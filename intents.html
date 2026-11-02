@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloombot Intent Use Cases</title>
+<meta name="description" content="Screenshots showing how Bloombot uses the Message Content and Server Members intents.">
+<meta property="og:title" content="Bloombot Intent Use Cases">
+<meta property="og:description" content="Screenshots showing how Bloombot uses the Message Content and Server Members intents.">
+<meta property="og:image" content="https://marcel899.github.io/bloombot-legal/img/garden.jpg">
+<meta property="og:url" content="https://marcel899.github.io/bloombot-legal/intents.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bloombot">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://marcel899.github.io/bloombot-legal/intents.html">
+<meta name="theme-color" content="#13151b">
+<meta name="color-scheme" content="dark">
+<meta name="darkreader-lock">
+<link rel="icon" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=c110a3c9">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+<header class="topbar">
+<div class="wrap bar">
+<a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<nav>
+<a class="brick nb dark" href="privacy.html"><img src="img/shield.png" alt=""><span>Privacy</span></a>
+<a class="brick nb dark" href="terms.html"><img src="img/scale.png" alt=""><span>Terms</span></a>
+<a class="brick nb red" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt=""><span>Support</span></a>
+</nav>
+</div>
+</header>
+<section class="hero">
+<div class="wrap hero-in">
+<h1 class="stud-title"><img class="hero-icon" src="img/gear.png" alt=""><img class="title-art" src="img/t_intents.png" alt="How Bloombot uses intents"></h1>
+<p class="sub">How Bloombot uses the Message Content and Server Members intents, with screenshots</p>
+</div>
+</section>
+<main class="wrap doc" id="main">
+<details class="mtoc"><summary class="weld g-yellow">On this page</summary><ul><li><a href="#message-content">Message Content intent</a></li><li><a href="#server-members">Server Members intent</a></li><li><a href="#commands">Command list</a></li></ul></details>
+<aside class="side"><div class="toc-box"><p class="weld g-yellow">On this page</p><ul><li><a href="#message-content">Message Content intent</a></li><li><a href="#server-members">Server Members intent</a></li><li><a href="#commands">Command list</a></li></ul></div></aside>
+<div class="content">
+<article class="panel" id="message-content">
+<h2 class="sec weld g-blue"><img src="img/swap.png" alt="">Message Content intent</h2>
+<p>A server admin picks one channel as the Global Trade Ad Channel. Members post a trade ad there as a normal message, with text and one image. Bloombot reads only that channel. It checks the text (7 to 200 characters, no external links, a filter for disallowed words) and the image, then posts the ad to the trade ad channels of every server using Bloombot and to the trade board. Messages in any other channel, and messages from bots or webhooks, are ignored.</p>
+
+<div class="shot">
+<img src="img/demo/message-content-2-trade-ads-posted.png" alt="Trade ads Bloombot created from messages in the global trade ads channel">
+<p>Members' messages in #global-trade-ads, turned into trade ads and posted to 25 to 26 servers. Each ad expires after 24 hours.</p>
+</div>
+<div class="shot">
+<img src="img/demo/message-content-1-trade-channel.png" alt="The global trade ads channel with its pinned explanation">
+<p>The channel explains to members that a message posted there becomes a trade ad.</p>
+</div>
+<div class="shot">
+<img src="img/demo/message-content-3-rejection-and-wishlist.png" alt="Bloombot DMs a member that their trade ad was not posted, and a wishlist match">
+<p>When a message breaks the rules (here, posting again within 5 minutes), Bloombot DMs the member the reason and gives their text back. Other members get a DM when an ad offers an item on their wishlist.</p>
+</div>
+</article>
+
+<article class="panel" id="server-members">
+<h2 class="sec weld g-green"><img src="img/gear.png" alt="">Server Members intent</h2>
+<p>Bloombot uses this intent for invite tracking. When a member joins a server, it records which invite they used and who created it, so it can count how many people each member has invited (<code>invites_required</code>). When a member leaves, they no longer count toward the inviter's total. Staff tools (support lookups and reports) also look members up by ID or username and check their roles.</p>
+
+<div class="shot">
+<img src="img/demo/server-members-1-invite-tracking.png" alt="Invite tracking: the invites_required option">
+<p>Invite tracking: the <code>invites_required</code> option counts the members someone has invited.</p>
+</div>
+</article>
+
+<article class="panel" id="commands">
+<h2 class="sec weld g-yellow"><img src="img/bell.png" alt="">Command list</h2>
+<div class="shot"><img src="img/demo/commands-1.png" alt="Bloombot slash commands, part 1"></div>
+<div class="shot"><img src="img/demo/commands-2.png" alt="Bloombot slash commands, part 2"></div>
+<div class="shot"><img src="img/demo/commands-3.png" alt="Bloombot slash commands, part 3"></div>
+</article>
+</div>
+</main>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc-box a')];const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.remove('on'));const a=map.get(e.target.id);if(a)a.classList.add('on');}})},{rootMargin:'-90px 0px -70% 0px'});
+map.forEach((a,id)=>{const el=document.getElementById(id);if(el)io.observe(el);});
+const d=document.querySelector('.mtoc');if(d)d.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>d.open=false));})();
+</script>
+<footer>
+<div class="grass"></div>
+<div class="wrap foot">
+<div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
+<nav><a href="./">Home</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="https://discord.gg/tGuXfcJxwf">Support server</a></nav>
+<p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
+</div>
+</footer>
+<a class="totop brick dark" href="#" aria-label="Back to top">&#8593;</a>
+<script>
+(()=>{const p=document.querySelector(".progress"),t=document.querySelector(".totop");const f=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;p.style.transform=`scaleX(${max>0?h.scrollTop/max:0})`;t.classList.toggle("show",h.scrollTop>600)};addEventListener("scroll",f,{passive:true});f();})();
+</script>
+</body>
+</html>

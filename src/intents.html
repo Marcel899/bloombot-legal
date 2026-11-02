@@ -1,0 +1,34 @@
+<article class="panel" id="message-content">
+<h2 class="sec weld g-blue"><img src="img/swap.png" alt="">Message Content intent</h2>
+<p>A server admin picks one channel as the Global Trade Ad Channel. Members post a trade ad there as a normal message, with text and one image. Bloombot reads only that channel. It checks the text (7 to 200 characters, no external links, a filter for disallowed words) and the image, then posts the ad to the trade ad channels of every server using Bloombot and to the trade board. Messages in any other channel, and messages from bots or webhooks, are ignored.</p>
+
+<div class="shot">
+<img src="img/demo/message-content-2-trade-ads-posted.png" alt="Trade ads Bloombot created from messages in the global trade ads channel">
+<p>Members' messages in #global-trade-ads, turned into trade ads and posted to 25 to 26 servers. Each ad expires after 24 hours.</p>
+</div>
+<div class="shot">
+<img src="img/demo/message-content-1-trade-channel.png" alt="The global trade ads channel with its pinned explanation">
+<p>The channel explains to members that a message posted there becomes a trade ad.</p>
+</div>
+<div class="shot">
+<img src="img/demo/message-content-3-rejection-and-wishlist.png" alt="Bloombot DMs a member that their trade ad was not posted, and a wishlist match">
+<p>When a message breaks the rules (here, posting again within 5 minutes), Bloombot DMs the member the reason and gives their text back. Other members get a DM when an ad offers an item on their wishlist.</p>
+</div>
+</article>
+
+<article class="panel" id="server-members">
+<h2 class="sec weld g-green"><img src="img/gear.png" alt="">Server Members intent</h2>
+<p>Bloombot uses this intent for invite tracking. When a member joins a server, it records which invite they used and who created it, so it can count how many people each member has invited (<code>invites_required</code>). When a member leaves, they no longer count toward the inviter's total. Staff tools (support lookups and reports) also look members up by ID or username and check their roles.</p>
+
+<div class="shot">
+<img src="img/demo/server-members-1-invite-tracking.png" alt="Invite tracking: the invites_required option">
+<p>Invite tracking: the <code>invites_required</code> option counts the members someone has invited.</p>
+</div>
+</article>
+
+<article class="panel" id="commands">
+<h2 class="sec weld g-yellow"><img src="img/bell.png" alt="">Command list</h2>
+<div class="shot"><img src="img/demo/commands-1.png" alt="Bloombot slash commands, part 1"></div>
+<div class="shot"><img src="img/demo/commands-2.png" alt="Bloombot slash commands, part 2"></div>
+<div class="shot"><img src="img/demo/commands-3.png" alt="Bloombot slash commands, part 3"></div>
+</article>
