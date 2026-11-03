@@ -235,3 +235,66 @@ footer{margin-top:auto;border-top:1px solid var(--border);background:rgba(10,11,
 @media (max-width:600px){
   .totop{right:14px;bottom:14px;width:44px;height:44px}
 }
+
+/* ── features, commands, trade ads ── */
+.brick.discord{--bg:#5865f2;--bd:#2c3391;--gl:88,101,242}
+.brick.yellow{--bg:#f5c83c;--bd:#7a5500;--gl:245,200,60}
+.brick.purple{--bg:#a94fff;--bd:#553078;--gl:169,79,255}
+.brick .dc{width:24px;height:24px;flex:none}
+.brick.nb .dc{width:20px;height:20px}
+.brick.sm .dc{width:18px;height:18px}
+.big-cta{font-size:1.2rem;padding:13px 26px}
+.legal-links{margin:18px 0 0;font-weight:700;color:#e3e8f2;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.legal-links a{color:#e3e8f2;text-underline-offset:3px}
+.ftiles{grid-template-columns:repeat(3,1fr)}
+.ftiles .tile h3{white-space:normal}
+.cmds{margin:28px 0 0;padding:30px 32px}
+.cmds-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.cmds-head h2.sec{margin:0}
+.search{flex:0 1 320px;min-width:0;padding:11px 16px;border-radius:10px;border:3px solid #0c0e12;background:var(--card-2);color:var(--text);font:700 1rem "Nunito",sans-serif;outline:none;box-shadow:inset 0 2px 0 rgba(0,0,0,.25)}
+.search:focus{border-color:#7a5500;box-shadow:0 0 0 3px rgba(245,200,60,.25)}
+.cmd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.cmd-group h3{margin:0 0 8px;padding:6px 14px;font-size:1.1rem}
+.cmd-group ul{list-style:none;margin:0;padding:0}
+.cmd{display:flex;gap:12px;align-items:baseline;margin:0;padding:8px 6px;border-bottom:1px solid var(--border)}
+.cmd:last-child{border-bottom:0}
+.cmd code{flex:none;color:#fff;font-weight:800;background:#2a2f3c}
+.cmd span{color:var(--soft);font-size:.95rem;line-height:1.45}
+.empty,.loading{text-align:center;color:var(--muted);font-weight:700;margin:24px 0}
+.trades{width:100%;margin-top:-70px;position:relative;padding-bottom:64px}
+.login{max-width:520px;margin:0 auto;text-align:center}
+.login-icon{width:64px;height:64px}
+.login h2{justify-content:center;margin:8px 0 6px;font-size:1.6rem;font-family:"Nunito",sans-serif;font-weight:800}
+.login p{color:var(--muted)}
+.err{color:#ff8a8a!important;font-weight:700}
+.board-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px;margin-bottom:22px}
+.me{display:flex;align-items:center;gap:10px;margin-right:auto}
+.me img{width:40px;height:40px;border-radius:50%;background:var(--card-2)}
+.me div{display:flex;flex-direction:column;line-height:1.25}
+.me span{color:var(--muted);font-size:.9rem;font-weight:700}
+.mine{display:flex;align-items:center;gap:6px;font-weight:800;color:var(--soft);cursor:pointer}
+.mine input{width:18px;height:18px;accent-color:#a94fff}
+.ads{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.ad{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--card);border:3px solid #0c0e12;border-radius:14px;box-shadow:0 3px 5px -2px rgba(0,0,0,.4),inset 0 3px 0 rgba(255,255,255,.05);transition:transform .15s}
+.ad:hover{transform:translateY(-3px)}
+.ad::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:11px;background:url(img/weld-light.png) 0 0/45px 45px;opacity:.08}
+.ad-head{display:flex;align-items:center;gap:10px}
+.ad-av{width:42px;height:42px;border-radius:50%;background:var(--card-2);flex:none}
+.ad-who{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.ad-who strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-who span{color:var(--muted);font-size:.85rem;font-weight:700}
+.ad-text{margin:0;color:#e9edf5;font-weight:700;white-space:pre-wrap;overflow-wrap:anywhere}
+.ad-img{width:100%;border-radius:10px;border:1px solid var(--border)}
+.ad-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.ad-links .brick{font-size:.92rem;padding:5px 12px}
+@media (max-width:900px){.ftiles{grid-template-columns:repeat(2,1fr)}.cmd-grid{grid-template-columns:1fr}}
+@media (max-width:600px){
+  .ftiles{grid-template-columns:1fr}
+  .hide-sm{display:none}
+  .brick.nb.yellow span,.brick.nb.purple span{display:inline}
+  .brick.nb.add span{display:none}
+  .cmds{padding:22px 16px}
+  .search{flex:1 1 100%}
+  .cmd{flex-direction:column;gap:2px}
+  .me{flex:1 1 100%}
+}

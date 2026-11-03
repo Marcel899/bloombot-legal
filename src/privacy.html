@@ -38,6 +38,7 @@
 <p>Bloombot does not read, log or store any other messages.</p>
 <p><strong>Activity and levels.</strong> We store your XP, level and how many commands you have used, plus a log of commands used (command name, user ID, whether it worked, how long it took, and when) for statistics and troubleshooting.</p>
 <p><strong>Moderation.</strong> If staff take action against an account or server (for example a bot ban), we store the action, the IDs involved, the moderator and the reason.</p>
+<p><strong>Website login.</strong> When you log in on the Bloombot website with Discord, Discord gives us your Discord ID, username, display name, avatar and email address. We use this only to log you in and show your name. We never post anything for you.</p>
 <p><strong>Server settings.</strong> For servers that set up Bloombot we store channel and role IDs, webhook links Bloombot created, enabled features, and who completed the setup.</p>
 <p><strong>Error and server logs.</strong> When an error happens, details of it (including the command, user ID and server name and ID) are sent to a private developer channel. We also log when Bloombot joins or leaves a server.</p>
 
@@ -51,7 +52,7 @@
 <p>We do not sell your data, use it for advertising, or share it with anyone except as described below.</p>
 
 <h2 id="what-other-people-can-see">3. What other people can see</h2>
-<p>Trade ads, team finds, strategies, your profile (Roblox username, private server link, description, avatar), levels and leaderboard positions are meant to be public. Trade ads are posted in every server that has opted into the global trade ad network.</p>
+<p>Trade ads, team finds, strategies, your profile (Roblox username, private server link, description, avatar), levels and leaderboard positions are meant to be public. Trade ads are posted in every server that has opted into the global trade ad network. Live trade ads (the text, image, your Discord name and avatar, and your linked Roblox account) are also shown on the Bloombot website to anyone logged in with Discord.</p>
 
 <h2 id="services-we-rely-on">4. Services we rely on</h2>
 <ul>
@@ -59,6 +60,8 @@
 <li><strong>Roblox public API</strong>, to look up Roblox user IDs and avatars from a username.</li>
 <li><strong>Sightengine</strong>, which checks images attached to trade ads and profiles for inappropriate content. The image is sent to Sightengine for this check (<a href="https://sightengine.com/privacy">Sightengine Privacy Policy</a>).</li>
 <li><strong>Wispbyte</strong>, the hosting provider where the bot and its database run.</li>
+<li><strong>Supabase</strong>, which handles the website's Discord login and holds a copy of the live trade ads for the website (<a href="https://supabase.com/privacy">Supabase Privacy Policy</a>).</li>
+<li><strong>GitHub Pages</strong>, which hosts this website.</li>
 </ul>
 <p>Bloombot also reads public game data (such as unit values and the Garden Tower Defense wiki). That involves no personal data.</p>
 
@@ -68,6 +71,7 @@
 <h2 id="how-long-we-keep-it">6. How long we keep it</h2>
 <ul>
 <li>Trade ads and team finds stop showing after 24 hours.</li>
+<li>The website's copy of a trade ad is removed within a few minutes of the ad ending. Website login details are kept until you ask us to delete them.</li>
 <li>Unit demand records are deleted after 400 days.</li>
 <li>Account, level, wishlist and other data is kept while you use Bloombot, or until you ask us to delete it.</li>
 <li>Moderation records may be kept longer to keep banned users from returning.</li>
