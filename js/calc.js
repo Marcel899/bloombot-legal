@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const { el } = BB;
   const FAIR_SHARE = 0.05; // same rule as the bot's trade checker
-  let items = [], byName = new Map();
+  let items = [], byName = new Map(), byLower = new Map();
   const sides = { give: [], get: [] };
 
   const key = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -117,16 +117,18 @@
   }
 
   function save() {
-    const enc = side => sides[side].map(r => encodeURIComponent(r.item.name) + (r.qty > 1 ? "*" + r.qty : "")).join(",");
+    const enc = side => sides[side].map(r => encodeURIComponent(r.item.name).replace(/%20/g, "_") + (r.qty > 1 ? "~" + r.qty : "")).join("!");
     const h = `give=${enc("give")}&get=${enc("get")}`;
     history.replaceState(null, "", h === "give=&get=" ? location.pathname : "#" + h);
   }
   function restore() {
     const p = new URLSearchParams(location.hash.slice(1));
     for (const side of ["give", "get"]) {
-      for (const part of (p.get(side) || "").split(",").filter(Boolean)) {
-        const [name, qty] = part.split("*");
-        const it = byName.get(name) || customValue(name);
+      const raw = p.get(side) || "";
+      for (const part of raw.split(raw.includes("!") ? "!" : ",").filter(Boolean)) {
+        const [n, qty] = part.split(/[*~]/);
+        const name = n.replace(/_/g, " ").trim();
+        const it = byName.get(name) || byLower.get(name.toLowerCase()) || customValue(name);
         if (it) sides[side].push({ item: it, qty: Math.max(1, Math.min(999, parseInt(qty) || 1)) });
       }
     }
@@ -137,7 +139,7 @@
     return items.filter(i => i.est > 0 && i.category !== "gamepasses").sort((a, b) => demNum(b.demand) - demNum(a.demand) || b.est - a.est).slice(0, 8);
   }
   function customValue(text) {
-    const n = BB.parseValue(text);
+    const n = BB.parseValue(String(text).replace(/\s*value$/i, ""));
     return n ? { name: BB.fmt(n) + " value", value: n, est: n, value_text: BB.fmt(n), custom: true } : null;
   }
 
@@ -180,11 +182,11 @@
     if (!sides.give.length || !sides.get.length) { BB.toast("Add units to both sides first", "bad"); return; }
     const line = side => sides[side].map(r => (r.qty > 1 ? r.qty + "x " : "") + r.item.name).join(", ") + " (" + BB.fmt(total(side)) + ")";
     const v = $("verdict");
-    BB.copy(`**I give:** ${line("give")}\n**I get:** ${line("get")}\n**Result:** ${v.querySelector("strong").textContent}. ${v.querySelector("span").textContent}\n-# Checked on ${location.host || "Bloombot"}`, "Copied. Paste it in Discord.");
+    BB.copy(`**I give:** ${line("give")}\n**I get:** ${line("get")}\n**Result:** ${v.querySelector("strong").textContent}. ${v.querySelector("span").textContent}\n-# [Open this trade in the Bloombot calculator](<${location.href}>)`, "Copied. Paste it in Discord.");
   };
   $("postad").onclick = () => {
     if (!sides.give.length) { BB.toast("Add what you're trading first", "bad"); return; }
-    const enc = side => sides[side].filter(r => !r.item.custom).map(r => encodeURIComponent(r.item.name) + (r.qty > 1 ? "*" + r.qty : "")).join(",");
+    const enc = side => sides[side].filter(r => !r.item.custom).map(r => encodeURIComponent(r.item.name).replace(/%20/g, "_") + (r.qty > 1 ? "~" + r.qty : "")).join("!");
     location.href = "trades.html#post&have=" + enc("give") + "&want=" + enc("get");
   };
   $("swap").onclick = () => { [sides.give, sides.get] = [sides.get, sides.give]; update(); };
@@ -204,6 +206,7 @@
     }
     $("cloading").hidden = true;
     byName = new Map(items.map(i => [i.name, i]));
+    byLower = new Map(items.map(i => [i.name.toLowerCase(), i]));
     restore();
     update();
   });
