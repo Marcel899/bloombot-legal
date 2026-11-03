@@ -44,6 +44,7 @@ HEAD = """<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{base}{path}">
 <meta name="robots" content="{robots}">
+<meta name="google-site-verification" content="wgEfTTw4ymFeGxytFVhbK6OwL639P6QfcPRBa0BeqMo">
 <meta name="theme-color" content="#13151b">
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
