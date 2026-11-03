@@ -1442,3 +1442,10 @@ body{background:
 
 .home{padding-bottom:56px}
 .vm-acts{gap:12px;flex-wrap:wrap}
+
+/* show more button */
+.brick.more-btn{display:flex;align-items:center;gap:10px;margin:26px auto 0;padding:10px 14px 10px 20px;border:3px solid var(--bd);border-radius:12px;background:var(--bg);font:800 1rem Nunito,system-ui,sans-serif;color:#fff}
+.brick.more-btn em{font-style:normal;font-size:.8rem;padding:2px 9px;border-radius:99px;background:rgba(0,0,0,.28);color:#dfe4ee}
+.brick.more-btn i{font-style:normal;font-size:.9rem;transition:transform .2s}
+@media (hover:hover){.brick.more-btn:hover i{transform:translateY(2px)}}
+.brick.more-btn[hidden]{display:none}

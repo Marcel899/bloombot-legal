@@ -58,7 +58,7 @@
     $("vgrid").replaceChildren(...list.slice(0, shown).map(card));
     const more = $("vmore");
     more.hidden = list.length <= shown;
-    more.textContent = `Show more (${list.length - shown} left)`;
+    more.innerHTML = `<span>Show ${Math.min(PAGE, list.length - shown)} more</span><em>${list.length - shown} left</em><i aria-hidden="true">▾</i>`;
     more.onclick = () => { shown += PAGE; render(); };
     $("vnone").hidden = list.length > 0;
     $("vnone").textContent = cat === "fav" && !favs.size ? "Your watchlist is empty. Open a unit and press Watch to add it." : "No unit matches that.";
