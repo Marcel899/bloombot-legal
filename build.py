@@ -148,7 +148,7 @@ FEATURES = [
     ("trading", "Global trade ads", "Post once and your ad reaches every server running Bloombot. Browse them all here.", "trades.html"),
     ("dollar", "Live values", "Every unit's value, demand and 30-day trend, with price charts.", "values.html"),
     ("calculator", "Trade calculator", "See right away if a trade is a win, fair, or a loss.", "calculator.html"),
-    ("gem", "All features", "Wishlists, value alerts, DPS ranking, levels, giveaways and more.", "features.html"),
+    ("bullseye", "Strategies", "Loadouts and map guides from the community. Share your own.", "strategies.html"),
 ]
 TILE_COLORS = ["green", "blue", "yellow", "purple"]
 tiles = "".join(f'<a class="tile tlink" href="{u}"><div class="weld g-{c}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div><p>{p}</p><span class="more">Open &rarr;</span></a>' for (i, h, p, u), c in zip(FEATURES, TILE_COLORS))
@@ -158,19 +158,16 @@ home = f"""<section class="hero big">
 <p class="sub">The trading bot for Roblox Garden Tower Defense.</p>
 <div class="ctas">
 <a class="brick discord big-cta" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
-<a class="brick blue" href="values.html"><img src="img/dollar.png" alt="">Values</a>
-<a class="brick green" href="calculator.html"><img src="img/calculator.png" alt="">Trade calculator</a>
-<a class="brick purple" href="trades.html"><img src="img/trading.png" alt="">Trade ads</a>
+<a class="brick purple big-cta" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a>
 </div>
-<p class="legal-links"><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p>
+<div class="hstats" id="stats">
+<span><strong id="st-ads">–</strong> live trade ads</span>
+<span><strong id="st-values">–</strong> units tracked</span>
+<span><strong id="st-strats">–</strong> strategies</span>
+</div>
 </div>
 </section>
-<main class="wrap" id="main">
-<section class="stats" id="stats">
-<div class="stat"><img src="img/trading.png" alt=""><div><strong id="st-ads">–</strong><span>live trade ads</span></div></div>
-<div class="stat"><img src="img/dollar.png" alt=""><div><strong id="st-values">–</strong><span>units and gamepasses tracked</span></div></div>
-<div class="stat"><img src="img/bullseye.png" alt=""><div><strong id="st-strats">–</strong><span>community strategies</span></div></div>
-</section>
+<main class="wrap home" id="main">
 <section class="tiles">{tiles}</section>
 <section class="watch" id="watch" hidden>
 <div class="sec-head"><h2>Your watchlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
@@ -185,22 +182,16 @@ home = f"""<section class="hero big">
 <div class="hs-list" id="hs-list"></div>
 </section>
 <section class="how">
-<h2 class="weld g-green how-title">How it works</h2>
+<div class="sec-head"><h2>How it works</h2><a href="features.html">All features &rarr;</a></div>
 <div class="steps">
-<div class="step"><img src="img/num_1.png" alt="1"><div><h3>Link your account</h3><p>Run <code>/link</code> and add your Roblox username and private server link.</p></div></div>
-<div class="step"><img src="img/num_2.png" alt="2"><div><h3>Post a trade ad</h3><p>Write your ad in your server's Global Trade Ad Channel. Bloombot shares it with every server in the network.</p></div></div>
+<div class="step"><img src="img/num_1.png" alt="1"><div><h3>Make your account</h3><p>Log in here with Discord, or run <code>/link</code>, and add your Roblox username.</p></div></div>
+<div class="step"><img src="img/num_2.png" alt="2"><div><h3>Post a trade ad</h3><p>Post it on this site or in a Global Trade Ad Channel. It reaches every server running Bloombot.</p></div></div>
 <div class="step"><img src="img/num_3.png" alt="3"><div><h3>Get offers</h3><p>Traders DM you, and Bloombot DMs you when a unit on your wishlist is offered.</p></div></div>
 </div>
 </section>
-<section class="cta-panel">
-<img src="img/shield.png" alt="">
-<div><h2>Run a Discord server?</h2><p>Set Bloombot's channels, pings and features from the server dashboard. No commands needed.</p></div>
-<a class="brick blue" href="dashboard.html">Open the dashboard</a>
-</section>
-<section class="cta-panel">
-<img src="img/envelope.png" alt="">
-<div><h2>Need help or want your data removed?</h2><p>Ask the team in the support server. We answer data requests within 30 days.</p></div>
-<a class="brick red" href="{SUPPORT}">Join the support server</a>
+<section class="hcards">
+<a class="hcard" href="dashboard.html"><img src="img/shield.png" alt=""><div><h3>Run a Discord server?</h3><p>Set channels, pings and features from the server dashboard.</p></div><span class="more">Open &rarr;</span></a>
+<a class="hcard" href="{SUPPORT}"><img src="img/envelope.png" alt=""><div><h3>Need help?</h3><p>Ask in the support server. Data requests are answered within 30 days.</p></div><span class="more">Join &rarr;</span></a>
 </section>
 </main>
 <script defer src="js/home.js?v={hashlib.md5(open('js/home.js', 'rb').read()).hexdigest()[:8]}"></script>
