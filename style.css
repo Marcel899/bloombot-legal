@@ -1449,3 +1449,5 @@ body{background:
 .brick.more-btn i{font-style:normal;font-size:.9rem;transition:transform .2s}
 @media (hover:hover){.brick.more-btn:hover i{transform:translateY(2px)}}
 .brick.more-btn[hidden]{display:none}
+.totop img{width:24px;height:24px;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+@media (hover:hover){.totop:hover img{transform:translateY(-3px)}}

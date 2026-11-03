@@ -95,7 +95,7 @@ FOOT = """<footer>
 <p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
 </div>
 </footer>
-<a class="totop brick dark" href="#" aria-label="Back to top">&#8593;</a>
+<a class="totop brick dark" href="#" aria-label="Back to top"><img src="img/up.png" alt=""></a>
 </body>
 </html>
 """
