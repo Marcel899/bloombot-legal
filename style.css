@@ -977,3 +977,10 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .pedit label em{margin-left:6px}
 .pedit label .search,.pedit label textarea{display:block;flex:none;width:100%;height:auto;min-height:0;margin-top:6px;box-sizing:border-box}
 .pedit label input.search{text-overflow:ellipsis}
+
+/* giveaway buttons use the site brick buttons */
+.gw .brick.gw-btn{flex:none;padding:6px 12px;font-size:.88rem}
+.gw .brick.gw-all{width:100%;justify-content:center;margin-top:10px;border-style:solid}
+.gw .brick.gw-pill{border-radius:12px;padding:9px 14px;background:var(--bg);animation:none}
+.gw .brick.gw-pill em{color:#fff}
+.gw .brick.gw-all{background:var(--bg);color:#fff;border:3px solid var(--bd);font:900 .95rem "Nunito",sans-serif;padding:9px}

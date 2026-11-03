@@ -81,7 +81,7 @@
     root.className = "gw" + (min ? " min" : "");
     root.replaceChildren();
     if (min) {
-      const b = el("button", "gw-pill");
+      const b = el("button", "brick purple gw-pill");
       b.type = "button";
       const i = el("img"); i.src = "img/gem.png"; i.alt = "";
       b.append(i, el("span", null, "Giveaway"), el("em", "gw-cd", left(g.ends_at)));
@@ -136,9 +136,9 @@
       row.append(dot, lab);
       if (!ok) {
         if (!BB.session && t.key === "join") {
-          const b = el("button", "gw-btn", "Sign in"); b.type = "button"; b.onclick = () => BB.login(); row.append(b);
+          const b = el("button", "brick blue sm gw-btn", "Sign in"); b.type = "button"; b.onclick = () => BB.login(); row.append(b);
         } else if (t.key === "join" || joined) {
-          const b = el("button", "gw-btn" + (t.key === "join" ? "" : " sm"), t.key === "join" ? "Join" : "Check");
+          const b = el("button", "brick sm gw-btn " + (t.key === "join" ? "green" : "dark"), t.key === "join" ? "Join" : "Check");
           b.type = "button"; b.onclick = () => claim(g, t, b);
           if (t.href) { const a = el("a", "gw-go", t.go); a.href = t.href; row.append(a); }
           row.append(b);
@@ -149,7 +149,7 @@
     root.append(ul);
     const open = TASKS.filter(t => t.key !== "join" && !mine.has(g.id + ":" + t.key));
     if (joined && open.length) {
-      const all = el("button", "gw-all", "Check all tasks");
+      const all = el("button", "brick blue gw-all", "Check all tasks");
       all.type = "button";
       all.onclick = async () => {
         if (busy) return;
