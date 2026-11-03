@@ -43,6 +43,7 @@ HEAD = """<!doctype html>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v={appver}"></script>
 <script defer src="js/site.js?v={sitever}"></script>
+<script defer src="js/giveaway.js?v={gwver}"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -84,6 +85,7 @@ NAV = [
 ]
 APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
 SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
+GWVER = hashlib.md5(open("js/giveaway.js", "rb").read()).hexdigest()[:8]
 
 
 def page(title, desc, body, cur="", path=""):
@@ -92,7 +94,7 @@ def page(title, desc, body, cur="", path=""):
         for key, href, icon, label, color in NAV)
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
                         invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
-                        appver=APPVER, sitever=SITEVER)
+                        appver=APPVER, sitever=SITEVER, gwver=GWVER)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE))
 
 

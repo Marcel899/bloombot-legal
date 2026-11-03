@@ -924,3 +924,37 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .wm h2{padding:0}.wm h2::before,.wm h2::after{display:none}
 .wm{max-height:calc(100vh - 32px);overflow:auto}
 .wm h2{text-align:center!important;justify-content:center}
+
+/* ── Sitewide giveaway popup ─────────────────────────────── */
+.gw{position:fixed;right:16px;bottom:16px;z-index:60;width:360px;max-width:calc(100vw - 32px);max-height:calc(100vh - 100px);overflow:auto;padding:14px;border-radius:18px;background:#16191f;border:1px solid rgba(255,255,255,.1);box-shadow:0 24px 50px -12px rgba(0,0,0,.85);animation:rise2 .25s}
+.gw.min{width:auto;padding:0;background:none;border:0;box-shadow:none;overflow:visible}
+.gw-pill{display:flex;align-items:center;gap:8px;padding:9px 14px;border:0;border-radius:99px;background:linear-gradient(135deg,#a94fff,#14aeea);color:#fff;font:900 .95rem "Nunito",sans-serif;cursor:pointer;box-shadow:0 10px 26px -6px rgba(120,80,255,.7)}
+.gw-pill img{width:22px;height:22px}.gw-pill em{font-style:normal;font-weight:800;opacity:.85;font-size:.82rem}
+.gw-top{display:flex;justify-content:space-between;align-items:center}
+.gw-kicker{font-size:.72rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gw-x{border:0;background:none;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer;padding:0 4px}.gw-x:hover{color:#fff}
+.gw-head{display:flex;gap:12px;align-items:center;margin:8px 0 12px}
+.gw-pic{width:60px;height:60px;border-radius:12px;object-fit:contain;background:#222733;padding:6px;flex:none}
+.gw-head h3{margin:0;font-size:1.25rem;line-height:1.2}
+.gw-meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-weight:800;font-size:.82rem;margin-top:4px}
+.gw-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}
+.gw-tab{flex:none;padding:6px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.12);background:#222733;color:var(--soft);font:800 .85rem "Nunito",sans-serif;cursor:pointer}
+.gw-tab.on{background:rgba(20,174,234,.18);border-color:#14aeea;color:#fff}
+.gw-tasks{display:flex;flex-direction:column;gap:6px}
+.gw-task{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#1f232c;border:1px solid rgba(255,255,255,.06)}
+.gw-task.locked{opacity:.5}
+.gw-dot{width:20px;height:20px;flex:none;border-radius:50%;border:2px solid #4a5263;display:grid;place-items:center;font-size:.75rem;font-weight:900}
+.gw-task.done .gw-dot{background:#28a828;border-color:#28a828;color:#fff}
+.gw-task.done .gw-lab{color:var(--muted);text-decoration:line-through}
+.gw-lab{flex:1;font-weight:800;font-size:.92rem}
+.gw-pts{flex:none;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.07);font-size:.75rem;font-weight:800;color:var(--soft)}
+.gw-btn{flex:none;padding:7px 14px;border:0;border-radius:10px;background:#14aeea;color:#04121a;font:900 .88rem "Nunito",sans-serif;cursor:pointer}
+.gw-btn.sm{padding:5px 10px;background:#2c3341;color:#fff}
+.gw-btn:disabled{opacity:.6;cursor:wait}
+.gw-go{flex:none;font-size:.8rem;font-weight:800;color:#8fd8ff;text-decoration:none}
+.gw-foot{margin:10px 2px 0;font-size:.8rem;color:var(--muted);font-weight:700}
+@media (max-width:520px){.gw{right:8px;left:8px;bottom:8px;width:auto;max-width:none;max-height:70vh}.gw.min{left:auto}.gw-pts{display:none}}
+.gw-lab{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+.gw-lab strong{font-size:.92rem;line-height:1.25}
+.gw-task.done .gw-lab strong{text-decoration:line-through;color:var(--muted)}.gw-task.done .gw-lab{text-decoration:none}
+@media (max-width:520px){.gw-pts{display:inline-block}}
