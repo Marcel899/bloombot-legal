@@ -1106,15 +1106,18 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 
 /* ── theme toggle button ───────────────────────────────────── */
 .theme-btn{display:grid;place-items:center;flex:none;width:38px;height:38px;padding:0;border-radius:10px;border:2px solid #0c0e12;background:#232733;color:#f5c83c;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
-.theme-btn:hover{background:#2b3040;border-color:rgba(255,255,255,.25);transform:rotate(-12deg)}
+.theme-btn:hover{background:#2b3040;border-color:rgba(255,255,255,.25)}
+@media (hover:hover){.theme-btn:hover img{transform:scale(1.12) rotate(-10deg)}}
+.theme-btn img{transition:transform .2s}
+.theme-btn:active img{transform:scale(.9)}
 .theme-btn:focus:not(:focus-visible){outline:none}
 .theme-btn:focus-visible{outline:2px solid #14aeea;outline-offset:2px}
-.theme-btn svg{width:19px;height:19px}
+.theme-btn img{width:24px;height:24px}
 .theme-btn .i-moon{display:none}
 [data-theme=light] .theme-btn .i-sun{display:none}
 [data-theme=light] .theme-btn .i-moon{display:block}
 @media (max-width:600px){.theme-btn{width:40px;height:40px}}
-.theme-anim,.theme-anim *,.theme-anim *::before,.theme-anim *::after{transition:background-color .3s,border-color .3s,color .3s!important}
+
 
 /* ══ LIGHT MODE ════════════════════════════════════════════════ */
 [data-theme=light]{
@@ -1155,7 +1158,7 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 [data-theme=light] .right{border-left-color:rgba(20,32,52,.10)}
 [data-theme=light] .qs-btn,[data-theme=light] .theme-btn{background:#fff;border-color:var(--line);color:var(--muted)}
 [data-theme=light] .qs-btn:hover,[data-theme=light] .theme-btn:hover{background:#f2f5f9;border-color:var(--line-2);color:var(--text)}
-[data-theme=light] .theme-btn{color:#5b4bd6}
+
 [data-theme=light] .qs-btn kbd{background:#f2f5f9;border-color:var(--line);color:var(--muted)}
 [data-theme=light] .me-btn,[data-theme=light] .burger{background:#fff;border-color:var(--line);color:var(--text)}
 [data-theme=light] .me-btn:hover{background:#f2f5f9;border-color:var(--line-2)}
@@ -1313,3 +1316,44 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 [data-theme=light] .gw-pts{background:rgba(20,32,52,.07)}
 [data-theme=light] .gw-bar{background:#e3e8ef}
 [data-theme=light] .gw-go{color:#0b6f9e}
+
+/* ── light palette v2: warm garden, not inverted ── */
+[data-theme=light]{
+  --bg:#f4f1e6;--card:#fffdf7;--card-2:#f6f2e6;--border:rgba(84,70,40,.12);
+  --text:#2a2a1f;--muted:#76705c;--soft:#4a4636;
+  --line:#e6dcc4;--line-2:#d4c6a3;--hov:rgba(120,100,40,.08);
+}
+[data-theme=light] body{background:
+  radial-gradient(900px 500px at 15% 0,rgba(126,200,80,.14),transparent 70%),
+  radial-gradient(900px 500px at 85% 10%,rgba(80,170,230,.12),transparent 70%),
+  linear-gradient(rgba(244,241,230,.94),rgba(244,241,230,.94)),
+  url(img/studs-bg.png) 0 0/160px 160px,var(--bg);
+  background-attachment:scroll,scroll,fixed,scroll,fixed}
+[data-theme=light] .hero::before{filter:blur(6px) saturate(1.15);inset:-30px -30px 0}
+[data-theme=light] .hero::after{background:linear-gradient(180deg,rgba(40,90,160,.18) 0%,rgba(40,90,160,.08) 45%,rgba(244,241,230,.3) 78%,rgba(244,241,230,0) 100%)}
+[data-theme=light] .bar,[data-theme=light] body.scrolled .topbar .bar{background:rgba(255,252,242,.88);border-color:rgba(120,100,50,.16);box-shadow:0 12px 28px -18px rgba(90,70,20,.45)}
+[data-theme=light] .bar::after{background:linear-gradient(90deg,transparent,rgba(40,168,40,.55),rgba(245,200,60,.6),rgba(20,174,234,.55),transparent)}
+[data-theme=light] .qs-btn,[data-theme=light] .me-btn,[data-theme=light] .burger{background:#fffdf7;border-color:var(--line)}
+[data-theme=light] .qs-btn:hover,[data-theme=light] .me-btn:hover{background:#f6f2e6}
+[data-theme=light] .nl.on{color:#1f2a14}
+[data-theme=light] .tile,[data-theme=light] .cta-panel,[data-theme=light] .toc-box,[data-theme=light] .panel,[data-theme=light] .step,
+[data-theme=light] .vcard,[data-theme=light] .tcard,[data-theme=light] .hs,[data-theme=light] .strat,[data-theme=light] .skel,
+[data-theme=light] .mtoc,[data-theme=light] .qs-box,[data-theme=light] .hcard,[data-theme=light] .stat{background:#fffdf7;border-color:var(--line);box-shadow:0 2px 0 #eadfc5,0 14px 28px -20px rgba(90,70,20,.4)}
+[data-theme=light] .vcard:hover,[data-theme=light] .hcard:hover{border-color:#9ccc6a}
+[data-theme=light] :where(a){color:#2c7a1e}
+[data-theme=light] .panel a,[data-theme=light] .md a,[data-theme=light] .tlink .more,[data-theme=light] .more-btn,[data-theme=light] .hcard .more{color:#2c7a1e}
+[data-theme=light] .tldr{background:linear-gradient(180deg,#fff3c8,#fff9e3);border-color:#e9c45a}
+[data-theme=light] footer{background:linear-gradient(180deg,#e7f0d6,#dce9c6);border-top:3px solid #a9cf7c}
+[data-theme=light] .foot nav a{color:#3f4a2c}
+[data-theme=light] select,[data-theme=light] .search,[data-theme=light] textarea,[data-theme=light] .chip,[data-theme=light] .tagb,[data-theme=light] .fa-chip,[data-theme=light] .cnum,[data-theme=light] .pchip{background:#fffdf7;border-color:var(--line)}
+[data-theme=light] select:focus,[data-theme=light] .search:focus,[data-theme=light] textarea:focus{border-color:#5fb43a;box-shadow:0 0 0 3px rgba(95,180,58,.22)}
+[data-theme=light] .chip.on,[data-theme=light] .tagb.on{background:#3aa52c;border-color:#24731a}
+[data-theme=light] .cmp-side,[data-theme=light] .cmp-preview,[data-theme=light] .gw-task,[data-theme=light] .dh,[data-theme=light] .crow,[data-theme=light] .vm-stat,[data-theme=light] .vm-chart{background:#f8f4e8}
+[data-theme=light] .qs-item.on,[data-theme=light] .dg.on{background:#eaf5dc;box-shadow:inset 3px 0 0 #3aa52c}
+[data-theme=light] .toc-box a.on{background:#eaf5dc;color:#24731a;box-shadow:inset 3px 0 0 #3aa52c}
+[data-theme=light] .count-pill,[data-theme=light] .cmd code,[data-theme=light] code{background:#f1ead7}
+[data-theme=light] .me-menu,[data-theme=light] .sugs,[data-theme=light] .toast,[data-theme=light] .ctip{background:#fffdf7;border-color:var(--line)}
+@media (max-width:1180px){[data-theme=light] .bar .links{background:rgba(255,252,242,.98);border-color:var(--line)}}
+[data-theme=light] .dside{background:rgba(255,253,247,.94)}
+[data-theme=light] .gw{background:linear-gradient(180deg,rgba(126,200,80,.16),rgba(245,200,60,.06) 120px,#fffdf7 220px),#fffdf7;border-color:#c9dfa8}
+[data-theme=light] .skel i{background:linear-gradient(90deg,#eee6d2 0%,#f8f4e8 40%,#eee6d2 80%) 0 0/300% 100%}
