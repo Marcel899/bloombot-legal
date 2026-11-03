@@ -1403,3 +1403,4 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 @keyframes nlwig{0%,100%{transform:none}25%{transform:rotate(-12deg) scale(1.1)}75%{transform:rotate(10deg) scale(1.1)}}
 .nl:hover img{transform:none}
 @media (prefers-reduced-motion:reduce){.nl img{animation:none!important}}
+.confetti{position:fixed;inset:0;width:100vw;height:100vh;z-index:500;pointer-events:none}

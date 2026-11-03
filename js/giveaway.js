@@ -10,6 +10,39 @@
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
   const el = (...a) => BB.el(...a);
 
+  /* full-page confetti burst */
+  function confetti(n) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const c = document.createElement("canvas"), x = c.getContext("2d"), d = Math.min(devicePixelRatio || 1, 2);
+    c.className = "confetti";
+    const W = innerWidth, H = innerHeight;
+    c.width = W * d; c.height = H * d; x.scale(d, d);
+    document.body.append(c);
+    const cols = ["#28a828", "#14aeea", "#f5c83c", "#a94fff", "#dc3232", "#e07a10", "#ffffff"];
+    const ps = [];
+    for (let i = 0; i < n; i++) {
+      const left = i % 2 === 0, a = 0.85 + Math.random() * 0.55;
+      const sp = 9 + Math.random() * 11;
+      ps.push({ x: left ? -10 : W + 10, y: H * (0.55 + Math.random() * 0.4), vx: (left ? 1 : -1) * Math.cos(a) * sp, vy: -Math.sin(a) * sp,
+        w: 6 + Math.random() * 6, h: 4 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+        c: cols[i % cols.length], f: Math.random() * 6 });
+    }
+    for (let i = 0; i < n / 2; i++) ps.push({ x: Math.random() * W, y: -20 - Math.random() * H * 0.5, vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 3,
+      w: 6 + Math.random() * 6, h: 4 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: cols[i % cols.length], f: Math.random() * 6 });
+    const t0 = performance.now();
+    (function tick(t) {
+      const age = t - t0;
+      x.clearRect(0, 0, W, H);
+      x.globalAlpha = age > 2600 ? Math.max(0, 1 - (age - 2600) / 900) : 1;
+      for (const p of ps) {
+        p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.32; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.f += 0.15;
+        x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.scale(1, Math.cos(p.f));
+        x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore();
+      }
+      if (age < 3500) requestAnimationFrame(tick); else c.remove();
+    })(t0);
+  }
+
   function left(t) {
     let s = Math.max(0, Math.floor((new Date(t) - Date.now()) / 1000));
     const d = Math.floor(s / 86400); s %= 86400;
@@ -48,7 +81,7 @@
         try { const { data } = await BB.sb.rpc("claim_giveaway_task", { gid: g.id, t: t.key }); if (data === "ok") got += t.pts; } catch (e) { /* skip */ }
       }
     }
-    if (got) { BB.toast(`Giveaway: +${got} entries added`); load(); }
+    if (got) { BB.toast(`Giveaway: +${got} entries added`); confetti(90); load(); }
   }
 
   async function claim(g, t, btn) {
@@ -67,6 +100,7 @@
       return;
     }
     BB.toast(t.key === "join" ? "You're in! Good luck" : `+${t.pts} entries`);
+    confetti(t.key === "join" ? 180 : 90);
     load();
   }
 
