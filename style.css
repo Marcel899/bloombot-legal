@@ -1430,11 +1430,11 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 body{background:
   radial-gradient(1200px 600px at 50% -200px,rgba(239,75,79,.10),transparent 70%),
   linear-gradient(rgba(19,21,27,.82),rgba(19,21,27,.82)),
-  url(img/studs-bg.png) 0 0/104px 104px,var(--bg);
+  url(img/studs-bg.png) 0 0/128px 128px,var(--bg);
   background-attachment:scroll,fixed,scroll,fixed}
 [data-theme=light] body{background:
   radial-gradient(900px 500px at 15% 0,rgba(126,200,80,.14),transparent 70%),
   radial-gradient(900px 500px at 85% 10%,rgba(80,170,230,.12),transparent 70%),
   linear-gradient(rgba(244,241,230,.965),rgba(244,241,230,.965)),
-  url(img/studs-bg.png) 0 0/104px 104px,var(--bg);
+  url(img/studs-bg.png) 0 0/128px 128px,var(--bg);
   background-attachment:scroll,scroll,fixed,scroll,fixed}
