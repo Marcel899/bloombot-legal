@@ -10,10 +10,15 @@
     const top = el("div", "strat-top");
     top.append(el("span", "stag c-" + s.category, CATS[s.category] || s.category));
     if (s.created_at) top.append(el("span", "strat-date", BB.ago(s.created_at)));
-    c.append(top, el("h3", null, s.title));
-    const body = el("p", "strat-body", s.description);
-    c.append(body);
-    if (s.description.length > 260) {
+    // Bot strategies often start with "# <emoji> Title": don't show the title twice.
+    const lines = s.description.split("\n");
+    const first = lines[0].match(/^#{1,3} (.+)$/);
+    const text = first && BB.plain(first[1]).toLowerCase() === BB.plain(s.title).toLowerCase() ? lines.slice(1).join("\n") : s.description;
+    const h = el("h3");
+    BB.mdInline(h, text === s.description ? s.title.replace(/^#{1,3} /, "") : first[1]);
+    const body = BB.md(text, { cls: "strat-body" });
+    c.append(top, h, body);
+    if (BB.plain(s.description).length > 320 || s.description.split("\n").filter(l => l.trim()).length > 9) {
       body.classList.add("clamp");
       const more = el("button", "more-btn", "Read more");
       more.type = "button";
@@ -32,7 +37,7 @@
 
   function render() {
     const q = $("sq").value.trim().toLowerCase();
-    const shown = list.filter(s => (cat === "all" || s.category === cat) && (!q || (s.title + " " + s.description).toLowerCase().includes(q)));
+    const shown = list.filter(s => (cat === "all" || s.category === cat) && (!q || BB.plain(s.title + " " + s.description).toLowerCase().includes(q)));
     $("slist").replaceChildren(...shown.map(card));
     $("snone").hidden = shown.length > 0;
     $("scount").textContent = shown.length + " strateg" + (shown.length === 1 ? "y" : "ies");

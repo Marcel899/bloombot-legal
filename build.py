@@ -75,7 +75,7 @@ NAV = [
     ("v", "values.html", "dollar", "Values", "blue"),
     ("c", "calculator.html", "calculator", "Calculator", "green"),
     ("a", "trades.html", "swap", "Trade ads", "purple"),
-    ("s", "strategies.html", "floating_island", "Strategies", "orange"),
+    ("s", "strategies.html", "bullseye", "Strategies", "orange"),
     ("f", "features.html", "gem", "Features", "yellow"),
 ]
 APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
@@ -162,12 +162,12 @@ home = f"""<section class="hero big">
 <section class="stats" id="stats">
 <div class="stat"><img src="img/swap.png" alt=""><div><strong id="st-ads">–</strong><span>live trade ads</span></div></div>
 <div class="stat"><img src="img/dollar.png" alt=""><div><strong id="st-values">–</strong><span>units and gamepasses tracked</span></div></div>
-<div class="stat"><img src="img/floating_island.png" alt=""><div><strong id="st-strats">–</strong><span>community strategies</span></div></div>
+<div class="stat"><img src="img/bullseye.png" alt=""><div><strong id="st-strats">–</strong><span>community strategies</span></div></div>
 </section>
 <section class="tiles">{tiles}</section>
 <section class="movers" id="movers" hidden>
 <div class="sec-head"><h2>Biggest moves this month</h2><a href="values.html">All values &rarr;</a></div>
-<div class="mv-cols"><div class="panel mv-col"><h3><img src="img/rise.png" alt="">Going up</h3><div id="mv-up"></div></div><div class="panel mv-col"><h3><img src="img/chart_up.png" alt="" class="flip">Going down</h3><div id="mv-down"></div></div></div>
+<div class="mv-cols"><div class="panel mv-col"><h3><img src="img/rise.png" alt="">Going up</h3><div id="mv-up"></div></div><div class="panel mv-col"><h3><img src="img/fall.png" alt="">Going down</h3><div id="mv-down"></div></div></div>
 </section>
 <section class="hstrats" id="hstrats" hidden>
 <div class="sec-head"><h2>New strategies</h2><a href="strategies.html">All strategies &rarr;</a></div>
@@ -202,7 +202,7 @@ ALL_FEATURES = [
     ("lightning", "DPS ranking", "Every unit ranked by damage, refreshed each week, plus full unit and enemy stats."),
     ("medal_gold", "Levels and ranks", "Earn XP for using Bloombot. Higher ranks keep their trade ads up longer and auto-bump them."),
     ("offer", "Giveaways", "Run giveaways with entry rules like a role, a linked Roblox account, invites or a level."),
-    ("floating_island", "Team finder and strategies", "Find teammates across servers, plus meta loadouts and community guides."),
+    ("bullseye", "Team finder and strategies", "Find teammates across servers, plus meta loadouts and community guides."),
     ("clock", "Weekly recap", "Every Sunday: the biggest value moves, new units and balance changes."),
     ("shield", "Safe trading", "Ads are screened for scams, bad words and NSFW images, and anyone can report a user."),
 ]
@@ -302,8 +302,8 @@ trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from ever
 <span class="count-pill" id="count"></span>
 </div>
 <div class="quick"><span>Quick search:</span><button class="chip" type="button" data-q="LF">LF</button><button class="chip" type="button" data-q="offers">Offers</button><button class="chip" type="button" data-q="gold">Gold</button><button class="chip" type="button" data-q="rainbow">Rainbow</button><button class="chip" type="button" data-q="">Clear</button></div>
-<div class="ads" id="ads"></div>
-<p class="empty" id="adsnone" hidden>No trade ads right now.</p>
+<div class="tlist" id="tlist"></div>
+<p class="empty" id="tnone" hidden>No trade ads right now.</p>
 <div class="more-wrap"><button class="brick dark" id="more" type="button" hidden>Show more</button></div>
 </section>
 <p class="loading" id="loading">Loading…</p>
@@ -362,7 +362,7 @@ open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tow
 
 
 # ── Strategies ───────────────────────────────────────────────────────────
-strat_body = hero("floating_island", "Strategies", "Community strategies for Garden Tower Defense. Share yours and it shows up in /home in Discord too.", "t_strategies") + f"""<main class="wrap strats" id="main">
+strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tower Defense. Share yours and it shows up in /home in Discord too.", "t_strategies") + f"""<main class="wrap strats" id="main">
 <section class="panel share">
 <div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in with Discord to share it with every Bloombot server.</span></div><button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in to share</button></div>
 <form id="sform" hidden>

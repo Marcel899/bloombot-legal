@@ -38,6 +38,112 @@
     if (s < 86400) return Math.floor(s / 3600) + "h ago";
     return Math.floor(s / 86400) + "d ago";
   };
+  /* Discord-style formatting, built as DOM nodes (never innerHTML):
+     # ## ### headings, -# small text, > quotes, - lists, **bold**, *italic*, __underline__,
+     ~~strike~~, `code`, ||spoilers||, [links](https://…) and custom emojis <:name:id>. */
+  const INLINE = /<(a?):(\w{2,32}):(\d{5,25})>|\*\*(.+?)\*\*|__(.+?)__|~~(.+?)~~|\|\|(.+?)\|\||`([^`]+)`|(?<![\w*])\*(?!\s)([^*]+?)\*(?![\w*])|(?<![\w])_(?!\s)([^_]+?)_(?![\w])|<(@[!&]?|#)(\d{5,25})>|\[([^\]\n]{1,100})\]\((https:\/\/[^)\s]+)\)|(https:\/\/[^\s<]+[^\s<.,:;"')\]!?])/g;
+  BB.emoji = (id, name, animated, cls = "demoji") => {
+    const img = BB.el("img", cls);
+    img.alt = ":" + name + ":";
+    img.title = name;
+    img.loading = "lazy";
+    img.src = `https://cdn.discordapp.com/emojis/${id}.${animated ? "gif" : "png"}?size=48`;
+    img.onerror = () => img.remove();
+    return img;
+  };
+  function inline(parent, text, onText, depth = 0) {
+    const plain = s => s && (onText ? onText(parent, s) : parent.append(s));
+    if (depth > 4) return plain(text);
+    let last = 0, m;
+    INLINE.lastIndex = 0;
+    const re = new RegExp(INLINE.source, "g");
+    while ((m = re.exec(text))) {
+      plain(text.slice(last, m.index));
+      last = re.lastIndex;
+      const wrap = (tag, cls, inner) => { const n = BB.el(tag, cls); inline(n, inner, onText, depth + 1); parent.append(n); };
+      if (m[3]) parent.append(BB.emoji(m[3], m[2], m[1] === "a"));
+      else if (m[4] != null) wrap("strong", null, m[4]);
+      else if (m[5] != null) wrap("u", null, m[5]);
+      else if (m[6] != null) wrap("s", null, m[6]);
+      else if (m[7] != null) {
+        const sp = BB.el("span", "spoiler");
+        sp.tabIndex = 0;
+        sp.title = "Spoiler: click to show";
+        sp.onclick = sp.onkeydown = () => sp.classList.add("open");
+        inline(sp, m[7], onText, depth + 1);
+        parent.append(sp);
+      }
+      else if (m[8] != null) parent.append(BB.el("code", null, m[8]));
+      else if (m[9] != null) wrap("em", null, m[9]);
+      else if (m[10] != null) wrap("em", null, m[10]);
+      else if (m[11]) parent.append(BB.el("span", "mention", m[11] === "#" ? "#channel" : m[11] === "@&" ? "@role" : "@user"));
+      else {
+        const href = BB.safeUrl(m[14] || m[15]);
+        const a = BB.el("a", null);
+        a.href = href; a.target = "_blank"; a.rel = "noopener nofollow ugc";
+        a.textContent = m[13] || m[15];
+        parent.append(a);
+      }
+    }
+    plain(text.slice(last));
+  }
+  BB.mdInline = (parent, text, onText) => inline(parent, String(text || ""), onText);
+  BB.md = (text, opts = {}) => {
+    const root = BB.el("div", "md" + (opts.cls ? " " + opts.cls : ""));
+    const lines = String(text || "").replace(/\r/g, "").split("\n");
+    let box = root, quoting = false, rest = false, list = null, para = null;
+    const fill = (node, s) => inline(node, s, opts.onText);
+    for (let raw of lines) {
+      let line = raw, quoted = rest;
+      if (!rest && /^>>> /.test(line)) { rest = quoted = true; line = line.slice(4); }
+      else if (!rest && /^> /.test(line)) { quoted = true; line = line.slice(2); }
+      else if (!rest && line === ">") { quoted = true; line = ""; }
+      if (quoted !== quoting) {
+        list = para = null;
+        if (quoted) { box = BB.el("blockquote"); root.append(box); } else box = root;
+        quoting = quoted;
+      }
+      let h;
+      if (!line.trim()) { list = para = null; continue; }
+      if ((h = line.match(/^(#{1,3}) (.+)$/))) {
+        list = para = null;
+        const n = BB.el("div", "md-h md-h" + h[1].length);
+        n.setAttribute("role", "heading");
+        n.setAttribute("aria-level", String(3 + h[1].length));
+        fill(n, h[2]);
+        box.append(n);
+      } else if ((h = line.match(/^-# (.+)$/))) {
+        list = para = null;
+        const n = BB.el("div", "md-sub");
+        fill(n, h[1]);
+        box.append(n);
+      } else if ((h = line.match(/^(\s*)[-*•] (.+)$/))) {
+        para = null;
+        if (!list) { list = BB.el("ul"); box.append(list); }
+        const li = BB.el("li", h[1].length >= 2 ? "sub" : null);
+        fill(li, h[2]);
+        list.append(li);
+      } else if ((h = line.match(/^\s*(\d{1,3})[.)] (.+)$/))) {
+        para = null;
+        if (!list || list.tagName !== "OL") { list = BB.el("ol"); list.start = +h[1]; box.append(list); }
+        const li = BB.el("li");
+        fill(li, h[2]);
+        list.append(li);
+      } else {
+        list = null;
+        if (para) para.append(BB.el("br")); else { para = BB.el("p"); box.append(para); }
+        fill(para, line);
+      }
+    }
+    return root;
+  };
+  /* The same text with the formatting taken out, for titles, previews and search. */
+  BB.plain = text => String(text || "")
+    .replace(/<a?:(\w+):\d+>/g, "").replace(/<(@[!&]?|#)\d+>/g, "")
+    .replace(/^(?:>>> |> |-# |#{1,3} |\s*[-*•] )/gm, "")
+    .replace(/\*\*|__|~~|\|\||`/g, "").replace(/(^|[^\w])[*_](?=\S)|(?<=\S)[*_](?=[^\w]|$)/g, "$1")
+    .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, "$1").replace(/[ \t]+/g, " ").trim();
+
   /* An item's picture: the bot's emoji, then the value list's picture, then the flower. */
   BB.itemImg = (item, cls) => {
     const img = BB.el("img", cls);
@@ -144,12 +250,22 @@
     try { localStorage.setItem(VKEY, JSON.stringify({ t: Date.now(), d: data })); } catch (e) { /* full or blocked */ }
     return prep(data || []);
   };
+  /* Same rule as the bot: a price that sat untouched 60+ days and then jumped
+     is the list catching up, not a move this month. */
+  function caughtUp(history) {
+    const cut = Date.now() - 30 * 864e5;
+    const pts = (history || []).map(p => [new Date(p[0]).getTime(), p[1]]);
+    let i = -1;
+    pts.forEach((p, j) => { if (p[0] <= cut) i = j; });
+    return i >= 0 && i + 1 < pts.length && pts[i + 1][0] - pts[i][0] >= 60 * 864e5;
+  }
   /* Owner's-choice items have no fixed value; use the first number written ("62k+ (O/C)" -> 62k). */
   function prep(list) {
     for (const it of list) {
       const m = !(it.value > 0) && String(it.value_text || "").match(/(\d+(?:\.\d+)?)\s*([km]?)/i);
       it.est = it.value > 0 ? it.value : m ? BB.parseValue(m[1] + m[2]) || 0 : 0;
       it.oc = !(it.value > 0) && it.est > 0;
+      if (it.change_30d != null && caughtUp(it.history)) it.change_30d = null;
     }
     return list;
   }
@@ -208,7 +324,7 @@
     out.type = "button";
     out.onclick = async () => { await BB.sb.auth.signOut(); };
     menu.append(head, link("trades.html#post", "offer", "Post a trade ad"), link("trades.html?mine=1", "swap", "My trade ads"),
-      link("strategies.html", "floating_island", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), out);
+      link("strategies.html", "bullseye", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), out);
     btn.onclick = e => {
       e.stopPropagation();
       const open = box.classList.toggle("open");

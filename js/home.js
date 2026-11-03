@@ -26,7 +26,7 @@
       $("stats").classList.add("ready");
     });
     try {
-      const items = (await BB.loadValues()).filter(i => i.change_30d != null && i.change_30d !== 0 && i.est >= 100);
+      const items = (await BB.loadValues()).filter(i => i.change_30d != null && i.change_30d !== 0 && i.est >= 100 && i.category !== "gamepasses");
       const up = items.filter(i => i.change_30d > 0).sort((a, b) => b.change_30d - a.change_30d).slice(0, 5);
       const down = items.filter(i => i.change_30d < 0).sort((a, b) => a.change_30d - b.change_30d).slice(0, 5);
       $("mv-up").replaceChildren(...up.map(mover));
@@ -38,7 +38,9 @@
       $("hs-list").replaceChildren(...strats.map(s => {
         const a = el("a", "hs");
         a.href = "strategies.html";
-        a.append(el("strong", null, s.title), el("span", null, (s.author_name || "Bloombot player")));
+        const t = el("strong");
+        BB.mdInline(t, s.title.replace(/^#{1,3} /, ""));
+        a.append(t, el("span", null, (s.author_name || "Bloombot player")));
         return a;
       }));
       $("hstrats").hidden = false;
