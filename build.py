@@ -6,7 +6,7 @@ VER = hashlib.md5(open("style.css", "rb").read()).hexdigest()[:8]
 SUPPORT = "https://discord.gg/tGuXfcJxwf"
 BASE = "https://marcel899.github.io/bloombot-legal/"
 UPDATED = "3 November 2026"
-CLIENT_ID = "1511343031624798289"
+CLIENT_ID = "1510660385517211820"
 # Bot permissions: view/send/history, embeds, files, reactions, external emojis, manage messages,
 # manage webhooks (trade ads), manage server (invite tracking), threads, timeout members.
 INVITE = f"https://discord.com/oauth2/authorize?client_id={CLIENT_ID}&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"
