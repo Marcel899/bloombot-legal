@@ -77,7 +77,17 @@
     prof.title = "See " + (a.discord_name || "this trader") + "'s profile";
     prof.append(av, who);
     head.append(prof);
-    if (own) head.append(el("span", "tag", "Yours"));
+    if (own) {
+      const del = el("button", "del-btn", "Delete");
+      del.type = "button";
+      del.title = "Delete this trade ad";
+      del.onclick = async () => {
+        del.disabled = true;
+        if (await BB.deleteMine("trade_ad", a.id)) { ads = ads.filter(x => x.id !== a.id); render(); }
+        else del.disabled = false;
+      };
+      head.append(el("span", "tag", "Yours"), del);
+    }
     c.append(head, adText(a.content));
     const img = BB.safeUrl(a.image_url);
     if (img) {

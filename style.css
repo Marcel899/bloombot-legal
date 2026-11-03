@@ -1063,3 +1063,19 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
   .burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 }
 @media (prefers-reduced-motion:reduce){.bar .links,.bar .links .nl,.burger span{transition:none}}
+/* delete buttons + confirm dialog */
+.del-btn{border:0;background:none;color:#ff8a8a;font:800 .8rem Nunito,system-ui,sans-serif;cursor:pointer;padding:2px 6px;border-radius:6px}
+.del-btn:hover{color:#fff;background:rgba(220,50,50,.35)}
+.del-btn:disabled{opacity:.5;cursor:default}
+.tc-head .del-btn{margin-left:4px}
+.tc-head .tag+.del-btn{margin-left:4px}
+.tc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hs-row{display:flex;align-items:stretch;gap:6px}.hs-row>.hs{flex:1;min-width:0}
+.hs-row>.del-btn{align-self:center}
+.pdanger{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:6px;padding:14px;border:1px solid rgba(220,50,50,.45);border-radius:12px;background:rgba(220,50,50,.08)}
+.pdanger p{margin:4px 0 0}
+.pdanger .brick{white-space:nowrap}
+@media (max-width:520px){.pdanger{flex-direction:column;align-items:stretch}}
+.cf .cf-type{font-weight:800}
+.cf .cf-type input{margin-top:6px}
+.cf .post-actions{margin-top:4px}

@@ -442,6 +442,7 @@ profile_body = f"""<main class="wrap prof" id="main">
 <div class="post-foot"><span class="count" id="fdc">0/300</span><span></span></div>
 <div class="post-actions"><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
 <p class="post-status" id="pstatus" hidden></p>
+<div class="pdanger" id="pdanger" hidden><div><strong>Delete account</strong><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div>
 </form>
 <section class="psec" id="pads-sec" hidden><div class="sec-head"><h2>Live trade ads</h2><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="tlist" id="pads"></div></section>
 <section class="psec" id="pstr-sec" hidden><div class="sec-head"><h2>Strategies</h2><a href="strategies.html">All strategies &rarr;</a></div><div class="slist" id="pstrs"></div></section>

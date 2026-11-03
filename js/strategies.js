@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const { el } = BB;
   const CATS = { "meta-units": "Meta units", "map-specific": "Map-specific", "general": "General" };
-  let list = [], cat = "all";
+  let list = [], cat = "all", me = null;
 
   function card(s) {
     const c = el("article", "strat");
@@ -15,6 +15,17 @@
     link.type = "button";
     link.onclick = () => BB.share(location.origin + location.pathname + "#s-" + s.id, BB.plain(s.title) + " · Bloombot", "Link to this strategy copied");
     top.append(link);
+    if (me && s.author_id === me) {
+      const del = el("button", "del-btn", "Delete");
+      del.type = "button";
+      del.title = "Delete your strategy";
+      del.onclick = async () => {
+        del.disabled = true;
+        if (await BB.deleteMine("strategy", s.id)) { list = list.filter(x => x.id !== s.id); render(); }
+        else del.disabled = false;
+      };
+      top.append(del);
+    }
     // Bot strategies often start with "# <emoji> Title": don't show the title twice.
     const lines = s.description.split("\n");
     const first = lines[0].match(/^#{1,3} (.+)$/);
@@ -134,6 +145,10 @@
     $("sform").hidden = !session;
     $("slogin").hidden = !!session;
     if (session) $("sname").textContent = BB.user(session).name;
+    const id = session ? BB.user(session).id : null;
+    const changed = id !== me;
+    me = id;
     if (!loaded) { loaded = true; load(); }
+    else if (changed) render();
   });
 })();

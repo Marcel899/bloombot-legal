@@ -66,32 +66,51 @@
     c.hidden = false;
   }
 
-  function adCard(a) {
+  function delBtn(kind, id, label, did) {
+    const b = el("button", "del-btn", "Delete");
+    b.type = "button";
+    b.title = label;
+    b.onclick = async e => {
+      e.preventDefault();
+      b.disabled = true;
+      if (await BB.deleteMine(kind, id)) lists(did);
+      else b.disabled = false;
+    };
+    return b;
+  }
+  function adCard(a, own) {
     const c = el("article", "tcard");
+    const foot = el("div", "tc-foot");
     const head = el("div", "tc-who");
     head.append(el("span", null, BB.ago(a.created_at)));
-    c.append(BB.md(a.content, { cls: "tc-text" }), head);
+    foot.append(head);
+    if (own) foot.append(delBtn("trade_ad", a.id, "Delete this trade ad", a.discord_id));
+    c.append(BB.md(a.content, { cls: "tc-text" }), foot);
     return c;
   }
-  function stratCard(s) {
+  function stratCard(s, own, did) {
     const c = el("a", "hs");
     c.href = "strategies.html#s-" + s.id;
     const t = el("strong");
     BB.mdInline(t, s.title);
     c.append(t, el("span", null, (s.category || "").replace("-", " ")));
-    return c;
+    if (!own) return c;
+    const row = el("div", "hs-row");
+    row.append(c, delBtn("strategy", s.id, "Delete your strategy", did));
+    return row;
   }
 
   async function lists(did) {
     const [{ data: ads }, { data: strs }] = await Promise.all([
-      BB.sb.from("trade_ads").select("id,content,created_at,expires_at").eq("discord_id", did).order("created_at", { ascending: false }).limit(20),
+      BB.sb.from("trade_ads").select("id,discord_id,content,created_at,expires_at").eq("discord_id", did).order("created_at", { ascending: false }).limit(20),
       BB.sb.from("strategies").select("id,title,category").eq("author_id", did).order("id", { ascending: false }).limit(20),
     ]);
     const live = (ads || []).filter(a => !a.expires_at || new Date(a.expires_at) > Date.now());
-    $("pads").replaceChildren(...live.map(adCard));
+    const own = did === me;
+    $("pads").replaceChildren(...live.map(a => adCard(a, own)));
     $("pads-sec").hidden = !live.length;
     $("pads-all").href = did === me ? "trades.html?mine=1" : "trades.html";
-    $("pstrs").replaceChildren(...(strs || []).map(stratCard));
+    $("pstrs").replaceChildren(...(strs || []).map(s => stratCard(s, own, did)));
     $("pstr-sec").hidden = !(strs || []).length;
   }
 
@@ -112,6 +131,7 @@
     $("fl").value = (priv && priv.server_link) || "";
     $("fd").value = (mine && mine.description) || "";
     $("fdc").textContent = $("fd").value.length + "/300";
+    $("pdanger").hidden = !mine;
     status("", "");
     $("pedit").scrollIntoView({ block: "start", behavior: "smooth" });
     $("fu").focus();
@@ -158,6 +178,11 @@
     setTimeout(poll, 1200);
   }
   $("pedit").onsubmit = save;
+  $("pdel").onclick = async () => {
+    $("pdel").disabled = true;
+    if (await BB.deleteAccount()) { setTimeout(() => { location.href = "./"; }, 1200); return; }
+    $("pdel").disabled = false;
+  };
   $("pcancel").onclick = () => { $("pedit").hidden = true; status("", ""); };
   $("fd").oninput = () => { $("fdc").textContent = $("fd").value.length + "/300"; };
 

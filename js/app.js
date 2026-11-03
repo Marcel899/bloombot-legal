@@ -398,6 +398,81 @@
     if (s) checkAccount(s);
   }
 
+  /* ── confirm dialog: resolves true when the user agrees ──── */
+  BB.confirm = ({ title, text, ok = "Delete", type = null }) => new Promise(done => {
+    const el = BB.el;
+    const back = el("div", "wm-back");
+    const box = el("form", "wm panel cf");
+    box.setAttribute("role", "alertdialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-labelledby", "cf-h");
+    const h = el("h2", null, title); h.id = "cf-h";
+    box.append(h, el("p", "hint", text));
+    let input = null;
+    if (type) {
+      const l = el("label", "cf-type");
+      l.append(document.createTextNode("Type " + type + " to confirm"));
+      input = el("input", "search wm-in"); input.autocomplete = "off"; input.spellcheck = false;
+      l.append(input);
+      box.append(l);
+    }
+    const no = el("button", "brick dark sm", "Cancel"); no.type = "button";
+    const yes = el("button", "brick red", ok); yes.type = "submit";
+    const acts = el("div", "post-actions"); acts.append(no, yes);
+    box.append(acts);
+    back.append(box);
+    document.body.append(back);
+    const ready = () => { yes.disabled = !!input && input.value.trim().toUpperCase() !== type; };
+    if (input) input.oninput = ready;
+    ready();
+    const close = v => { back.remove(); document.removeEventListener("keydown", esc); done(v); };
+    const esc = e => { if (e.key === "Escape") close(false); };
+    document.addEventListener("keydown", esc);
+    back.onclick = e => { if (e.target === back) close(false); };
+    no.onclick = () => close(false);
+    box.onsubmit = e => { e.preventDefault(); if (!yes.disabled) close(true); };
+    setTimeout(() => (input || no).focus(), 50);
+  });
+
+  /* Delete your own trade ad ("trade_ad") or strategy ("strategy"). Resolves true when deleted. */
+  BB.deleteMine = async (kind, id) => {
+    const ad = kind === "trade_ad";
+    const sure = await BB.confirm({
+      title: ad ? "Delete this trade ad?" : "Delete this strategy?",
+      text: ad ? "It comes off the trade board here and in Discord. Copies already posted in server channels stay up."
+        : "It is removed from the website and from /home → Strategies in Discord.",
+    });
+    if (!sure) return false;
+    let data, error;
+    try { ({ data, error } = await BB.sb.rpc(ad ? "delete_my_trade_ad" : "delete_my_strategy", ad ? { ad_id: id } : { sid: id })); }
+    catch (err) { error = { message: (err && err.message) || "network error" }; }
+    if (error) { BB.toast("Couldn't delete it: " + error.message, "bad"); return false; }
+    if (data === "login") { BB.toast("Log in again and retry.", "bad"); return false; }
+    if (data === "not_found") { BB.toast("It's already gone.", "bad"); return true; }
+    BB.toast(ad ? "Trade ad deleted" : "Strategy deleted");
+    return true;
+  };
+
+  BB.deleteAccount = async () => {
+    const sure = await BB.confirm({
+      title: "Delete your Bloombot account?",
+      text: "This removes your Roblox link, private server link, profile, live trade ads, strategies, wishlist and website login, on the website and in Discord. Your levels stay. This can't be undone.",
+      ok: "Delete my account",
+      type: "DELETE",
+    });
+    if (!sure) return false;
+    let data, error;
+    try { ({ data, error } = await BB.sb.rpc("delete_my_account")); }
+    catch (err) { error = { message: (err && err.message) || "network error" }; }
+    if (error || data !== "ok") { BB.toast("Couldn't delete your account: " + ((error && error.message) || "log in again and retry."), "bad"); return false; }
+    try {
+      Object.keys(localStorage).filter(k => /^bb_acct_/.test(k)).forEach(k => localStorage.removeItem(k));
+    } catch (e) { /* storage blocked */ }
+    try { await BB.sb.auth.signOut({ scope: "local" }); } catch (e) { /* the login is already gone */ }
+    BB.toast("Your account was deleted");
+    return true;
+  };
+
   /* ── first login: create a Bloombot account ──────────────── */
   let checked = null;
   async function checkAccount(s) {
