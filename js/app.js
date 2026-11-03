@@ -376,9 +376,12 @@
     headLink.href = "profile.html";
     headLink.title = "Open your profile";
     headLink.append(...head.childNodes);
-    menu.append(headLink, link("profile.html", "medal_gold", "My profile"), link("profile.html#edit", "gear", "Profile settings"),
-      link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "trading", "My trade ads"),
-      link("strategies.html", "bullseye", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), link("dashboard.html", "shield", "Server dashboard"), out);
+    const group = (title, ...items) => { const g = BB.el("div", "me-group"); g.append(BB.el("p", "me-gt", title), ...items); return g; };
+    menu.append(headLink,
+      group("Account", link("profile.html", "medal_gold", "My profile"), link("profile.html#edit", "gear", "Settings")),
+      group("Trading", link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "trading", "My trade ads")),
+      group("Servers", link("dashboard.html", "shield", "Server dashboard")),
+      out);
     btn.onclick = e => {
       e.stopPropagation();
       const open = box.classList.toggle("open");
@@ -392,6 +395,81 @@
     BB.ready = true;
     renderAcct();
     listeners.forEach(fn => { try { fn(s); } catch (e) { console.error(e); } });
+    if (s) checkAccount(s);
+  }
+
+  /* ── first login: create a Bloombot account ──────────────── */
+  let checked = null;
+  async function checkAccount(s) {
+    const id = BB.user(s).id;
+    if (!id || checked === id) return;
+    checked = id;
+    if (/profile\.html/.test(location.pathname)) return;
+    let skip = null;
+    try { skip = localStorage.getItem("bb_acct_" + id); } catch (e) { /* storage blocked */ }
+    if (skip) return;
+    try {
+      const [{ data: p }, { data: pend }] = await Promise.all([
+        BB.sb.from("profiles").select("discord_id").eq("discord_id", id).maybeSingle(),
+        BB.sb.from("profile_updates").select("id,status").order("id", { ascending: false }).limit(1),
+      ]);
+      if (p || (pend && pend.length && pend[0].status !== "rejected")) { remember(id, "has"); return; }
+    } catch (e) { return; }
+    welcome(id);
+  }
+  function remember(id, v) { try { localStorage.setItem("bb_acct_" + id, v); } catch (e) { /* ignore */ } }
+
+  function welcome(id) {
+    const el = BB.el;
+    const back = el("div", "wm-back");
+    const box = el("form", "wm panel");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-labelledby", "wm-h");
+    const logo = el("img", "wm-logo"); logo.src = "img/flower.png"; logo.alt = "";
+    const h = el("h2", null, "Welcome to Bloombot!"); h.id = "wm-h";
+    const sub = el("p", "hint", "Create your Bloombot account to post trade ads, share strategies and get a profile. It's the same account you use in Discord.");
+    const lab = (text, input, opt) => { const l = el("label"); l.append(document.createTextNode(text)); if (opt) l.append(el("em", null, " optional")); l.append(input); return l; };
+    const u = el("input", "search wm-in"); u.maxLength = 20; u.autocomplete = "off"; u.placeholder = "Your Roblox username";
+    const k = el("input", "search wm-in"); k.maxLength = 300; k.autocomplete = "off"; k.placeholder = "https://www.roblox.com/share?code=...&type=Server";
+    const st = el("p", "post-status"); st.hidden = true;
+    const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t; };
+    const later = el("button", "brick dark sm", "Later"); later.type = "button";
+    const go = el("button", "brick green", "Create account"); go.type = "submit";
+    const acts = el("div", "post-actions"); acts.append(later, go);
+    box.append(logo, h, sub, lab("Roblox username", u), lab("Private server link", k, true), acts, st);
+    back.append(box);
+    document.body.append(back);
+    setTimeout(() => u.focus(), 50);
+    const close = () => { back.remove(); document.removeEventListener("keydown", esc); };
+    const esc = e => { if (e.key === "Escape") { remember(id, "later"); close(); } };
+    document.addEventListener("keydown", esc);
+    later.onclick = () => { remember(id, "later"); close(); };
+    let busy = false;
+    box.onsubmit = async e => {
+      e.preventDefault();
+      if (busy) return;
+      const name = u.value.trim(), link = k.value.trim();
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) { say("bad", "Your Roblox username needs 3 to 20 letters, numbers or underscores."); u.focus(); return; }
+      if (link && !/^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/.test(link)) { say("bad", "That server link isn't right. Leave it empty or paste the Private Server Link from Roblox."); k.focus(); return; }
+      busy = true; go.disabled = true; say("wait", "Creating your account…");
+      const row = { roblox_username: name };
+      if (link) row.server_link = link;
+      let data, error;
+      try { ({ data, error } = await BB.sb.from("profile_updates").insert(row).select("id").single()); }
+      catch (err) { error = { message: (err && err.message) || "network error" }; }
+      if (error) { busy = false; go.disabled = false; say("bad", "Couldn't create it: " + error.message); return; }
+      const t0 = Date.now();
+      const poll = async () => {
+        let r = null;
+        try { ({ data: r } = await BB.sb.from("profile_updates").select("status,reason").eq("id", data.id).single()); } catch (err) { /* retry */ }
+        if (r && r.status === "posted") { remember(id, "has"); say("ok", "Your account is ready!"); BB.toast("Welcome to Bloombot"); setTimeout(close, 1200); return; }
+        if (r && r.status === "rejected") { busy = false; go.disabled = false; say("bad", r.reason || "Bloombot couldn't create it."); return; }
+        if (Date.now() - t0 > 45000) { remember(id, "has"); say("wait", "Bloombot will finish creating it as soon as it's online."); setTimeout(close, 2500); return; }
+        setTimeout(poll, 1500);
+      };
+      setTimeout(poll, 1000);
+    };
   }
 
   document.addEventListener("click", e => {

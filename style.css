@@ -907,3 +907,20 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .g-yellow *,.brick.yellow span{color:#3b2a00;text-shadow:none}
 @media (max-width:420px){.post-actions .brick{padding-left:12px;padding-right:12px;font-size:.95rem}.cmp-top{flex-wrap:wrap}}
 .weld.g-yellow,.weld.g-yellow *{color:#3b2a00!important;text-shadow:0 1px 0 rgba(255,255,255,.35)!important}
+
+/* profile menu groups + welcome dialog */
+.me-group{padding:4px 0;border-bottom:1px solid var(--border)}
+.me-gt{margin:4px 10px 2px;font-size:.72rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.me-item.out{margin-top:4px;color:#ff9a9a}
+.wm-back{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:rgba(5,8,12,.72);backdrop-filter:blur(4px);animation:rise2 .2s}
+.wm{width:100%;max-width:440px;display:flex;flex-direction:column;gap:12px;text-align:left}
+.wm-logo{width:64px;height:64px;margin:0 auto}
+.wm h2{margin:0;text-align:center}.wm>.hint{text-align:center;margin:0}
+.wm label{display:flex;flex-direction:column;gap:6px;font-weight:800}
+.wm label em{font-style:normal;color:var(--muted);font-weight:700;font-size:.85rem}
+.wm .wm-in{flex:none;height:auto;min-height:0;width:100%;padding:11px 14px;box-sizing:border-box}
+.wm label{display:block}.wm label .wm-in{margin-top:6px}
+.wm label em{margin-left:4px}
+.wm h2{padding:0}.wm h2::before,.wm h2::after{display:none}
+.wm{max-height:calc(100vh - 32px);overflow:auto}
+.wm h2{text-align:center!important;justify-content:center}
