@@ -49,6 +49,7 @@ HEAD = """<!doctype html>
 <a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
 <nav class="links" id="links">{nav}</nav>
 <div class="right">
+<button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
 <a class="brick nb discord add" href="{invite}">{dsvg}<span>Add<span class="wide"> to Discord</span></span></a>
 <div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login>{dsvg}<span>Log in</span></button></div>
 <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -165,6 +166,10 @@ home = f"""<section class="hero big">
 <div class="stat"><img src="img/bullseye.png" alt=""><div><strong id="st-strats">–</strong><span>community strategies</span></div></div>
 </section>
 <section class="tiles">{tiles}</section>
+<section class="watch" id="watch" hidden>
+<div class="sec-head"><h2>Your watchlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
+<div class="panel wl" id="wl"></div>
+</section>
 <section class="movers" id="movers" hidden>
 <div class="sec-head"><h2>Biggest moves this month</h2><a href="values.html">All values &rarr;</a></div>
 <div class="mv-cols"><div class="panel mv-col"><h3><img src="img/rise.png" alt="">Going up</h3><div id="mv-up"></div></div><div class="panel mv-col"><h3><img src="img/fall.png" alt="">Going down</h3><div id="mv-down"></div></div></div>
@@ -245,6 +250,13 @@ COMMANDS = [
 ]
 
 
+import json
+import os
+os.makedirs("data", exist_ok=True)
+with open("data/commands.json", "w") as f:
+    json.dump([[c, d, g] for g, _, cmds in COMMANDS for c, d in cmds], f, separators=(",", ":"))
+
+
 def _esc(t):
     return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -306,7 +318,7 @@ trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from ever
 <p class="empty" id="tnone" hidden>No trade ads right now.</p>
 <div class="more-wrap"><button class="brick dark" id="more" type="button" hidden>Show more</button></div>
 </section>
-<p class="loading" id="loading">Loading…</p>
+<div class="skel-grid sk-ads" id="loading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 </main>
 <script defer src="js/trades.js?v={JSVER['trades']}"></script>
 """
@@ -316,12 +328,12 @@ open("trades.html", "w").write(page("Bloombot Trade Ads", "Browse and post Bloom
 values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and gamepass, with demand and 30-day trends.", "t_values") + f"""<main class="wrap vals" id="main">
 <section class="panel filters">
 <input class="search" id="vq" type="search" placeholder="Search a unit…" aria-label="Search units">
-<div class="chips"><button class="chip on" type="button" data-cat="all">All</button><button class="chip" type="button" data-cat="units">Units</button><button class="chip" type="button" data-cat="gamepasses">Gamepasses</button></div>
+<div class="chips"><button class="chip on" type="button" data-cat="all">All</button><button class="chip" type="button" data-cat="units">Units</button><button class="chip" type="button" data-cat="gamepasses">Gamepasses</button><button class="chip star-chip" type="button" data-cat="fav">★ Watchlist</button></div>
 <select id="vrar" aria-label="Rarity"><option value="">All rarities</option></select>
 <select id="vsort" aria-label="Sort"><option value="value">Highest value</option><option value="low">Lowest value</option><option value="demand">Most demand</option><option value="up">Rising most</option><option value="down">Falling most</option><option value="name">A to Z</option></select>
 </section>
 <div class="vinfo"><span id="vcount"></span><span id="vupdated"></span></div>
-<p class="loading" id="vloading">Loading values…</p>
+<div class="skel-grid sk-vals" id="vloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="vgrid" id="vgrid"></div>
 <p class="empty" id="vnone" hidden>No unit matches that.</p>
 <p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
@@ -349,11 +361,12 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 <div class="verdict" id="verdict"><strong>Add units to both sides</strong><span>Search a unit or type a value like 4k.</span></div>
 <div class="meter" id="meter"><i></i></div>
 <div class="cbtns"><button class="brick dark sm" id="swap" type="button">⇄ Swap sides</button><button class="brick dark sm" id="clear" type="button">Clear</button></div>
+<div class="cbtns share-btns"><button class="brick blue sm" id="copylink" type="button">Copy link</button><button class="brick discord sm" id="copytext" type="button">Copy for Discord</button></div>
 <div class="fairadds" id="fairadds"></div>
 </div>
 {side("get", "You get", "green")}
 </div>
-<p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. The link updates as you go, so you can share it.</p>
+<p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. Use Copy link to share this exact trade.</p>
 </main>
 <script defer src="js/calc.js?v={JSVER['calc']}"></script>
 """
@@ -363,7 +376,7 @@ open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tow
 
 # ── Strategies ───────────────────────────────────────────────────────────
 strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tower Defense. Share yours and it shows up in /home in Discord too.", "t_strategies") + f"""<main class="wrap strats" id="main">
-<section class="panel share">
+<section class="panel share" id="share">
 <div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in with Discord to share it with every Bloombot server.</span></div><button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in to share</button></div>
 <form id="sform" hidden>
 <h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
@@ -378,7 +391,7 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <div class="chips"><button class="chip on" type="button" data-scat="all">All</button><button class="chip" type="button" data-scat="meta-units">Meta units</button><button class="chip" type="button" data-scat="map-specific">Map-specific</button><button class="chip" type="button" data-scat="general">General</button></div>
 <span class="count-pill" id="scount"></span>
 </div>
-<p class="loading" id="sloading">Loading strategies…</p>
+<div class="skel-grid sk-strats" id="sloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="slist" id="slist"></div>
 <p class="empty" id="snone" hidden>No strategies match that.</p>
 </main>
@@ -392,4 +405,4 @@ notfound = hero("warning", "Page not found", "That page doesn't exist. It may ha
 <a class="brick green" href="./">Go home</a>
 </section></main>
 """
-open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>')))
+open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>')))

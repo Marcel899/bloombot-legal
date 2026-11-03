@@ -26,12 +26,23 @@
       $("stats").classList.add("ready");
     });
     try {
-      const items = (await BB.loadValues()).filter(i => i.change_30d != null && i.change_30d !== 0 && i.est >= 100 && i.category !== "gamepasses");
+      const all = await BB.loadValues();
+      const items = all.filter(i => i.change_30d != null && i.change_30d !== 0 && i.est >= 100 && i.category !== "gamepasses");
       const up = items.filter(i => i.change_30d > 0).sort((a, b) => b.change_30d - a.change_30d).slice(0, 5);
       const down = items.filter(i => i.change_30d < 0).sort((a, b) => a.change_30d - b.change_30d).slice(0, 5);
       $("mv-up").replaceChildren(...up.map(mover));
       $("mv-down").replaceChildren(...down.map(mover));
       $("movers").hidden = !(up.length || down.length);
+      const favs = BB.favs.all();
+      const watched = all.filter(i => favs.has(i.name)).sort((a, b) => b.est - a.est).slice(0, 12);
+      if (watched.length) {
+        $("wl").replaceChildren(...watched.map(it => {
+          const a = mover(it);
+          if (it.change_30d == null || it.change_30d === 0) a.querySelector(".chg").replaceWith(el("span", "chg flat", "steady"));
+          return a;
+        }));
+        $("watch").hidden = false;
+      }
     } catch (e) { /* values not synced yet */ }
     const { data: strats } = await BB.sb.from("strategies").select("id,title,category,author_name").order("id", { ascending: false }).limit(3);
     if (strats && strats.length) {

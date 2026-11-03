@@ -145,6 +145,17 @@
     input.onblur = () => setTimeout(() => { opts = []; draw(); }, 100);
   }
 
+  /* Sharing: the link holds the trade; the text is ready to paste in Discord. */
+  $("copylink").onclick = () => {
+    if (!sides.give.length && !sides.get.length) { BB.toast("Add some units first", "bad"); return; }
+    BB.copy(location.href, "Link copied. Anyone who opens it sees this trade.");
+  };
+  $("copytext").onclick = () => {
+    if (!sides.give.length || !sides.get.length) { BB.toast("Add units to both sides first", "bad"); return; }
+    const line = side => sides[side].map(r => (r.qty > 1 ? r.qty + "x " : "") + r.item.name).join(", ") + " (" + BB.fmt(total(side)) + ")";
+    const v = $("verdict");
+    BB.copy(`**I give:** ${line("give")}\n**I get:** ${line("get")}\n**Result:** ${v.querySelector("strong").textContent}. ${v.querySelector("span").textContent}\n-# Checked on ${location.host || "Bloombot"}`, "Copied. Paste it in Discord.");
+  };
   $("swap").onclick = () => { [sides.give, sides.get] = [sides.get, sides.give]; update(); };
   $("clear").onclick = () => { sides.give = []; sides.get = []; update(); };
   picker("give");

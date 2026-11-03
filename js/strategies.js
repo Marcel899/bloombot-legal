@@ -7,9 +7,14 @@
 
   function card(s) {
     const c = el("article", "strat");
+    c.id = "s-" + s.id;
     const top = el("div", "strat-top");
     top.append(el("span", "stag c-" + s.category, CATS[s.category] || s.category));
     if (s.created_at) top.append(el("span", "strat-date", BB.ago(s.created_at)));
+    const link = el("button", "strat-link", "Copy link");
+    link.type = "button";
+    link.onclick = () => BB.copy(location.origin + location.pathname + "#s-" + s.id, "Link to this strategy copied");
+    top.append(link);
     // Bot strategies often start with "# <emoji> Title": don't show the title twice.
     const lines = s.description.split("\n");
     const first = lines[0].match(/^#{1,3} (.+)$/);
@@ -46,10 +51,24 @@
   async function load() {
     const { data, error } = await BB.sb.from("strategies").select("*").order("id", { ascending: false }).limit(500);
     $("sloading").hidden = true;
-    if (error) { $("snone").hidden = false; $("snone").textContent = "Couldn't load strategies."; return; }
+    if (error) { $("sloading").hidden = true; $("snone").hidden = false; $("snone").textContent = "Couldn't load strategies."; return; }
     list = data || [];
     render();
+    focusHash();
   }
+  /* strategies.html#s-12 jumps to that strategy and opens it. */
+  function focusHash() {
+    const m = location.hash.match(/^#s-(\d+)$/);
+    if (!m) return;
+    if (!document.getElementById("s-" + m[1])) { cat = "all"; $("sq").value = ""; render(); }
+    const c = document.getElementById("s-" + m[1]);
+    if (!c) return;
+    const body = c.querySelector(".strat-body.clamp");
+    if (body) { body.classList.remove("clamp"); const b = c.querySelector(".more-btn"); if (b) b.textContent = "Show less"; }
+    c.scrollIntoView({ block: "center", behavior: "smooth" });
+    c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash");
+  }
+  addEventListener("hashchange", () => { if (list.length) focusHash(); });
 
   /* sharing */
   function counters() {

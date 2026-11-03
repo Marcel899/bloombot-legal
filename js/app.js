@@ -144,6 +144,33 @@
     .replace(/\*\*|__|~~|\|\||`/g, "").replace(/(^|[^\w])[*_](?=\S)|(?<=\S)[*_](?=[^\w]|$)/g, "$1")
     .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, "$1").replace(/[ \t]+/g, " ").trim();
 
+  /* Small message at the bottom of the screen. */
+  BB.toast = (text, kind = "ok") => {
+    let box = document.getElementById("toasts");
+    if (!box) { box = BB.el("div", "toasts"); box.id = "toasts"; box.setAttribute("role", "status"); document.body.append(box); }
+    const t = BB.el("div", "toast " + kind, text);
+    box.append(t);
+    setTimeout(() => t.classList.add("out"), 2600);
+    setTimeout(() => t.remove(), 3000);
+  };
+  BB.copy = async (text, done = "Copied!") => {
+    try { await navigator.clipboard.writeText(text); BB.toast(done); }
+    catch (e) { BB.toast("Couldn't copy. Select the text and copy it yourself.", "bad"); }
+  };
+  /* Watchlist: units you starred, kept in this browser only. */
+  const FKEY = "bb_watch";
+  BB.favs = {
+    all() { try { return new Set(JSON.parse(localStorage.getItem(FKEY) || "[]")); } catch (e) { return new Set(); } },
+    has(name) { return BB.favs.all().has(name); },
+    toggle(name) {
+      const f = BB.favs.all();
+      const on = !f.has(name);
+      if (on) f.add(name); else f.delete(name);
+      try { localStorage.setItem(FKEY, JSON.stringify([...f].slice(-100))); } catch (e) { /* blocked */ }
+      return on;
+    },
+  };
+
   /* An item's picture: the bot's emoji, then the value list's picture, then the flower. */
   BB.itemImg = (item, cls) => {
     const img = BB.el("img", cls);

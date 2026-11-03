@@ -2,7 +2,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const { el } = BB;
-  let items = [], cat = "all";
+  let items = [], cat = "all", favs = BB.favs.all();
   const RARITY_ORDER = ["leaderboard", "exclusive", "godly", "secret", "mythic", "legendary", "epic", "rare", "uncommon", "common", "item"];
   const cap = s => (s || "").replace(/\b\w/g, c => c.toUpperCase());
   const demandNum = d => { const m = String(d || "").match(/[\d.]+/); return m ? parseFloat(m[0]) : -1; };
@@ -24,6 +24,7 @@
     t.append(el("strong", null, it.name));
     if (it.rarity) t.append(el("span", "rar r-" + it.rarity.toLowerCase().replace(/\W/g, ""), cap(it.rarity)));
     top.append(t);
+    if (favs.has(it.name)) { const st = el("span", "vstar", "★"); st.title = "On your watchlist"; top.append(st); }
     const val = el("div", "vval");
     val.append(el("span", "vnum", it.est > 0 ? BB.fmt(it.est) : (it.value_text || "N/A")));
     if (it.oc) val.append(el("span", "oc", "O/C"));
@@ -39,7 +40,7 @@
 
   function render() {
     const q = $("vq").value.trim().toLowerCase(), r = $("vrar").value, sort = $("vsort").value;
-    let list = items.filter(it => (cat === "all" || it.category === cat) && (!r || (it.rarity || "").toLowerCase() === r) &&
+    let list = items.filter(it => (cat === "all" || it.category === cat || (cat === "fav" && favs.has(it.name))) && (!r || (it.rarity || "").toLowerCase() === r) &&
       (!q || it.name.toLowerCase().includes(q)));
     const by = {
       value: (a, b) => b.est - a.est,
@@ -52,6 +53,7 @@
     list.sort(by);
     $("vgrid").replaceChildren(...list.map(card));
     $("vnone").hidden = list.length > 0;
+    $("vnone").textContent = cat === "fav" && !favs.size ? "Your watchlist is empty. Open a unit and press Watch to add it." : "No unit matches that.";
     $("vcount").textContent = `${list.length} of ${items.length}`;
   }
 
@@ -89,22 +91,52 @@
     const acts = el("div", "vm-acts");
     const add = el("a", "brick green sm", "Add to trade calculator");
     add.href = "calculator.html#give=" + encodeURIComponent(it.name);
-    acts.append(add);
+    const star = el("button", "brick yellow sm");
+    star.type = "button";
+    const label = () => {
+      const i = el("img"); i.src = "img/wish_star.png"; i.alt = "";
+      star.replaceChildren(i, favs.has(it.name) ? "Watching" : "Watch");
+      star.classList.toggle("on", favs.has(it.name));
+    };
+    label();
+    star.onclick = () => {
+      const on = BB.favs.toggle(it.name);
+      favs = BB.favs.all();
+      label();
+      BB.toast(on ? it.name + " added to your watchlist" : it.name + " removed from your watchlist");
+      render();
+    };
+    const share = el("button", "brick dark sm", "Copy link");
+    share.type = "button";
+    share.onclick = () => BB.copy(location.origin + location.pathname + "#" + encodeURIComponent(it.name), "Link copied");
+    acts.append(add, star, share);
     body.append(head, stats, ch, changes, acts);
     m.hidden = false;
     document.body.classList.add("noscroll");
     $("vmclose").focus();
   }
-  function close() { $("vmodal").hidden = true; document.body.classList.remove("noscroll"); }
+  function close() {
+    $("vmodal").hidden = true;
+    document.body.classList.remove("noscroll");
+    if (location.hash && location.hash !== "#watchlist") history.replaceState(null, "", location.pathname);
+  }
+  function setCat(c) {
+    cat = c;
+    document.querySelectorAll(".chip[data-cat]").forEach(x => x.classList.toggle("on", x.dataset.cat === c));
+    render();
+  }
+  function fromHash() {
+    if (location.hash === "#watchlist") { setCat("fav"); return; }
+    const want = decodeURIComponent(location.hash.slice(1));
+    const hit = want && items.find(i => i.name === want);
+    if (hit) open(hit);
+  }
+  addEventListener("hashchange", () => { if (items.length) fromHash(); });
   $("vmclose").onclick = close;
   $("vmodal").onclick = e => { if (e.target.id === "vmodal") close(); };
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("vmodal").hidden) close(); });
 
-  document.querySelectorAll(".chip[data-cat]").forEach(b => b.onclick = () => {
-    cat = b.dataset.cat;
-    document.querySelectorAll(".chip[data-cat]").forEach(x => x.classList.toggle("on", x === b));
-    render();
-  });
+  document.querySelectorAll(".chip[data-cat]").forEach(b => b.onclick = () => setCat(b.dataset.cat));
   $("vq").oninput = render;
   $("vrar").onchange = render;
   $("vsort").onchange = render;
@@ -116,6 +148,7 @@
     try {
       items = await BB.loadValues();
     } catch (e) {
+      $("vloading").className = "loading";
       $("vloading").textContent = "Couldn't load values. Try again in a minute.";
       return;
     }
@@ -126,8 +159,6 @@
     const newest = items.map(i => i.updated_at).filter(Boolean).sort().pop();
     if (newest) $("vupdated").textContent = "Synced " + BB.ago(newest);
     render();
-    const want = decodeURIComponent(location.hash.slice(1));
-    const hit = want && items.find(i => i.name === want);
-    if (hit) open(hit);
+    fromHash();
   });
 })();
