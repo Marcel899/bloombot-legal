@@ -190,6 +190,11 @@ home = f"""<section class="hero big">
 </div>
 </section>
 <section class="cta-panel">
+<img src="img/shield.png" alt="">
+<div><h2>Run a Discord server?</h2><p>Set Bloombot's channels, pings and features from the server dashboard. No commands needed.</p></div>
+<a class="brick blue" href="dashboard.html">Open the dashboard</a>
+</section>
+<section class="cta-panel">
 <img src="img/envelope.png" alt="">
 <div><h2>Need help or want your data removed?</h2><p>Ask the team in the support server. We answer data requests within 30 days.</p></div>
 <a class="brick red" href="{SUPPORT}">Join the support server</a>
@@ -353,6 +358,7 @@ values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and game
 <div class="vinfo"><span id="vcount"></span><span id="vupdated"></span></div>
 <div class="skel-grid sk-vals" id="vloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="vgrid" id="vgrid"></div>
+<button class="brick dark more-btn" type="button" id="vmore" hidden>Show more</button>
 <p class="empty" id="vnone" hidden>No unit matches that.</p>
 <p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
 </main>

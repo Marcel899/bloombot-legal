@@ -38,6 +38,8 @@
     return c;
   }
 
+  const PAGE = 60;
+  let shown = PAGE, lastKey = "";
   function render() {
     const q = $("vq").value.trim().toLowerCase(), r = $("vrar").value, sort = $("vsort").value;
     let list = items.filter(it => (cat === "all" || it.category === cat || (cat === "fav" && favs.has(it.name))) && (!r || (it.rarity || "").toLowerCase() === r) &&
@@ -51,7 +53,13 @@
       down: (a, b) => (a.change_30d ?? 1e9) - (b.change_30d ?? 1e9),
     }[sort];
     list.sort(by);
-    $("vgrid").replaceChildren(...list.map(card));
+    const key = [q, r, sort, cat].join("|");
+    if (key !== lastKey) { shown = PAGE; lastKey = key; }
+    $("vgrid").replaceChildren(...list.slice(0, shown).map(card));
+    const more = $("vmore");
+    more.hidden = list.length <= shown;
+    more.textContent = `Show more (${list.length - shown} left)`;
+    more.onclick = () => { shown += PAGE; render(); };
     $("vnone").hidden = list.length > 0;
     $("vnone").textContent = cat === "fav" && !favs.size ? "Your watchlist is empty. Open a unit and press Watch to add it." : "No unit matches that.";
     $("vcount").textContent = `${list.length} of ${items.length}`;
