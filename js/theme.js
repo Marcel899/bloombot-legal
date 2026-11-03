@@ -36,3 +36,20 @@
     });
   });
 })();
+/* Prefetch same-site pages on hover / touch so clicks open instantly (works in Firefox too). */
+(function () {
+  var done = {};
+  function go(e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || a.origin !== location.origin || a.target === "_blank") return;
+    var u = a.pathname;
+    if (!/\.html$|\/$/.test(u) || u === location.pathname || done[u]) return;
+    done[u] = 1;
+    var l = document.createElement("link");
+    l.rel = "prefetch"; l.href = u; l.as = "document";
+    document.head.appendChild(l);
+  }
+  document.addEventListener("mouseover", go, { passive: true });
+  document.addEventListener("touchstart", go, { passive: true });
+  document.addEventListener("focusin", go);
+})();
