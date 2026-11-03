@@ -15,16 +15,19 @@
     ["reports", "User Reports", "Let members report users with /report."],
     ["value_updates", "Value Updates", "Announce value changes."],
   ];
-  let guilds = [], cur = null, busy = false, started = false;
+  let guilds = [], cur = null, busy = false, started = false, me = null;
 
   function icon(g, cls) {
     if (g.icon) { const i = el("img", cls); i.alt = ""; i.src = BB.safeUrl(g.icon) || "img/flower.png"; i.onerror = () => { i.src = "img/flower.png"; }; return i; }
     return el("span", cls + " letter", (g.name || "?").trim().charAt(0).toUpperCase());
   }
 
+  let filter = "";
   function list() {
     const box = $("dglist");
-    box.replaceChildren(...guilds.map(g => {
+    const q = $("dgq");
+    if (q) { q.hidden = guilds.length < 6; q.oninput = () => { filter = q.value.trim().toLowerCase(); list(); }; }
+    box.replaceChildren(...guilds.filter(g => !filter || g.name.toLowerCase().includes(filter)).map(g => {
       const b = el("button", "dg" + (cur && cur.guild_id === g.guild_id ? " on" : ""));
       b.type = "button";
       const t = el("span", "dg-t");
@@ -45,13 +48,15 @@
   async function send(action, slot, value, ctrl) {
     if (busy) { BB.toast("Wait for the last change to finish"); return; }
     busy = true;
+    const row = ctrl && ctrl.closest(".drow");
+    if (row) row.classList.add("saving");
     document.querySelectorAll("#dpanel select, #dpanel button.sw, #dpanel .dclear").forEach(x => { x.disabled = true; });
     status("Saving…", "wait");
     let data, error;
     try { ({ data, error } = await BB.sb.from("dash_updates").insert({ guild_id: cur.guild_id, action, slot, value }).select("id").single()); }
     catch (err) { error = { message: (err && err.message) || "network error" }; }
     const done = (msg, kind) => { busy = false; status(msg, kind); reload(); };
-    if (error) { done(/row-level|violates/i.test(error.message) ? "You can't change this server, or too many changes are waiting." : "Couldn't save: " + error.message, "bad"); return; }
+    if (error) { done(/row-level|violates/i.test(error.message) ? "Not allowed. You may have lost admin in this server, or you made too many changes. Wait a few minutes." : "Couldn't save: " + error.message, "bad"); return; }
     const t0 = Date.now();
     const poll = async () => {
       let r = null;
@@ -93,7 +98,27 @@
     const ht = el("div");
     ht.append(el("h2", null, cur.name), el("p", "hint", "Synced " + BB.ago(cur.updated_at) + ". Changes apply in a few seconds."));
     head.append(icon(cur, "dh-ic"), ht);
+    const open = el("a", "brick dark sm dopen", "Open in Discord");
+    open.href = "https://discord.com/channels/" + cur.guild_id; open.target = "_blank"; open.rel = "noopener";
+    head.append(open);
     p.append(head);
+    const setCount = SLOTS.filter(([k]) => chans[k] && chans[k].id && !chans[k].missing).length;
+    const onCount = FEATURES.filter(([k]) => feats[k] !== false).length;
+    const ov = el("div", "dov");
+    const chip = (ok, text) => el("span", "dchip " + (ok ? "good" : "warn"), (ok ? "✓ " : "! ") + text);
+    ov.append(chip(cur.setup_complete, cur.setup_complete ? "Set up" : "Needs /setup"),
+      chip(setCount > 0, `${setCount}/${SLOTS.length} channels set`),
+      chip(true, `${onCount}/${FEATURES.length} features on`));
+    p.append(ov);
+    const bp = cfg.bot_perms;
+    if (bp && !bp.administrator) {
+      const miss = [["manage_webhooks", "Manage Webhooks"], ["send_messages", "Send Messages"], ["embed_links", "Embed Links"]].filter(([k]) => !bp[k]).map(x => x[1]);
+      if (miss.length) {
+        const w = el("div", "dwarn");
+        w.append(el("strong", null, "Bloombot is missing permissions"), el("span", null, "Give its role: " + miss.join(", ") + ". Some features won't work without them."));
+        p.append(w);
+      }
+    }
     if (!cur.setup_complete) {
       const w = el("div", "dwarn");
       w.append(el("strong", null, "Run /setup in Discord first"), el("span", null, "Bloombot needs its first setup before most settings work. You can still pick channels here."));
@@ -116,12 +141,12 @@
       const ctl = el("div", "dctl");
       const s = channelSelect(cur, v.missing ? "" : v.id, webhook);
       s.setAttribute("aria-label", label + " channel");
-      s.onchange = () => { if (s.value) send("channel", slot, s.value); else if (!required) send("clear_channel", slot, null); else { s.value = v.id || ""; BB.toast(label + " is required"); } };
+      s.onchange = () => { if (s.value) send("channel", slot, s.value, s); else if (!required) send("clear_channel", slot, null, s); else { s.value = v.id || ""; BB.toast(label + " is required"); } };
       ctl.append(s);
       if (!required && v.id) {
         const x = el("button", "brick dark sm dclear", "Clear");
         x.type = "button";
-        x.onclick = () => send("clear_channel", slot, null);
+        x.onclick = () => send("clear_channel", slot, null, x);
         ctl.append(x);
       }
       row.append(t, ctl);
@@ -139,7 +164,7 @@
     const no = el("option", null, "No ping"); no.value = ""; rsel.append(no);
     for (const r of cur.roles || []) { const o = el("option", null, "@" + r.name); o.value = r.id; rsel.append(o); }
     rsel.value = (cfg.role && cfg.role.id) || "";
-    rsel.onchange = () => send(rsel.value ? "role" : "clear_role", null, rsel.value || null);
+    rsel.onchange = () => send(rsel.value ? "role" : "clear_role", null, rsel.value || null, rsel);
     const rc = el("div", "dctl"); rc.append(rsel);
     row.append(t, rc);
     rs.append(row);
@@ -158,7 +183,7 @@
       sw.setAttribute("aria-checked", String(on));
       sw.setAttribute("aria-label", label);
       sw.append(el("i"));
-      sw.onclick = () => { sw.classList.toggle("on"); send("feature", key, on ? "off" : "on"); };
+      sw.onclick = () => { sw.classList.toggle("on"); send("feature", key, on ? "off" : "on", sw); };
       const fc = el("div", "dctl"); fc.append(sw);
       r.append(ft, fc);
       fs.append(r);
@@ -166,6 +191,28 @@
     const st = el("p", "post-status", "");
     st.id = "dstatus"; st.hidden = true;
     p.append(st);
+    const hs = sec("Recent changes", "clock");
+    const hl = el("div", "dhist"); hl.append(el("p", "hint", "Loading…"));
+    hs.append(hl);
+    history(cur.guild_id, hl);
+  }
+
+  async function history(gid, box) {
+    let data = null;
+    try { ({ data } = await BB.sb.from("dash_updates").select("*").eq("guild_id", gid).order("id", { ascending: false }).limit(8)); } catch (e) { /* offline */ }
+    if (!cur || cur.guild_id !== gid) return;
+    box.replaceChildren();
+    if (!data || !data.length) { box.append(el("p", "hint", "No website changes yet. Changes made here show up in this list and in your Moderation Log.")); return; }
+    for (const r of data) {
+      const row = el("div", "dh " + (r.status || ""));
+      const icon = r.status === "posted" ? "✓" : r.status === "rejected" ? "✕" : "…";
+      row.append(el("span", "dh-i", icon));
+      const t = el("div");
+      t.append(el("strong", null, r.reason || (r.status === "pending" || r.status === "processing" ? "Waiting for Bloombot…" : r.action)),
+        el("span", null, (r.actor_name || (r.discord_id === me ? "You" : "An admin")) + " · " + BB.ago(r.created_at)));
+      row.append(t);
+      box.append(row);
+    }
   }
 
   function pick() {
@@ -193,6 +240,7 @@
   BB.onAuth(session => {
     if (!session) { $("dloading").hidden = true; $("dlogin").hidden = false; $("dmain").hidden = true; $("dempty").hidden = true; return; }
     $("dlogin").hidden = true;
+    me = BB.user(session).id;
     if (started) return;
     started = true;
     reload();

@@ -468,7 +468,7 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 <a class="brick discord" href="{INVITE}">{DISCORD_SVG}Add Bloombot to a server</a>
 </section>
 <div class="dgrid" id="dmain" hidden>
-<aside class="dside"><h3>Your servers</h3><div id="dglist"></div><a class="dadd" href="{INVITE}">+ Add to another server</a></aside>
+<aside class="dside"><h3>Your servers</h3><input class="search dgq" id="dgq" placeholder="Find a server…" hidden aria-label="Find a server"><div id="dglist"></div><a class="dadd" href="{INVITE}">+ Add to another server</a></aside>
 <div><p class="panel dpick" id="dpick" hidden>Pick a server to change its settings.</p><section class="panel dpanel" id="dpanel" hidden></section></div>
 </div>
 </main>
