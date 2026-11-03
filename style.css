@@ -1404,3 +1404,10 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 .nl:hover img{transform:none}
 @media (prefers-reduced-motion:reduce){.nl img{animation:none!important}}
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;z-index:500;pointer-events:none}
+
+/* nav icons: clean hover (smooth lift, no keyframes) */
+@media (hover:hover){
+  .nl:hover img,.nl.on:hover img{animation:none}
+  .nl img{transition:transform .25s cubic-bezier(.2,.8,.2,1),filter .25s}
+  .nl:hover img{transform:translateY(-2px) scale(1.1);filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
+}
