@@ -1451,3 +1451,6 @@ body{background:
 .brick.more-btn[hidden]{display:none}
 .totop img{width:24px;height:24px;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 @media (hover:hover){.totop:hover img{transform:translateY(-3px)}}
+/* back-to-top moves left while the giveaway bubble is in the bottom right */
+body:has(.gw) .totop{right:auto;left:20px}
+@media (max-width:600px){body:has(.gw) .totop{left:14px}}

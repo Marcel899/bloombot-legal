@@ -118,7 +118,7 @@
     if (min) {
       const b = el("button", "brick purple gw-pill");
       b.type = "button";
-      const i = el("img"); i.src = "img/gem.png"; i.alt = "";
+      const i = el("img"); i.src = "img/gift.png"; i.alt = "";
       b.append(i, el("span", null, "Giveaway"), el("em", "gw-cd", left(g.ends_at)));
       b.onclick = () => { store("bb_gw_min_" + g.id, "0"); render(); };
       root.append(b);
@@ -132,8 +132,8 @@
     x.onclick = () => { store("bb_gw_min_" + g.id, "1"); render(); };
     top.append(x);
     const head = el("div", "gw-head");
-    const pic = el("img", "gw-pic"); pic.alt = ""; pic.src = BB.safeUrl(g.image_url) || "img/gem.png";
-    pic.onerror = () => { pic.src = "img/gem.png"; };
+    const pic = el("img", "gw-pic"); pic.alt = ""; pic.src = BB.safeUrl(g.image_url) || "img/gift.png";
+    pic.onerror = () => { pic.src = "img/gift.png"; };
     const ht = el("div");
     const meta = el("div", "gw-meta");
     const done = TASKS.filter(t => mine.has(g.id + ":" + t.key));
