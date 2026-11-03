@@ -1385,3 +1385,7 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 }
 .nl img{width:20px;height:20px}
 .nl:hover img{transform:translateY(-1px) scale(1.08)}
+@media (min-width:1181px){
+  .links{align-items:center;height:44px;box-sizing:border-box;flex:none}
+  .bar .links .nl{height:34px;padding:0 12px;box-sizing:border-box;display:inline-flex;align-items:center;line-height:1;transform:none}
+}
