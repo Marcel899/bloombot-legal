@@ -1439,8 +1439,4 @@ body{background:
   url(img/studs-bg.png) 0 0/128px 128px,var(--bg);
   background-attachment:scroll,scroll,fixed,scroll,fixed}
 
-/* smooth page-to-page transition (Chrome/Edge/Safari), top bar stays put */
-@view-transition{navigation:auto}
-.topbar .bar{view-transition-name:topbar}
-::view-transition-old(root),::view-transition-new(root){animation-duration:.18s}
-@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
