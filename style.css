@@ -579,7 +579,6 @@ select:focus,.search:focus,textarea:focus{border-color:#174b63;box-shadow:0 0 0 
 .share .search{flex:none}
 .nl{white-space:nowrap}
 .wide{display:none}
-@media (max-width:1100px) and (min-width:1001px){.nl img{display:none}.nl{padding:8px 10px}}
 
 /* ── round 4: Discord formatting, trader accounts ───────────── */
 .mv-cols .panel+.panel{margin-top:0}
@@ -625,7 +624,7 @@ span.acc{opacity:.6}
 .qs-btn:hover,.qs-btn:focus-visible{background:#2b3040;color:var(--text)}
 .qs-btn svg{width:17px;height:17px}
 .qs-btn kbd{font:700 .72rem ui-monospace,Consolas,monospace;padding:2px 6px;border-radius:5px;background:#14171d;border:1px solid #333948;color:var(--muted)}
-@media (max-width:1300px){.qs-btn span,.qs-btn kbd{display:none}.qs-btn{padding:0 10px}}
+@media (max-width:1440px){.qs-btn span,.qs-btn kbd{display:none}.qs-btn{padding:0;width:38px;justify-content:center}}
 .qs-wrap{position:fixed;inset:0;z-index:200;background:rgba(6,8,12,.66);backdrop-filter:blur(4px);display:flex;justify-content:center;align-items:flex-start;padding:12vh 16px 16px}
 .qs-wrap[hidden]{display:none}
 .qs-box{width:100%;max-width:620px;max-height:72vh;display:flex;flex-direction:column;background:var(--card);border:3px solid #0c0e12;border-radius:16px;box-shadow:0 30px 60px -20px rgba(0,0,0,.9);overflow:hidden;animation:pop .14s ease-out}
@@ -679,3 +678,63 @@ span.acc{opacity:.6}
 .strat-link:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .vm-acts .brick img{width:20px;height:20px}
 .share-btns{align-items:center}
+
+/* ── round 6: top bar fits every width, phone pass ─────────── */
+.topbar .wrap.bar{max-width:1220px}
+.bar{display:flex;align-items:center;min-width:0}
+.mini{flex:none}
+.qs-btn:focus:not(:focus-visible){outline:none}
+.qs-btn:focus-visible{outline:2px solid #14aeea;outline-offset:2px}
+@media (max-width:1180px){
+  .burger{display:flex}
+  .bar .links{position:absolute;left:0;right:0;top:calc(100% + 8px);margin:0;flex-direction:column;align-items:stretch;gap:4px;padding:8px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:#191c24;box-shadow:0 20px 40px -12px rgba(0,0,0,.8);opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .15s,transform .15s}
+  .bar .links.open{opacity:1;transform:none;pointer-events:auto}
+  .nl{padding:12px 14px;font-size:1rem}
+  .nl img{display:inline-block}
+  .nl.on::after{left:0;right:auto;top:10px;bottom:10px;width:3px;height:auto}
+  .right{margin-left:auto;border-left:0;padding-left:0}
+  .qs-btn span,.qs-btn kbd{display:inline}
+  .qs-btn{width:auto;padding:0 10px 0 12px}
+}
+@media (max-width:700px){
+  .qs-btn span,.qs-btn kbd{display:none}
+  .qs-btn{width:38px;padding:0;justify-content:center}
+  .me-name,.caret{display:none}
+  .brick.nb.add span{display:none}
+}
+@media (max-width:600px){
+  .bar{width:calc(100% - 16px);margin-top:8px;padding:0 6px 0 8px;gap:6px}
+  .right{gap:6px}
+  .qs-btn,.burger{width:40px;height:40px}
+  .brick.nb{height:40px}
+  .hero{padding-top:96px}
+  .hero .sub{font-size:1rem}
+  .title-art{max-width:86vw;height:auto}
+  .board-bar,.filters{gap:10px}
+  .board-bar .search,.filters .search{flex:1 1 100%}
+  .board-bar select,.filters select{flex:1 1 calc(50% - 5px);min-width:0}
+  .quick{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+  .quick::-webkit-scrollbar{display:none}
+  .quick .chip{flex:none}
+  .modal-box{max-height:92vh;overflow-y:auto;padding:22px 16px}
+  .vm-acts{flex-wrap:wrap}
+  .vm-acts .brick{flex:1 1 auto;justify-content:center}
+  .post-row{flex-direction:column}
+  .post-row .brick{width:100%}
+  .post-foot{flex-wrap:wrap;gap:8px}
+  .share-btns{flex-wrap:wrap;justify-content:center}
+  .qs-box{max-height:80vh}
+  .toasts{bottom:16px}
+  input,select,textarea,.search{font-size:16px!important}
+}
+.wl{grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr))}
+.mv-cols,.hs-list,.stats{min-width:0}
+.mv-cols>*,.hs-list>*,.stats>*{min-width:0}
+@media (max-width:1000px){.cgrid{grid-template-columns:minmax(0,1fr)}.cgrid>*{min-width:0}}
+@media (max-width:900px){.mv-cols,.hs-list{grid-template-columns:minmax(0,1fr)}}
+.vcard{min-width:0}
+.vtitle{min-width:0}
+.vtitle strong{overflow-wrap:anywhere}
+.rar{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+@media (max-width:380px){.vgrid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:600px){.quick>span{flex:none;white-space:nowrap}}
