@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bloombot Trade Ads</title>
-<meta name="description" content="Browse every live Bloombot trade ad for Garden Tower Defense. Log in with Discord.">
+<meta name="description" content="Browse and post Bloombot trade ads for Garden Tower Defense. Log in with Discord.">
 <meta property="og:title" content="Bloombot Trade Ads">
-<meta property="og:description" content="Browse every live Bloombot trade ad for Garden Tower Defense. Log in with Discord.">
+<meta property="og:description" content="Browse and post Bloombot trade ads for Garden Tower Defense. Log in with Discord.">
 <meta property="og:image" content="https://bloombot-gtd.vercel.app/img/garden.jpg">
 <meta property="og:url" content="https://bloombot-gtd.vercel.app/trades.html">
 <meta property="og:type" content="website">
@@ -20,7 +20,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5b1897a3">
+<link rel="stylesheet" href="style.css?v=ff53a4d0">
+<script>window.BB_CONF={url:"https://rkzgsndfzzgezoltddvx.supabase.co",key:"sb_publishable_CfTjHiYYCGqLZMlgpiKN-Q_m7JNITb5"}</script>
+<script defer src="js/supabase.js?v=2.45.4"></script>
+<script defer src="js/app.js?v=4fa6240a"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -28,100 +31,54 @@
 <header class="topbar">
 <div class="wrap bar">
 <a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
-<nav>
-<a class="brick nb dark" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a>
-<a class="brick nb purple" href="trades.html"><img src="img/swap.png" alt=""><span>Trade ads</span></a>
-<a class="brick nb dark hide-sm" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt=""><span>Support</span></a>
+<nav class="links" id="links"><a class="nl" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl on g-purple" href="trades.html"><img src="img/swap.png" alt=""><span>Trade ads</span></a><a class="nl" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a></nav>
+<div class="right">
 <a class="brick nb discord add" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg><span>Add</span></a>
-</nav>
+<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login><svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg><span>Log in</span></button></div>
+<button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div>
 </div>
 </header>
 <section class="hero">
 <div class="wrap hero-in">
 <h1 class="stud-title"><img class="hero-icon" src="img/swap.png" alt=""><img class="title-art" src="img/t_trades.png" alt="Trade ads"></h1>
-<p class="sub">Every live Bloombot trade ad, from every server. Log in with Discord to see them.</p>
+<p class="sub">Every live Bloombot trade ad, from every server. Post your own right here.</p>
 </div>
 </section>
 <main class="wrap trades" id="main">
 <section class="panel login" id="login" hidden>
 <img class="login-icon" src="img/swap.png" alt="">
 <h2>Log in to see trade ads</h2>
-<p>Trade ads are only shown to Discord users. We only use your Discord account to log you in. We never post for you.</p>
-<button class="brick discord" id="loginbtn" type="button"><svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Log in with Discord</button>
+<p>Trade ads are only shown to Discord users. We use your Discord account only to log you in.</p>
+<button class="brick discord" type="button" data-login><svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Log in with Discord</button>
 <p class="err" id="loginerr" hidden></p>
 </section>
 <section id="board" hidden>
-<div class="board-bar panel">
-<div class="me"><img id="meav" alt=""><div><strong id="mename"></strong><span id="count"></span></div></div>
+<form class="panel post" id="postform">
+<div class="post-head"><img id="meav" alt=""><div><strong>Post a trade ad as <span id="mename"></span></strong><span>It goes to every server running Bloombot, just like posting in a trade ad channel.</span></div></div>
+<div class="post-row" id="post">
+<textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad"></textarea>
+<button class="brick green" id="postbtn" type="submit">Post ad</button>
+</div>
+<div class="post-foot"><span class="hint">7 to 200 characters, no links, one ad every 5 minutes. You need a linked account (<code>/link</code> in Discord).</span><span id="adcount" class="count">0/200</span></div>
+<p class="post-status" id="poststatus" hidden></p>
+</form>
+<div class="board-bar">
 <input class="search" id="adq" type="search" placeholder="Search units or traders…" aria-label="Search trade ads">
-<label class="mine"><input type="checkbox" id="mine"> My ads</label>
-<button class="brick dark sm" id="logout" type="button">Log out</button>
+<label class="mine"><input type="checkbox" id="mine"> Only my ads</label>
+<span class="count-pill" id="count"></span>
 </div>
 <div class="ads" id="ads"></div>
 <p class="empty" id="adsnone" hidden>No trade ads right now.</p>
 </section>
 <p class="loading" id="loading">Loading…</p>
 </main>
-<script src="js/supabase.js?v=2.45.4"></script>
-<script>
-(()=>{
-const sb=supabase.createClient("https://rkzgsndfzzgezoltddvx.supabase.co","sb_publishable_CfTjHiYYCGqLZMlgpiKN-Q_m7JNITb5");
-const $=id=>document.getElementById(id);
-let ads=[],me=null;
-const safe=u=>typeof u==="string"&&/^https:\/\//.test(u)?u:null;
-const ago=t=>{const s=(Date.now()-new Date(t))/1000;if(!(s>=0))return"";if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"};
-function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
-function card(a){
-  const c=el("article","ad");
-  const head=el("div","ad-head");
-  const av=el("img","ad-av");av.alt="";av.src=safe(a.discord_avatar)||"img/flower.png";av.onerror=()=>{av.src="img/flower.png"};
-  const who=el("div","ad-who");who.append(el("strong",null,a.discord_name||"Trader"),el("span",null,ago(a.created_at)));
-  head.append(av,who);c.append(head,el("p","ad-text",a.content));
-  const img=safe(a.image_url);
-  if(img){const i=el("img","ad-img");i.alt="Trade ad picture";i.loading="lazy";i.src=img;i.onerror=()=>i.remove();c.append(i)}
-  const links=el("div","ad-links");
-  if(/^\d+$/.test(a.discord_id)){const d=el("a","brick discord sm","Message");d.href="https://discord.com/users/"+a.discord_id;d.target="_blank";d.rel="noopener";links.append(d)}
-  const r=safe(a.roblox_url);
-  if(r){const b=el("a","brick dark sm","Roblox: "+(a.roblox_name||"profile"));b.href=r;b.target="_blank";b.rel="noopener";links.append(b)}
-  c.append(links);return c;
-}
-function render(){
-  const v=$("adq").value.trim().toLowerCase(),mine=$("mine").checked,now=Date.now();
-  const list=ads.filter(a=>(!a.expires_at||new Date(a.expires_at)>now)&&(!mine||a.discord_id===me)&&(!v||(a.content+" "+(a.discord_name||"")+" "+(a.roblox_name||"")).toLowerCase().includes(v)));
-  $("ads").replaceChildren(...list.map(card));
-  $("adsnone").hidden=list.length>0;
-  $("adsnone").textContent=ads.length?"No trade ad matches that.":"No trade ads right now.";
-  $("count").textContent=list.length+" live trade ad"+(list.length===1?"":"s");
-}
-async function load(){
-  const {data,error}=await sb.from("trade_ads").select("*").order("created_at",{ascending:false}).limit(1000);
-  if(error){$("adsnone").hidden=false;$("adsnone").textContent="Couldn't load trade ads. Try again in a minute.";return}
-  ads=data||[];render();
-}
-async function show(session){
-  $("loading").hidden=true;
-  if(!session){$("login").hidden=false;$("board").hidden=true;return}
-  const m=session.user.user_metadata||{};
-  me=m.provider_id||m.sub||null;
-  $("mename").textContent=m.full_name||m.custom_claims?.global_name||m.name||"Discord user";
-  const av=safe(m.avatar_url);if(av)$("meav").src=av;else $("meav").src="img/flower.png";
-  $("login").hidden=true;$("board").hidden=false;await load();
-}
-$("loginbtn").onclick=()=>sb.auth.signInWithOAuth({provider:"discord",options:{redirectTo:location.origin+location.pathname,scopes:"identify"}});
-$("logout").onclick=async()=>{await sb.auth.signOut();show(null)};
-$("adq").oninput=render;$("mine").onchange=render;
-const p=new URLSearchParams(location.hash.slice(1)+"&"+location.search.slice(1));
-if(p.get("error_description")){$("loginerr").hidden=false;$("loginerr").textContent="Login failed: "+p.get("error_description")}
-sb.auth.getSession().then(({data})=>show(data.session));
-sb.auth.onAuthStateChange((ev,s)=>{if(ev==="SIGNED_IN")show(s)});
-setInterval(()=>{if(!$("board").hidden)load()},60000);
-})();
-</script>
+<script defer src="js/trades.js?v=077f5c7d"></script>
 <footer>
 <div class="grass"></div>
 <div class="wrap foot">
 <div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
-<nav><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="trades.html">Trade ads</a><a href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="https://discord.gg/tGuXfcJxwf">Support server</a></nav>
+<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="features.html">Features &amp; commands</a><a href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="https://discord.gg/tGuXfcJxwf">Support server</a></nav>
 <p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
 </div>
 </footer>

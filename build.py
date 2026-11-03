@@ -37,6 +37,9 @@ HEAD = """<!doctype html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v={ver}">
+<script>window.BB_CONF={{url:"{sburl}",key:"{sbkey}"}}</script>
+<script defer src="js/supabase.js?v=2.45.4"></script>
+<script defer src="js/app.js?v={appver}"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -44,12 +47,12 @@ HEAD = """<!doctype html>
 <header class="topbar">
 <div class="wrap bar">
 <a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
-<nav>
-<a class="brick nb {fc}" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a>
-<a class="brick nb {ac}" href="trades.html"><img src="img/swap.png" alt=""><span>Trade ads</span></a>
-<a class="brick nb dark hide-sm" href="{support}"><img src="img/envelope.png" alt=""><span>Support</span></a>
+<nav class="links" id="links">{nav}</nav>
+<div class="right">
 <a class="brick nb discord add" href="{invite}">{dsvg}<span>Add</span></a>
-</nav>
+<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login>{dsvg}<span>Log in</span></button></div>
+<button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div>
 </div>
 </header>
 """
@@ -58,7 +61,7 @@ FOOT = """<footer>
 <div class="grass"></div>
 <div class="wrap foot">
 <div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
-<nav><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="trades.html">Trade ads</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
+<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="features.html">Features &amp; commands</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
 <p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
 </div>
 </footer>
@@ -71,10 +74,22 @@ FOOT = """<footer>
 """
 
 
+NAV = [
+    ("v", "values.html", "dollar", "Values", "blue"),
+    ("c", "calculator.html", "calculator", "Calculator", "green"),
+    ("a", "trades.html", "swap", "Trade ads", "purple"),
+    ("f", "features.html", "gem", "Features", "yellow"),
+]
+APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
+
+
 def page(title, desc, body, cur="", path=""):
+    nav = "".join(
+        f'<a class="nl{" on g-" + color if key == cur else ""}" href="{href}"><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
+        for key, href, icon, label, color in NAV)
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
-                        invite=INVITE, dsvg=DISCORD_SVG,
-                        fc="yellow" if cur == "f" else "dark", ac="purple" if cur == "a" else "dark")
+                        invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
+                        appver=APPVER)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE))
 
 
@@ -130,21 +145,22 @@ doc("intents", "gear", "How Bloombot uses intents", "How Bloombot uses the Messa
     "Bloombot Intent Use Cases", "Screenshots showing how Bloombot uses the Message Content and Server Members intents.", "", "t_intents")
 
 FEATURES = [
-    ("swap", "Global trade ads", "Post once and your ad reaches every server running Bloombot."),
-    ("rise", "Live values", "Unit values, demand and trends, updated from the community lists."),
-    ("scale", "Trade checks", "See right away if a trade is a win, fair, or a loss."),
-    ("wish_star", "Wishlists", "Get a DM the moment someone offers a unit you want."),
+    ("swap", "Global trade ads", "Post once and your ad reaches every server running Bloombot. Browse them all here.", "trades.html"),
+    ("dollar", "Live values", "Every unit's value, demand and 30-day trend, with price charts.", "values.html"),
+    ("calculator", "Trade calculator", "See right away if a trade is a win, fair, or a loss.", "calculator.html"),
+    ("gem", "All features", "Wishlists, value alerts, DPS ranking, levels, giveaways and more.", "features.html"),
 ]
 TILE_COLORS = ["green", "blue", "yellow", "purple"]
-tiles = "".join(f'<div class="tile"><div class="weld g-{c}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div><p>{p}</p></div>' for (i, h, p), c in zip(FEATURES, TILE_COLORS))
+tiles = "".join(f'<a class="tile tlink" href="{u}"><div class="weld g-{c}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div><p>{p}</p><span class="more">Open &rarr;</span></a>' for (i, h, p, u), c in zip(FEATURES, TILE_COLORS))
 home = f"""<section class="hero big">
 <div class="wrap hero-in">
 <div class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.png" alt="Bloombot"></div>
 <p class="sub">The trading bot for Roblox Garden Tower Defense.</p>
 <div class="ctas">
 <a class="brick discord big-cta" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
-<a class="brick yellow" href="features.html"><img src="img/gem.png" alt="">Features &amp; commands</a>
-<a class="brick purple" href="trades.html"><img src="img/swap.png" alt="">Browse trade ads</a>
+<a class="brick blue" href="values.html"><img src="img/dollar.png" alt="">Values</a>
+<a class="brick green" href="calculator.html"><img src="img/calculator.png" alt="">Trade calculator</a>
+<a class="brick purple" href="trades.html"><img src="img/swap.png" alt="">Trade ads</a>
 </div>
 <p class="legal-links"><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p>
 </div>
@@ -259,83 +275,86 @@ none.hidden=!!any}});}})();
 open("features.html", "w").write(page("Bloombot Features and Commands", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
-trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from every server. Log in with Discord to see them.", "t_trades") + f"""<main class="wrap trades" id="main">
+JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc")}
+trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from every server. Post your own right here.", "t_trades") + f"""<main class="wrap trades" id="main">
 <section class="panel login" id="login" hidden>
 <img class="login-icon" src="img/swap.png" alt="">
 <h2>Log in to see trade ads</h2>
-<p>Trade ads are only shown to Discord users. We only use your Discord account to log you in. We never post for you.</p>
-<button class="brick discord" id="loginbtn" type="button">{DISCORD_SVG}Log in with Discord</button>
+<p>Trade ads are only shown to Discord users. We use your Discord account only to log you in.</p>
+<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
 <p class="err" id="loginerr" hidden></p>
 </section>
 <section id="board" hidden>
-<div class="board-bar panel">
-<div class="me"><img id="meav" alt=""><div><strong id="mename"></strong><span id="count"></span></div></div>
+<form class="panel post" id="postform">
+<div class="post-head"><img id="meav" alt=""><div><strong>Post a trade ad as <span id="mename"></span></strong><span>It goes to every server running Bloombot, just like posting in a trade ad channel.</span></div></div>
+<div class="post-row" id="post">
+<textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad"></textarea>
+<button class="brick green" id="postbtn" type="submit">Post ad</button>
+</div>
+<div class="post-foot"><span class="hint">7 to 200 characters, no links, one ad every 5 minutes. You need a linked account (<code>/link</code> in Discord).</span><span id="adcount" class="count">0/200</span></div>
+<p class="post-status" id="poststatus" hidden></p>
+</form>
+<div class="board-bar">
 <input class="search" id="adq" type="search" placeholder="Search units or traders…" aria-label="Search trade ads">
-<label class="mine"><input type="checkbox" id="mine"> My ads</label>
-<button class="brick dark sm" id="logout" type="button">Log out</button>
+<label class="mine"><input type="checkbox" id="mine"> Only my ads</label>
+<span class="count-pill" id="count"></span>
 </div>
 <div class="ads" id="ads"></div>
 <p class="empty" id="adsnone" hidden>No trade ads right now.</p>
 </section>
 <p class="loading" id="loading">Loading…</p>
 </main>
-<script src="js/supabase.js?v=2.45.4"></script>
-<script>
-(()=>{{
-const sb=supabase.createClient("{SUPABASE_URL}","{SUPABASE_KEY}");
-const $=id=>document.getElementById(id);
-let ads=[],me=null;
-const safe=u=>typeof u==="string"&&/^https:\\/\\//.test(u)?u:null;
-const ago=t=>{{const s=(Date.now()-new Date(t))/1000;if(!(s>=0))return"";if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}};
-function el(tag,cls,text){{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}}
-function card(a){{
-  const c=el("article","ad");
-  const head=el("div","ad-head");
-  const av=el("img","ad-av");av.alt="";av.src=safe(a.discord_avatar)||"img/flower.png";av.onerror=()=>{{av.src="img/flower.png"}};
-  const who=el("div","ad-who");who.append(el("strong",null,a.discord_name||"Trader"),el("span",null,ago(a.created_at)));
-  head.append(av,who);c.append(head,el("p","ad-text",a.content));
-  const img=safe(a.image_url);
-  if(img){{const i=el("img","ad-img");i.alt="Trade ad picture";i.loading="lazy";i.src=img;i.onerror=()=>i.remove();c.append(i)}}
-  const links=el("div","ad-links");
-  if(/^\\d+$/.test(a.discord_id)){{const d=el("a","brick discord sm","Message");d.href="https://discord.com/users/"+a.discord_id;d.target="_blank";d.rel="noopener";links.append(d)}}
-  const r=safe(a.roblox_url);
-  if(r){{const b=el("a","brick dark sm","Roblox: "+(a.roblox_name||"profile"));b.href=r;b.target="_blank";b.rel="noopener";links.append(b)}}
-  c.append(links);return c;
-}}
-function render(){{
-  const v=$("adq").value.trim().toLowerCase(),mine=$("mine").checked,now=Date.now();
-  const list=ads.filter(a=>(!a.expires_at||new Date(a.expires_at)>now)&&(!mine||a.discord_id===me)&&(!v||(a.content+" "+(a.discord_name||"")+" "+(a.roblox_name||"")).toLowerCase().includes(v)));
-  $("ads").replaceChildren(...list.map(card));
-  $("adsnone").hidden=list.length>0;
-  $("adsnone").textContent=ads.length?"No trade ad matches that.":"No trade ads right now.";
-  $("count").textContent=list.length+" live trade ad"+(list.length===1?"":"s");
-}}
-async function load(){{
-  const {{data,error}}=await sb.from("trade_ads").select("*").order("created_at",{{ascending:false}}).limit(1000);
-  if(error){{$("adsnone").hidden=false;$("adsnone").textContent="Couldn't load trade ads. Try again in a minute.";return}}
-  ads=data||[];render();
-}}
-async function show(session){{
-  $("loading").hidden=true;
-  if(!session){{$("login").hidden=false;$("board").hidden=true;return}}
-  const m=session.user.user_metadata||{{}};
-  me=m.provider_id||m.sub||null;
-  $("mename").textContent=m.full_name||m.custom_claims?.global_name||m.name||"Discord user";
-  const av=safe(m.avatar_url);if(av)$("meav").src=av;else $("meav").src="img/flower.png";
-  $("login").hidden=true;$("board").hidden=false;await load();
-}}
-$("loginbtn").onclick=()=>sb.auth.signInWithOAuth({{provider:"discord",options:{{redirectTo:location.origin+location.pathname,scopes:"identify"}}}});
-$("logout").onclick=async()=>{{await sb.auth.signOut();show(null)}};
-$("adq").oninput=render;$("mine").onchange=render;
-const p=new URLSearchParams(location.hash.slice(1)+"&"+location.search.slice(1));
-if(p.get("error_description")){{$("loginerr").hidden=false;$("loginerr").textContent="Login failed: "+p.get("error_description")}}
-sb.auth.getSession().then(({{data}})=>show(data.session));
-sb.auth.onAuthStateChange((ev,s)=>{{if(ev==="SIGNED_IN")show(s)}});
-setInterval(()=>{{if(!$("board").hidden)load()}},60000);
-}})();
-</script>
+<script defer src="js/trades.js?v={JSVER['trades']}"></script>
 """
-open("trades.html", "w").write(page("Bloombot Trade Ads", "Browse every live Bloombot trade ad for Garden Tower Defense. Log in with Discord.", trades_body, "a", "trades.html"))
+open("trades.html", "w").write(page("Bloombot Trade Ads", "Browse and post Bloombot trade ads for Garden Tower Defense. Log in with Discord.", trades_body, "a", "trades.html"))
+
+# ── Values ───────────────────────────────────────────────────────────────
+values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and gamepass, with demand and 30-day trends.", "t_values") + f"""<main class="wrap vals" id="main">
+<section class="panel filters">
+<input class="search" id="vq" type="search" placeholder="Search a unit…" aria-label="Search units">
+<div class="chips"><button class="chip on" type="button" data-cat="all">All</button><button class="chip" type="button" data-cat="units">Units</button><button class="chip" type="button" data-cat="gamepasses">Gamepasses</button></div>
+<select id="vrar" aria-label="Rarity"><option value="">All rarities</option></select>
+<select id="vsort" aria-label="Sort"><option value="value">Highest value</option><option value="low">Lowest value</option><option value="demand">Most demand</option><option value="up">Rising most</option><option value="down">Falling most</option><option value="name">A to Z</option></select>
+</section>
+<div class="vinfo"><span id="vcount"></span><span id="vupdated"></span></div>
+<p class="loading" id="vloading">Loading values…</p>
+<div class="vgrid" id="vgrid"></div>
+<p class="empty" id="vnone" hidden>No unit matches that.</p>
+<p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
+</main>
+<div class="modal" id="vmodal" hidden><div class="modal-box panel" role="dialog" aria-modal="true"><button class="modal-x" id="vmclose" type="button" aria-label="Close">×</button><div id="vmbody"></div></div></div>
+<script defer src="js/values.js?v={JSVER['values']}"></script>
+"""
+open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "Live Garden Tower Defense unit and gamepass values with demand, status and 30-day trends.", values_body, "v", "values.html"))
+
+# ── Trade calculator ─────────────────────────────────────────────────────
+def side(key, title, color):
+    return f"""<section class="panel cside">
+<h2 class="weld g-{color} cs-title">{title}<span class="cs-total" id="{key}total">0</span></h2>
+<div class="picker"><input class="search" id="{key}q" type="search" autocomplete="off" placeholder="Add a unit or a value like 4k" aria-label="Add to {title}"><div class="sugs" id="{key}sug" hidden></div></div>
+<div class="clist" id="{key}list"></div>
+<p class="cempty" id="{key}empty">Nothing here yet.</p>
+</section>"""
+
+
+calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss? Add both sides and find out.", "t_calc") + f"""<main class="wrap calc" id="main">
+<p class="loading" id="cloading">Loading values…</p>
+<div class="cgrid">
+{side("give", "You give", "red")}
+<div class="cmid">
+<div class="verdict" id="verdict"><strong>Add units to both sides</strong><span>Search a unit or type a value like 4k.</span></div>
+<div class="meter" id="meter"><i></i></div>
+<div class="cbtns"><button class="brick dark sm" id="swap" type="button">⇄ Swap sides</button><button class="brick dark sm" id="clear" type="button">Clear</button></div>
+<div class="fairadds" id="fairadds"></div>
+</div>
+{side("get", "You get", "green")}
+</div>
+<p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. The link updates as you go, so you can share it.</p>
+</main>
+<script defer src="js/calc.js?v={JSVER['calc']}"></script>
+"""
+open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "Check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html"))
+
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/swap.png" alt="">
