@@ -378,7 +378,7 @@
     headLink.append(...head.childNodes);
     const group = (title, ...items) => { const g = BB.el("div", "me-group"); g.append(BB.el("p", "me-gt", title), ...items); return g; };
     menu.append(headLink,
-      group("Account", link("profile.html", "medal_gold", "My profile"), link("profile.html#edit", "gear", "Settings")),
+      group("Account", link("profile.html", "gear", "Profile & settings")),
       group("Trading", link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "trading", "My trade ads")),
       group("Servers", link("dashboard.html", "shield", "Server dashboard")),
       out);

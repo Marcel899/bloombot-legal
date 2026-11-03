@@ -1357,3 +1357,17 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 [data-theme=light] .dside{background:rgba(255,253,247,.94)}
 [data-theme=light] .gw{background:linear-gradient(180deg,rgba(126,200,80,.16),rgba(245,200,60,.06) 120px,#fffdf7 220px),#fffdf7;border-color:#c9dfa8}
 [data-theme=light] .skel i{background:linear-gradient(90deg,#eee6d2 0%,#f8f4e8 40%,#eee6d2 80%) 0 0/300% 100%}
+
+/* ── profile dropdown v2: clean open animation ── */
+.me-menu{transform-origin:top right;transform:translateY(-6px) scale(.96);opacity:0;visibility:hidden;transition:opacity .16s ease,transform .2s cubic-bezier(.2,.9,.3,1.1),visibility 0s linear .2s}
+.acct.open .me-menu{opacity:1;transform:none;visibility:visible;transition:opacity .16s ease,transform .22s cubic-bezier(.2,.9,.3,1.1),visibility 0s}
+.me-menu .me-head,.me-menu .me-group,.me-menu .me-item.out{opacity:0;transform:translateY(-4px);transition:opacity .18s,transform .22s}
+.acct.open .me-menu .me-head,.acct.open .me-menu .me-group,.acct.open .me-menu .me-item.out{opacity:1;transform:none}
+.acct.open .me-menu>:nth-child(2){transition-delay:.03s}.acct.open .me-menu>:nth-child(3){transition-delay:.06s}
+.acct.open .me-menu>:nth-child(4){transition-delay:.09s}.acct.open .me-menu>:nth-child(5){transition-delay:.12s}
+.caret{display:inline-block;transition:transform .2s}
+.acct.open .caret{transform:rotate(180deg)}
+.me-item{transition:background .12s,color .12s}
+.me-item img{transition:transform .15s}
+@media (hover:hover){.me-item:hover img{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.me-menu,.me-menu *{transition:none!important}}
