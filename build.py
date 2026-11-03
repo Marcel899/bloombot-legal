@@ -12,6 +12,17 @@ CLIENT_ID = "1510660385517211820"
 INVITE = f"https://discord.com/oauth2/authorize?client_id={CLIENT_ID}&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"
 SUPABASE_URL = "https://rkzgsndfzzgezoltddvx.supabase.co"
 SUPABASE_KEY = "sb_publishable_CfTjHiYYCGqLZMlgpiKN-Q_m7JNITb5"  # public key, reads are limited by row level security
+import json as _json
+HOME_LD = '<script type="application/ld+json">' + _json.dumps([
+    {"@context": "https://schema.org", "@type": "WebSite", "name": "Bloombot", "url": BASE,
+     "description": "Garden Tower Defense trading bot: trade ads, live values, trade calculator and strategies."},
+    {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Bloombot",
+     "applicationCategory": "GameApplication", "operatingSystem": "Discord", "url": BASE,
+     "image": BASE + "img/logo.png", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+     "description": "Discord bot for Roblox Garden Tower Defense traders: global trade ads, live unit values, trade checks and wishlists."},
+]).replace("<", "\\u003c") + "</script>\n"
+# Pages Google should list (profile, dashboard and 404 are noindex).
+SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>'
 
 HEAD = """<!doctype html>
@@ -32,6 +43,7 @@ HEAD = """<!doctype html>
 <meta property="og:site_name" content="Bloombot">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{base}{path}">
+<meta name="robots" content="{robots}">
 <meta name="theme-color" content="#13151b">
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
@@ -44,7 +56,7 @@ HEAD = """<!doctype html>
 <script defer src="js/app.js?v={appver}"></script>
 <script defer src="js/site.js?v={sitever}"></script>
 <script defer src="js/giveaway.js?v={gwver}"></script>
-</head>
+{ld}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="progress" aria-hidden="true"></div>
@@ -89,13 +101,15 @@ SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
 GWVER = hashlib.md5(open("js/giveaway.js", "rb").read()).hexdigest()[:8]
 
 
-def page(title, desc, body, cur="", path=""):
+def page(title, desc, body, cur="", path="", index=True, ld=""):
     nav = "".join(
         f'<a class="nl{" on g-" + color if key == cur else ""}" href="{href}"><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
         for key, href, icon, label, color in NAV)
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
                         invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
-                        appver=APPVER, sitever=SITEVER, gwver=GWVER)
+                        appver=APPVER, sitever=SITEVER, gwver=GWVER,
+                        robots="index, follow, max-image-preview:large" if index else "noindex, follow",
+                        ld=ld)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE))
 
 
@@ -154,7 +168,7 @@ TILE_COLORS = ["green", "blue", "yellow", "purple"]
 tiles = "".join(f'<a class="tile tlink" href="{u}"><div class="weld g-{c}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div><p>{p}</p><span class="more">Open &rarr;</span></a>' for (i, h, p, u), c in zip(FEATURES, TILE_COLORS))
 home = f"""<section class="hero big">
 <div class="wrap hero-in">
-<div class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.png" alt="Bloombot"></div>
+<h1 class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.png" alt="Bloombot, the Garden Tower Defense trading bot"></h1>
 <p class="sub">The trading bot for Roblox Garden Tower Defense.</p>
 <div class="ctas">
 <a class="brick discord big-cta" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
@@ -196,7 +210,7 @@ home = f"""<section class="hero big">
 </main>
 <script defer src="js/home.js?v={hashlib.md5(open('js/home.js', 'rb').read()).hexdigest()[:8]}"></script>
 """
-open("index.html", "w").write(page("Bloombot", "Bloombot is the trading bot for Roblox Garden Tower Defense: global trade ads, live values, trade checks and wishlists. Add it to your Discord server.", home))
+open("index.html", "w").write(page("Bloombot · Garden Tower Defense Trading Bot, Values and Trade Ads", "Bloombot is the trading bot for Roblox Garden Tower Defense: global trade ads, live values, trade checks and wishlists. Add it to your Discord server.", home, ld=HOME_LD))
 
 # ── Features & commands ──────────────────────────────────────────────────
 ALL_FEATURES = [
@@ -287,7 +301,7 @@ features_body = hero("gem", "Features", "Everything Bloombot can do, and every c
 </section>
 </main>
 """
-open("features.html", "w").write(page("Bloombot Features and Commands", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
+open("features.html", "w").write(page("Bloombot Features and Commands · Garden Tower Defense Discord Bot", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
 JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home", "profile")}
@@ -339,7 +353,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 </main>
 <script defer src="js/trades.js?v={JSVER['trades']}"></script>
 """
-open("trades.html", "w").write(page("Bloombot Trade Ads", "Browse and post Bloombot trade ads for Garden Tower Defense. Log in with Discord.", trades_body, "a", "trades.html"))
+open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense", "Browse and post Garden Tower Defense trade ads from every Bloombot server. Log in with Discord.", trades_body, "a", "trades.html"))
 
 # ── Values ───────────────────────────────────────────────────────────────
 values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and gamepass, with demand and 30-day trends.", "t_values") + f"""<main class="wrap vals" id="main">
@@ -449,7 +463,7 @@ profile_body = f"""<main class="wrap prof" id="main">
 </main>
 <script defer src="js/profile.js?v={JSVER['profile']}"></script>
 """
-open("profile.html", "w").write(page("Bloombot Profile", "A Bloombot trader's profile: Roblox account, live trade ads and strategies.", profile_body, "", "profile.html"))
+open("profile.html", "w").write(page("Bloombot Profile", "A Bloombot trader's profile: Roblox account, live trade ads and strategies.", profile_body, "", "profile.html", index=False))
 
 # ── Server dashboard ─────────────────────────────────────────────────────
 JSVER["dashboard"] = hashlib.md5(open("js/dashboard.js", "rb").read()).hexdigest()[:8]
@@ -474,7 +488,7 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 </main>
 <script defer src="js/dashboard.js?v={JSVER['dashboard']}"></script>
 """
-open("dashboard.html", "w").write(page("Bloombot Server Dashboard", "Change Bloombot's channels, pings and features for your Discord server from the website.", dash_body, "", "dashboard.html"))
+open("dashboard.html", "w").write(page("Bloombot Server Dashboard", "Change Bloombot's channels, pings and features for your Discord server from the website.", dash_body, "", "dashboard.html", index=False))
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/trading.png" alt="">
@@ -482,4 +496,9 @@ notfound = hero("warning", "Page not found", "That page doesn't exist. It may ha
 <a class="brick green" href="./">Go home</a>
 </section></main>
 """
-open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>')))
+open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", index=False, body=notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>')))
+
+open("robots.txt", "w").write(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}sitemap.xml\n")
+open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                               + "".join(f"<url><loc>{BASE}{u}</loc><priority>{'1.0' if not u else '0.8'}</priority></url>\n" for u in SITEMAP)
+                               + "</urlset>\n")

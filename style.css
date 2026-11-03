@@ -82,7 +82,7 @@ h1,h2,h3{font-family:"Nunito",system-ui,sans-serif;font-weight:800;letter-spacin
 .hero::before{content:"";position:absolute;inset:-30px -30px 0;z-index:-2;background:url(img/garden.jpg) center 35%/cover;filter:blur(8px) saturate(1.1);-webkit-mask:linear-gradient(180deg,#000 45%,rgba(0,0,0,.6) 70%,transparent 100%);mask:linear-gradient(180deg,#000 45%,rgba(0,0,0,.6) 70%,transparent 100%)}
 .hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(12,16,36,.45) 0%,rgba(12,16,36,.3) 45%,rgba(19,21,27,.35) 75%,rgba(19,21,27,0) 100%)}
 .hero.big{padding:180px 0 150px}
-.hero-mark{display:flex;align-items:center;justify-content:center;gap:clamp(12px,2.5vw,26px)}
+.hero-mark{margin:0;font-size:inherit;display:flex;align-items:center;justify-content:center;gap:clamp(12px,2.5vw,26px)}
 .hero-flower{width:clamp(70px,13vw,140px);filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))}
 .hero-logo{width:min(520px,70%);filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
 .hero-icon{width:68px;height:68px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
