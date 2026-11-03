@@ -12,8 +12,8 @@ body{
   font:16.5px/1.7 "Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   background:
     radial-gradient(1200px 600px at 50% -200px,rgba(239,75,79,.10),transparent 70%),
-    linear-gradient(rgba(19,21,27,.82),rgba(19,21,27,.82)),
-    url(img/baseplate.png) 0 0/120px 120px,var(--bg);
+    linear-gradient(rgba(19,21,27,.45),rgba(19,21,27,.45)),
+    url(img/studs-bg.png) 0 0/160px 160px,var(--bg);
   background-attachment:scroll,fixed,fixed,fixed;
 }
 main{flex:1}
