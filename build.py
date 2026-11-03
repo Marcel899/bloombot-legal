@@ -21,6 +21,15 @@ HOME_LD = '<script type="application/ld+json">' + _json.dumps([
      "image": BASE + "img/logo.png", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
      "description": "Discord bot for Roblox Garden Tower Defense traders: global trade ads, live unit values, trade checks and wishlists."},
 ]).replace("<", "\\u003c") + "</script>\n"
+KEYWORDS = ("Garden Tower Defense, GTD, Roblox, Discord bot, GTD Discord, Garden Tower Defense Discord, "
+            "GTD values, Garden Tower Defense values, GTD trading, GTD trade ads, value list, Bloombot")
+PAGE_KW = {
+    "values.html": "GTD value list, Garden Tower Defense value list, unit values, gamepass values, demand, value trends",
+    "calculator.html": "GTD trade calculator, Garden Tower Defense trade calculator, win or loss, WFL, fair trade",
+    "trades.html": "GTD trade ads, Garden Tower Defense trading server, trade ads, LF NLF",
+    "strategies.html": "GTD strategies, Garden Tower Defense strategy, best units, meta units, loadouts, map guides",
+    "features.html": "Discord trading bot, Roblox trading bot, slash commands, wishlist, trade check",
+}
 # Pages Google should list (profile, dashboard and 404 are noindex).
 SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>'
@@ -44,6 +53,7 @@ HEAD = """<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{base}{path}">
 <meta name="robots" content="{robots}">
+<meta name="keywords" content="{keywords}">
 <meta name="google-site-verification" content="wgEfTTw4ymFeGxytFVhbK6OwL639P6QfcPRBa0BeqMo">
 <meta name="theme-color" content="#13151b">
 <meta name="color-scheme" content="dark">
@@ -102,15 +112,16 @@ SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
 GWVER = hashlib.md5(open("js/giveaway.js", "rb").read()).hexdigest()[:8]
 
 
-def page(title, desc, body, cur="", path="", index=True, ld=""):
+def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
     nav = "".join(
         f'<a class="nl{" on g-" + color if key == cur else ""}" href="{href}"><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
         for key, href, icon, label, color in NAV)
+    kw = kw or PAGE_KW.get(path, "")
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
                         invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
                         appver=APPVER, sitever=SITEVER, gwver=GWVER,
                         robots="index, follow, max-image-preview:large" if index else "noindex, follow",
-                        ld=ld)
+                        ld=ld, keywords=(kw + ", " if kw else "") + KEYWORDS)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE))
 
 
@@ -375,7 +386,7 @@ values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and game
 <div class="modal" id="vmodal" hidden><div class="modal-box panel" role="dialog" aria-modal="true"><button class="modal-x" id="vmclose" type="button" aria-label="Close">×</button><div id="vmbody"></div></div></div>
 <script defer src="js/values.js?v={JSVER['values']}"></script>
 """
-open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "Live Garden Tower Defense unit and gamepass values with demand, status and 30-day trends.", values_body, "v", "values.html"))
+open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "GTD value list: live Garden Tower Defense unit and gamepass values with demand, status and 30-day trends.", values_body, "v", "values.html"))
 
 # ── Trade calculator ─────────────────────────────────────────────────────
 def side(key, title, color):
@@ -405,7 +416,7 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 </main>
 <script defer src="js/calc.js?v={JSVER['calc']}"></script>
 """
-open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "Check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html"))
+open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "GTD trade calculator: check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html"))
 
 
 
