@@ -385,6 +385,8 @@
     btn.onclick = e => {
       e.stopPropagation();
       const open = box.classList.toggle("open");
+      const nav = document.getElementById("links"), bg = document.getElementById("burger");
+      if (open && nav) { nav.classList.remove("open"); if (bg) bg.setAttribute("aria-expanded", "false"); }
       btn.setAttribute("aria-expanded", String(open));
     };
     box.append(btn, menu);
@@ -569,6 +571,8 @@
     const burger = document.getElementById("burger");
     if (burger) burger.onclick = () => {
       const open = document.getElementById("links").classList.toggle("open");
+      const acct = document.getElementById("acct");
+      if (open && acct) acct.classList.remove("open");
       burger.setAttribute("aria-expanded", String(open));
     };
     if (!window.supabase || !C.url) { setSession(null); return; }

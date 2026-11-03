@@ -1079,3 +1079,11 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 .cf .cf-type{font-weight:800}
 .cf .cf-type input{margin-top:6px}
 .cf .post-actions{margin-top:4px}
+/* burger icon: absolute bars so the ✕ lines up on every browser */
+.burger{position:relative}
+.burger span{position:absolute;left:50%;top:50%;width:18px;height:2px;margin:-1px 0 0 -9px}
+.burger span:nth-child(1){transform:translateY(-6px)}
+.burger span:nth-child(3){transform:translateY(6px)}
+.burger[aria-expanded="true"] span:nth-child(1){transform:rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:rotate(-45deg)}
