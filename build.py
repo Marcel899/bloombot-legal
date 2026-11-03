@@ -61,7 +61,6 @@ HEAD = """<!doctype html>
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v={ver}">
 <script src="js/theme.js?v={themever}"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>

@@ -17,6 +17,11 @@
       b.setAttribute("aria-pressed", t === "light" ? "true" : "false");
     }
   }
+  /* load the web font without blocking the first paint */
+  var f = document.createElement("link");
+  f.rel = "stylesheet";
+  f.href = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap";
+  document.head.appendChild(f);
   apply(saved() === "light" ? "light" : "dark");
   document.addEventListener("DOMContentLoaded", function () {
     apply(root.getAttribute("data-theme"));
