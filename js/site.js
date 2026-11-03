@@ -49,7 +49,7 @@
     ["Home", "./", "flower"], ["Values", "values.html", "dollar"], ["Trade calculator", "calculator.html", "calculator"],
     ["Trade ads", "trades.html", "trading"], ["Post a trade ad", "trades.html#post", "plus"], ["Strategies", "strategies.html", "bullseye"],
     ["Share a strategy", "strategies.html#share", "bullseye"], ["Features and commands", "features.html", "gem"],
-    ["My watchlist", "values.html#watchlist", "wish_star"], ["Add Bloombot to Discord", invite, "envelope"],
+    ["My watchlist", "values.html#watchlist", "wish_star"], ["My profile", "profile.html", "medal_gold"], ["Profile settings", "profile.html#edit", "gear"], ["Add Bloombot to Discord", invite, "envelope"],
     ["Privacy Policy", "privacy.html", "shield"], ["Terms of Service", "terms.html", "scale"],
   ];
   let box, input, list, opts = [], idx = 0, data = null;

@@ -35,7 +35,12 @@
     av.alt = "";
     av.src = BB.safeUrl(s.author_avatar) || "img/flower.png";
     av.onerror = () => { av.src = "img/flower.png"; };
-    by.append(av, el("span", null, s.author_name || "Bloombot player"));
+    if (s.author_id) {
+      const a = el("a", "strat-author");
+      a.href = "profile.html?id=" + encodeURIComponent(s.author_id);
+      a.append(av, el("span", null, s.author_name || "Bloombot player"));
+      by.append(a);
+    } else by.append(av, el("span", null, s.author_name || "Bloombot player"));
     c.append(by);
     return c;
   }

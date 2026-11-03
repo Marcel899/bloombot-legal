@@ -291,7 +291,7 @@ features_body = hero("gem", "Features", "Everything Bloombot can do, and every c
 open("features.html", "w").write(page("Bloombot Features and Commands", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
-JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home")}
+JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home", "profile")}
 trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from every server. Post your own right here.", "t_trades") + f"""<main class="wrap trades" id="main">
 <section class="panel login" id="login" hidden>
 <img class="login-icon" src="img/trading.png" alt="">
@@ -417,6 +417,37 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <script defer src="js/strategies.js?v={JSVER['strategies']}"></script>
 """
 open("strategies.html", "w").write(page("Bloombot Strategies · Garden Tower Defense", "Community Garden Tower Defense strategies: meta units, map-specific guides and general tips.", strat_body, "s", "strategies.html"))
+
+# ── Profiles ─────────────────────────────────────────────────────────────
+JSVER["profile"] = hashlib.md5(open("js/profile.js", "rb").read()).hexdigest()[:8]
+profile_body = f"""<main class="wrap prof" id="main">
+<section class="panel login" id="plogin" hidden>
+<img class="login-icon" src="img/medal_gold.png" alt="">
+<h2>Log in to see profiles</h2>
+<p>Profiles are only shown to Discord users. We use your Discord account only to log you in.</p>
+<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+</section>
+<div class="skel-grid sk-prof" id="ploading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
+<section class="panel pcard" id="pcard" hidden></section>
+<form class="panel pedit" id="pedit" hidden>
+<h2 class="pedit-title"><img src="img/gear.png" alt=""><span id="pedit-h">Profile settings</span></h2>
+<p class="hint" id="pedit-sub">Changes are saved to your Bloombot account, the same as /home → Settings in Discord.</p>
+<div class="pfields">
+<label>Roblox username<input class="search" id="fu" maxlength="20" autocomplete="off" placeholder="e.g. CoolGardener123"></label>
+<label>Private server link <em>optional</em><input class="search" id="fl" maxlength="300" autocomplete="off" placeholder="https://www.roblox.com/share?code=...&amp;type=Server"></label>
+</div>
+<p class="hint">In Roblox: Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see your server link on the website.</p>
+<label>About me <em>optional</em><textarea id="fd" rows="3" maxlength="300" placeholder="How you play, what you collect, when you're online…"></textarea></label>
+<div class="post-foot"><span class="count" id="fdc">0/300</span><span></span></div>
+<div class="post-actions"><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
+<p class="post-status" id="pstatus" hidden></p>
+</form>
+<section class="psec" id="pads-sec" hidden><div class="sec-head"><h2>Live trade ads</h2><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="tlist" id="pads"></div></section>
+<section class="psec" id="pstr-sec" hidden><div class="sec-head"><h2>Strategies</h2><a href="strategies.html">All strategies &rarr;</a></div><div class="slist" id="pstrs"></div></section>
+</main>
+<script defer src="js/profile.js?v={JSVER['profile']}"></script>
+"""
+open("profile.html", "w").write(page("Bloombot Profile", "A Bloombot trader's profile: Roblox account, live trade ads and strategies.", profile_body, "", "profile.html"))
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/trading.png" alt="">

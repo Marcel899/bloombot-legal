@@ -72,7 +72,11 @@
     const who = el("div", "tc-who");
     who.append(el("strong", null, BB.plain(a.discord_name || "") || "Trader"),
       el("span", null, BB.ago(a.created_at) + (a.expires_at && left(a.expires_at) ? " · " + left(a.expires_at) : "")));
-    head.append(av, who);
+    const prof = el("a", "tc-prof");
+    prof.href = "profile.html?id=" + encodeURIComponent(a.discord_id);
+    prof.title = "See " + (a.discord_name || "this trader") + "'s profile";
+    prof.append(av, who);
+    head.append(prof);
     if (own) head.append(el("span", "tag", "Yours"));
     c.append(head, adText(a.content));
     const img = BB.safeUrl(a.image_url);
