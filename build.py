@@ -65,7 +65,7 @@ FOOT = """<footer>
 <div class="grass"></div>
 <div class="wrap foot">
 <div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
-<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="features.html">Features &amp; commands</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
+<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
 <p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
 </div>
 </footer>
@@ -448,6 +448,31 @@ profile_body = f"""<main class="wrap prof" id="main">
 <script defer src="js/profile.js?v={JSVER['profile']}"></script>
 """
 open("profile.html", "w").write(page("Bloombot Profile", "A Bloombot trader's profile: Roblox account, live trade ads and strategies.", profile_body, "", "profile.html"))
+
+# ── Server dashboard ─────────────────────────────────────────────────────
+JSVER["dashboard"] = hashlib.md5(open("js/dashboard.js", "rb").read()).hexdigest()[:8]
+dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for your server without typing a command. For server owners and administrators.", "t_dash") + f"""<main class="wrap dash" id="main">
+<section class="panel login" id="dlogin" hidden>
+<img class="login-icon" src="img/shield.png" alt="">
+<h2>Log in to manage your servers</h2>
+<p>We check you're the owner or an administrator of a server before showing its settings.</p>
+<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+</section>
+<div class="skel-grid sk-prof" id="dloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
+<section class="panel login" id="dempty" hidden>
+<img class="login-icon" src="img/envelope.png" alt="">
+<h2 id="dempty-t">No servers to manage yet</h2>
+<p>You'll see every server where you're the owner or an administrator and Bloombot is a member. New servers show up within a few minutes.</p>
+<a class="brick discord" href="{INVITE}">{DISCORD_SVG}Add Bloombot to a server</a>
+</section>
+<div class="dgrid" id="dmain" hidden>
+<aside class="dside"><h3>Your servers</h3><div id="dglist"></div><a class="dadd" href="{INVITE}">+ Add to another server</a></aside>
+<div><p class="panel dpick" id="dpick" hidden>Pick a server to change its settings.</p><section class="panel dpanel" id="dpanel" hidden></section></div>
+</div>
+</main>
+<script defer src="js/dashboard.js?v={JSVER['dashboard']}"></script>
+"""
+open("dashboard.html", "w").write(page("Bloombot Server Dashboard", "Change Bloombot's channels, pings and features for your Discord server from the website.", dash_body, "", "dashboard.html"))
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/trading.png" alt="">

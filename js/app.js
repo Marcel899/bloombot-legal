@@ -378,7 +378,7 @@
     headLink.append(...head.childNodes);
     menu.append(headLink, link("profile.html", "medal_gold", "My profile"), link("profile.html#edit", "gear", "Profile settings"),
       link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "trading", "My trade ads"),
-      link("strategies.html", "bullseye", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), out);
+      link("strategies.html", "bullseye", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), link("dashboard.html", "shield", "Server dashboard"), out);
     btn.onclick = e => {
       e.stopPropagation();
       const open = box.classList.toggle("open");
