@@ -206,7 +206,7 @@
   };
   /* Step chart of [[date, value], ...] as an SVG string. */
   BB.chart = (points, w, h, opts = {}) => {
-    const pts = (points || []).filter(p => p && p[1] > 0).map(p => [new Date(p[0]).getTime(), p[1]]);
+    const pts = (points || []).map(p => p && [new Date(p[0]).getTime(), Number(p[1])]).filter(p => p && isFinite(p[0]) && isFinite(p[1]) && p[1] > 0);
     if (!pts.length) return "";
     const now = Date.now();
     pts.push([now, pts[pts.length - 1][1]]);
@@ -232,7 +232,7 @@
 
   /* Interactive step chart: hover or drag to read the price on any day. */
   BB.interactiveChart = (box, points) => {
-    const pts = (points || []).filter(p => p && p[1] > 0).map(p => [new Date(p[0]).getTime(), p[1]]);
+    const pts = (points || []).map(p => p && [new Date(p[0]).getTime(), Number(p[1])]).filter(p => p && isFinite(p[0]) && isFinite(p[1]) && p[1] > 0);
     box.replaceChildren();
     if (!pts.length) { box.append(BB.el("p", "empty", "No price history yet.")); return; }
     const W = 600, H = 220, PL = 8, PR = 52, PT = 14, PB = 26;
