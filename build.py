@@ -4,7 +4,7 @@ import re
 
 VER = hashlib.md5(open("style.css", "rb").read()).hexdigest()[:8]
 SUPPORT = "https://discord.gg/tGuXfcJxwf"
-BASE = "https://marcel899.github.io/bloombot-legal/"
+BASE = "https://bloombot-gtd.vercel.app/"
 UPDATED = "3 November 2026"
 CLIENT_ID = "1510660385517211820"
 # Bot permissions: view/send/history, embeds, files, reactions, external emojis, manage messages,
@@ -343,4 +343,4 @@ notfound = hero("warning", "Page not found", "That page doesn't exist. It may ha
 <a class="brick green" href="./">Go home</a>
 </section></main>
 """
-open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/bloombot-legal/\1"', page("Page not found · Bloombot", "This page does not exist.", notfound.replace('href="./"', 'href="/bloombot-legal/"')).replace('src="img/', 'src="/bloombot-legal/img/').replace('href="style.css', 'href="/bloombot-legal/style.css').replace('href="img/', 'href="/bloombot-legal/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/bloombot-legal/">').replace('<a href="./">Home</a>', '<a href="/bloombot-legal/">Home</a>')))
+open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>')))
