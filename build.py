@@ -67,6 +67,7 @@ FOOT = """<footer>
 <div class="wrap foot">
 <div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
 <nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
+<p>Unit values come from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>. Thanks to its team!</p>
 <p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
 </div>
 </footer>
@@ -359,6 +360,7 @@ values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and game
 </section>
 <div class="vinfo"><span id="vcount"></span><span id="vupdated"></span></div>
 <div class="skel-grid sk-vals" id="vloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
+<p class="credit"><img src="img/dollar.png" alt="">Values come from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>. Bloombot copies them every few minutes and adds trend charts.</p>
 <div class="vgrid" id="vgrid"></div>
 <button class="brick dark more-btn" type="button" id="vmore" hidden>Show more</button>
 <p class="empty" id="vnone" hidden>No unit matches that.</p>
@@ -393,7 +395,7 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 </div>
 {side("get", "You get", "green")}
 </div>
-<p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. Use Copy link to share this exact trade.</p>
+<p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. Use Copy link to share this exact trade. Values from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>.</p>
 </main>
 <script defer src="js/calc.js?v={JSVER['calc']}"></script>
 """
