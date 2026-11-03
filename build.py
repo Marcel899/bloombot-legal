@@ -37,9 +37,9 @@ HEAD = """<!doctype html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v={ver}">
-<script>window.BB_CONF={{url:"{sburl}",key:"{sbkey}"}}</script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v={appver}"></script>
+<script defer src="js/site.js?v={sitever}"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -61,14 +61,11 @@ FOOT = """<footer>
 <div class="grass"></div>
 <div class="wrap foot">
 <div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
-<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="features.html">Features &amp; commands</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
+<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="features.html">Features &amp; commands</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
 <p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
 </div>
 </footer>
 <a class="totop brick dark" href="#" aria-label="Back to top">&#8593;</a>
-<script>
-(()=>{const p=document.querySelector(".progress"),t=document.querySelector(".totop");const f=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;p.style.transform=`scaleX(${max>0?h.scrollTop/max:0})`;t.classList.toggle("show",h.scrollTop>600)};addEventListener("scroll",f,{passive:true});f();})();
-</script>
 </body>
 </html>
 """
@@ -78,9 +75,11 @@ NAV = [
     ("v", "values.html", "dollar", "Values", "blue"),
     ("c", "calculator.html", "calculator", "Calculator", "green"),
     ("a", "trades.html", "swap", "Trade ads", "purple"),
+    ("s", "strategies.html", "floating_island", "Strategies", "orange"),
     ("f", "features.html", "gem", "Features", "yellow"),
 ]
 APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
+SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
 
 
 def page(title, desc, body, cur="", path=""):
@@ -89,17 +88,11 @@ def page(title, desc, body, cur="", path=""):
         for key, href, icon, label, color in NAV)
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
                         invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
-                        appver=APPVER)
+                        appver=APPVER, sitever=SITEVER)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE))
 
 
-SPY = """<script>
-(()=>{const links=[...document.querySelectorAll('.toc-box a')];const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
-const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.remove('on'));const a=map.get(e.target.id);if(a)a.classList.add('on');}})},{rootMargin:'-90px 0px -70% 0px'});
-map.forEach((a,id)=>{const el=document.getElementById(id);if(el)io.observe(el);});
-const d=document.querySelector('.mtoc');if(d)d.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>d.open=false));})();
-</script>
-"""
+SPY = ""
 
 
 def hero(icon, h1, sub, art):
@@ -166,7 +159,20 @@ home = f"""<section class="hero big">
 </div>
 </section>
 <main class="wrap" id="main">
+<section class="stats" id="stats">
+<div class="stat"><img src="img/swap.png" alt=""><div><strong id="st-ads">–</strong><span>live trade ads</span></div></div>
+<div class="stat"><img src="img/dollar.png" alt=""><div><strong id="st-values">–</strong><span>units and gamepasses tracked</span></div></div>
+<div class="stat"><img src="img/floating_island.png" alt=""><div><strong id="st-strats">–</strong><span>community strategies</span></div></div>
+</section>
 <section class="tiles">{tiles}</section>
+<section class="movers" id="movers" hidden>
+<div class="sec-head"><h2>Biggest moves this month</h2><a href="values.html">All values &rarr;</a></div>
+<div class="mv-cols"><div class="panel mv-col"><h3><img src="img/rise.png" alt="">Going up</h3><div id="mv-up"></div></div><div class="panel mv-col"><h3><img src="img/chart_up.png" alt="" class="flip">Going down</h3><div id="mv-down"></div></div></div>
+</section>
+<section class="hstrats" id="hstrats" hidden>
+<div class="sec-head"><h2>New strategies</h2><a href="strategies.html">All strategies &rarr;</a></div>
+<div class="hs-list" id="hs-list"></div>
+</section>
 <section class="how">
 <h2 class="weld g-green how-title">How it works</h2>
 <div class="steps">
@@ -181,6 +187,7 @@ home = f"""<section class="hero big">
 <a class="brick red" href="{SUPPORT}">Join the support server</a>
 </section>
 </main>
+<script defer src="js/home.js?v={hashlib.md5(open('js/home.js', 'rb').read()).hexdigest()[:8]}"></script>
 """
 open("index.html", "w").write(page("Bloombot", "Bloombot is the trading bot for Roblox Garden Tower Defense: global trade ads, live values, trade checks and wishlists. Add it to your Discord server.", home))
 
@@ -265,17 +272,11 @@ features_body = hero("gem", "Features", "Everything Bloombot can do, and every c
 <a class="brick discord" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
 </section>
 </main>
-<script>
-(()=>{{const q=document.getElementById("cmdq"),none=document.getElementById("cmdnone");
-q.addEventListener("input",()=>{{const v=q.value.trim().toLowerCase();let any=0;
-document.querySelectorAll(".cmd-group").forEach(g=>{{let n=0;g.querySelectorAll(".cmd").forEach(li=>{{const ok=!v||li.dataset.q.includes(v);li.hidden=!ok;n+=ok}});g.hidden=!n;any+=n}});
-none.hidden=!!any}});}})();
-</script>
 """
 open("features.html", "w").write(page("Bloombot Features and Commands", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
-JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc")}
+JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home")}
 trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from every server. Post your own right here.", "t_trades") + f"""<main class="wrap trades" id="main">
 <section class="panel login" id="login" hidden>
 <img class="login-icon" src="img/swap.png" alt="">
@@ -296,11 +297,14 @@ trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from ever
 </form>
 <div class="board-bar">
 <input class="search" id="adq" type="search" placeholder="Search units or traders…" aria-label="Search trade ads">
+<select id="adsort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="ending">Ending soon</option></select>
 <label class="mine"><input type="checkbox" id="mine"> Only my ads</label>
 <span class="count-pill" id="count"></span>
 </div>
+<div class="quick"><span>Quick search:</span><button class="chip" type="button" data-q="LF">LF</button><button class="chip" type="button" data-q="offers">Offers</button><button class="chip" type="button" data-q="gold">Gold</button><button class="chip" type="button" data-q="rainbow">Rainbow</button><button class="chip" type="button" data-q="">Clear</button></div>
 <div class="ads" id="ads"></div>
 <p class="empty" id="adsnone" hidden>No trade ads right now.</p>
+<div class="more-wrap"><button class="brick dark" id="more" type="button" hidden>Show more</button></div>
 </section>
 <p class="loading" id="loading">Loading…</p>
 </main>
@@ -355,6 +359,32 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 """
 open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "Check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html"))
 
+
+
+# ── Strategies ───────────────────────────────────────────────────────────
+strat_body = hero("floating_island", "Strategies", "Community strategies for Garden Tower Defense. Share yours and it shows up in /home in Discord too.", "t_strategies") + f"""<main class="wrap strats" id="main">
+<section class="panel share">
+<div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in with Discord to share it with every Bloombot server.</span></div><button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in to share</button></div>
+<form id="sform" hidden>
+<h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
+<div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
+<label>Details<textarea id="sd" rows="5" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea></label>
+<div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Details <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes. You need a linked account (<code>/link</code>).</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
+<p class="post-status" id="sstatus" hidden></p>
+</form>
+</section>
+<div class="board-bar">
+<input class="search" id="sq" type="search" placeholder="Search strategies…" aria-label="Search strategies">
+<div class="chips"><button class="chip on" type="button" data-scat="all">All</button><button class="chip" type="button" data-scat="meta-units">Meta units</button><button class="chip" type="button" data-scat="map-specific">Map-specific</button><button class="chip" type="button" data-scat="general">General</button></div>
+<span class="count-pill" id="scount"></span>
+</div>
+<p class="loading" id="sloading">Loading strategies…</p>
+<div class="slist" id="slist"></div>
+<p class="empty" id="snone" hidden>No strategies match that.</p>
+</main>
+<script defer src="js/strategies.js?v={JSVER['strategies']}"></script>
+"""
+open("strategies.html", "w").write(page("Bloombot Strategies · Garden Tower Defense", "Community Garden Tower Defense strategies: meta units, map-specific guides and general tips.", strat_body, "s", "strategies.html"))
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/swap.png" alt="">

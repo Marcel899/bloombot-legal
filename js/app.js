@@ -1,7 +1,8 @@
 /* Shared site code: Discord login (Supabase), the profile menu, the phone menu,
    value loading and small helpers. Pages read window.BB. */
 (() => {
-  const C = window.BB_CONF || {};
+  // Public project URL and publishable key: reads are limited by row level security.
+  const C = { url: "https://rkzgsndfzzgezoltddvx.supabase.co", key: "sb_publishable_CfTjHiYYCGqLZMlgpiKN-Q_m7JNITb5" };
   const listeners = [];
   const BB = window.BB = {
     sb: null, session: null, ready: false,
@@ -72,6 +73,61 @@
     }
     return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">` +
       `<path d="${area}" fill="${col}" opacity=".14"/><path d="${d}" fill="none" stroke="${col}" stroke-width="${opts.stroke || 2}" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>${labels}</svg>`;
+  };
+
+  /* Interactive step chart: hover or drag to read the price on any day. */
+  BB.interactiveChart = (box, points) => {
+    const pts = (points || []).filter(p => p && p[1] > 0).map(p => [new Date(p[0]).getTime(), p[1]]);
+    box.replaceChildren();
+    if (!pts.length) { box.append(BB.el("p", "empty", "No price history yet.")); return; }
+    const W = 600, H = 220, PL = 8, PR = 52, PT = 14, PB = 26;
+    const now = Date.now();
+    const x0 = pts[0][0], x1 = Math.max(now, x0 + 864e5);
+    let lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1]));
+    if (hi === lo) { hi += hi * 0.1 || 1; lo -= lo * 0.1 || 1; }
+    const span = hi - lo; hi += span * 0.08; lo = Math.max(0, lo - span * 0.08);
+    const X = t => PL + (t - x0) / (x1 - x0) * (W - PL - PR);
+    const Y = v => PT + (1 - (v - lo) / (hi - lo)) * (H - PT - PB);
+    const all = pts.concat([[now, pts[pts.length - 1][1]]]);
+    let d = `M${X(all[0][0])},${Y(all[0][1])}`;
+    for (let i = 1; i < all.length; i++) d += `H${X(all[i][0]).toFixed(1)}V${Y(all[i][1]).toFixed(1)}`;
+    const up = all[all.length - 1][1] >= all[0][1];
+    const col = up ? "#33c46a" : "#ef4b4f";
+    const day = t => new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    let grid = "";
+    for (let i = 0; i <= 3; i++) {
+      const v = lo + (hi - lo) * i / 3, y = Y(v).toFixed(1);
+      grid += `<line x1="${PL}" x2="${W - PR}" y1="${y}" y2="${y}" class="gl"/><text x="${W - PR + 6}" y="${+y + 4}">${BB.fmt(v)}</text>`;
+    }
+    grid += `<text x="${PL}" y="${H - 6}">${day(x0)}</text><text x="${W - PR}" y="${H - 6}" text-anchor="end">Today</text>`;
+    const dots = pts.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3" fill="${col}"/>`).join("");
+    const wrap = BB.el("div", "ichart");
+    wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" aria-label="Price chart">${grid}<path d="${d}V${H - PB}H${PL}Z" fill="${col}" opacity=".12"/>` +
+      `<path d="${d}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>${dots}` +
+      `<line class="cross" x1="0" x2="0" y1="${PT}" y2="${H - PB}" visibility="hidden"/><circle class="cdot" r="6" fill="${col}" stroke="#fff" stroke-width="2" visibility="hidden"/></svg>`;
+    const tip = BB.el("div", "ctip");
+    tip.hidden = true;
+    wrap.append(tip);
+    box.append(wrap);
+    const svg = wrap.querySelector("svg"), cross = svg.querySelector(".cross"), dot = svg.querySelector(".cdot");
+    const at = t => { let v = pts[0][1], since = pts[0][0]; for (const p of pts) { if (p[0] <= t) { v = p[1]; since = p[0]; } } return [v, since]; };
+    const move = e => {
+      const r = svg.getBoundingClientRect();
+      const sx = (e.clientX - r.left) / r.width * W;
+      const t = Math.min(x1, Math.max(x0, x0 + (sx - PL) / (W - PL - PR) * (x1 - x0)));
+      const [v, since] = at(t);
+      const cx = X(t), cy = Y(v);
+      cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.setAttribute("visibility", "visible");
+      dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("visibility", "visible");
+      tip.hidden = false;
+      tip.replaceChildren(BB.el("strong", null, BB.fmt(v)), BB.el("span", null, day(t)), BB.el("em", null, "since " + day(since)));
+      const px = cx / W * r.width;
+      tip.style.left = Math.min(r.width - tip.offsetWidth - 4, Math.max(4, px - tip.offsetWidth / 2)) + "px";
+    };
+    const leave = () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); };
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerdown", move);
+    svg.addEventListener("pointerleave", leave);
   };
 
   /* ── values (cached for 10 minutes) ──────────────────────── */
@@ -152,7 +208,7 @@
     out.type = "button";
     out.onclick = async () => { await BB.sb.auth.signOut(); };
     menu.append(head, link("trades.html#post", "offer", "Post a trade ad"), link("trades.html?mine=1", "swap", "My trade ads"),
-      link("calculator.html", "calculator", "Trade calculator"), out);
+      link("strategies.html", "floating_island", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), out);
     btn.onclick = e => {
       e.stopPropagation();
       const open = box.classList.toggle("open");

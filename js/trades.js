@@ -2,7 +2,40 @@
 (() => {
   const $ = id => document.getElementById(id);
   const { el } = BB;
-  let ads = [], me = null, timer = null;
+  let ads = [], me = null, timer = null, units = [], shown = 24;
+  const PAGE = 24;
+
+  /* Unit names in the ad text get their icon, longest names first. */
+  let unitRe = null, unitMap = new Map();
+  function prepUnits(items) {
+    units = items.filter(i => i.name && i.name.length >= 4);
+    unitMap = new Map(units.map(i => [i.name.toLowerCase(), i]));
+    const names = units.map(i => i.name).sort((a, b) => b.length - a.length)
+      .map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    unitRe = names.length ? new RegExp("\\b(" + names.join("|") + ")\\b", "gi") : null;
+  }
+  function adText(text) {
+    const p = el("p", "ad-text");
+    if (!unitRe) { p.textContent = text; return p; }
+    let last = 0;
+    text.replace(unitRe, (m, _g, i) => {
+      if (i > last) p.append(document.createTextNode(text.slice(last, i)));
+      const it = unitMap.get(m.toLowerCase());
+      const chip = el("span", "uchip");
+      chip.title = it.value > 0 ? `${it.name} · ${BB.fmt(it.value)}` : it.name;
+      chip.append(BB.itemImg(it, "uimg"), document.createTextNode(m));
+      p.append(chip);
+      last = i + m.length;
+      return m;
+    });
+    if (last < text.length) p.append(document.createTextNode(text.slice(last)));
+    return p;
+  }
+  const left = t => {
+    const h = (new Date(t) - Date.now()) / 36e5;
+    if (!(h > 0)) return "";
+    return h < 1 ? Math.max(1, Math.round(h * 60)) + "m left" : Math.round(h) + "h left";
+  };
 
   function card(a) {
     const c = el("article", "ad" + (a.discord_id === me ? " own" : ""));
@@ -12,10 +45,11 @@
     av.src = BB.safeUrl(a.discord_avatar) || "img/flower.png";
     av.onerror = () => { av.src = "img/flower.png"; };
     const who = el("div", "ad-who");
-    who.append(el("strong", null, a.discord_name || "Trader"), el("span", null, BB.ago(a.created_at)));
+    who.append(el("strong", null, a.discord_name || "Trader"),
+      el("span", null, BB.ago(a.created_at) + (a.expires_at ? " · " + left(a.expires_at) : "")));
     head.append(av, who);
     if (a.discord_id === me) head.append(el("span", "tag", "Yours"));
-    c.append(head, el("p", "ad-text", a.content));
+    c.append(head, adText(a.content));
     const img = BB.safeUrl(a.image_url);
     if (img) {
       const i = el("img", "ad-img");
@@ -46,7 +80,12 @@
     const v = $("adq").value.trim().toLowerCase(), mine = $("mine").checked, now = Date.now();
     const list = ads.filter(a => (!a.expires_at || new Date(a.expires_at) > now) && (!mine || a.discord_id === me) &&
       (!v || (a.content + " " + (a.discord_name || "") + " " + (a.roblox_name || "")).toLowerCase().includes(v)));
-    $("ads").replaceChildren(...list.map(card));
+    const sort = $("adsort").value;
+    if (sort === "old") list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    else if (sort === "ending") list.sort((a, b) => new Date(a.expires_at || 8e15) - new Date(b.expires_at || 8e15));
+    else list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    $("ads").replaceChildren(...list.slice(0, shown).map(card));
+    $("more").hidden = list.length <= shown;
     $("adsnone").hidden = list.length > 0;
     $("adsnone").textContent = mine ? "You have no live trade ads. Post one above!" : ads.length ? "No trade ad matches that." : "No trade ads right now.";
     $("count").textContent = list.length + " live trade ad" + (list.length === 1 ? "" : "s");
@@ -132,13 +171,18 @@
     $("login").hidden = true; $("board").hidden = false;
     if (new URLSearchParams(location.search).get("mine")) $("mine").checked = true;
     if (location.hash === "#post") setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("adtext").focus(); }, 50);
+    BB.loadValues().then(v => { prepUnits(v); render(); }).catch(() => {});
     load();
     clearInterval(timer);
     timer = setInterval(load, 60000);
   }
 
-  $("adq").oninput = render;
-  $("mine").onchange = render;
+  const reset = () => { shown = PAGE; render(); };
+  $("adq").oninput = reset;
+  $("mine").onchange = reset;
+  $("adsort").onchange = reset;
+  $("more").onclick = () => { shown += PAGE; render(); };
+  document.querySelectorAll("[data-q]").forEach(b => b.onclick = () => { $("adq").value = b.dataset.q; reset(); });
   $("adtext").oninput = counter;
   $("postform").onsubmit = post;
   counter();

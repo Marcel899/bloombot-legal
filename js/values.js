@@ -70,12 +70,27 @@
     stats.append(stat("Value", it.value_text || BB.fmt(it.est)), stat("Demand", it.demand || "?"), stat("Status", it.status || "?"),
       stat("30 days", it.change_30d == null ? "–" : (it.change_30d > 0 ? "+" : "") + it.change_30d + "%"));
     const ch = el("div", "vm-chart");
-    ch.innerHTML = BB.chart(it.history, 600, 200, { labels: true, pad: 6 }) || "<p class='empty'>No price history yet.</p>";
+    BB.interactiveChart(ch, it.history);
+    const changes = el("div", "vm-changes");
+    const hist = (it.history || []).filter(p => p[1] > 0);
+    if (hist.length > 1) {
+      changes.append(el("h3", null, "Recent price changes"));
+      const ul = el("ul");
+      for (let i = hist.length - 1; i > 0 && ul.childElementCount < 6; i--) {
+        const [d, v] = hist[i], prev = hist[i - 1][1];
+        const pct = Math.round((v - prev) / prev * 1000) / 10;
+        const li = el("li");
+        li.append(el("span", null, new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })),
+          el("strong", null, BB.fmt(prev) + " → " + BB.fmt(v)), el("em", pct >= 0 ? "up" : "down", (pct > 0 ? "+" : "") + pct + "%"));
+        ul.append(li);
+      }
+      changes.append(ul);
+    }
     const acts = el("div", "vm-acts");
     const add = el("a", "brick green sm", "Add to trade calculator");
     add.href = "calculator.html#give=" + encodeURIComponent(it.name);
     acts.append(add);
-    body.append(head, stats, ch, acts);
+    body.append(head, stats, ch, changes, acts);
     m.hidden = false;
     document.body.classList.add("noscroll");
     $("vmclose").focus();
@@ -111,5 +126,8 @@
     const newest = items.map(i => i.updated_at).filter(Boolean).sort().pop();
     if (newest) $("vupdated").textContent = "Synced " + BB.ago(newest);
     render();
+    const want = decodeURIComponent(location.hash.slice(1));
+    const hit = want && items.find(i => i.name === want);
+    if (hit) open(hit);
   });
 })();
