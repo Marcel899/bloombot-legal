@@ -1036,3 +1036,30 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 .hcard div{flex:1;min-width:0}.hcard h3{margin:0 0 2px;font-size:1.05rem}.hcard p{margin:0;color:var(--muted);font-size:.88rem}
 .hcard .more{flex:none;color:#8fd8ff;font-weight:800}
 @media (max-width:700px){.hcards{grid-template-columns:minmax(0,1fr)}.hero.big .ctas .brick{width:100%;justify-content:center}}
+
+/* giveaway: compact on phones */
+@media (max-width:600px){
+  .gw:not(.min){left:8px;right:8px;bottom:8px;padding:10px 12px;max-height:62vh;border-radius:16px}
+  .gw-head{margin:4px 0 8px;gap:10px}.gw-pic{width:44px;height:44px;padding:4px}
+  .gw-head h3{font-size:1.05rem}.gw-sub{font-size:.76rem}.gw-meta{font-size:.74rem;gap:8px}
+  .gw-task{padding:7px 10px;gap:8px}.gw-lab strong{font-size:.85rem}.gw-pts{font-size:.7rem}
+  .gw-go{display:none}.gw .brick.gw-btn{padding:5px 10px;font-size:.8rem}
+  .gw-prog{margin-bottom:6px}.gw-foot{font-size:.74rem;margin-top:6px}.gw .brick.gw-all{padding:7px;font-size:.85rem}
+  .gw .brick.gw-pill{padding:6px 8px 6px 10px;font-size:.9rem}.gw .brick.gw-pill img{width:22px;height:22px}
+}
+/* mobile top-bar menu: animated dropdown */
+@media (max-width:1180px){
+  .bar .links{transform-origin:top center;transform:translateY(-8px) scale(.97);transition:opacity .2s ease,transform .25s cubic-bezier(.2,.9,.3,1.2);padding:10px;gap:4px;background:rgba(22,25,32,.97);backdrop-filter:blur(14px)}
+  .bar .links.open{transform:none}
+  .bar .links .nl{opacity:0;transform:translateX(-10px);transition:opacity .2s,transform .25s,background .15s;border-radius:12px}
+  .bar .links.open .nl{opacity:1;transform:none}
+  .bar .links.open .nl:nth-child(1){transition-delay:.03s}.bar .links.open .nl:nth-child(2){transition-delay:.06s}
+  .bar .links.open .nl:nth-child(3){transition-delay:.09s}.bar .links.open .nl:nth-child(4){transition-delay:.12s}
+  .bar .links.open .nl:nth-child(5){transition-delay:.15s}.bar .links.open .nl:nth-child(6){transition-delay:.18s}
+  .bar .links .nl:active{transform:scale(.98)}
+  .burger span{transition:transform .25s,opacity .2s}
+  .burger[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+  .burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+}
+@media (prefers-reduced-motion:reduce){.bar .links,.bar .links .nl,.burger span{transition:none}}

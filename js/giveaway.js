@@ -77,7 +77,8 @@
       document.body.append(root);
     }
     const g = list[cur];
-    const min = store("bb_gw_min_" + g.id) === "1";
+    const saved = store("bb_gw_min_" + g.id);
+    const min = saved === "1" || (saved === null && matchMedia("(max-width:600px)").matches);
     root.className = "gw" + (min ? " min" : "");
     root.replaceChildren();
     if (min) {
