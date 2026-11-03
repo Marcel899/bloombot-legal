@@ -126,7 +126,13 @@
     const n = $("adtext").value.trim().length;
     $("adcount").textContent = `${n}/${MAX}`;
     $("adcount").classList.toggle("bad", n > MAX || (n > 0 && n < MIN));
-    $("postbtn").disabled = n < MIN || n > MAX;
+    $("postbtn").disabled = busy || n < MIN || n > MAX;
+    preview();
+  }
+  function preview() {
+    const t = $("adtext").value.trim();
+    $("adprev").hidden = !t;
+    if (t) $("adprevbody").replaceChildren(adText(t));
   }
   function status(kind, text) {
     const s = $("poststatus");
@@ -134,38 +140,144 @@
     s.className = "post-status " + kind;
     s.textContent = text || "";
   }
+
+  /* Composer: pick units for each side and the ad text writes itself. */
+  const pick = { have: [], want: [], tags: new Set() };
+  const qty = r => (r.qty > 1 ? r.qty + "x " : "");
+  function compose() {
+    const side = (list, extra) => {
+      const parts = list.map(r => qty(r) + r.item.name);
+      let t = parts.length > 2 ? parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1] : parts.join(" and ");
+      if (extra) t += (t ? " + " : "") + extra;
+      return t;
+    };
+    const haveExtra = pick.tags.has("have-add") ? "add" : "";
+    let have = side(pick.have, haveExtra);
+    if (pick.tags.has("have-bulk") && have) have = "bulk " + have;
+    const wantBits = [];
+    if (pick.tags.has("want-overpay")) wantBits.push("overpay");
+    let want = side(pick.want, pick.tags.has("want-add") ? "add" : "");
+    if (!want && (pick.tags.has("want-offers") || pick.have.length)) want = "offers";
+    if (wantBits.length) want = want ? want + " (" + wantBits.join(", ") + ")" : wantBits.join(", ");
+    let text = "";
+    if (have && want) text = have + " for " + want;
+    else if (have) text = "trading " + have;
+    else if (pick.want.length) text = "LF " + want;
+    $("adtext").value = text;
+    counter();
+  }
+  function drawChips() {
+    for (const [key, box] of [["have", "hchips"], ["want", "wchips"]]) {
+      $(box).replaceChildren(...pick[key].map(r => {
+        const c = el("span", "pchip");
+        c.append(BB.itemImg(r.item, "pimg"), el("span", null, r.item.name));
+        const q = el("button", "pq", "×" + r.qty);
+        q.type = "button";
+        q.title = "Change amount";
+        q.onclick = () => { r.qty = r.qty >= 9 ? 1 : r.qty + 1; drawChips(); compose(); };
+        const x = el("button", "px", "×");
+        x.type = "button";
+        x.setAttribute("aria-label", "Remove " + r.item.name);
+        x.onclick = () => { pick[key].splice(pick[key].indexOf(r), 1); drawChips(); compose(); };
+        c.append(q, x);
+        return c;
+      }));
+    }
+  }
+  const norm = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  function find(q) {
+    const k = norm(q);
+    if (!k) return [];
+    const starts = [], has = [];
+    for (const it of units) { const n = norm(it.name); if (n.startsWith(k)) starts.push(it); else if (n.includes(k)) has.push(it); }
+    return starts.concat(has).slice(0, 8);
+  }
+  function picker(key, inputId, listId) {
+    const input = $(inputId), list = $(listId);
+    let opts = [], idx = 0;
+    const draw = () => {
+      list.replaceChildren(...opts.map((it, i) => {
+        const o = el("button", "sug" + (i === idx ? " on" : ""));
+        o.type = "button";
+        o.append(BB.itemImg(it, "sug-img"), el("span", null, it.name), el("em", null, it.est > 0 ? BB.fmt(it.est) : ""));
+        o.onmousedown = e => { e.preventDefault(); choose(it); };
+        return o;
+      }));
+      list.hidden = !opts.length;
+    };
+    const choose = it => {
+      const have = pick[key].find(r => r.item.name === it.name);
+      if (have) have.qty = Math.min(9, have.qty + 1);
+      else if (pick[key].length < 6) pick[key].push({ item: it, qty: 1 });
+      if (key === "want") pick.tags.delete("want-offers"), syncTags();
+      input.value = ""; opts = []; draw(); drawChips(); compose(); input.focus();
+    };
+    input.oninput = () => { opts = find(input.value); idx = 0; draw(); };
+    input.onkeydown = e => {
+      if (e.key === "ArrowDown") { idx = Math.min(idx + 1, opts.length - 1); draw(); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { idx = Math.max(idx - 1, 0); draw(); e.preventDefault(); }
+      else if (e.key === "Enter") { e.preventDefault(); if (opts[idx]) choose(opts[idx]); }
+      else if (e.key === "Escape") { opts = []; draw(); }
+    };
+    input.onblur = () => setTimeout(() => { opts = []; draw(); }, 120);
+  }
+  function syncTags() { document.querySelectorAll(".tagb").forEach(b => b.classList.toggle("on", pick.tags.has(b.dataset.tag))); }
+  document.querySelectorAll(".tagb").forEach(b => b.onclick = () => {
+    const t = b.dataset.tag;
+    if (pick.tags.has(t)) pick.tags.delete(t); else pick.tags.add(t);
+    if (t === "want-offers" && pick.tags.has(t)) pick.want = [];
+    syncTags(); drawChips(); compose();
+  });
+  function clearComposer() {
+    pick.have = []; pick.want = []; pick.tags.clear();
+    syncTags(); drawChips();
+    $("adtext").value = "";
+    counter();
+  }
+
+  let busy = false;
   async function post(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const content = $("adtext").value.trim();
-    if (content.length < MIN || content.length > MAX) return;
-    $("postbtn").disabled = true;
+    if (busy) return;
+    if (content.length < MIN || content.length > MAX) {
+      status("bad", content.length < MIN ? "Your ad is too short. Add a unit or write a bit more." : "Your ad is too long (200 characters max).");
+      return;
+    }
+    if (!BB.sb || !BB.session) { status("bad", "You're logged out. Log in again and retry."); return; }
+    busy = true;
+    counter();
     status("wait", "Sending your trade ad to Bloombot…");
-    const { data, error } = await BB.sb.from("ad_submissions").insert({ content }).select("id").single();
+    let data, error;
+    try {
+      ({ data, error } = await BB.sb.from("ad_submissions").insert({ content }).select("id").single());
+    } catch (err) {
+      error = { message: (err && err.message) || "network error" };
+    }
     if (error) {
-      status("bad", /row-level security/i.test(error.message)
+      busy = false;
+      status("bad", /row-level security|violates/i.test(error.message)
         ? "You already have a trade ad waiting. Give it a few seconds."
+        : /JWT|token|auth/i.test(error.message) ? "Your login expired. Log out and in again, then retry."
         : "Couldn't send it: " + error.message);
       counter();
       return;
     }
     const started = Date.now();
+    const done = (kind, text) => { busy = false; status(kind, text); counter(); };
     const poll = async () => {
-      const { data: row } = await BB.sb.from("ad_submissions").select("status,reason,servers").eq("id", data.id).single();
+      let row = null;
+      try { ({ data: row } = await BB.sb.from("ad_submissions").select("status,reason,servers").eq("id", data.id).single()); } catch (err) { /* retry */ }
       if (row && row.status === "posted") {
-        status("ok", row.reason || `Posted to ${row.servers} server${row.servers === 1 ? "" : "s"}! It's on the board below.`);
-        $("adtext").value = "";
-        counter();
+        clearComposer();
+        done("ok", row.reason || `Posted to ${row.servers} server${row.servers === 1 ? "" : "s"}! It's on the board below.`);
+        BB.toast("Trade ad posted!");
         load();
         return;
       }
-      if (row && row.status === "rejected") {
-        status("bad", row.reason || "Bloombot couldn't post that trade ad.");
-        counter();
-        return;
-      }
+      if (row && row.status === "rejected") { done("bad", row.reason || "Bloombot couldn't post that trade ad."); return; }
       if (Date.now() - started > 90000) {
-        status("wait", "Bloombot is busy. Your ad will post soon; check back in a minute.");
-        counter();
+        done("wait", "Bloombot hasn't picked it up yet. If the bot is offline it will post when it's back.");
         return;
       }
       status("wait", row && row.status === "processing" ? "Posting to every server…" : "Waiting for Bloombot…");
@@ -183,13 +295,14 @@
       return;
     }
     const u = BB.user(session);
+    if (me === u.id && timer) return; // same login fired twice
     me = u.id;
     $("meav").src = u.avatar;
     $("mename").textContent = u.name;
     $("login").hidden = true; $("board").hidden = false;
     if (new URLSearchParams(location.search).get("mine")) $("mine").checked = true;
     if (location.hash === "#post") setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("adtext").focus(); }, 50);
-    BB.loadValues().then(v => { prepUnits(v); render(); }).catch(() => {});
+    BB.loadValues().then(v => { prepUnits(v); render(); preview(); }).catch(() => {});
     load();
     clearInterval(timer);
     timer = setInterval(load, 60000);
@@ -202,7 +315,11 @@
   $("more").onclick = () => { shown += PAGE; render(); };
   document.querySelectorAll("[data-q]").forEach(b => b.onclick = () => { $("adq").value = b.dataset.q; reset(); });
   $("adtext").oninput = counter;
+  $("adtext").onkeydown = e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); post(); } };
   $("postform").onsubmit = post;
+  $("adclear").onclick = () => { clearComposer(); status("", ""); };
+  picker("have", "hq", "hsug");
+  picker("want", "wq", "wsug");
   counter();
   BB.onAuth(show);
 })();

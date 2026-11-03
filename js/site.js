@@ -47,7 +47,7 @@
   const invite = (document.querySelector(".brick.add") || {}).href || "features.html";
   const PAGES = [
     ["Home", "./", "flower"], ["Values", "values.html", "dollar"], ["Trade calculator", "calculator.html", "calculator"],
-    ["Trade ads", "trades.html", "swap"], ["Post a trade ad", "trades.html#post", "offer"], ["Strategies", "strategies.html", "bullseye"],
+    ["Trade ads", "trades.html", "swap"], ["Post a trade ad", "trades.html#post", "plus"], ["Strategies", "strategies.html", "bullseye"],
     ["Share a strategy", "strategies.html#share", "bullseye"], ["Features and commands", "features.html", "gem"],
     ["My watchlist", "values.html#watchlist", "wish_star"], ["Add Bloombot to Discord", invite, "envelope"],
     ["Privacy Policy", "privacy.html", "shield"], ["Terms of Service", "terms.html", "scale"],

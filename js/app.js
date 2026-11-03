@@ -350,7 +350,7 @@
     const out = BB.el("button", "me-item out", "Log out");
     out.type = "button";
     out.onclick = async () => { await BB.sb.auth.signOut(); };
-    menu.append(head, link("trades.html#post", "offer", "Post a trade ad"), link("trades.html?mine=1", "swap", "My trade ads"),
+    menu.append(head, link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "swap", "My trade ads"),
       link("strategies.html", "bullseye", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), out);
     btn.onclick = e => {
       e.stopPropagation();

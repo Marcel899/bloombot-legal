@@ -300,11 +300,26 @@ trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from ever
 <section id="board" hidden>
 <form class="panel post" id="postform">
 <div class="post-head"><img id="meav" alt=""><div><strong>Post a trade ad as <span id="mename"></span></strong><span>It goes to every server running Bloombot, just like posting in a trade ad channel.</span></div></div>
-<div class="post-row" id="post">
-<textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad"></textarea>
-<button class="brick green" id="postbtn" type="submit">Post ad</button>
+<div class="composer" id="post">
+<div class="cmp-side have"><div class="cmp-top"><span class="cmp-label">I'm trading</span><span class="cmp-hint">pick units</span></div>
+<div class="cmp-chips" id="hchips"></div>
+<div class="picker"><input class="search" id="hq" type="search" autocomplete="off" placeholder="Search a unit…" aria-label="Add a unit you're trading"><div class="sugs" id="hsug" hidden></div></div>
+<div class="cmp-tags"><button class="tagb" type="button" data-tag="have-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="have-bulk"><img src="img/bulk.png" alt="">Bulk</button></div>
 </div>
-<div class="post-foot"><span class="hint">7 to 200 characters, no links, one ad every 5 minutes. You need a linked account (<code>/link</code> in Discord).</span><span id="adcount" class="count">0/200</span></div>
+<div class="cmp-mid"><img src="img/swap.png" alt=""><span>for</span></div>
+<div class="cmp-side want"><div class="cmp-top"><span class="cmp-label">I want</span><span class="cmp-hint">or leave empty for offers</span></div>
+<div class="cmp-chips" id="wchips"></div>
+<div class="picker"><input class="search" id="wq" type="search" autocomplete="off" placeholder="Search a unit…" aria-label="Add a unit you want"><div class="sugs" id="wsug" hidden></div></div>
+<div class="cmp-tags"><button class="tagb" type="button" data-tag="want-offers"><img src="img/offer.png" alt="">Offers</button><button class="tagb" type="button" data-tag="want-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="want-overpay"><img src="img/big_add.png" alt="">Overpay</button></div>
+</div>
+</div>
+<label class="cmp-text-label" for="adtext">Your trade ad <span>Built from your picks. You can also type it yourself.</span></label>
+<div class="post-row">
+<textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad"></textarea>
+</div>
+<div class="cmp-preview" id="adprev" hidden><span class="pv-label">Preview</span><div id="adprevbody"></div></div>
+<div class="post-foot"><span class="hint">7 to 200 characters, no links, one ad every 5 minutes. You need a linked account (<code>/link</code> in Discord). Press Enter to post.</span><span id="adcount" class="count">0/200</span></div>
+<div class="post-actions"><button class="brick dark sm" id="adclear" type="button">Clear</button><button class="brick green" id="postbtn" type="submit"><img src="img/plus.png" alt="">Post trade ad</button></div>
 <p class="post-status" id="poststatus" hidden></p>
 </form>
 <div class="board-bar">
