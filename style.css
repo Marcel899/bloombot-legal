@@ -1020,3 +1020,4 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 @media (prefers-reduced-motion:reduce){.topbar .bar,.nl img,.mini{transition:none}}
 .credit{display:block;line-height:1.5}
 .credit img{display:inline-block;vertical-align:-5px;margin-right:6px}
+.nl.g-yellow,.nl.g-yellow *{color:#fff!important;text-shadow:none!important}.nl.g-yellow:not(.on),.nl.g-yellow:not(.on) *{color:var(--soft)!important}.nl.g-yellow:not(.on):hover,.nl.g-yellow:not(.on):hover *{color:#fff!important}
