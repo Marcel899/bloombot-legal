@@ -1371,3 +1371,17 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 .me-item img{transition:transform .15s}
 @media (hover:hover){.me-item:hover img{transform:scale(1.12)}}
 @media (prefers-reduced-motion:reduce){.me-menu,.me-menu *{transition:none!important}}
+
+/* ── top bar nav v5: pill track ── */
+@media (min-width:1181px){
+  .links{gap:2px;padding:4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+  .nl{padding:7px 13px;border-radius:10px;font-size:.93rem;color:var(--muted)}
+  .nl:hover{background:rgba(255,255,255,.06);color:var(--text)}
+  .nl.on{background:linear-gradient(180deg,rgba(var(--gl),.30),rgba(var(--gl),.16));color:#fff;box-shadow:inset 0 0 0 1px rgba(var(--gl),.45),inset 0 1px 0 rgba(255,255,255,.12),0 4px 12px -6px rgba(var(--gl),.7)}
+  .nl.on::after{display:none}
+  [data-theme=light] .links{background:rgba(120,100,40,.06);border-color:rgba(120,100,40,.10)}
+  [data-theme=light] .nl{color:var(--soft)}
+  [data-theme=light] .nl.on{background:#fff;color:var(--text);box-shadow:inset 0 0 0 1px rgba(var(--gl),.55),0 3px 10px -5px rgba(var(--gl),.8)}
+}
+.nl img{width:20px;height:20px}
+.nl:hover img{transform:translateY(-1px) scale(1.08)}
