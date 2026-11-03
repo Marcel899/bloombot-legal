@@ -49,7 +49,7 @@ HEAD = """<!doctype html>
 <a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
 <nav class="links" id="links">{nav}</nav>
 <div class="right">
-<a class="brick nb discord add" href="{invite}">{dsvg}<span>Add</span></a>
+<a class="brick nb discord add" href="{invite}">{dsvg}<span>Add<span class="wide"> to Discord</span></span></a>
 <div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login>{dsvg}<span>Log in</span></button></div>
 <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </div>
