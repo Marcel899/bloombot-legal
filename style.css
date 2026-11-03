@@ -1411,3 +1411,17 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
   .nl img{transition:transform .25s cubic-bezier(.2,.8,.2,1),filter .25s}
   .nl:hover img{transform:translateY(-2px) scale(1.1);filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
 }
+
+/* top bar: always fits when logged in (theme button + profile) */
+.bar{overflow:visible}
+.mini{min-width:0}
+@media (min-width:1181px){
+  .links{flex:0 1 auto;min-width:0;margin:0 auto}
+  .qs-btn span,.qs-btn kbd{display:none}
+  .qs-btn{width:38px;padding:0;justify-content:center}
+  .me-name{max-width:96px}
+}
+@media (min-width:1181px) and (max-width:1300px){.nl{padding:0 9px!important;gap:6px}.me-name,.caret{display:none}.me-btn{padding:3px}}
+.right{min-width:0}
+.me-btn{flex:none}
+@media (max-width:600px){.me-menu{position:fixed;top:72px;right:8px;left:auto;width:min(300px,calc(100vw - 16px));max-height:calc(100vh - 90px);overflow:auto}}
