@@ -6,6 +6,7 @@
       const h = document.documentElement, max = h.scrollHeight - h.clientHeight;
       p.style.transform = `scaleX(${max > 0 ? h.scrollTop / max : 0})`;
       t.classList.toggle("show", h.scrollTop > 600);
+      document.body.classList.toggle("scrolled", h.scrollTop > 24);
     };
     addEventListener("scroll", f, { passive: true });
     f();

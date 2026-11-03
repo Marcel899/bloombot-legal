@@ -993,3 +993,30 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .gw .brick.gw-pill em{padding:3px 8px;border-radius:8px;background:rgba(0,0,0,.35);font:800 .8rem ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em;opacity:1}
 @keyframes gwbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-3px) rotate(6deg)}}
 @media (prefers-reduced-motion:reduce){.gw .brick.gw-pill img{animation:none}}
+
+/* ── top bar v4 ── */
+.topbar .bar{transition:height .2s,background .2s,box-shadow .2s,border-color .2s;margin-top:12px}
+.bar::after{content:"";position:absolute;left:18px;right:18px;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(235,55,60,.6),rgba(169,79,255,.5),rgba(20,174,234,.6),transparent);pointer-events:none}
+body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-color:rgba(255,255,255,.12);box-shadow:0 14px 34px -14px rgba(0,0,0,1)}
+.mini{display:flex;align-items:center;gap:8px;transition:transform .15s}
+.mini:hover{transform:scale(1.04)}
+.mini:hover img.flower{animation:gwbob 1s ease-in-out}
+.nl{transition:background .15s,color .15s}
+.nl:hover{background:rgba(255,255,255,.07);color:#fff}
+.nl img,.nl svg{transition:transform .2s}
+.nl:hover img{transform:translateY(-2px) scale(1.12)}
+.nl.on{background:linear-gradient(180deg,rgba(var(--gl),.22),rgba(var(--gl),.08))}
+.nl.on::after{box-shadow:0 0 10px rgb(var(--gl))}
+.qs-btn{transition:background .15s,border-color .15s}
+.qs-btn:hover{border-color:rgba(255,255,255,.25)}
+.me-btn{transition:background .15s,border-color .15s}
+.me-btn:hover{border-color:rgba(255,255,255,.25)}
+.me-av{box-shadow:0 0 0 2px rgba(88,101,242,.8)}
+@media (max-width:1180px){
+  .bar .links .nl{padding:12px 14px;font-size:1rem}
+  .bar .links .nl img{width:26px;height:26px}
+}
+@media (max-width:600px){.topbar .bar{margin-top:8px}body.scrolled .topbar .bar{height:52px}}
+@media (prefers-reduced-motion:reduce){.topbar .bar,.nl img,.mini{transition:none}}
+.credit{display:block;line-height:1.5}
+.credit img{display:inline-block;vertical-align:-5px;margin-right:6px}
