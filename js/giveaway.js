@@ -2,7 +2,7 @@
 (() => {
   const TASKS = [
     { key: "join", label: "Join the giveaway", pts: 1, icon: "plus" },
-    { key: "trade_ad", label: "Have a live trade ad", pts: 7, icon: "trading", href: "trades.html#post", go: "Post one" },
+    { key: "trade_ad", label: "Have a live trade ad", pts: 4, icon: "trading", href: "trades.html#post", go: "Post one" },
     { key: "strategy", label: "Share a strategy", pts: 3, icon: "bullseye", href: "strategies.html", go: "Share" },
     { key: "server_link", label: "Add your private server link", pts: 1, icon: "gear", href: "profile.html#edit", go: "Add" },
   ];
@@ -18,7 +18,7 @@
   }
 
   async function load() {
-    const { data } = await BB.sb.from("giveaways").select("id,title,image_url,ends_at").is("winner_id", null)
+    const { data } = await BB.sb.from("giveaways").select("id,title,subtitle,image_url,ends_at").is("winner_id", null)
       .gt("ends_at", new Date().toISOString()).order("ends_at").limit(3);
     list = data || [];
     if (!list.length) { if (root) root.remove(); root = null; return; }
@@ -33,6 +33,22 @@
       (e || []).forEach(r => mine.add(r.giveaway_id + ":" + r.task));
     }
     render();
+    autoCheck();
+  }
+
+  let auto = false;
+  async function autoCheck() {
+    if (auto || !BB.session) return;
+    auto = true;
+    let got = 0;
+    for (const g of list) {
+      if (!mine.has(g.id + ":join")) continue;
+      for (const t of TASKS) {
+        if (t.key === "join" || mine.has(g.id + ":" + t.key)) continue;
+        try { const { data } = await BB.sb.rpc("claim_giveaway_task", { gid: g.id, t: t.key }); if (data === "ok") got += t.pts; } catch (e) { /* skip */ }
+      }
+    }
+    if (got) { BB.toast(`Giveaway: +${got} entries added`); load(); }
   }
 
   async function claim(g, t, btn) {
@@ -88,7 +104,9 @@
     const done = TASKS.filter(t => mine.has(g.id + ":" + t.key));
     const my = done.reduce((s, t) => s + t.pts, 0);
     meta.append(el("span", "gw-cd", "Ends in " + left(g.ends_at)), el("span", null, (totals[g.id] || 0).toLocaleString() + " entries"));
-    ht.append(el("h3", null, g.title), meta);
+    ht.append(el("h3", null, g.title));
+    if (g.subtitle) ht.append(el("p", "gw-sub", g.subtitle));
+    ht.append(meta);
     head.append(pic, ht);
     root.append(top, head);
     if (list.length > 1) {
@@ -97,6 +115,17 @@
       root.append(tabs);
     }
     const joined = mine.has(g.id + ":join");
+    if (joined) {
+      const prog = el("div", "gw-prog");
+      const bar = el("div", "gw-bar"); const fill = el("i"); fill.style.width = (done.length / TASKS.length * 100) + "%"; bar.append(fill);
+      const max = TASKS.reduce((s, t) => s + t.pts, 0);
+      const tot = Math.max(totals[g.id] || 0, my);
+      const chance = tot ? (my / tot * 100) : 0;
+      const info = el("div", "gw-pinfo");
+      info.append(el("span", null, `${my}/${max} entries`), el("span", null, "Your chance " + (chance >= 10 ? chance.toFixed(0) : chance.toFixed(1)) + "%"));
+      prog.append(info, bar);
+      root.append(prog);
+    }
     const ul = el("div", "gw-tasks");
     for (const t of TASKS) {
       const ok = mine.has(g.id + ":" + t.key);
@@ -118,6 +147,23 @@
       ul.append(row);
     }
     root.append(ul);
+    const open = TASKS.filter(t => t.key !== "join" && !mine.has(g.id + ":" + t.key));
+    if (joined && open.length) {
+      const all = el("button", "gw-all", "Check all tasks");
+      all.type = "button";
+      all.onclick = async () => {
+        if (busy) return;
+        busy = true; all.disabled = true; all.textContent = "Checking…";
+        let got = 0;
+        for (const t of open) {
+          try { const { data } = await BB.sb.rpc("claim_giveaway_task", { gid: g.id, t: t.key }); if (data === "ok") got += t.pts; } catch (e) { /* skip */ }
+        }
+        busy = false;
+        BB.toast(got ? `+${got} entries` : "Nothing new yet. Finish a task, then check again.");
+        load();
+      };
+      root.append(all);
+    }
     const foot = el("p", "gw-foot", BB.session
       ? (joined ? `You have ${my} ${my === 1 ? "entry" : "entries"}. Do more tasks for extra entries.` : "You need a Bloombot account to join.")
       : "Log in with Discord and have a Bloombot account to join.");

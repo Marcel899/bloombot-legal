@@ -958,3 +958,17 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .gw-lab strong{font-size:.92rem;line-height:1.25}
 .gw-task.done .gw-lab strong{text-decoration:line-through;color:var(--muted)}.gw-task.done .gw-lab{text-decoration:none}
 @media (max-width:520px){.gw-pts{display:inline-block}}
+
+.gw{background:linear-gradient(180deg,rgba(169,79,255,.16),rgba(20,174,234,.05) 120px,#16191f 220px),#16191f;border-color:rgba(169,79,255,.35)}
+.gw.min{background:none}
+.gw-pic{background:radial-gradient(circle,rgba(245,200,60,.35),#222733 70%);box-shadow:0 0 0 2px rgba(245,200,60,.45)}
+.gw-sub{margin:2px 0 0;color:#ffd77a;font-weight:800;font-size:.82rem}
+.gw-prog{margin:0 0 10px}
+.gw-pinfo{display:flex;justify-content:space-between;font-size:.8rem;font-weight:800;color:var(--soft);margin-bottom:5px}
+.gw-bar{height:8px;border-radius:99px;background:#262b36;overflow:hidden}
+.gw-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#28a828,#7ef0a0);transition:width .4s}
+.gw-all{width:100%;margin-top:8px;padding:9px;border:1px dashed rgba(143,216,255,.4);border-radius:12px;background:rgba(20,174,234,.08);color:#8fd8ff;font:900 .9rem "Nunito",sans-serif;cursor:pointer}
+.gw-all:hover{background:rgba(20,174,234,.16)}
+.gw-pill{animation:gwpulse 2.4s ease-in-out infinite}
+@keyframes gwpulse{0%,100%{box-shadow:0 10px 26px -6px rgba(120,80,255,.7)}50%{box-shadow:0 10px 34px -2px rgba(120,80,255,1)}}
+@media (prefers-reduced-motion:reduce){.gw-pill{animation:none}}
