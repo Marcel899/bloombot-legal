@@ -23,6 +23,10 @@
       $("st-ads").textContent = data.ads;
       $("st-values").textContent = data.values;
       $("st-strats").textContent = data.strategies;
+      const big = n => Number(n).toLocaleString("en-US");
+      for (const k of ["servers", "users"]) {
+        if (data[k] > 0) { $("st-" + k).textContent = big(data[k]); $("st-" + k).parentElement.hidden = false; }
+      }
       $("stats").classList.add("ready");
     });
     try {

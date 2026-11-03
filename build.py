@@ -187,6 +187,8 @@ home = f"""<section class="hero big">
 <a class="brick purple big-cta" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a>
 </div>
 <div class="hstats" id="stats">
+<span hidden><strong id="st-servers">–</strong> servers</span>
+<span hidden><strong id="st-users">–</strong> users</span>
 <span><strong id="st-ads">–</strong> live trade ads</span>
 <span><strong id="st-values">–</strong> units tracked</span>
 <span><strong id="st-strats">–</strong> strategies</span>
