@@ -108,7 +108,7 @@
     };
     const share = el("button", "brick dark sm", "Copy link");
     share.type = "button";
-    share.onclick = () => BB.copy(location.origin + location.pathname + "#" + encodeURIComponent(it.name), "Link copied");
+    share.onclick = () => BB.share(location.origin + location.pathname + "#" + encodeURIComponent(it.name), it.name + " value · Bloombot");
     acts.append(add, star, share);
     body.append(head, stats, ch, changes, acts);
     m.hidden = false;

@@ -143,7 +143,7 @@
 
   /* Composer: pick units for each side and the ad text writes itself. */
   const pick = { have: [], want: [], tags: new Set() };
-  const qty = r => (r.qty > 1 ? r.qty + "x " : "");
+  const qty = r => (r.bulk ? "bulk " : r.qty > 1 ? r.qty + "x " : "");
   function compose() {
     const side = (list, extra) => {
       const parts = list.map(r => qty(r) + r.item.name);
@@ -151,12 +151,12 @@
       if (extra) t += (t ? " + " : "") + extra;
       return t;
     };
-    const haveExtra = pick.tags.has("have-add") ? "add" : "";
+    const haveExtra = pick.tags.has("have-big") ? "big add" : pick.tags.has("have-small") ? "small add" : pick.tags.has("have-add") ? "add" : "";
     let have = side(pick.have, haveExtra);
-    if (pick.tags.has("have-bulk") && have) have = "bulk " + have;
     const wantBits = [];
     if (pick.tags.has("want-overpay")) wantBits.push("overpay");
     let want = side(pick.want, pick.tags.has("want-add") ? "add" : "");
+    if (!want && pick.tags.has("want-any")) want = "any";
     if (!want && (pick.tags.has("want-offers") || pick.have.length)) want = "offers";
     if (wantBits.length) want = want ? want + " (" + wantBits.join(", ") + ")" : wantBits.join(", ");
     let text = "";
@@ -169,17 +169,36 @@
   function drawChips() {
     for (const [key, box] of [["have", "hchips"], ["want", "wchips"]]) {
       $(box).replaceChildren(...pick[key].map(r => {
-        const c = el("span", "pchip");
-        c.append(BB.itemImg(r.item, "pimg"), el("span", null, r.item.name));
-        const q = el("button", "pq", "×" + r.qty);
-        q.type = "button";
-        q.title = "Change amount";
-        q.onclick = () => { r.qty = r.qty >= 9 ? 1 : r.qty + 1; drawChips(); compose(); };
+        const c = el("div", "pchip" + (r.bulk ? " bulk" : ""));
+        c.append(BB.itemImg(r.item, "pimg"), el("span", "pname", r.item.name));
+        const amt = el("div", "pamt");
+        const minus = el("button", "pq", "−"), plus = el("button", "pq", "+");
+        minus.type = plus.type = "button";
+        minus.setAttribute("aria-label", "One less");
+        plus.setAttribute("aria-label", "One more");
+        const n = el("input", "pnum");
+        n.type = "number"; n.min = "1"; n.max = "999"; n.inputMode = "numeric";
+        n.value = r.qty;
+        n.setAttribute("aria-label", "Amount of " + r.item.name);
+        n.disabled = !!r.bulk;
+        const set = v => { r.qty = Math.max(1, Math.min(999, Math.round(v) || 1)); n.value = r.qty; compose(); };
+        minus.onclick = () => set(r.qty - 1);
+        plus.onclick = () => set(r.qty + 1);
+        n.oninput = () => { if (n.value !== "") set(+n.value); };
+        n.onblur = () => set(+n.value);
+        minus.disabled = plus.disabled = !!r.bulk;
+        amt.append(minus, n, plus);
+        const bulk = el("button", "pbulk" + (r.bulk ? " on" : ""));
+        bulk.type = "button";
+        const bi = el("img"); bi.src = "img/bulk.png"; bi.alt = "";
+        bulk.append(bi, "Bulk");
+        bulk.title = "Trading or wanting lots of this unit";
+        bulk.onclick = () => { r.bulk = !r.bulk; drawChips(); compose(); };
         const x = el("button", "px", "×");
         x.type = "button";
         x.setAttribute("aria-label", "Remove " + r.item.name);
         x.onclick = () => { pick[key].splice(pick[key].indexOf(r), 1); drawChips(); compose(); };
-        c.append(q, x);
+        c.append(amt, bulk, x);
         return c;
       }));
     }
@@ -207,9 +226,10 @@
     };
     const choose = it => {
       const have = pick[key].find(r => r.item.name === it.name);
-      if (have) have.qty = Math.min(9, have.qty + 1);
-      else if (pick[key].length < 6) pick[key].push({ item: it, qty: 1 });
-      if (key === "want") pick.tags.delete("want-offers"), syncTags();
+      if (have) have.qty = Math.min(999, have.qty + 1);
+      else if (pick[key].length < 15) pick[key].push({ item: it, qty: 1, bulk: false });
+      else BB.toast("That\u2019s a lot of units. Keep it to 15 per side.", "bad");
+      if (key === "want") { pick.tags.delete("want-offers"); pick.tags.delete("want-any"); syncTags(); }
       input.value = ""; opts = []; draw(); drawChips(); compose(); input.focus();
     };
     input.oninput = () => { opts = find(input.value); idx = 0; draw(); };
@@ -224,8 +244,10 @@
   function syncTags() { document.querySelectorAll(".tagb").forEach(b => b.classList.toggle("on", pick.tags.has(b.dataset.tag))); }
   document.querySelectorAll(".tagb").forEach(b => b.onclick = () => {
     const t = b.dataset.tag;
-    if (pick.tags.has(t)) pick.tags.delete(t); else pick.tags.add(t);
-    if (t === "want-offers" && pick.tags.has(t)) pick.want = [];
+    const on = !pick.tags.has(t);
+    if (b.dataset.group) document.querySelectorAll(`.tagb[data-group="${b.dataset.group}"]`).forEach(x => pick.tags.delete(x.dataset.tag));
+    if (on) pick.tags.add(t); else pick.tags.delete(t);
+    if ((t === "want-offers" || t === "want-any") && on) pick.want = [];
     syncTags(); drawChips(); compose();
   });
   function clearComposer() {

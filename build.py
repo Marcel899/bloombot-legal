@@ -23,7 +23,10 @@ HEAD = """<!doctype html>
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="{base}img/garden.jpg">
+<meta property="og:image" content="{base}img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="{base}img/og.jpg">
 <meta property="og:url" content="{base}{path}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bloombot">
@@ -75,7 +78,7 @@ FOOT = """<footer>
 NAV = [
     ("v", "values.html", "dollar", "Values", "blue"),
     ("c", "calculator.html", "calculator", "Calculator", "green"),
-    ("a", "trades.html", "swap", "Trade ads", "purple"),
+    ("a", "trades.html", "trading", "Trade ads", "purple"),
     ("s", "strategies.html", "bullseye", "Strategies", "orange"),
     ("f", "features.html", "gem", "Features", "yellow"),
 ]
@@ -139,7 +142,7 @@ doc("intents", "gear", "How Bloombot uses intents", "How Bloombot uses the Messa
     "Bloombot Intent Use Cases", "Screenshots showing how Bloombot uses the Message Content and Server Members intents.", "", "t_intents")
 
 FEATURES = [
-    ("swap", "Global trade ads", "Post once and your ad reaches every server running Bloombot. Browse them all here.", "trades.html"),
+    ("trading", "Global trade ads", "Post once and your ad reaches every server running Bloombot. Browse them all here.", "trades.html"),
     ("dollar", "Live values", "Every unit's value, demand and 30-day trend, with price charts.", "values.html"),
     ("calculator", "Trade calculator", "See right away if a trade is a win, fair, or a loss.", "calculator.html"),
     ("gem", "All features", "Wishlists, value alerts, DPS ranking, levels, giveaways and more.", "features.html"),
@@ -154,14 +157,14 @@ home = f"""<section class="hero big">
 <a class="brick discord big-cta" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
 <a class="brick blue" href="values.html"><img src="img/dollar.png" alt="">Values</a>
 <a class="brick green" href="calculator.html"><img src="img/calculator.png" alt="">Trade calculator</a>
-<a class="brick purple" href="trades.html"><img src="img/swap.png" alt="">Trade ads</a>
+<a class="brick purple" href="trades.html"><img src="img/trading.png" alt="">Trade ads</a>
 </div>
 <p class="legal-links"><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></p>
 </div>
 </section>
 <main class="wrap" id="main">
 <section class="stats" id="stats">
-<div class="stat"><img src="img/swap.png" alt=""><div><strong id="st-ads">–</strong><span>live trade ads</span></div></div>
+<div class="stat"><img src="img/trading.png" alt=""><div><strong id="st-ads">–</strong><span>live trade ads</span></div></div>
 <div class="stat"><img src="img/dollar.png" alt=""><div><strong id="st-values">–</strong><span>units and gamepasses tracked</span></div></div>
 <div class="stat"><img src="img/bullseye.png" alt=""><div><strong id="st-strats">–</strong><span>community strategies</span></div></div>
 </section>
@@ -198,7 +201,7 @@ open("index.html", "w").write(page("Bloombot", "Bloombot is the trading bot for 
 
 # ── Features & commands ──────────────────────────────────────────────────
 ALL_FEATURES = [
-    ("swap", "Global trade ads", "Post one ad in your server's trade channel and it shows up in every server running Bloombot. Unit names turn into icons."),
+    ("trading", "Global trade ads", "Post one ad in your server's trade channel and it shows up in every server running Bloombot. Unit names turn into icons."),
     ("dollar", "Live values", "Every unit and gamepass with its value, demand and a price chart, updated from the community value list."),
     ("chart_up", "Value hub", "What's going up, what's going down, our guess for the next 30 days and the best cheap units for your budget."),
     ("calculator", "Trade checker", "Type what you give and what you get and see if it's a win, fair or a loss, with a picture you can share."),
@@ -289,9 +292,9 @@ open("features.html", "w").write(page("Bloombot Features and Commands", "Everyth
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
 JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home")}
-trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from every server. Post your own right here.", "t_trades") + f"""<main class="wrap trades" id="main">
+trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from every server. Post your own right here.", "t_trades") + f"""<main class="wrap trades" id="main">
 <section class="panel login" id="login" hidden>
-<img class="login-icon" src="img/swap.png" alt="">
+<img class="login-icon" src="img/trading.png" alt="">
 <h2>Log in to see trade ads</h2>
 <p>Trade ads are only shown to Discord users. We use your Discord account only to log you in.</p>
 <button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
@@ -301,16 +304,16 @@ trades_body = hero("swap", "Trade ads", "Every live Bloombot trade ad, from ever
 <form class="panel post" id="postform">
 <div class="post-head"><img id="meav" alt=""><div><strong>Post a trade ad as <span id="mename"></span></strong><span>It goes to every server running Bloombot, just like posting in a trade ad channel.</span></div></div>
 <div class="composer" id="post">
-<div class="cmp-side have"><div class="cmp-top"><span class="cmp-label">I'm trading</span><span class="cmp-hint">pick units</span></div>
+<div class="cmp-side have"><div class="cmp-top"><span class="cmp-label">I'm trading</span><span class="cmp-hint">pick units, set amounts or bulk</span></div>
 <div class="cmp-chips" id="hchips"></div>
 <div class="picker"><input class="search" id="hq" type="search" autocomplete="off" placeholder="Search a unit…" aria-label="Add a unit you're trading"><div class="sugs" id="hsug" hidden></div></div>
-<div class="cmp-tags"><button class="tagb" type="button" data-tag="have-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="have-bulk"><img src="img/bulk.png" alt="">Bulk</button></div>
+<div class="cmp-tags"><button class="tagb" type="button" data-tag="have-small" data-group="have-add"><img src="img/tiny_add.png" alt="">+ small add</button><button class="tagb" type="button" data-tag="have-add" data-group="have-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="have-big" data-group="have-add"><img src="img/big_add.png" alt="">+ big add</button></div>
 </div>
-<div class="cmp-mid"><img src="img/swap.png" alt=""><span>for</span></div>
+<div class="cmp-mid"><img src="img/trading.png" alt=""><span>for</span></div>
 <div class="cmp-side want"><div class="cmp-top"><span class="cmp-label">I want</span><span class="cmp-hint">or leave empty for offers</span></div>
 <div class="cmp-chips" id="wchips"></div>
 <div class="picker"><input class="search" id="wq" type="search" autocomplete="off" placeholder="Search a unit…" aria-label="Add a unit you want"><div class="sugs" id="wsug" hidden></div></div>
-<div class="cmp-tags"><button class="tagb" type="button" data-tag="want-offers"><img src="img/offer.png" alt="">Offers</button><button class="tagb" type="button" data-tag="want-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="want-overpay"><img src="img/big_add.png" alt="">Overpay</button></div>
+<div class="cmp-tags"><button class="tagb" type="button" data-tag="want-offers" data-group="want-kind"><img src="img/offer.png" alt="">Offers</button><button class="tagb" type="button" data-tag="want-any" data-group="want-kind"><img src="img/any.png" alt="">Any</button><button class="tagb" type="button" data-tag="want-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="want-overpay"><img src="img/win.png" alt="">Overpay</button></div>
 </div>
 </div>
 <label class="cmp-text-label" for="adtext">Your trade ad <span>Built from your picks. You can also type it yourself.</span></label>
@@ -415,7 +418,7 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 open("strategies.html", "w").write(page("Bloombot Strategies · Garden Tower Defense", "Community Garden Tower Defense strategies: meta units, map-specific guides and general tips.", strat_body, "s", "strategies.html"))
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
-<img src="img/swap.png" alt="">
+<img src="img/trading.png" alt="">
 <div><h2>Let's get you back</h2><p>Head home, or open the Privacy Policy or Terms of Service.</p></div>
 <a class="brick green" href="./">Go home</a>
 </section></main>

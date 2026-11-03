@@ -13,7 +13,7 @@
     if (s.created_at) top.append(el("span", "strat-date", BB.ago(s.created_at)));
     const link = el("button", "strat-link", "Copy link");
     link.type = "button";
-    link.onclick = () => BB.copy(location.origin + location.pathname + "#s-" + s.id, "Link to this strategy copied");
+    link.onclick = () => BB.share(location.origin + location.pathname + "#s-" + s.id, BB.plain(s.title) + " · Bloombot", "Link to this strategy copied");
     top.append(link);
     // Bot strategies often start with "# <emoji> Title": don't show the title twice.
     const lines = s.description.split("\n");

@@ -47,7 +47,7 @@
   const invite = (document.querySelector(".brick.add") || {}).href || "features.html";
   const PAGES = [
     ["Home", "./", "flower"], ["Values", "values.html", "dollar"], ["Trade calculator", "calculator.html", "calculator"],
-    ["Trade ads", "trades.html", "swap"], ["Post a trade ad", "trades.html#post", "plus"], ["Strategies", "strategies.html", "bullseye"],
+    ["Trade ads", "trades.html", "trading"], ["Post a trade ad", "trades.html#post", "plus"], ["Strategies", "strategies.html", "bullseye"],
     ["Share a strategy", "strategies.html#share", "bullseye"], ["Features and commands", "features.html", "gem"],
     ["My watchlist", "values.html#watchlist", "wish_star"], ["Add Bloombot to Discord", invite, "envelope"],
     ["Privacy Policy", "privacy.html", "shield"], ["Terms of Service", "terms.html", "scale"],
@@ -172,4 +172,19 @@
     cq.dispatchEvent(new Event("input"));
     setTimeout(() => document.getElementById("commands").scrollIntoView({ block: "start" }), 50);
   }
+})();
+
+/* The trade icon comes from Discord through the site; fall back to the local one if that fails. */
+(() => {
+  const fix = img => { if (!img.dataset.fb) { img.dataset.fb = 1; img.src = "img/swap.png"; } };
+  const watch = img => {
+    if (img.complete && img.naturalWidth === 0) fix(img);
+    else img.addEventListener("error", () => fix(img), { once: true });
+  };
+  document.querySelectorAll('img[src$="trading.png"]').forEach(watch);
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => {
+    if (n.nodeType !== 1) return;
+    if (n.matches('img[src$="trading.png"]')) watch(n);
+    n.querySelectorAll && n.querySelectorAll('img[src$="trading.png"]').forEach(watch);
+  }))).observe(document.body, { childList: true, subtree: true });
 })();

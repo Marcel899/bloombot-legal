@@ -153,10 +153,32 @@
     setTimeout(() => t.classList.add("out"), 2600);
     setTimeout(() => t.remove(), 3000);
   };
+  /* Copy text: clipboard API, then the old select-and-copy way, then show it to copy by hand. */
   BB.copy = async (text, done = "Copied!") => {
-    try { await navigator.clipboard.writeText(text); BB.toast(done); }
-    catch (e) { BB.toast("Couldn't copy. Select the text and copy it yourself.", "bad"); }
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); BB.toast(done); return true; }
+    } catch (e) { /* fall through */ }
+    const ta = BB.el("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+    document.body.append(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    ta.remove();
+    if (ok) { BB.toast(done); return true; }
+    window.prompt("Copy this:", text);
+    return false;
   };
+  /* Share a link: the phone's share sheet when there is one, otherwise copy it. */
+  BB.share = async (url, title, done = "Link copied") => {
+    if (navigator.share && matchMedia("(pointer:coarse)").matches) {
+      try { await navigator.share({ title, url }); return; } catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    return BB.copy(url, done);
+  };
+
   /* Watchlist: units you starred, kept in this browser only. */
   const FKEY = "bb_watch";
   BB.favs = {
@@ -350,7 +372,7 @@
     const out = BB.el("button", "me-item out", "Log out");
     out.type = "button";
     out.onclick = async () => { await BB.sb.auth.signOut(); };
-    menu.append(head, link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "swap", "My trade ads"),
+    menu.append(head, link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "trading", "My trade ads"),
       link("strategies.html", "bullseye", "Share a strategy"), link("calculator.html", "calculator", "Trade calculator"), out);
     btn.onclick = e => {
       e.stopPropagation();

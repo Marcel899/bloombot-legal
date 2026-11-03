@@ -148,7 +148,7 @@
   /* Sharing: the link holds the trade; the text is ready to paste in Discord. */
   $("copylink").onclick = () => {
     if (!sides.give.length && !sides.get.length) { BB.toast("Add some units first", "bad"); return; }
-    BB.copy(location.href, "Link copied. Anyone who opens it sees this trade.");
+    BB.share(location.href, "Trade check · Bloombot", "Link copied. Anyone who opens it sees this trade.");
   };
   $("copytext").onclick = () => {
     if (!sides.give.length || !sides.get.length) { BB.toast("Add units to both sides first", "bad"); return; }
