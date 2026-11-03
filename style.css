@@ -986,3 +986,10 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .gw .brick.gw-all{background:var(--bg);color:#fff;border:3px solid var(--bd);font:900 .95rem "Nunito",sans-serif;padding:9px}
 .credit{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:rgba(245,200,60,.08);border:1px solid rgba(245,200,60,.25);color:var(--soft);font-weight:700;font-size:.9rem}
 .credit img{width:22px;height:22px;flex:none}.credit a,footer a[href*="garden-td-values"]{color:#ffd77a}
+/* giveaway bubble v2 */
+.gw .brick.gw-pill{border:3px solid var(--bd);border-radius:14px;padding:8px 10px 8px 12px;gap:10px;font-size:1rem;box-shadow:0 0 0 0 rgba(169,79,255,.5),0 10px 24px -8px rgba(169,79,255,.8);transition:transform .15s}
+.gw .brick.gw-pill:hover{transform:translateY(-2px)}
+.gw .brick.gw-pill img{width:26px;height:26px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));animation:gwbob 2.2s ease-in-out infinite}
+.gw .brick.gw-pill em{padding:3px 8px;border-radius:8px;background:rgba(0,0,0,.35);font:800 .8rem ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em;opacity:1}
+@keyframes gwbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-3px) rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){.gw .brick.gw-pill img{animation:none}}
