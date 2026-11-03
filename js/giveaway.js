@@ -167,8 +167,9 @@
       const row = el("div", "gw-task" + (ok ? " done" : ""));
       const dot = el("span", "gw-dot", ok ? "✓" : "");
       const lab = el("span", "gw-lab");
-      lab.append(el("strong", null, t.label), el("span", "gw-pts", `+${t.pts} ${t.pts === 1 ? "entry" : "entries"}`));
-      row.append(dot, lab);
+      lab.append(el("strong", null, t.label));
+      const ico = el("img", "gw-ico"); ico.src = `img/${t.icon}.png`; ico.alt = ""; ico.onerror = () => ico.remove();
+      row.append(dot, ico, lab, el("span", "gw-pts", `+${t.pts}`));
       if (!ok) {
         if (!BB.session && t.key === "join") {
           const b = el("button", "brick blue sm gw-btn", "Sign in"); b.type = "button"; b.onclick = () => BB.login(); row.append(b);
@@ -200,7 +201,7 @@
       root.append(all);
     }
     const foot = el("p", "gw-foot", BB.session
-      ? (joined ? `You have ${my} ${my === 1 ? "entry" : "entries"}. Do more tasks for extra entries.` : "You need a Bloombot account to join.")
+      ? (joined ? (open.length ? `You have ${my} ${my === 1 ? "entry" : "entries"}. Do more tasks for extra entries.` : `All tasks done. You have the most entries possible. Good luck!`) : "You need a Bloombot account to join.")
       : "Log in with Discord and have a Bloombot account to join.");
     root.append(foot);
     tick();

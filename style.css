@@ -1454,3 +1454,20 @@ body{background:
 /* back-to-top moves left while the giveaway bubble is in the bottom right */
 body:has(.gw) .totop{right:auto;left:20px}
 @media (max-width:600px){body:has(.gw) .totop{left:14px}}
+
+/* giveaway tasks v3: compact rows, no strikethrough */
+.gw-tasks{gap:6px}
+.gw-task{gap:10px;padding:9px 10px;border-radius:12px}
+.gw-ico{width:22px;height:22px;flex:none;object-fit:contain}
+.gw-lab{flex:1;min-width:0}
+.gw-lab strong{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.gw-pts{flex:none;padding:2px 8px;border-radius:99px;font-size:.78rem;font-weight:900;background:rgba(255,255,255,.07);color:var(--soft)}
+.gw-task.done{background:rgba(40,168,40,.10);border-color:rgba(40,168,40,.35)}
+.gw-task.done .gw-lab strong,.gw-task.done .gw-lab{text-decoration:none!important;color:var(--text)!important}
+.gw-task.done .gw-pts{background:rgba(40,168,40,.2);color:#7ef0a0}
+.gw-task.done .gw-dot{width:20px;height:20px}
+.gw-task.locked{opacity:.55}
+[data-theme=light] .gw-task.done{background:#e8f6e6;border-color:#b7e0b0}
+[data-theme=light] .gw-task.done .gw-pts{background:#cfeec9;color:#17762f}
+@media (max-width:520px){.gw-pts{display:inline-block}}
+.gw-lab strong{white-space:normal;overflow:visible;line-height:1.25}
