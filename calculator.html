@@ -7,10 +7,10 @@
 <meta name="description" content="Check if a Garden Tower Defense trade is a win, fair or a loss with live values.">
 <meta property="og:title" content="Bloombot Trade Calculator · Garden Tower Defense">
 <meta property="og:description" content="Check if a Garden Tower Defense trade is a win, fair or a loss with live values.">
-<meta property="og:image" content="https://bloombot-gtd.vercel.app/img/og.jpg">
+<meta property="og:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta name="twitter:image" content="https://bloombot-gtd.vercel.app/img/og.jpg">
+<meta name="twitter:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
 <meta property="og:url" content="https://bloombot-gtd.vercel.app/calculator.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bloombot">
@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66781bb7">
+<link rel="stylesheet" href="style.css?v=6c697285">
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=8e9fee6e"></script>
 <script defer src="js/site.js?v=0813f001"></script>
@@ -53,20 +53,21 @@
 <p class="loading" id="cloading">Loading values…</p>
 <div class="cgrid">
 <section class="panel cside">
-<h2 class="weld g-red cs-title">You give<span class="cs-total" id="givetotal">0</span></h2>
+<h2 class="weld g-red cs-title">You give<span class="cs-count" id="givecount"></span><span class="cs-total" id="givetotal">0</span></h2>
 <div class="picker"><input class="search" id="giveq" type="search" autocomplete="off" placeholder="Add a unit or a value like 4k" aria-label="Add to You give"><div class="sugs" id="givesug" hidden></div></div>
 <div class="clist" id="givelist"></div>
 <p class="cempty" id="giveempty">Nothing here yet.</p>
 </section>
 <div class="cmid">
-<div class="verdict" id="verdict"><strong>Add units to both sides</strong><span>Search a unit or type a value like 4k.</span></div>
+<div class="verdict" id="verdict"><img id="vicon" class="vicon" alt="" hidden><strong>Add units to both sides</strong><span>Search a unit or type a value like 4k.</span></div>
 <div class="meter" id="meter"><i></i></div>
 <div class="cbtns"><button class="brick dark sm" id="swap" type="button">⇄ Swap sides</button><button class="brick dark sm" id="clear" type="button">Clear</button></div>
 <div class="cbtns share-btns"><button class="brick blue sm" id="copylink" type="button">Copy link</button><button class="brick discord sm" id="copytext" type="button">Copy for Discord</button></div>
+<button class="brick green sm post-from-calc" id="postad" type="button"><img src="img/plus.png" alt="">Post as trade ad</button>
 <div class="fairadds" id="fairadds"></div>
 </div>
 <section class="panel cside">
-<h2 class="weld g-green cs-title">You get<span class="cs-total" id="gettotal">0</span></h2>
+<h2 class="weld g-green cs-title">You get<span class="cs-count" id="getcount"></span><span class="cs-total" id="gettotal">0</span></h2>
 <div class="picker"><input class="search" id="getq" type="search" autocomplete="off" placeholder="Add a unit or a value like 4k" aria-label="Add to You get"><div class="sugs" id="getsug" hidden></div></div>
 <div class="clist" id="getlist"></div>
 <p class="cempty" id="getempty">Nothing here yet.</p>
@@ -74,7 +75,7 @@
 </div>
 <p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. Use Copy link to share this exact trade.</p>
 </main>
-<script defer src="js/calc.js?v=48d38690"></script>
+<script defer src="js/calc.js?v=57b8958b"></script>
 <footer>
 <div class="grass"></div>
 <div class="wrap foot">

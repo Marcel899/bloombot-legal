@@ -790,3 +790,17 @@ span.acc{opacity:.6}
 .pbulk.on{background:#14aeea;color:#fff}
 .px{height:24px;min-width:24px;padding:0}
 @media (max-width:420px){.pchip{flex-wrap:wrap}.pname{flex-basis:calc(100% - 40px)}}
+
+/* ── round 8: calculator ───────────────────────────────────── */
+.cs-count{margin-left:auto;margin-right:8px;font-size:.78rem;font-weight:800;opacity:.85}
+.cs-title .cs-total{margin-left:0}
+.cnum{width:44px;height:28px;border-radius:8px;border:2px solid #0c0e12;background:#171a21;color:#fff;font:800 .95rem Nunito,system-ui,sans-serif;text-align:center;-moz-appearance:textfield;appearance:textfield}
+.cnum::-webkit-outer-spin-button,.cnum::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.csum{color:var(--text);font-weight:800}
+.cmeta{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
+.cmeta i{font-style:normal}
+.cdem{font-size:.72rem;font-weight:800;color:var(--muted);background:rgba(255,255,255,.06);padding:1px 6px;border-radius:6px}
+.cmeta .chg{font-size:.72rem;padding:1px 6px}
+.vicon{width:44px;height:44px;margin:0 auto 2px;object-fit:contain}
+.post-from-calc{width:100%;justify-content:center;margin-top:8px}
+.post-from-calc img{width:20px;height:20px}

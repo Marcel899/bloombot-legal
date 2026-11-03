@@ -23,10 +23,10 @@ HEAD = """<!doctype html>
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="{base}img/og.jpg">
+<meta property="og:image" content="{base}img/og-v2.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta name="twitter:image" content="{base}img/og.jpg">
+<meta name="twitter:image" content="{base}img/og-v2.jpg">
 <meta property="og:url" content="{base}{path}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bloombot">
@@ -364,7 +364,7 @@ open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "
 # ── Trade calculator ─────────────────────────────────────────────────────
 def side(key, title, color):
     return f"""<section class="panel cside">
-<h2 class="weld g-{color} cs-title">{title}<span class="cs-total" id="{key}total">0</span></h2>
+<h2 class="weld g-{color} cs-title">{title}<span class="cs-count" id="{key}count"></span><span class="cs-total" id="{key}total">0</span></h2>
 <div class="picker"><input class="search" id="{key}q" type="search" autocomplete="off" placeholder="Add a unit or a value like 4k" aria-label="Add to {title}"><div class="sugs" id="{key}sug" hidden></div></div>
 <div class="clist" id="{key}list"></div>
 <p class="cempty" id="{key}empty">Nothing here yet.</p>
@@ -376,10 +376,11 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 <div class="cgrid">
 {side("give", "You give", "red")}
 <div class="cmid">
-<div class="verdict" id="verdict"><strong>Add units to both sides</strong><span>Search a unit or type a value like 4k.</span></div>
+<div class="verdict" id="verdict"><img id="vicon" class="vicon" alt="" hidden><strong>Add units to both sides</strong><span>Search a unit or type a value like 4k.</span></div>
 <div class="meter" id="meter"><i></i></div>
 <div class="cbtns"><button class="brick dark sm" id="swap" type="button">⇄ Swap sides</button><button class="brick dark sm" id="clear" type="button">Clear</button></div>
 <div class="cbtns share-btns"><button class="brick blue sm" id="copylink" type="button">Copy link</button><button class="brick discord sm" id="copytext" type="button">Copy for Discord</button></div>
+<button class="brick green sm post-from-calc" id="postad" type="button"><img src="img/plus.png" alt="">Post as trade ad</button>
 <div class="fairadds" id="fairadds"></div>
 </div>
 {side("get", "You get", "green")}

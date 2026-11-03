@@ -250,6 +250,20 @@
     if ((t === "want-offers" || t === "want-any") && on) pick.want = [];
     syncTags(); drawChips(); compose();
   });
+  /* trades.html#post&have=Witchleaf*2&want=Corn fills the composer (from the calculator). */
+  function prefill(values) {
+    const p = new URLSearchParams(location.hash.slice(1));
+    if (!p.has("have") && !p.has("want")) return;
+    const by = new Map(values.map(v => [v.name, v]));
+    for (const key of ["have", "want"]) for (const part of (p.get(key) || "").split(",").filter(Boolean)) {
+      const [name, q] = part.split("*");
+      const it = by.get(name);
+      if (it && pick[key].length < 15) pick[key].push({ item: it, qty: Math.max(1, Math.min(999, parseInt(q) || 1)), bulk: false });
+    }
+    drawChips();
+    compose();
+    history.replaceState(null, "", location.pathname + "#post");
+  }
   function clearComposer() {
     pick.have = []; pick.want = []; pick.tags.clear();
     syncTags(); drawChips();
@@ -323,8 +337,8 @@
     $("mename").textContent = u.name;
     $("login").hidden = true; $("board").hidden = false;
     if (new URLSearchParams(location.search).get("mine")) $("mine").checked = true;
-    if (location.hash === "#post") setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("adtext").focus(); }, 50);
-    BB.loadValues().then(v => { prepUnits(v); render(); preview(); }).catch(() => {});
+    if (location.hash.startsWith("#post")) setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("adtext").focus(); }, 50);
+    BB.loadValues().then(v => { prepUnits(v); render(); preview(); prefill(v); }).catch(() => {});
     load();
     clearInterval(timer);
     timer = setInterval(load, 60000);
