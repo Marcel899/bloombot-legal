@@ -972,3 +972,8 @@ a.me-head:hover{background:rgba(255,255,255,.05)}
 .gw-pill{animation:gwpulse 2.4s ease-in-out infinite}
 @keyframes gwpulse{0%,100%{box-shadow:0 10px 26px -6px rgba(120,80,255,.7)}50%{box-shadow:0 10px 34px -2px rgba(120,80,255,1)}}
 @media (prefers-reduced-motion:reduce){.gw-pill{animation:none}}
+/* profile form: inputs were stretched by .search flex-basis */
+.pedit label{display:block}
+.pedit label em{margin-left:6px}
+.pedit label .search,.pedit label textarea{display:block;flex:none;width:100%;height:auto;min-height:0;margin-top:6px;box-sizing:border-box}
+.pedit label input.search{text-overflow:ellipsis}
