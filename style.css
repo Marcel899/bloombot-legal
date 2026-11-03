@@ -1389,3 +1389,17 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
   .links{align-items:center;height:44px;box-sizing:border-box;flex:none}
   .bar .links .nl{height:34px;padding:0 12px;box-sizing:border-box;display:inline-flex;align-items:center;line-height:1;transform:none}
 }
+
+/* nav: weld texture on the active tab + icon hover */
+.nl{isolation:isolate;overflow:hidden}
+.nl.on::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:url(img/weld.png) 0 0/38px 38px repeat;filter:grayscale(100%);opacity:.22;pointer-events:none}
+[data-theme=light] .nl.on::before{opacity:.12}
+.nl img{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+@media (hover:hover){
+  .nl:hover img{animation:nlhop .5s cubic-bezier(.3,1.4,.5,1)}
+  .nl.on:hover img{animation:nlwig .5s ease-in-out}
+}
+@keyframes nlhop{0%{transform:none}35%{transform:translateY(-4px) scale(1.18) rotate(-8deg)}65%{transform:translateY(0) scale(.95) rotate(4deg)}100%{transform:none}}
+@keyframes nlwig{0%,100%{transform:none}25%{transform:rotate(-12deg) scale(1.1)}75%{transform:rotate(10deg) scale(1.1)}}
+.nl:hover img{transform:none}
+@media (prefers-reduced-motion:reduce){.nl img{animation:none!important}}
