@@ -375,7 +375,6 @@
     const c = crate(), u = c.units[S.unit];
     if (!u) return;
     $("kd").value = u[2];
-    $("kunitname").textContent = u[0];
     if (u[3]) {
       $("kpy").checked = true;
       $("kyn").value = u[3];
@@ -404,11 +403,6 @@
     node.textContent = "";
     String(text).split("**").forEach((part, i) => { if (part) node.append(i % 2 ? el("b", null, part) : part); });
   }
-  function stat(id, big, small) {
-    const n = $(id);
-    n.querySelector("strong").textContent = big;
-    n.querySelector("span").textContent = small;
-  }
 
   let last = null;
   function update(fromCost) {
@@ -430,136 +424,88 @@
     if (fromCost) { n = M.afford(num($("kc").value) || 0); $("kn").value = n; }
     const budgetN = M.afford(M.budget);
 
-    // a first solve tells us the scale for the chart
-    const pre = solve(M, []);
-    const n99 = Math.min(isFinite(pre.need(0.99)) ? pre.need(0.99) : CAP, CAP);
-    let xmax = Math.max(n99, 10);
-    if (budgetN > xmax && budgetN < xmax * 3) xmax = budgetN;
-    xmax = Math.ceil(xmax * 1.04);
-    const samples = [];
-    for (let i = 0; i <= 120; i++) samples.push(Math.round(xmax * i / 120));
-    const R = M.pity && !M.pity.exact ? solve(M, samples.concat([n, budgetN])) : pre;
+    const want = [n, budgetN];
+    let R = solve(M, want);
     last = { M, R };
+    const p = M.p, c = crate(), cn = cur(c).name, u = c.units[S.unit];
+    const uname = u ? u[0] : "your unit";
+    const E = R.expected, n50 = R.need(0.5);
+    const tone = g => (g >= 0.9 ? "good" : g >= 0.5 ? "mid" : g >= 0.2 ? "low" : "bad");
 
-    const p = M.p;
-    stat("ks-chance", pct(p), p >= 1 ? "Every crate" : "1 in " + short(1 / p) + (M.luck !== 1 ? ` (${pct(M.base)} × ${M.luck} luck)` : " per crate"));
-    const E = R.expected, med = R.need(0.5);
-    stat("ks-avg", isFinite(E) ? (E < 100 ? String(Math.round(E * 10) / 10) : short(E)) : "Too many", isFinite(med) ? "Half of players need " + short(med) + " or fewer" : "");
-    stat("ks-cost", isFinite(E) ? short(E * M.per) : "–", M.per > 0 ? short(M.per) + " per crate" + (M.usePacks ? " (in packs)" : "") : "Add a crate price");
-    $("ks-pity").classList.toggle("sure", !!R.guarantee);
-    if (R.guarantee) stat("ks-pity", short(R.guarantee), "crates from now, " + short(M.cost(R.guarantee)) + " " + cur(crate()).name);
-    else {
-      const left = 1 - R.got(Math.round(E * 3) || 1);
-      stat("ks-pity", "Never", M.pity ? "Pity gives a random unit of this rarity, so nothing is certain" : isFinite(left) ? `Even after 3× the average, ${pct(left)} of players still have none` : "No pity on this crate");
+    // head
+    $("kunitname").textContent = uname;
+    $("krsub").textContent = (c.id === "custom" ? "Your own numbers" : c.name) + (M.luck !== 1 ? ` · ${M.luck}x luck` : "");
+    const im = $("krimg"), src = (u && u[4]) || ((values.get(uname.toLowerCase()) || {}).icon_url) || "img/crate.png";
+    if (im.getAttribute("src") !== src) { im.src = src; im.onerror = () => { im.src = "img/crate.png"; im.onerror = null; }; }
+
+    // three numbers
+    $("kt1").textContent = p >= 1 ? "Every crate" : "1 in " + short(1 / p);
+    $("kt1s").textContent = pct(p) + (M.luck !== 1 ? ` (${pct(M.base)} × ${M.luck})` : "");
+    $("kt2").textContent = isFinite(E) ? (E < 100 ? String(Math.round(E * 10) / 10) : short(E)) : "Too many";
+    $("kt2s").textContent = isFinite(E) && M.per > 0 ? `≈ ${short(E * M.per)} ${cn}` : "";
+    const gB = M.budget > 0 ? R.got(budgetN) : null;
+    $("kt3box").className = "kr-tile kr-you" + (gB == null ? " empty" : " " + tone(gB));
+    $("kt3").textContent = gB == null ? "?" : pct(gB);
+    $("kt3s").textContent = gB == null ? `Type your ${cn} in step 2` : budgetN > 0 ? `${commas(budgetN)} crates with ${short(M.budget)} ${cn}` : "Not enough for 1 crate";
+
+    // meter: your chance on a 0-100% bar
+    $("krmeter").hidden = gB == null;
+    if (gB != null) {
+      $("krbar").style.width = Math.max(gB * 100, gB > 0 ? 1 : 0) + "%";
+      $("krbar").className = tone(gB);
+      $("krlabel").textContent = pct(gB);
     }
 
-    // the short answer, in words
-    const uname = $("kunitname").textContent, cn = cur(crate()).name;
-    rich($("ka1"), `**${uname}** drops from **${pct(p)}** of crates` + (p < 1 ? ` (1 in ${short(1 / p)})` : "") + (M.luck !== 1 ? ` with ${M.luck}x luck.` : "."));
-    rich($("ka2"), isFinite(E)
-      ? `On average you need **${short(E)} crates**` + (M.per > 0 ? `, about **${short(E * M.per)} ${cn}**.` : ".")
-        + (R.guarantee ? ` Pity guarantees it by crate **${short(R.guarantee)}**.` : " That's an average, not a promise. Unlucky players need a lot more.")
-      : "It's so rare that the average is too big to work out.");
-    const bn = budgetN;
-    rich($("ka3"), M.budget > 0
-      ? (bn > 0 ? `With your **${short(M.budget)} ${cn}** you can open **${commas(bn)} crates**: a **${pct(R.got(bn))}** chance to get it.` : `Your ${short(M.budget)} ${cn} isn't enough for one crate.`)
-      : `Type the ${cn} you have in step 2 to see your own chance.`);
+    // verdict in plain words
+    const v = $("krverdict");
+    let words;
+    if (gB == null) words = isFinite(n50) ? `For a 50/50 chance you need **${commas(n50)} crates** (**${short(M.cost(n50))} ${cn}**).` : "";
+    else if (gB >= 1) words = "**You're guaranteed to get it** with your budget.";
+    else if (gB >= 0.9) words = "**Very likely!** You'll almost surely get it.";
+    else if (gB >= 0.5) words = "**Better than a coin flip.** Most players with your budget get it.";
+    else if (gB >= 0.2) words = `**Possible, but don't count on it.** For a 50/50 chance save **${short(M.cost(n50))} ${cn}**.`;
+    else words = isFinite(n50) ? `**Very unlikely** with your budget. For a 50/50 chance save **${short(M.cost(n50))} ${cn}**.` : "**Very unlikely.**";
+    rich(v, words);
+    v.className = "kr-verdict " + (gB == null ? "" : tone(gB));
+    rich($("krnote"), R.guarantee
+      ? `Pity guarantees it by crate **${commas(R.guarantee)}** (${short(M.cost(R.guarantee))} ${cn}).`
+      : M.pity
+        ? `Pity gives a unit of this rarity every **${commas(M.pity.N)} crates**, but it's this one only ${pct(M.pity.s)} of the time.`
+        : `No pity here, so luck decides. About 1 in ${Math.max(2, Math.round(1 / Math.max(1e-9, 1 - R.got(Math.max(1, Math.round(3 * (isFinite(E) ? E : 1)))))))} players still has none after 3× the average.`);
 
-    // budget
-    const bline = $("kbudget");
-    if (M.budget > 0 && budgetN > 0) {
-      const g = R.got(budgetN);
-      bline.hidden = false;
-      bline.className = "kbudget " + (g >= 0.9 ? "good" : g >= 0.5 ? "mid" : "bad");
-      bline.querySelector("strong").textContent = pct(g);
-      bline.querySelector("span").textContent = `With ${short(M.budget)} ${cur(crate()).name} you can open ${commas(budgetN)} crates. That's your chance to get ${$("kunitname").textContent}.`;
-    } else if (M.budget > 0) {
-      bline.hidden = false;
-      bline.className = "kbudget bad";
-      bline.querySelector("strong").textContent = "0%";
-      bline.querySelector("span").textContent = "That's not enough for one crate.";
-    } else bline.hidden = true;
-
-    // chance box
+    // what if box
     if (!fromCost) $("kc").value = n > 0 ? Math.round(M.cost(n)) : "";
     const g = n > 0 ? R.got(n) : 0;
     $("kres").textContent = pct(g);
-    $("kres").className = "kbig " + (g >= 0.9 ? "good" : g >= 0.5 ? "mid" : "bad");
-    const copies = n * p, oneIn = g > 0 ? 1 / g : Infinity;
+    $("kres").className = "kbig " + tone(g);
     $("kresline").textContent = n > 0
-      ? (g >= 1 ? `Everyone opening ${commas(n)} crates gets it.` : g >= 0.995 ? `Almost every player opening ${commas(n)} crates gets at least one.` : g >= 0.01
-        ? `Out of 100 players opening ${commas(n)} crates, about ${Math.round(g * 100)} get at least one.`
-        : `Only about 1 in ${short(oneIn)} players opening ${commas(n)} crates gets one.`)
-        + ` On average that's ${copies >= 10 ? short(copies) : copies >= 0.01 ? Math.round(copies * 100) / 100 : "less than 0.01"} ${copies === 1 ? "copy" : "copies"}.`
+      ? (g >= 1 ? `Everyone opening ${commas(n)} crates gets it.` : g >= 0.995 ? `Almost everyone opening ${commas(n)} crates gets it.` : g >= 0.01
+        ? `About ${Math.round(g * 100)} out of 100 players opening ${commas(n)} crates get it.`
+        : `Only about 1 in ${short(1 / g)} players opening ${commas(n)} crates gets it.`)
       : "Type how many crates you'll open, or how much you'll spend.";
 
-    // milestones
-    const tb = $("kmiles");
-    $("kmiles").closest("table").classList.toggle("nobudget", !(M.budget > 0));
-    tb.textContent = "";
-    for (const t of MILESTONES) {
-      const need = R.need(t);
-      const tr = el("tr");
-      if (isFinite(need) && M.budget > 0) tr.className = need <= budgetN ? "yes" : "no";
-      tr.append(el("td", "km-p", pct(t)));
-      tr.append(el("td", null, isFinite(need) ? commas(need) : "Over " + short(CAP)));
-      tr.append(el("td", null, isFinite(need) ? short(M.cost(need)) : "–"));
-      const td = el("td", "km-b");
-      td.textContent = !(M.budget > 0) || !isFinite(need) ? "" : need <= budgetN ? "✓ You can" : "Need " + short(M.cost(need) - M.budget) + " more";
-      tr.append(td);
-      tb.append(tr);
-    }
-    chart(R, samples, xmax, isFinite(E) ? E : null, budgetN, n);
-    save();
-  }
-
-  /* ── chart ────────────────────────────────────────────────────── */
-  const NS = "http://www.w3.org/2000/svg";
-  const svgEl = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
-  function chart(R, samples, xmax, avg, budgetN, mine) {
-    const box = $("kchart");
+    // how much to save: one bar per chance
+    const box = $("kmiles");
     box.textContent = "";
-    const W = 640, H = 220, L = 44, B = 26, T = 10, Rr = 12;
-    const x = n => L + (n / xmax) * (W - L - Rr), y = v => T + (1 - v) * (H - T - B);
-    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Chance to get the unit by crates opened" });
-    for (const v of [0, 0.25, 0.5, 0.75, 1]) {
-      svg.append(svgEl("line", { x1: L, x2: W - Rr, y1: y(v), y2: y(v), class: "kg" }));
-      const t = svgEl("text", { x: L - 8, y: y(v) + 4, class: "kt", "text-anchor": "end" }); t.textContent = v * 100 + "%"; svg.append(t);
-    }
-    for (const f of [0, 0.5, 1]) {
-      const t = svgEl("text", { x: x(xmax * f), y: H - 6, class: "kt", "text-anchor": f === 0 ? "start" : f === 1 ? "end" : "middle" });
-      t.textContent = short(Math.round(xmax * f)) + (f === 1 ? " crates" : "");
-      svg.append(t);
-    }
-    const pts = samples.map(n => [x(n), y(Math.max(0, Math.min(1, R.got(n) || 0)))]);
-    const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
-    svg.append(svgEl("path", { d: d + `L${x(xmax)} ${y(0)}L${x(0)} ${y(0)}Z`, class: "ka" }));
-    svg.append(svgEl("path", { d, class: "kl" }));
-    const mark = (n, cls, label) => {
-      if (!(n > 0) || n > xmax) return;
-      svg.append(svgEl("line", { x1: x(n), x2: x(n), y1: T, y2: H - B, class: "km " + cls }));
-      const t = svgEl("text", { x: Math.min(x(n) + 5, W - 90), y: T + 12 + (cls === "kmb" ? 14 : cls === "kmn" ? 28 : 0), class: "kt " + cls }); t.textContent = label; svg.append(t);
-    };
-    mark(avg, "kma", "Average");
-    mark(budgetN, "kmb", "Your budget");
-    if (mine && mine !== budgetN) mark(mine, "kmn", "Your crates");
-    const dot = svgEl("circle", { r: 5, class: "kdot", cx: -20, cy: -20 });
-    svg.append(dot);
-    box.append(svg);
-    const tip = el("div", "ktip"); tip.hidden = true; box.append(tip);
-    const move = e => {
-      const rect = svg.getBoundingClientRect();
-      const px = ((e.touches ? e.touches[0].clientX : e.clientX) - rect.left) / rect.width * W;
-      const i = Math.max(0, Math.min(samples.length - 1, Math.round((px - L) / (W - L - Rr) * (samples.length - 1))));
-      const n = samples[i], v = R.got(n) || 0;
-      dot.setAttribute("cx", pts[i][0]); dot.setAttribute("cy", pts[i][1]);
-      tip.hidden = false;
-      tip.textContent = `${commas(n)} crates: ${pct(v)}`;
-      tip.style.left = Math.min(rect.width - 150, Math.max(0, pts[i][0] / W * rect.width - 70)) + "px";
-    };
-    svg.addEventListener("mousemove", move);
-    svg.addEventListener("touchmove", move, { passive: true });
-    svg.addEventListener("mouseleave", () => { tip.hidden = true; dot.setAttribute("cx", -20); });
+    const needs = MILESTONES.map(t => R.need(t));
+    const top = Math.max(...needs.filter(isFinite), 1);
+    MILESTONES.forEach((t, i) => {
+      const need = needs[i];
+      const row = el("div", "kbar" + (M.budget > 0 && isFinite(need) ? (need <= budgetN ? " yes" : " no") : ""));
+      row.append(el("span", "kb-p", pct(t)));
+      const track = el("span", "kb-track"), fill = el("i");
+      fill.style.width = (isFinite(need) ? Math.max(2, need / top * 100) : 100) + "%";
+      track.append(fill);
+      row.append(track);
+      const txt = el("span", "kb-v");
+      const b = el("b", null, isFinite(need) ? short(M.cost(need)) + " " + cn : "Too many");
+      if (isFinite(need) && c.cur !== "custom") { const ci = el("img"); ci.alt = ""; ci.src = cur(c).icon; ci.onerror = () => ci.remove(); b.prepend(ci); }
+      txt.append(b, el("small", null, isFinite(need) ? commas(need) + " crates" : ""));
+      row.append(txt);
+      row.append(el("span", "kb-ok", M.budget > 0 && isFinite(need) ? (need <= budgetN ? "✓" : "") : ""));
+      box.append(row);
+    });
+    save();
   }
 
   /* ── share link ───────────────────────────────────────────────── */
@@ -584,6 +530,12 @@
     $("kpk").checked = q.get("pk") === "1";
     $("kpy").checked = q.get("py") === "1";
     $("kyt").value = q.get("yt") === "tier" ? "tier" : "exact";
+    if (!q.has("d")) { // short link: use the crate's own numbers
+      const want = S.unit;
+      pickCrate(S.crate);
+      if (want >= 0) pickUnit(want);
+      return true;
+    }
     const u = crate().units[S.unit];
     $("kunitname").textContent = u ? u[0] : "your unit";
     pickCrate(S.crate, true);
@@ -603,7 +555,7 @@
   const buyOne = () => { const c = crate(); if (c.price) buy(1, c.price); };
   $("buy1").onclick = buyOne;
   $("buyn").onclick = buyPack;
-  $("swreset").onclick = () => { simReset(); $("swpull").hidden = true; drawUnits(); };
+  $("swreset").onclick = $("swx").onclick = () => { simReset(); $("swpull").hidden = true; drawUnits(); };
   // E and T buy, like in game
   document.addEventListener("keydown", e => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || "")) return;

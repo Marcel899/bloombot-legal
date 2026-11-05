@@ -447,7 +447,7 @@ open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tow
 # ── Crate calculator ─────────────────────────────────────────────────────
 JSVER["crates"] = hashlib.md5(open("js/crates.js", "rb").read()).hexdigest()[:8]
 CRATESVER = hashlib.md5(open("data/crates.json", "rb").read()).hexdigest()[:8]
-crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&amp;display=swap">
+crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;display=swap">
 <main class="wrap calc crates" id="main" data-crates="data/crates.json?v={CRATESVER}">
 {calc_tabs("crate")}
 <section class="panel kpick">
@@ -455,6 +455,7 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 <div class="kcrates" id="kcrates"></div>
 <section class="smw" id="sw" aria-label="Summon window">
 <div class="sw-top"><h3 class="sw-title" id="swtitle">Skull Summon</h3><span class="sw-sub" id="swsub" hidden></span></div>
+<button class="sw-x" id="swx" type="button" aria-label="Reset pretend pulls" title="Reset pretend pulls">X</button>
 <div class="sw-grid" id="kunits"></div>
 <div class="sw-buy"><kbd class="sw-key">E</kbd><button class="sw-btn" id="buy1" type="button"><span id="buy1n">Buy 1 -</span><img src="img/candy.png" alt=""><span id="buy1p">666</span></button><button class="sw-btn" id="buyn" type="button"><span id="buynn">Buy 13 -</span><img src="img/candy.png" alt=""><span id="buynp">6666</span></button><kbd class="sw-key">T</kbd></div>
 </section>
@@ -490,28 +491,30 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 <section class="kout" id="kout">
 <h2 class="weld g-green kh kout-h"><img src="img/num_3.png" alt="3">Your chances</h2>
 <p class="kerr" id="kerr" hidden></p>
-<div class="kanswer" id="kanswer"><p id="ka1"></p><p id="ka2"></p><p id="ka3"></p></div>
-<div class="kstats">
-<div class="kstat" id="ks-chance"><img src="img/clover.png" alt=""><em>Your chance per crate</em><strong>–</strong><span></span></div>
-<div class="kstat" id="ks-avg"><img src="img/crate.png" alt=""><em>Average crates for <b id="kunitname">Grim Gardener</b></em><strong>–</strong><span></span></div>
-<div class="kstat" id="ks-cost"><img data-curimg src="img/candy.png" alt=""><em>Average <b data-cur>Candy</b> needed</em><strong>–</strong><span></span></div>
-<div class="kstat" id="ks-pity"><img src="img/shield.png" alt=""><em>Guaranteed after</em><strong>–</strong><span></span></div>
+<div class="kres">
+<div class="kr-head"><img class="kr-img" id="krimg" src="img/crate.png" alt=""><div><strong id="kunitname">Grim Gardener</strong><span id="krsub"></span></div></div>
+<div class="kr-tiles">
+<div class="kr-tile"><span>Chance per crate</span><strong id="kt1">–</strong><em id="kt1s"></em></div>
+<div class="kr-tile"><span>Crates on average</span><strong id="kt2">–</strong><em id="kt2s"></em></div>
+<div class="kr-tile kr-you" id="kt3box"><span>Your chance</span><strong id="kt3">–</strong><em id="kt3s"></em></div>
 </div>
-<p class="kbudget" id="kbudget" hidden><strong></strong><span></span></p>
+<div class="kr-meter" id="krmeter"><i id="krbar"></i><b id="krlabel"></b></div>
+<p class="kr-verdict" id="krverdict"></p>
+<p class="kr-note" id="krnote"></p>
+</div>
+<section class="panel ksave">
+<h3>How much should I save?</h3>
+<p class="khint">Pick how sure you want to be. Lucky players need less, unlucky ones more.</p>
+<div class="kbars" id="kmiles"></div>
+</section>
 <section class="panel kchance">
-<h3>Try a number of crates</h3>
-<div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
-<div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">My budget</button></div>
+<h3>What if I open…</h3>
+<div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or spend</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
+<div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">All my currency</button></div>
 <div class="kresult"><span class="kbig" id="kres">–</span><span id="kresline"></span></div>
-<div class="kchart" id="kchart"></div>
 </section>
 </section>
 </div>
-<section class="panel kmile">
-<h2 class="weld g-purple kh"><img src="img/chart_up.png" alt="">How many crates for each chance</h2>
-<p class="khint">Read it like this: after the 50% number of crates, half of all players have the unit. Lucky players need fewer, unlucky ones more.</p>
-<div class="ktable"><table><thead><tr><th>Chance</th><th>Crates</th><th><span data-cur>Candy</span></th><th>Your budget</th></tr></thead><tbody id="kmiles"></tbody></table></div>
-</section>
 <section class="panel khow">
 <h2 class="weld g-green kh"><img src="img/bell.png" alt="">How it works</h2>
 <div class="khow-grid">

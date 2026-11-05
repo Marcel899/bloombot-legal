@@ -25,7 +25,7 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=2701c8ba">
+<link rel="stylesheet" href="style.css?v=fae1fdf2">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=122853cd"></script>
@@ -54,7 +54,7 @@
 <p class="sub">Your real chance to pull a unit, and how much to save before you spend.</p>
 </div>
 </section>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;display=swap">
 <main class="wrap calc crates" id="main" data-crates="data/crates.json?v=9e797375">
 <nav class="ctabs" aria-label="Calculators"><a class="ctab" href="calculator.html"><img src="img/calculator.png" alt="">Trade calculator</a><a class="ctab on" href="crates.html" aria-current="page"><img src="img/crate.png" alt="">Crate calculator</a></nav>
 
@@ -63,6 +63,7 @@
 <div class="kcrates" id="kcrates"></div>
 <section class="smw" id="sw" aria-label="Summon window">
 <div class="sw-top"><h3 class="sw-title" id="swtitle">Skull Summon</h3><span class="sw-sub" id="swsub" hidden></span></div>
+<button class="sw-x" id="swx" type="button" aria-label="Reset pretend pulls" title="Reset pretend pulls">X</button>
 <div class="sw-grid" id="kunits"></div>
 <div class="sw-buy"><kbd class="sw-key">E</kbd><button class="sw-btn" id="buy1" type="button"><span id="buy1n">Buy 1 -</span><img src="img/candy.png" alt=""><span id="buy1p">666</span></button><button class="sw-btn" id="buyn" type="button"><span id="buynn">Buy 13 -</span><img src="img/candy.png" alt=""><span id="buynp">6666</span></button><kbd class="sw-key">T</kbd></div>
 </section>
@@ -98,28 +99,30 @@
 <section class="kout" id="kout">
 <h2 class="weld g-green kh kout-h"><img src="img/num_3.png" alt="3">Your chances</h2>
 <p class="kerr" id="kerr" hidden></p>
-<div class="kanswer" id="kanswer"><p id="ka1"></p><p id="ka2"></p><p id="ka3"></p></div>
-<div class="kstats">
-<div class="kstat" id="ks-chance"><img src="img/clover.png" alt=""><em>Your chance per crate</em><strong>–</strong><span></span></div>
-<div class="kstat" id="ks-avg"><img src="img/crate.png" alt=""><em>Average crates for <b id="kunitname">Grim Gardener</b></em><strong>–</strong><span></span></div>
-<div class="kstat" id="ks-cost"><img data-curimg src="img/candy.png" alt=""><em>Average <b data-cur>Candy</b> needed</em><strong>–</strong><span></span></div>
-<div class="kstat" id="ks-pity"><img src="img/shield.png" alt=""><em>Guaranteed after</em><strong>–</strong><span></span></div>
+<div class="kres">
+<div class="kr-head"><img class="kr-img" id="krimg" src="img/crate.png" alt=""><div><strong id="kunitname">Grim Gardener</strong><span id="krsub"></span></div></div>
+<div class="kr-tiles">
+<div class="kr-tile"><span>Chance per crate</span><strong id="kt1">–</strong><em id="kt1s"></em></div>
+<div class="kr-tile"><span>Crates on average</span><strong id="kt2">–</strong><em id="kt2s"></em></div>
+<div class="kr-tile kr-you" id="kt3box"><span>Your chance</span><strong id="kt3">–</strong><em id="kt3s"></em></div>
 </div>
-<p class="kbudget" id="kbudget" hidden><strong></strong><span></span></p>
+<div class="kr-meter" id="krmeter"><i id="krbar"></i><b id="krlabel"></b></div>
+<p class="kr-verdict" id="krverdict"></p>
+<p class="kr-note" id="krnote"></p>
+</div>
+<section class="panel ksave">
+<h3>How much should I save?</h3>
+<p class="khint">Pick how sure you want to be. Lucky players need less, unlucky ones more.</p>
+<div class="kbars" id="kmiles"></div>
+</section>
 <section class="panel kchance">
-<h3>Try a number of crates</h3>
-<div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
-<div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">My budget</button></div>
+<h3>What if I open…</h3>
+<div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or spend</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
+<div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">All my currency</button></div>
 <div class="kresult"><span class="kbig" id="kres">–</span><span id="kresline"></span></div>
-<div class="kchart" id="kchart"></div>
 </section>
 </section>
 </div>
-<section class="panel kmile">
-<h2 class="weld g-purple kh"><img src="img/chart_up.png" alt="">How many crates for each chance</h2>
-<p class="khint">Read it like this: after the 50% number of crates, half of all players have the unit. Lucky players need fewer, unlucky ones more.</p>
-<div class="ktable"><table><thead><tr><th>Chance</th><th>Crates</th><th><span data-cur>Candy</span></th><th>Your budget</th></tr></thead><tbody id="kmiles"></tbody></table></div>
-</section>
 <section class="panel khow">
 <h2 class="weld g-green kh"><img src="img/bell.png" alt="">How it works</h2>
 <div class="khow-grid">
@@ -132,7 +135,7 @@
 <div class="cbtns kbtns"><button class="brick blue sm" id="kcopy" type="button">Copy link</button><button class="brick dark sm" id="kreset" type="button">Reset</button></div>
 <p class="note">Drop chances and prices are from the in-game shop and can change with updates. Got different numbers? Just type them in. More crates on the <a href="https://gtd.fandom.com/wiki/Crates" target="_blank" rel="noopener">Garden Tower Defense wiki</a>.</p>
 </main>
-<script defer src="js/crates.js?v=e49ac310"></script>
+<script defer src="js/crates.js?v=4e711311"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">
