@@ -439,45 +439,96 @@
     const u = BB.user(BB.session);
     const btn = BB.el("button", "me-btn");
     btn.type = "button";
-    btn.setAttribute("aria-haspopup", "true");
+    btn.setAttribute("aria-haspopup", "menu");
     btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-label", "Account menu for " + u.name);
     const av = BB.el("img", "me-av");
     av.alt = "";
     av.src = u.avatar;
     av.onerror = () => { av.src = "img/flower.png"; };
-    btn.append(av, BB.el("span", "me-name", u.name), BB.el("span", "caret", "▾"));
+    const caret = BB.el("span", "caret");
+    caret.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>';
+    btn.append(av, BB.el("span", "me-name", u.name), caret);
     const menu = BB.el("div", "me-menu");
-    const head = BB.el("div", "me-head");
-    const hav = av.cloneNode();
-    head.append(hav, Object.assign(BB.el("div"), {}));
-    head.lastChild.append(BB.el("strong", null, u.name), BB.el("span", null, "Logged in with Discord"));
+    menu.setAttribute("role", "menu");
+    menu.id = "me-menu";
+    btn.setAttribute("aria-controls", "me-menu");
+
+    /* Header: who you are, with Roblox name + level once the profile row loads. */
+    const head = BB.el("a", "me-head");
+    head.href = "profile.html";
+    head.setAttribute("role", "menuitem");
+    const hav = BB.el("img", "me-hav");
+    hav.alt = "";
+    hav.src = u.avatar;
+    hav.onerror = () => { hav.src = "img/flower.png"; };
+    const who = BB.el("div", "me-who");
+    const meta = BB.el("span", "me-meta", "Logged in with Discord");
+    who.append(BB.el("strong", null, u.name), meta);
+    head.append(hav, who, BB.el("span", "me-view", "View"));
+    let loaded = false;
+    const loadMeta = async () => {
+      if (loaded || !BB.sb || !u.id) return;
+      loaded = true;
+      try {
+        const { data: p } = await BB.sb.from("profiles").select("roblox_name,level").eq("discord_id", u.id).maybeSingle();
+        meta.replaceChildren();
+        if (!p) { meta.append(BB.el("span", "me-setup", "Finish setting up your account")); return; }
+        if (p.level) meta.append(BB.el("span", "me-lvl", "Lv " + p.level));
+        meta.append(BB.el("span", "me-rbx", p.roblox_name || "No Roblox linked"));
+      } catch (e) { loaded = false; }
+    };
+
+    const here = location.pathname.replace(/^.*\//, "") + location.search + location.hash;
     const link = (href, icon, label) => {
       const a = BB.el("a", "me-item");
       a.href = href;
+      a.setAttribute("role", "menuitem");
       const i = BB.el("img"); i.src = `img/${icon}.png`; i.alt = "";
       a.append(i, BB.el("span", null, label));
+      if (here === href) a.setAttribute("aria-current", "page");
       return a;
     };
-    const out = BB.el("button", "me-item out", "Log out");
+    const sep = () => { const s = BB.el("div", "me-sep"); s.setAttribute("role", "separator"); return s; };
+    const out = BB.el("button", "me-item out");
     out.type = "button";
-    out.onclick = async () => { await BB.sb.auth.signOut(); };
-    const headLink = BB.el("a", "me-head");
-    headLink.href = "profile.html";
-    headLink.title = "Open your profile";
-    headLink.append(...head.childNodes);
-    const group = (title, ...items) => { const g = BB.el("div", "me-group"); g.append(BB.el("p", "me-gt", title), ...items); return g; };
-    menu.append(headLink,
-      group("Account", link("profile.html", "gear", "Profile & settings")),
-      group("Trading", link("trades.html#post", "plus", "Post a trade ad"), link("trades.html?mine=1", "trading", "My trade ads")),
-      group("Servers", link("dashboard.html", "shield", "Server dashboard")),
-      out);
-    btn.onclick = e => {
-      e.stopPropagation();
-      const open = box.classList.toggle("open");
-      const nav = document.getElementById("links"), bg = document.getElementById("burger");
-      if (open && nav) { nav.classList.remove("open"); if (bg) bg.setAttribute("aria-expanded", "false"); }
-      btn.setAttribute("aria-expanded", String(open));
+    out.setAttribute("role", "menuitem");
+    out.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>';
+    out.append(BB.el("span", null, "Log out"));
+    out.onclick = async () => { out.disabled = true; await BB.sb.auth.signOut(); };
+    menu.append(head, sep(),
+      link("profile.html#edit", "gear", "Edit profile"),
+      link("values.html#watchlist", "wish_star", "My watchlist"),
+      sep(),
+      link("trades.html#post", "plus", "Post a trade ad"),
+      link("trades.html?mine=1", "trading", "My trade ads"),
+      link("dashboard.html", "shield", "Server dashboard"),
+      sep(), out);
+
+    const items = () => [...menu.querySelectorAll("[role=menuitem]")];
+    const setOpen = (open, focus) => {
+      box.classList.toggle("open", open);
+      if (open) {
+        loadMeta();
+        const nav = document.getElementById("links"), bg = document.getElementById("burger");
+        if (nav) { nav.classList.remove("open"); if (bg) bg.setAttribute("aria-expanded", "false"); }
+        if (focus) setTimeout(() => items()[0].focus(), 30);
+      }
     };
+    /* Other code closes the menu by removing .open; keep aria-expanded in sync. */
+    new MutationObserver(() => btn.setAttribute("aria-expanded", String(box.classList.contains("open")))).observe(box, { attributes: true, attributeFilter: ["class"] });
+    btn.onclick = e => { e.stopPropagation(); setOpen(!box.classList.contains("open"), e.detail === 0); };
+    btn.onkeydown = e => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); setOpen(true, true); } };
+    menu.onkeydown = e => {
+      const list = items(), i = list.indexOf(document.activeElement);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        list[(i + (e.key === "ArrowDown" ? 1 : list.length - 1)) % list.length].focus();
+      } else if (e.key === "Home" || e.key === "End") { e.preventDefault(); list[e.key === "Home" ? 0 : list.length - 1].focus(); }
+      else if (e.key === "Escape") { e.preventDefault(); setOpen(false); btn.focus(); }
+      else if (e.key === "Tab") setOpen(false);
+    };
+    menu.addEventListener("click", e => { if (e.target.closest("a")) setOpen(false); });
     box.append(btn, menu);
   }
 

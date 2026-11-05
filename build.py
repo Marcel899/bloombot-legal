@@ -571,18 +571,17 @@ profile_body = f"""<main class="wrap prof" id="main">
 </section>
 <div class="skel-grid sk-prof" id="ploading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
 <section class="panel pcard" id="pcard" hidden></section>
-<form class="panel pedit" id="pedit" hidden>
-<h2 class="pedit-title"><img src="img/gear.png" alt=""><span id="pedit-h">Profile settings</span></h2>
-<p class="hint" id="pedit-sub">Changes are saved to your Bloombot account, the same as /home → Settings in Discord.</p>
+<form class="panel pedit" id="pedit" hidden novalidate>
+<div class="pe-head"><span class="pe-ico"><img src="img/gear.png" alt=""></span><div><h2 id="pedit-h">Profile settings</h2><p class="hint" id="pedit-sub">Changes are saved to your Bloombot account, the same as /home → Settings in Discord.</p></div><button class="pe-x" type="button" id="pclose" aria-label="Close settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg></button></div>
 <div class="pfields">
-<label>Roblox username<input class="search" id="fu" maxlength="20" autocomplete="off" placeholder="e.g. CoolGardener123"></label>
-<label>Private server link <em>optional</em><input class="search" id="fl" maxlength="300" autocomplete="off" placeholder="https://www.roblox.com/share?code=...&amp;type=Server"></label>
+<div class="pe-field" id="fu-f"><label for="fu">Roblox username</label><div class="pe-in"><span class="pe-pre" aria-hidden="true">@</span><input id="fu" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="CoolGardener123" aria-describedby="fu-m"><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fu-m">Your exact Roblox name, not your display name.</p></div>
+<div class="pe-field" id="fl-f"><label for="fl">Private server link <em>optional</em></label><div class="pe-in"><input id="fl" maxlength="300" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://www.roblox.com/share?code=…&amp;type=Server" aria-describedby="fl-m"><button class="pe-paste" type="button" id="fpaste" hidden>Paste</button><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fl-m">Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.</p></div>
 </div>
-<p class="hint">In Roblox: Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see your server link on the website.</p>
-<label>About me <em>optional</em><textarea id="fd" rows="3" maxlength="300" placeholder="How you play, what you collect, when you're online…"></textarea></label>
-<div class="post-foot"><span class="count" id="fdc">0/300</span><span></span></div>
-<div class="post-actions"><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
-<p class="post-status" id="pstatus" hidden></p>
+<div class="pe-field" id="fd-f"><div class="pe-lrow"><label for="fd">About me <em>optional</em></label><div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="fdw" aria-selected="true">Write</button><button type="button" role="tab" id="fdp" aria-selected="false">Preview</button></div></div>
+<div class="pe-ta"><textarea id="fd" rows="4" maxlength="300" placeholder="How you play, what you collect, when you're online…"></textarea><div class="pe-prev" id="fdprev" hidden></div></div>
+<div class="pe-foot"><span><b>**bold**</b> <i>*italic*</i> and emojis work</span><span class="count" id="fdc">0/300</span></div></div>
+<div class="pe-bar"><span class="pe-dirty" id="pdirty" hidden>Unsaved changes</span><span class="pe-sp"></span><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
+<p class="post-status" id="pstatus" hidden role="status"></p>
 <div class="pdanger" id="pdanger" hidden><div><strong>Delete account</strong><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div>
 </form>
 <section class="psec" id="pads-sec" hidden><div class="sec-head"><h2>Live trade ads</h2><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="tlist" id="pads"></div></section>

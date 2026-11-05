@@ -121,29 +121,87 @@
     s.className = "post-status " + kind;
     s.textContent = text || "";
   }
+  const USER = /^[A-Za-z0-9_]{3,20}$/, LINK = /^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/;
+  const FU_HINT = "Your exact Roblox name, not your display name.";
+  const FL_HINT = "Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.";
+  let orig = { u: "", l: "", d: "" }, touched = {};
+  const vals = () => ({ u: $("fu").value.trim(), l: $("fl").value.trim(), d: $("fd").value.trim() });
+  const dirty = () => { const v = vals(); return v.u !== orig.u || v.l !== orig.l || v.d !== orig.d; };
+  function field(id, state, msg) {
+    const f = $(id + "-f");
+    f.classList.toggle("ok", state === "ok");
+    f.classList.toggle("bad", state === "bad");
+    $(id).setAttribute("aria-invalid", String(state === "bad"));
+    $(id + "-m").textContent = msg;
+  }
+  /* Pull a share link out of whatever was pasted (Roblox sometimes adds text around it). */
+  const cleanLink = s => { const m = String(s).match(/https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server/); return m ? m[0] : String(s).trim(); };
+  function check() {
+    const v = vals();
+    let ok = true;
+    if (!v.u) { ok = false; field("fu", touched.fu ? "bad" : "", touched.fu ? "Enter your Roblox username." : FU_HINT); }
+    else if (!USER.test(v.u)) { ok = false; field("fu", "bad", v.u.length < 3 ? "Usernames are at least 3 characters." : "Only letters, numbers and _ are allowed."); }
+    else field("fu", "ok", FU_HINT);
+    if (!v.l) field("fl", "", FL_HINT);
+    else if (!LINK.test(v.l)) { ok = false; field("fl", touched.fl ? "bad" : "", touched.fl ? "That isn't a share link. It looks like https://www.roblox.com/share?code=…&type=Server" : FL_HINT); }
+    else field("fl", "ok", "Looks good. Only you can see it.");
+    const n = $("fd").value.length;
+    $("fdc").textContent = n + "/300";
+    $("fdc").classList.toggle("bad", n > 280);
+    const d = dirty();
+    $("pdirty").hidden = !d;
+    $("psave").disabled = busy || !ok || (!d && !!mine);
+    return ok;
+  }
+  function preview(on) {
+    $("fdw").classList.toggle("on", !on); $("fdw").setAttribute("aria-selected", String(!on));
+    $("fdp").classList.toggle("on", on); $("fdp").setAttribute("aria-selected", String(on));
+    $("fd").hidden = on;
+    const p = $("fdprev");
+    p.hidden = !on;
+    if (on) {
+      const t = $("fd").value.trim();
+      p.replaceChildren(t ? BB.md(t, { cls: "p-desc" }) : el("p", "hint", "Nothing to preview yet."));
+    } else $("fd").focus();
+  }
+  function closeEdit() {
+    if (busy) return;
+    $("pedit").hidden = true;
+    status("", "");
+    $("pcard").classList.remove("editing");
+    if (location.hash === "#edit") history.replaceState(null, "", location.pathname + location.search);
+  }
   function openEdit() {
     $("pedit").hidden = false;
+    $("pcard").classList.add("editing");
     $("pedit-h").textContent = mine ? "Profile settings" : "Create your Bloombot account";
     $("pedit-sub").textContent = mine
-      ? "Changes are saved to your Bloombot account, the same as /home → Settings in Discord."
+      ? "Saved to your Bloombot account, the same as /home → Settings in Discord."
       : "Link your Roblox account to post trade ads and share strategies. This is the same as /link in Discord.";
-    $("fu").value = (mine && mine.roblox_name) || "";
-    $("fl").value = (priv && priv.server_link) || "";
-    $("fd").value = (mine && mine.description) || "";
-    $("fdc").textContent = $("fd").value.length + "/300";
+    $("psave").textContent = mine ? "Save changes" : "Create account";
+    orig = { u: (mine && mine.roblox_name) || "", l: (priv && priv.server_link) || "", d: (mine && mine.description) || "" };
+    $("fu").value = orig.u;
+    $("fl").value = orig.l;
+    $("fd").value = orig.d;
+    touched = {};
+    preview(false);
     $("pdanger").hidden = !mine;
+    $("pclose").hidden = !mine;
+    $("pcancel").hidden = !mine;
     status("", "");
+    check();
     $("pedit").scrollIntoView({ block: "start", behavior: "smooth" });
-    $("fu").focus();
+    setTimeout(() => $("fu").focus({ preventScroll: true }), 250);
   }
-  const USER = /^[A-Za-z0-9_]{3,20}$/, LINK = /^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/;
   let busy = false;
+  const done = () => { busy = false; $("psave").classList.remove("busy"); check(); };
   async function save(e) {
     e.preventDefault();
     if (busy) return;
-    const u = $("fu").value.trim(), l = $("fl").value.trim(), d = $("fd").value.trim();
-    if (!USER.test(u)) { status("bad", "Your Roblox username needs 3 to 20 letters, numbers or underscores."); $("fu").focus(); return; }
-    if (l && !LINK.test(l)) { status("bad", "That server link isn't right. It should look like https://www.roblox.com/share?code=YOURCODE&type=Server"); $("fl").focus(); return; }
+    touched = { fu: true, fl: true };
+    $("fl").value = cleanLink($("fl").value);
+    if (!check()) { status("bad", "Fix the highlighted field first."); (USER.test(vals().u) ? $("fl") : $("fu")).focus(); return; }
+    const { u, l, d } = vals();
     const row = {};
     if (!mine || u !== mine.roblox_name) row.roblox_username = u;
     if (l !== ((priv && priv.server_link) || "")) row.server_link = l;
@@ -151,13 +209,14 @@
     if (!Object.keys(row).length) { status("ok", "Nothing changed."); BB.toast("", "info", { title: "Nothing changed" }); return; }
     busy = true;
     $("psave").disabled = true;
-    status("wait", "Saving…");
+    $("psave").classList.add("busy");
+    status("wait", "Saving… Bloombot checks your Roblox name, this takes a few seconds.");
     const tt = BB.toast("Sending your changes to Bloombot…", "wait", { title: "Saving your profile" });
     let data, error;
     try { ({ data, error } = await BB.sb.from("profile_updates").insert(row).select("id").single()); }
     catch (err) { error = { message: (err && err.message) || "network error" }; }
     if (error) {
-      busy = false; $("psave").disabled = false;
+      done();
       const why = /row-level|violates/i.test(error.message) ? "Your last change is still being saved. Give it a few seconds." : "Couldn't save: " + error.message;
       status("bad", why);
       tt.update(why, "bad", { title: "Profile not saved" });
@@ -168,14 +227,15 @@
       let r = null;
       try { ({ data: r } = await BB.sb.from("profile_updates").select("status,reason").eq("id", data.id).single()); } catch (err) { /* retry */ }
       if (r && r.status === "posted") {
-        busy = false; $("psave").disabled = false;
+        orig = vals();
+        done();
         status("ok", "Saved!");
         tt.update("Your changes are live on the site and in Discord.", "ok", { title: "Profile saved" });
-        setTimeout(() => { $("pedit").hidden = true; load(); }, 900);
+        setTimeout(() => { closeEdit(); load(); }, 900);
         return;
       }
-      if (r && r.status === "rejected") { busy = false; $("psave").disabled = false; status("bad", r.reason || "Bloombot couldn't save that."); tt.update(r.reason || "Bloombot couldn't save that.", "bad", { title: "Profile not saved" }); return; }
-      if (Date.now() - t0 > 60000) { busy = false; $("psave").disabled = false; status("wait", "Bloombot hasn't picked it up yet. If the bot is offline it will save when it's back."); tt.update("Bloombot seems busy or offline. It will save it when it's back.", "info", { title: "Still waiting" }); return; }
+      if (r && r.status === "rejected") { done(); status("bad", r.reason || "Bloombot couldn't save that."); tt.update(r.reason || "Bloombot couldn't save that.", "bad", { title: "Profile not saved" }); return; }
+      if (Date.now() - t0 > 60000) { done(); status("wait", "Bloombot hasn't picked it up yet. If the bot is offline it will save when it's back."); tt.update("Bloombot seems busy or offline. It will save it when it's back.", "info", { title: "Still waiting" }); return; }
       setTimeout(poll, 2000);
     };
     setTimeout(poll, 1200);
@@ -186,8 +246,33 @@
     if (await BB.deleteAccount()) { setTimeout(() => { location.href = "./"; }, 1200); return; }
     $("pdel").disabled = false;
   };
-  $("pcancel").onclick = () => { $("pedit").hidden = true; status("", ""); };
-  $("fd").oninput = () => { $("fdc").textContent = $("fd").value.length + "/300"; };
+  const cancel = async () => {
+    if (dirty() && !(await BB.confirm({ title: "Discard changes?", text: "Your edits haven't been saved.", ok: "Discard" }))) return;
+    orig = vals();
+    closeEdit();
+  };
+  $("pcancel").onclick = cancel;
+  $("pclose").onclick = cancel;
+  ["fu", "fl", "fd"].forEach(id => {
+    $(id).addEventListener("input", check);
+    $(id).addEventListener("blur", () => { if ($(id).value.trim()) touched[id] = true; check(); });
+  });
+  $("fu").addEventListener("input", () => { const v = $("fu").value, c = v.replace(/[\s@]/g, ""); if (c !== v) { $("fu").value = c; check(); } });
+  $("fl").addEventListener("paste", () => setTimeout(() => { $("fl").value = cleanLink($("fl").value); touched.fl = true; check(); }, 0));
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    $("fpaste").hidden = false;
+    $("fpaste").onclick = async () => {
+      try { $("fl").value = cleanLink(await navigator.clipboard.readText()); touched.fl = true; check(); $("fl").focus(); }
+      catch (err) { BB.toast("Couldn't read the clipboard. Paste with Ctrl+V."); $("fl").focus(); }
+    };
+  }
+  $("fdw").onclick = () => preview(false);
+  $("fdp").onclick = () => preview(true);
+  $("pedit").addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $("pedit").requestSubmit(); }
+    else if (e.key === "Escape" && mine && !e.defaultPrevented && !document.querySelector(".wm-back")) cancel();
+  });
+  addEventListener("beforeunload", e => { if (!$("pedit").hidden && dirty()) { e.preventDefault(); e.returnValue = ""; } });
 
   async function load() {
     const did = want || me;
