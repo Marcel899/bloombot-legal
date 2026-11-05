@@ -86,6 +86,10 @@
     {
       "source": "/img/trading.png",
       "destination": "https://cdn.discordapp.com/emojis/1510667373663883476.png?size=128&quality=lossless"
+    },
+    {
+      "source": "/img/seeds.png",
+      "destination": "https://cdn.discordapp.com/emojis/1510667402478616577.png?size=128&quality=lossless"
     }
   ]
 }

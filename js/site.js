@@ -47,7 +47,7 @@
   const { el } = BB;
   const invite = (document.querySelector(".brick.add") || {}).href || "features.html";
   const PAGES = [
-    ["Home", "./", "flower"], ["Values", "values.html", "dollar"], ["Trade calculator", "calculator.html", "calculator"],
+    ["Home", "./", "flower"], ["Values", "values.html", "dollar"], ["Trade calculator", "calculator.html", "calculator"], ["Crate calculator", "crates.html", "crate"],
     ["Trade ads", "trades.html", "trading"], ["Post a trade ad", "trades.html#post", "plus"], ["Strategies", "strategies.html", "bullseye"],
     ["Share a strategy", "strategies.html#share", "bullseye"], ["Features and commands", "features.html", "gem"],
     ["My watchlist", "values.html#watchlist", "wish_star"], ["My profile", "profile.html", "medal_gold"], ["Profile settings", "profile.html#edit", "gear"], ["Server dashboard", "dashboard.html", "shield"], ["Add Bloombot to Discord", invite, "envelope"],

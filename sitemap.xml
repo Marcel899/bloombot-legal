@@ -5,6 +5,7 @@
 <url><loc>https://bloombot-gtd.vercel.app/trades.html</loc><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/values.html</loc><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/calculator.html</loc><priority>0.8</priority></url>
+<url><loc>https://bloombot-gtd.vercel.app/crates.html</loc><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/strategies.html</loc><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/privacy.html</loc><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/terms.html</loc><priority>0.8</priority></url>

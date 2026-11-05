@@ -26,12 +26,13 @@ KEYWORDS = ("Garden Tower Defense, GTD, Roblox, Discord bot, GTD Discord, Garden
 PAGE_KW = {
     "values.html": "GTD value list, Garden Tower Defense value list, unit values, gamepass values, demand, value trends",
     "calculator.html": "GTD trade calculator, Garden Tower Defense trade calculator, win or loss, WFL, fair trade",
+    "crates.html": "GTD crate calculator, Garden Tower Defense summon calculator, drop chance, summon odds, pity, luck, how many summons, Skull Summon, Classic Summon",
     "trades.html": "GTD trade ads, Garden Tower Defense trading server, trade ads, LF NLF",
     "strategies.html": "GTD strategies, Garden Tower Defense strategy, best units, meta units, loadouts, map guides",
     "features.html": "Discord trading bot, Roblox trading bot, slash commands, wishlist, trade check",
 }
 # Pages Google should list (profile, dashboard and 404 are noindex).
-SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
+SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>'
 
 HEAD = """<!doctype html>
@@ -87,12 +88,23 @@ HEAD = """<!doctype html>
 """
 
 FOOT = """<footer>
-<div class="grass"></div>
 <div class="wrap foot">
-<div class="foot-mark"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot"></div>
-<nav><a href="./">Home</a><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="{support}">Support server</a></nav>
+<div class="foot-top">
+<div class="foot-brand">
+<a class="foot-mark" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<p>The trading bot for Roblox Garden Tower Defense. Trade ads, live values, calculators and strategies, free in every server.</p>
+<div class="foot-cta"><a class="brick discord sm" href="{invite}">{dsvg}Add to Discord</a><a class="brick dark sm" href="{support}"><img src="img/envelope.png" alt="">Support</a></div>
+</div>
+<nav class="foot-cols" aria-label="Footer">
+<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a></div>
+<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
+<div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a></div>
+</nav>
+</div>
+<div class="foot-bottom">
 <p>Unit values come from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>. Thanks to its team!</p>
-<p>Bloombot is a fan-made bot. It is not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
+<p>&copy; 2026 Bloombot. A fan-made bot, not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
+</div>
 </div>
 </footer>
 <a class="totop brick dark" href="#" aria-label="Back to top"><img src="img/up.png" alt=""></a>
@@ -124,7 +136,7 @@ def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
                         appver=APPVER, themever=THEMEVER, sitever=SITEVER, gwver=GWVER,
                         robots="index, follow, max-image-preview:large" if index else "noindex, follow",
                         ld=ld, keywords=(kw + ", " if kw else "") + KEYWORDS)
-            + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE))
+            + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE).replace("{dsvg}", DISCORD_SVG))
 
 
 SPY = ""
@@ -221,6 +233,7 @@ home = f"""<section class="hero big">
 </section>
 <section class="hcards">
 <a class="hcard" href="dashboard.html"><img src="img/shield.png" alt=""><div><h3>Run a Discord server?</h3><p>Set channels, pings and features from the server dashboard.</p></div><span class="more">Open &rarr;</span></a>
+<a class="hcard" href="crates.html"><img src="img/crate.png" alt=""><div><h3>Saving up for a unit?</h3><p>See your real chance per crate and how much to save first.</p></div><span class="more">Open &rarr;</span></a>
 <a class="hcard" href="{SUPPORT}"><img src="img/envelope.png" alt=""><div><h3>Need help?</h3><p>Ask in the support server. Data requests are answered within 30 days.</p></div><span class="more">Join &rarr;</span></a>
 </section>
 </main>
@@ -402,8 +415,15 @@ def side(key, title, color):
 </section>"""
 
 
+def calc_tabs(cur):
+    tabs = [("trade", "calculator.html", "calculator", "Trade calculator"), ("crate", "crates.html", "crate", "Crate calculator")]
+    return '<nav class="ctabs" aria-label="Calculators">' + "".join(
+        f'<a class="ctab{" on" if k == cur else ""}" href="{h}"{" aria-current=\"page\"" if k == cur else ""}><img src="img/{i}.png" alt="">{t}</a>'
+        for k, h, i, t in tabs) + "</nav>\n"
+
+
 calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss? Add both sides and find out.", "t_calc") + f"""<main class="wrap calc" id="main">
-<p class="loading" id="cloading">Loading values…</p>
+{calc_tabs("trade")}<p class="loading" id="cloading">Loading values…</p>
 <div class="cgrid">
 {side("give", "You give", "red")}
 <div class="cmid">
@@ -422,6 +442,77 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 """
 open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "GTD trade calculator: check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html"))
 
+
+
+# ── Crate calculator ─────────────────────────────────────────────────────
+JSVER["crates"] = hashlib.md5(open("js/crates.js", "rb").read()).hexdigest()[:8]
+crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""<main class="wrap calc crates" id="main">
+{calc_tabs("crate")}
+<section class="panel kpick">
+<h2 class="weld g-orange kh"><img src="img/crate.png" alt="">Pick a crate</h2>
+<div class="kcrates" id="kcrates"></div>
+<div id="kunits-wrap"><p class="khint">Tap the unit you want. Drop chances are from the in-game shop.</p><div class="kunits" id="kunits"></div></div>
+<p class="khint knote" id="knote" hidden></p>
+</section>
+<div class="kgrid">
+<section class="panel kform">
+<h2 class="weld g-blue kh"><img src="img/gear.png" alt="">Your numbers</h2>
+<label class="kf">Drop chance <span>The unit's chance per crate, like 0.005% or 1/20000</span>
+<span class="kin"><input class="search" id="kd" inputmode="decimal" autocomplete="off" value="0.005"><b>%</b></span></label>
+<div class="kf">Luck <span>2x luck doubles every chance (up to 100%).</span>
+<div class="kluck"><button class="chip" type="button" data-luck="1">1x</button><button class="chip" type="button" data-luck="1.5">1.5x</button><button class="chip" type="button" data-luck="2">2x</button><button class="chip" type="button" data-luck="3">3x</button><span class="kin sm"><input class="search" id="kl" inputmode="decimal" autocomplete="off" value="1" aria-label="Luck multiplier"><b>x</b></span></div></div>
+<label class="kf">Price per crate <span>What one crate costs</span>
+<span class="kin"><img data-curimg alt=""><input class="search" id="kp" inputmode="decimal" autocomplete="off" value="666"><b data-cur>Candy</b></span></label>
+<div class="kf">Pack deal <span>Like "Buy 13 for 6666". Turn it on if you buy in packs.</span>
+<div class="kpack"><label class="ktog"><input type="checkbox" id="kpk" checked><i></i></label><input class="search" id="kpn" inputmode="numeric" autocomplete="off" value="13" aria-label="Crates in a pack"><span>for</span><input class="search" id="kpp" inputmode="decimal" autocomplete="off" value="6666" aria-label="Pack price"></div></div>
+<label class="kf">Currency you have <span>Or what you plan to spend. 1.5m and 20k work too.</span>
+<span class="kin"><img data-curimg alt=""><input class="search" id="kb" inputmode="decimal" autocomplete="off" placeholder="e.g. 250k"><b data-cur>Candy</b></span></label>
+<div class="kf kpyf"><label class="ktog-line"><span class="ktog"><input type="checkbox" id="kpy"><i></i></span><span><strong>This crate has pity</strong><span>A guaranteed drop after a set number of crates.</span></span></label>
+<div class="kpity" id="kpity" hidden>
+<label class="kf">Pity at <span>Crates until the guarantee, like the 50 in "Pity 10/50"</span><input class="search" id="kyn" inputmode="numeric" autocomplete="off" value="50000"></label>
+<label class="kf">Your pity now <span>Like the 10 in "Pity 10/50"</span><input class="search" id="kyk" inputmode="numeric" autocomplete="off" value="0"></label>
+<label class="kf">Pity gives <select id="kyt"><option value="exact">This exact unit</option><option value="tier">A random unit of this rarity</option></select></label>
+<label class="kf" id="kyr-wrap">Chance of the whole rarity <span>All units with the same stars added up</span><span class="kin"><input class="search" id="kyr" inputmode="decimal" autocomplete="off"><b>%</b></span></label>
+</div></div>
+</section>
+<section class="kout" id="kout">
+<p class="kerr" id="kerr" hidden></p>
+<div class="kstats">
+<div class="kstat" id="ks-chance"><img src="img/clover.png" alt=""><em>Your chance per crate</em><strong>–</strong><span></span></div>
+<div class="kstat" id="ks-avg"><img src="img/crate.png" alt=""><em>Average crates for <b id="kunitname">Grim Gardener</b></em><strong>–</strong><span></span></div>
+<div class="kstat" id="ks-cost"><img data-curimg src="img/candy.png" alt=""><em>Average <b data-cur>Candy</b> needed</em><strong>–</strong><span></span></div>
+<div class="kstat" id="ks-pity"><img src="img/shield.png" alt=""><em>Guaranteed after</em><strong>–</strong><span></span></div>
+</div>
+<p class="kbudget" id="kbudget" hidden><strong></strong><span></span></p>
+<section class="panel kchance">
+<h3>What are my chances?</h3>
+<div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
+<div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">My budget</button></div>
+<div class="kresult"><span class="kbig" id="kres">–</span><span id="kresline"></span></div>
+<div class="kchart" id="kchart"></div>
+</section>
+</section>
+</div>
+<section class="panel kmile">
+<h2 class="weld g-purple kh"><img src="img/chart_up.png" alt="">Milestones</h2>
+<p class="khint">How many crates it takes to reach each chance. Lucky players need fewer, unlucky ones more.</p>
+<div class="ktable"><table><thead><tr><th>Chance</th><th>Crates</th><th><span data-cur>Candy</span></th><th>Your budget</th></tr></thead><tbody id="kmiles"></tbody></table></div>
+</section>
+<section class="panel khow">
+<h2 class="weld g-green kh"><img src="img/bell.png" alt="">How it works</h2>
+<div class="khow-grid">
+<div><h3>Every crate is a fresh roll</h3><p>Opening crates doesn't make the next one luckier. At 1% you don't get the unit after 100 crates for sure: your chance is <b>1 - 0.99<sup>100</sup> = 63%</b>. That's why we never just multiply the chance by the crates.</p></div>
+<div><h3>Average is not guaranteed</h3><p>The average is what it takes across many players. About 63% get the unit by then, and 37% don't. Without pity there is no number of crates that guarantees it.</p></div>
+<div><h3>Luck</h3><p>We multiply the drop chance by your luck, up to 100%. 2x luck halves the average crates. Check in game which units your luck boost works on.</p></div>
+<div><h3>Pity</h3><p>With pity, the crate at the pity count always drops that rarity. If the rarity has more than one unit, it can still be a different one. Pity counts are per rarity and reset when you pull one.</p></div>
+</div>
+</section>
+<div class="cbtns kbtns"><button class="brick blue sm" id="kcopy" type="button">Copy link</button><button class="brick dark sm" id="kreset" type="button">Reset</button></div>
+<p class="note">Drop chances and prices are from the in-game shop and can change with updates. Got different numbers? Just type them in. More crates on the <a href="https://gtd.fandom.com/wiki/Crates" target="_blank" rel="noopener">Garden Tower Defense wiki</a>.</p>
+</main>
+<script defer src="js/crates.js?v={JSVER['crates']}"></script>
+"""
+open("crates.html", "w").write(page("Bloombot Crate Calculator · Garden Tower Defense Summon Odds", "GTD crate calculator: your real chance to pull a Garden Tower Defense unit, average summons, currency needed, luck and pity.", crates_body, "c", "crates.html"))
 
 
 # ── Strategies ───────────────────────────────────────────────────────────
@@ -512,7 +603,7 @@ notfound = hero("warning", "Page not found", "That page doesn't exist. It may ha
 <a class="brick green" href="./">Go home</a>
 </section></main>
 """
-open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", index=False, body=notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>')))
+open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", index=False, body=notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>').replace('<a class="foot-mark" href="./">', '<a class="foot-mark" href="/">')))
 
 open("robots.txt", "w").write(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}sitemap.xml\n")
 open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
