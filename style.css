@@ -1738,3 +1738,13 @@ body:has(.gw) .totop{right:auto;left:20px}
 [data-theme=light] .smw{border-color:#9a9a9a}
 [data-theme=light] .linkbtn{color:#2c7a1e}
 @media (prefers-reduced-motion:reduce){.su.hit,.sw-pchip{animation:none}}
+.kout-h{margin-bottom:0!important}
+.panel h2.kout-h,.kout>h2.kh{margin:0;font-size:1.2rem;padding:6px 12px;display:flex;align-items:center;gap:12px;border-radius:8px}
+.kout>h2.kh img,.panel h2.kh img[src*="num_"]{width:30px;height:30px}
+.kform-hint{margin:-6px 0 0!important}
+.kanswer{padding:14px 18px;border-radius:14px;background:var(--card);border:3px solid #0c0e12;box-shadow:0 10px 24px -18px rgba(0,0,0,.8)}
+.kanswer p{margin:0;color:var(--soft);font-size:1.02rem;line-height:1.55}
+.kanswer p+p{margin-top:6px}
+.kanswer b{color:var(--text);font-weight:900}
+.kanswer p:first-child{font-size:1.1rem;color:var(--text)}
+[data-theme=light] .kanswer{background:#fffdf7;border-color:var(--line);box-shadow:0 2px 0 #eadfc5,0 14px 28px -20px rgba(90,70,20,.4)}

@@ -221,10 +221,12 @@
 
   function unitImg(u) {
     const it = values.get(u[0].toLowerCase());
-    if (it && window.BB && BB.itemImg) return BB.itemImg(it, "su-img");
+    const srcs = [u[4], it && it.icon_url, it && it.image_url].filter(x => typeof x === "string" && (/^https:\/\//.test(x) || /^img\//.test(x)));
+    srcs.push("img/crate.png");
     const i = el("img", "su-img"); i.alt = ""; i.loading = "lazy";
-    i.src = u[4] || "img/crate.png";
-    i.onerror = () => { i.src = "img/crate.png"; i.onerror = null; };
+    let k = 0;
+    i.src = srcs[0];
+    i.onerror = () => { if (++k < srcs.length) i.src = srcs[k]; };
     return i;
   }
 
@@ -389,6 +391,11 @@
     document.querySelectorAll("[data-luck]").forEach(b => b.classList.toggle("on", Number(b.dataset.luck) === Number(num(v))));
   }
 
+  // "**bold** text" as DOM nodes
+  function rich(node, text) {
+    node.textContent = "";
+    String(text).split("**").forEach((part, i) => { if (part) node.append(i % 2 ? el("b", null, part) : part); });
+  }
   function stat(id, big, small) {
     const n = $(id);
     n.querySelector("strong").textContent = big;
@@ -437,6 +444,18 @@
       const left = 1 - R.got(Math.round(E * 3) || 1);
       stat("ks-pity", "Never", M.pity ? "Pity gives a random unit of this rarity, so nothing is certain" : isFinite(left) ? `Even after 3× the average, ${pct(left)} of players still have none` : "No pity on this crate");
     }
+
+    // the short answer, in words
+    const uname = $("kunitname").textContent, cn = cur(crate()).name;
+    rich($("ka1"), `**${uname}** drops from **${pct(p)}** of crates` + (p < 1 ? ` (1 in ${short(1 / p)})` : "") + (M.luck !== 1 ? ` with ${M.luck}x luck.` : "."));
+    rich($("ka2"), isFinite(E)
+      ? `On average you need **${short(E)} crates**` + (M.per > 0 ? `, about **${short(E * M.per)} ${cn}**.` : ".")
+        + (R.guarantee ? ` Pity guarantees it by crate **${short(R.guarantee)}**.` : " That's an average, not a promise. Unlucky players need a lot more.")
+      : "It's so rare that the average is too big to work out.");
+    const bn = budgetN;
+    rich($("ka3"), M.budget > 0
+      ? (bn > 0 ? `With your **${short(M.budget)} ${cn}** you can open **${commas(bn)} crates**: a **${pct(R.got(bn))}** chance to get it.` : `Your ${short(M.budget)} ${cn} isn't enough for one crate.`)
+      : `Type the ${cn} you have in step 2 to see your own chance.`);
 
     // budget
     const bline = $("kbudget");

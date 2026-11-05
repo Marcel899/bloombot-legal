@@ -451,7 +451,7 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 <main class="wrap calc crates" id="main" data-crates="data/crates.json?v={CRATESVER}">
 {calc_tabs("crate")}
 <section class="panel kpick">
-<h2 class="weld g-orange kh"><img src="img/crate.png" alt="">Pick a crate</h2>
+<h2 class="weld g-orange kh"><img src="img/num_1.png" alt="1">Pick a crate, then the unit you want</h2>
 <div class="kcrates" id="kcrates"></div>
 <section class="smw" id="sw" aria-label="Summon window">
 <div class="sw-top"><h3 class="sw-title" id="swtitle">Skull Summon</h3><span class="sw-sub" id="swsub" hidden></span></div>
@@ -459,7 +459,7 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 <div class="sw-buy"><kbd class="sw-key">E</kbd><button class="sw-btn" id="buy1" type="button"><span id="buy1n">Buy 1 -</span><img src="img/candy.png" alt=""><span id="buy1p">666</span></button><button class="sw-btn" id="buyn" type="button"><span id="buynn">Buy 13 -</span><img src="img/candy.png" alt=""><span id="buynp">6666</span></button><kbd class="sw-key">T</kbd></div>
 </section>
 <div class="sw-under">
-<p class="khint">Tap the unit you want to calculate. Press Buy (or E and T) to try opening crates for fun. Nothing is spent.</p>
+<p class="khint"><b>Tap a unit</b> to calculate it. <b>Buy</b> (or E and T) opens pretend crates for fun, nothing is spent.</p>
 <p class="sw-stat" id="swstat" hidden>Opened <b id="swopened">0</b> · Spent <b id="swspent">0</b> · <b id="swmine"></b> <button class="linkbtn" id="swreset" type="button">Reset</button></p>
 </div>
 <div class="sw-pull" id="swpull" hidden></div>
@@ -467,17 +467,18 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 </section>
 <div class="kgrid">
 <section class="panel kform">
-<h2 class="weld g-blue kh"><img src="img/gear.png" alt="">Your numbers</h2>
+<h2 class="weld g-blue kh"><img src="img/num_2.png" alt="2">Check your numbers</h2>
+<p class="khint kform-hint">Filled in from the crate. Change anything that is different for you.</p>
 <label class="kf">Drop chance <span>The unit's chance per crate, like 0.005% or 1/20000</span>
 <span class="kin"><input class="search" id="kd" inputmode="decimal" autocomplete="off" value="0.005"><b>%</b></span></label>
+<label class="kf">Currency you have <span>Or what you plan to spend. 1.5m and 20k work too.</span>
+<span class="kin"><img data-curimg alt=""><input class="search" id="kb" inputmode="decimal" autocomplete="off" placeholder="e.g. 250k"><b data-cur>Candy</b></span></label>
 <div class="kf">Luck <span>2x luck doubles every chance (up to 100%).</span>
 <div class="kluck"><button class="chip" type="button" data-luck="1">1x</button><button class="chip" type="button" data-luck="1.5">1.5x</button><button class="chip" type="button" data-luck="2">2x</button><button class="chip" type="button" data-luck="3">3x</button><span class="kin sm"><input class="search" id="kl" inputmode="decimal" autocomplete="off" value="1" aria-label="Luck multiplier"><b>x</b></span></div></div>
 <label class="kf">Price per crate <span>What one crate costs</span>
 <span class="kin"><img data-curimg alt=""><input class="search" id="kp" inputmode="decimal" autocomplete="off" value="666"><b data-cur>Candy</b></span></label>
 <div class="kf">Pack deal <span>Like "Buy 13 for 6666". Turn it on if you buy in packs.</span>
 <div class="kpack"><label class="ktog"><input type="checkbox" id="kpk" checked><i></i></label><input class="search" id="kpn" inputmode="numeric" autocomplete="off" value="13" aria-label="Crates in a pack"><span>for</span><input class="search" id="kpp" inputmode="decimal" autocomplete="off" value="6666" aria-label="Pack price"></div></div>
-<label class="kf">Currency you have <span>Or what you plan to spend. 1.5m and 20k work too.</span>
-<span class="kin"><img data-curimg alt=""><input class="search" id="kb" inputmode="decimal" autocomplete="off" placeholder="e.g. 250k"><b data-cur>Candy</b></span></label>
 <div class="kf kpyf"><label class="ktog-line"><span class="ktog"><input type="checkbox" id="kpy"><i></i></span><span><strong>This crate has pity</strong><span>A guaranteed drop after a set number of crates.</span></span></label>
 <div class="kpity" id="kpity" hidden>
 <label class="kf">Pity at <span>Crates until the guarantee, like the 50 in "Pity 10/50"</span><input class="search" id="kyn" inputmode="numeric" autocomplete="off" value="50000"></label>
@@ -487,7 +488,9 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 </div></div>
 </section>
 <section class="kout" id="kout">
+<h2 class="weld g-green kh kout-h"><img src="img/num_3.png" alt="3">Your chances</h2>
 <p class="kerr" id="kerr" hidden></p>
+<div class="kanswer" id="kanswer"><p id="ka1"></p><p id="ka2"></p><p id="ka3"></p></div>
 <div class="kstats">
 <div class="kstat" id="ks-chance"><img src="img/clover.png" alt=""><em>Your chance per crate</em><strong>–</strong><span></span></div>
 <div class="kstat" id="ks-avg"><img src="img/crate.png" alt=""><em>Average crates for <b id="kunitname">Grim Gardener</b></em><strong>–</strong><span></span></div>
@@ -496,7 +499,7 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 </div>
 <p class="kbudget" id="kbudget" hidden><strong></strong><span></span></p>
 <section class="panel kchance">
-<h3>What are my chances?</h3>
+<h3>Try a number of crates</h3>
 <div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
 <div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">My budget</button></div>
 <div class="kresult"><span class="kbig" id="kres">–</span><span id="kresline"></span></div>
@@ -505,8 +508,8 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 </section>
 </div>
 <section class="panel kmile">
-<h2 class="weld g-purple kh"><img src="img/chart_up.png" alt="">Milestones</h2>
-<p class="khint">How many crates it takes to reach each chance. Lucky players need fewer, unlucky ones more.</p>
+<h2 class="weld g-purple kh"><img src="img/chart_up.png" alt="">How many crates for each chance</h2>
+<p class="khint">Read it like this: after the 50% number of crates, half of all players have the unit. Lucky players need fewer, unlucky ones more.</p>
 <div class="ktable"><table><thead><tr><th>Chance</th><th>Crates</th><th><span data-cur>Candy</span></th><th>Your budget</th></tr></thead><tbody id="kmiles"></tbody></table></div>
 </section>
 <section class="panel khow">
