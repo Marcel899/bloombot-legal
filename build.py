@@ -446,12 +446,23 @@ open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tow
 
 # ── Crate calculator ─────────────────────────────────────────────────────
 JSVER["crates"] = hashlib.md5(open("js/crates.js", "rb").read()).hexdigest()[:8]
-crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""<main class="wrap calc crates" id="main">
+CRATESVER = hashlib.md5(open("data/crates.json", "rb").read()).hexdigest()[:8]
+crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&amp;display=swap">
+<main class="wrap calc crates" id="main" data-crates="data/crates.json?v={CRATESVER}">
 {calc_tabs("crate")}
 <section class="panel kpick">
 <h2 class="weld g-orange kh"><img src="img/crate.png" alt="">Pick a crate</h2>
 <div class="kcrates" id="kcrates"></div>
-<div id="kunits-wrap"><p class="khint">Tap the unit you want. Drop chances are from the in-game shop.</p><div class="kunits" id="kunits"></div></div>
+<section class="smw" id="sw" aria-label="Summon window">
+<div class="sw-top"><h3 class="sw-title" id="swtitle">Skull Summon</h3><span class="sw-sub" id="swsub" hidden></span></div>
+<div class="sw-grid" id="kunits"></div>
+<div class="sw-buy"><kbd class="sw-key">E</kbd><button class="sw-btn" id="buy1" type="button"><span id="buy1n">Buy 1 -</span><img src="img/candy.png" alt=""><span id="buy1p">666</span></button><button class="sw-btn" id="buyn" type="button"><span id="buynn">Buy 13 -</span><img src="img/candy.png" alt=""><span id="buynp">6666</span></button><kbd class="sw-key">T</kbd></div>
+</section>
+<div class="sw-under">
+<p class="khint">Tap the unit you want to calculate. Press Buy (or E and T) to try opening crates for fun. Nothing is spent.</p>
+<p class="sw-stat" id="swstat" hidden>Opened <b id="swopened">0</b> · Spent <b id="swspent">0</b> · <b id="swmine"></b> <button class="linkbtn" id="swreset" type="button">Reset</button></p>
+</div>
+<div class="sw-pull" id="swpull" hidden></div>
 <p class="khint knote" id="knote" hidden></p>
 </section>
 <div class="kgrid">

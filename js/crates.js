@@ -6,14 +6,14 @@
   const el = (window.BB && BB.el) || ((t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; });
 
   /* ── crates (from the in-game shop) ────────────────────────────── */
-  const CUR = {
+  let CUR = {
     candy: { name: "Candy", icon: "img/candy.png" },
     seeds: { name: "Seeds", icon: "img/seeds.png" },
     custom: { name: "currency", icon: "img/crate.png" },
   };
   // [name, stars, drop %, pity] ; pity = [count, progress] shared by the rarity
-  const CRATES = [
-    { id: "skull", name: "Skull Summon", tag: "Limited", cur: "candy", price: 666, pack: [13, 6666], units: [
+  let CRATES = [
+    { id: "skull", name: "Skull Summon", kind: "limited", tag: "Limited", cur: "candy", price: 666, pack: [13, 6666], units: [
       ["Lanternwood", 1, 45], ["Cyclopsia", 2, 35], ["Draculaflora", 3, 15.8], ["Vitalily", 4, 2.64],
       ["Skeleton Dragon", 4, 1.2], ["Coffinroot", 5, 0.26], ["Stringshade", 5, 0.095], ["Grim Gardener", 5, 0.005]] },
     { id: "mushroom", name: "Mushroom Summon", cur: "seeds", price: 300, pack: [10, 2700], units: [
@@ -23,8 +23,9 @@
       ["Tomato", 0, 15.513], ["Farmer", 1, 13.186], ["Gnome", 1, 12.411], ["Pineapple Cannon", 1, 11.635],
       ["Chili Pepper", 2, 8.532], ["Rose Trap", 2, 7.757], ["Palm Tree", 3, 15.317, 50], ["Broccoli", 3, 12.254, 50],
       ["Watermelon", 4, 1.691, 500], ["Sunflower", 4, 1.674, 500], ["Bloodvine", 5, 0.03, 50000]] },
-    { id: "custom", name: "Custom", cur: "custom", units: [] },
   ];
+  const CUSTOM = { id: "custom", name: "Custom", cur: "custom", units: [] };
+  const KINDS = [["normal", "In the shop"], ["limited", "Limited time"], ["event", "Events"], ["removed", "Old crates"]];
   const STAR_CLASS = ["s0", "s1", "s2", "s3", "s4", "s5"];
   const MILESTONES = [0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99];
   const CAP = 2e7; // most crates the pity maths walks through
@@ -174,49 +175,167 @@
   }
 
   /* ── page ─────────────────────────────────────────────────────── */
-  const crate = () => CRATES.find(c => c.id === S.crate) || CRATES[0];
+  const crate = () => (S.crate === "custom" ? CUSTOM : CRATES.find(c => c.id === S.crate) || CRATES[0]);
+  const cur = c => CUR[c.cur] || { name: c.cur || "currency", icon: "img/crate.png" };
 
+  function crateBtn(c) {
+    const b = el("button", "kcrate" + (c.id === S.crate ? " on" : ""));
+    b.type = "button";
+    const ic = el("img"); ic.alt = ""; ic.src = c.id === "custom" ? "img/gear.png" : c.img || "img/crate.png";
+    ic.onerror = () => { ic.src = "img/crate.png"; };
+    const t = el("span", "kc-t");
+    t.append(el("strong", null, c.name));
+    const sm = el("small");
+    if (c.id === "custom") sm.textContent = "Type your own numbers";
+    else {
+      const ci = el("img", "kc-cur"); ci.alt = ""; ci.src = cur(c).icon; ci.onerror = () => ci.remove();
+      sm.append(ci, c.price ? commas(c.price) : "?", c.pack ? ` · ${c.pack[0]} for ${commas(c.pack[1])}` : "");
+    }
+    t.append(sm);
+    b.append(ic, t);
+    if (c.tag) b.append(el("em", "kc-tag" + (c.kind ? " k-" + c.kind : ""), c.tag));
+    b.onclick = () => pickCrate(c.id);
+    return b;
+  }
   function drawCrates() {
     const box = $("kcrates");
     box.textContent = "";
-    for (const c of CRATES) {
-      const b = el("button", "kcrate" + (c.id === S.crate ? " on" : ""));
-      b.type = "button";
-      const ic = el("img"); ic.alt = ""; ic.src = c.id === "custom" ? "img/gear.png" : CUR[c.cur].icon;
-      ic.onerror = () => { ic.src = "img/crate.png"; };
-      const t = el("span", "kc-t");
-      t.append(el("strong", null, c.name));
-      t.append(el("small", null, c.id === "custom" ? "Type your own numbers" : `${commas(c.price)} ${CUR[c.cur].name}` + (c.pack ? ` · ${c.pack[0]} for ${commas(c.pack[1])}` : "")));
-      b.append(ic, t);
-      if (c.tag) b.append(el("em", "kc-tag", c.tag));
-      b.onclick = () => pickCrate(c.id);
-      box.append(b);
+    const many = CRATES.length > 6;
+    box.classList.toggle("many", many);
+    for (const [kind, label] of KINDS) {
+      const list = CRATES.filter(c => (c.kind || "normal") === kind);
+      if (!list.length) continue;
+      if (many) {
+        const g = el("div", "kc-group");
+        g.append(el("h3", "kc-gh", label + " (" + list.length + ")"));
+        const row = el("div", "kc-row");
+        list.forEach(c => row.append(crateBtn(c)));
+        g.append(row);
+        box.append(g);
+      } else list.forEach(c => box.append(crateBtn(c)));
     }
+    const last = many ? el("div", "kc-row kc-custom") : box;
+    last.append(crateBtn(CUSTOM));
+    if (many) box.append(last);
   }
 
-  function unitImg(name) {
-    const it = values.get(name.toLowerCase());
-    if (it && window.BB && BB.itemImg) return BB.itemImg(it, "ku-img");
-    const i = el("img", "ku-img"); i.alt = ""; i.src = "img/crate.png"; return i;
+  function unitImg(u) {
+    const it = values.get(u[0].toLowerCase());
+    if (it && window.BB && BB.itemImg) return BB.itemImg(it, "su-img");
+    const i = el("img", "su-img"); i.alt = ""; i.loading = "lazy";
+    i.src = u[4] || "img/crate.png";
+    i.onerror = () => { i.src = "img/crate.png"; i.onerror = null; };
+    return i;
   }
+
+  /* ── the summon window (looks like the in-game shop) ──────────────── */
+  const SIM = { id: null, got: {}, opened: 0, spent: 0, pity: {} };
+  function simReset() { SIM.id = S.crate; SIM.got = {}; SIM.opened = 0; SIM.spent = 0; SIM.pity = {}; }
+  // Pity is shared by each rarity that shows one; the counter resets when you pull that rarity.
+  const pityTiers = c => { const t = {}; c.units.forEach(u => { if (u[3]) t[u[1]] = u[3]; }); return t; };
 
   function drawUnits() {
     const c = crate(), box = $("kunits");
+    if (SIM.id !== S.crate) simReset();
     box.textContent = "";
-    $("kunits-wrap").hidden = !c.units.length;
+    $("sw").hidden = !c.units.length;
+    $("swtitle").textContent = c.name;
+    $("swsub").textContent = c.sub || (c.kind === "limited" ? "Limited time crate" : c.kind === "event" ? "Event crate" : c.kind === "removed" ? "No longer in the shop" : "");
+    $("swsub").hidden = !$("swsub").textContent;
+    box.className = "sw-grid" + (c.units.length > 8 ? " wide" : "");
+    const tiers = pityTiers(c);
     c.units.forEach((u, i) => {
-      const [name, stars, drop, pity] = u;
-      const b = el("button", "kunit " + STAR_CLASS[stars] + (i === S.unit ? " on" : ""));
+      const [name, stars, drop] = u;
+      const cell = el("div", "su-cell");
+      const b = el("button", "su s" + Math.max(0, Math.min(6, stars)) + (i === S.unit ? " on" : ""));
       b.type = "button";
+      b.dataset.i = i;
       b.setAttribute("aria-pressed", i === S.unit ? "true" : "false");
-      const st = el("span", "ku-stars", stars ? "★".repeat(stars) : "");
-      b.append(st, unitImg(name), el("span", "ku-name", name), el("span", "ku-pct", drop + "%"));
-      if (pity) b.append(el("span", "ku-pity", "Pity " + commas(pity)));
+      b.setAttribute("aria-label", `${name}, ${drop}%`);
+      const art = el("span", "su-art");
+      art.append(el("span", "su-stars", stars > 0 ? "★".repeat(Math.min(stars, 6)) : ""));
+      if (c.kind === "limited" || u[5] === "limited") art.append(el("span", "su-lim", "LIMITED"));
+      art.append(unitImg(u), el("span", "su-name", name));
+      const n = SIM.got[name];
+      if (n) art.append(el("span", "su-got", "x" + commas(n)));
+      b.append(art, el("span", "su-pct", drop + "%"));
       b.onclick = () => pickUnit(i);
-      box.append(b);
+      cell.append(b);
+      if (tiers[stars]) cell.append(el("span", "su-pity", `PITY ${SIM.pity[stars] || 0}/${tiers[stars]}`));
+      box.append(cell);
     });
-    $("knote").textContent = c.id === "classic" ? "The Classic Summon's units change every hour. These are one example rotation, so type the drop chance you see in game." : c.id === "skull" ? "Skull Summon is a limited crate. It leaves the shop when the timer ends." : "";
+    const ci = cur(c);
+    $("buy1").hidden = !c.price;
+    $("buy1n").textContent = "Buy 1 -";
+    $("buy1p").textContent = c.price ? String(c.price) : "";
+    $("buyn").hidden = !c.pack;
+    if (c.pack) { $("buynn").textContent = `Buy ${c.pack[0]} -`; $("buynp").textContent = String(c.pack[1]); }
+    document.querySelectorAll(".sw-btn img").forEach(im => { im.src = ci.icon; });
+    simLine();
+    $("knote").textContent = c.note || "";
     $("knote").hidden = !$("knote").textContent;
+  }
+
+  function simLine() {
+    const c = crate();
+    $("swstat").hidden = !SIM.opened;
+    $("swopened").textContent = commas(SIM.opened);
+    $("swspent").textContent = short(SIM.spent) + " " + cur(c).name;
+    const u = c.units[S.unit];
+    $("swmine").textContent = u ? `${u[0]}: ${commas(SIM.got[u[0]] || 0)}` : "";
+  }
+
+  // Luck boosts every unit but the most common one, which shrinks to make room.
+  function rollWeights(c, luck) {
+    const top = c.units.reduce((m, u, i) => (u[2] > c.units[m][2] ? i : m), 0);
+    const w = c.units.map((u, i) => (i === top ? 0 : u[2] * luck));
+    const rest = w.reduce((a, b) => a + b, 0);
+    w[top] = Math.max(0, 100 - rest);
+    return w;
+  }
+  function pickFrom(units, w) {
+    const tot = w.reduce((a, b) => a + b, 0);
+    let r = Math.random() * tot;
+    for (let i = 0; i < units.length; i++) { r -= w[i]; if (r < 0) return i; }
+    return units.length - 1;
+  }
+  function buy(count, cost) {
+    const c = crate();
+    if (!c.units.length) return;
+    const luck = Math.max(0, num($("kl").value) || 1);
+    const w = rollWeights(c, luck), tiers = pityTiers(c), pulled = [];
+    for (let k = 0; k < count; k++) {
+      // a rarity whose pity is full gives one of its units now
+      const due = Object.keys(tiers).map(Number).filter(t => (SIM.pity[t] || 0) + 1 >= tiers[t]).sort((a, b) => b - a)[0];
+      let i;
+      if (due != null) {
+        const idx = c.units.map((u, j) => j).filter(j => c.units[j][1] === due);
+        i = idx[pickFrom(idx.map(j => c.units[j]), idx.map(j => c.units[j][2]))];
+      } else i = pickFrom(c.units, w);
+      const u = c.units[i];
+      for (const t of Object.keys(tiers)) SIM.pity[t] = Number(t) === u[1] ? 0 : (SIM.pity[t] || 0) + 1;
+      SIM.got[u[0]] = (SIM.got[u[0]] || 0) + 1;
+      pulled.push(i);
+    }
+    SIM.opened += count;
+    SIM.spent += cost;
+    drawUnits();
+    // flash what came out, rarest first
+    const box = $("swpull");
+    box.textContent = "";
+    const seen = new Map();
+    pulled.forEach(i => seen.set(i, (seen.get(i) || 0) + 1));
+    [...seen.entries()].sort((a, b) => c.units[b[0]][1] - c.units[a[0]][1] || c.units[a[0]][2] - c.units[b[0]][2]).forEach(([i, n]) => {
+      const u = c.units[i];
+      const chip = el("span", "sw-pchip s" + Math.max(0, Math.min(6, u[1])));
+      chip.append(unitImg(u), el("span", null, (n > 1 ? n + "x " : "") + u[0]));
+      box.append(chip);
+      const card = document.querySelector(`.su[data-i="${i}"]`);
+      if (card) { card.classList.remove("hit"); void card.offsetWidth; card.classList.add("hit"); }
+    });
+    box.hidden = false;
+    const best = Math.max(...pulled.map(i => c.units[i][1]));
+    if (best >= 5 && window.BB && BB.toast) BB.toast("Wow, a " + "★".repeat(best) + " unit!");
   }
 
   function pickCrate(id, keepInputs) {
@@ -224,7 +343,7 @@
     const c = crate();
     if (!keepInputs) {
       if (c.id !== "custom") {
-        $("kp").value = c.price;
+        $("kp").value = c.price || "";
         $("kpn").value = c.pack ? c.pack[0] : "";
         $("kpp").value = c.pack ? c.pack[1] : "";
         $("kpk").checked = !!c.pack;
@@ -235,8 +354,8 @@
         $("kunitname").textContent = "your unit";
       }
     }
-    document.querySelectorAll("[data-cur]").forEach(n => { n.textContent = CUR[c.cur].name; });
-    document.querySelectorAll("[data-curimg]").forEach(n => { n.src = CUR[c.cur].icon; n.hidden = c.cur === "custom"; });
+    document.querySelectorAll("[data-cur]").forEach(n => { n.textContent = cur(c).name; });
+    document.querySelectorAll("[data-curimg]").forEach(n => { n.src = cur(c).icon; n.hidden = c.cur === "custom"; });
     drawCrates();
     drawUnits();
     if (!keepInputs) update();
@@ -313,7 +432,7 @@
     stat("ks-avg", isFinite(E) ? (E < 100 ? String(Math.round(E * 10) / 10) : short(E)) : "Too many", isFinite(med) ? "Half of players need " + short(med) + " or fewer" : "");
     stat("ks-cost", isFinite(E) ? short(E * M.per) : "–", M.per > 0 ? short(M.per) + " per crate" + (M.usePacks ? " (in packs)" : "") : "Add a crate price");
     $("ks-pity").classList.toggle("sure", !!R.guarantee);
-    if (R.guarantee) stat("ks-pity", short(R.guarantee), "crates from now, " + short(M.cost(R.guarantee)) + " " + CUR[crate().cur].name);
+    if (R.guarantee) stat("ks-pity", short(R.guarantee), "crates from now, " + short(M.cost(R.guarantee)) + " " + cur(crate()).name);
     else {
       const left = 1 - R.got(Math.round(E * 3) || 1);
       stat("ks-pity", "Never", M.pity ? "Pity gives a random unit of this rarity, so nothing is certain" : isFinite(left) ? `Even after 3× the average, ${pct(left)} of players still have none` : "No pity on this crate");
@@ -326,7 +445,7 @@
       bline.hidden = false;
       bline.className = "kbudget " + (g >= 0.9 ? "good" : g >= 0.5 ? "mid" : "bad");
       bline.querySelector("strong").textContent = pct(g);
-      bline.querySelector("span").textContent = `With ${short(M.budget)} ${CUR[crate().cur].name} you can open ${commas(budgetN)} crates. That's your chance to get ${$("kunitname").textContent}.`;
+      bline.querySelector("span").textContent = `With ${short(M.budget)} ${cur(crate()).name} you can open ${commas(budgetN)} crates. That's your chance to get ${$("kunitname").textContent}.`;
     } else if (M.budget > 0) {
       bline.hidden = false;
       bline.className = "kbudget bad";
@@ -421,7 +540,8 @@
   function save() {
     const q = new URLSearchParams();
     q.set("c", S.crate);
-    if (S.unit >= 0) q.set("u", S.unit);
+    const u = crate().units[S.unit];
+    if (u) q.set("u", u[0]);
     for (const f of FIELDS) if ($(f).value !== "") q.set(f.slice(1), $(f).value);
     q.set("pk", $("kpk").checked ? 1 : 0);
     q.set("py", $("kpy").checked ? 1 : 0);
@@ -430,9 +550,9 @@
   }
   function restore() {
     const q = new URLSearchParams(location.hash.slice(1));
-    if (!q.has("c") || !CRATES.some(c => c.id === q.get("c"))) return false;
+    if (!q.has("c") || !(q.get("c") === "custom" || CRATES.some(c => c.id === q.get("c")))) return false;
     S.crate = q.get("c");
-    S.unit = q.has("u") ? Number(q.get("u")) : -1;
+    S.unit = q.has("u") ? crate().units.findIndex(x => x[0] === q.get("u")) : -1;
     for (const f of FIELDS) if (q.has(f.slice(1))) $(f).value = q.get(f.slice(1)).slice(0, 20);
     $("kpk").checked = q.get("pk") === "1";
     $("kpy").checked = q.get("py") === "1";
@@ -451,10 +571,33 @@
   $("kc").addEventListener("input", () => update(true));
   document.querySelectorAll("[data-n]").forEach(b => { b.onclick = () => { $("kn").value = b.dataset.n === "budget" ? model().afford(model().budget) : b.dataset.n; update(); }; });
   $("kcopy").onclick = () => (window.BB && BB.share ? BB.share(location.href, "Bloombot crate calculator", "Link copied") : navigator.clipboard.writeText(location.href));
-  $("kreset").onclick = () => { history.replaceState(null, "", location.pathname); $("kb").value = ""; $("kn").value = 13; setLuck(1); pickCrate("skull"); };
+  $("kreset").onclick = () => { history.replaceState(null, "", location.pathname); $("kb").value = ""; $("kn").value = 13; setLuck(1); pickCrate(CRATES[0].id); };
+  const buyPack = () => { const c = crate(); if (c.pack) buy(c.pack[0], c.pack[1]); };
+  const buyOne = () => { const c = crate(); if (c.price) buy(1, c.price); };
+  $("buy1").onclick = buyOne;
+  $("buyn").onclick = buyPack;
+  $("swreset").onclick = () => { simReset(); $("swpull").hidden = true; drawUnits(); };
+  // E and T buy, like in game
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || "")) return;
+    if ($("sw").hidden || document.querySelector(".qs-box:not([hidden])")) return;
+    const k = e.key.toLowerCase();
+    if (k === "e") buyOne(); else if (k === "t") buyPack();
+  });
 
-  if (!restore()) { setLuck(1); pickCrate("skull"); }
-  else update();
+  async function start() {
+    try {
+      const r = await fetch($("main").dataset.crates, { cache: "no-cache" });
+      if (r.ok) {
+        const d = await r.json();
+        if (Array.isArray(d.crates) && d.crates.length) CRATES = d.crates.filter(c => c && c.id && Array.isArray(c.units));
+        if (d.currencies) CUR = Object.assign({}, CUR, d.currencies);
+      }
+    } catch (e) { /* the built-in crates still work */ }
+    if (!restore()) { setLuck(1); pickCrate(CRATES[0].id); }
+    else update();
+  }
+  start();
 
   // unit pictures from the value list, when it loads
   if (window.BB && BB.onAuth) {
