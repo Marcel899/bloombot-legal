@@ -256,12 +256,18 @@
   function fitText() {
     document.querySelectorAll("#kunits .su-name, #kunits .su-pity").forEach(t => {
       t.style.fontSize = "";
+      t.classList.remove("two");
       let fs = parseFloat(getComputedStyle(t).fontSize);
-      while (t.scrollWidth > t.clientWidth + 1 && fs > 7) { fs -= 0.5; t.style.fontSize = fs + "px"; }
+      const fits = () => t.scrollWidth <= t.clientWidth + 1;
+      while (!fits() && fs > 9) { fs -= 0.5; t.style.fontSize = fs + "px"; }
+      // tiny cards: a name with spaces may use two lines; single words keep shrinking
+      if (!fits() && t.classList.contains("su-name") && t.textContent.includes(" ")) t.classList.add("two");
+      while (!fits() && fs > 6) { fs -= 0.5; t.style.fontSize = fs + "px"; }
     });
   }
   let fitT = 0;
   addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(fitText, 120); });
+  if (document.fonts) { document.fonts.ready.then(fitText); document.fonts.addEventListener && document.fonts.addEventListener("loadingdone", fitText); }
 
   function drawUnits() {
     const c = crate(), box = $("kunits");

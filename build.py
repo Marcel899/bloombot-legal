@@ -417,7 +417,7 @@ def side(key, title, color):
 
 
 def calc_tabs(cur):
-    tabs = [("trade", "calculator.html", "calculator", "Trade calculator"), ("crate", "crates.html", "crate", "Crate calculator")]
+    tabs = [("trade", "calculator.html", "calculator", 'Trade<span class="ct-l"> calculator</span>'), ("crate", "crates.html", "crate", 'Crate<span class="ct-l"> calculator</span>')]
     return '<nav class="ctabs" aria-label="Calculators">' + "".join(
         f'<a class="ctab{" on" if k == cur else ""}" href="{h}"{" aria-current=\"page\"" if k == cur else ""}><img src="img/{i}.png" alt="">{t}</a>'
         for k, h, i, t in tabs) + "</nav>\n"
