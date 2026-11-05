@@ -7,8 +7,8 @@
 
   /* ── crates (from the in-game shop) ────────────────────────────── */
   let CUR = {
-    candy: { name: "Candy", icon: "img/candy.png" },
-    seeds: { name: "Seeds", icon: "img/seeds.png" },
+    candy: { name: "Candy", icon: "img/cur/candy.webp" },
+    seeds: { name: "Seeds", icon: "img/cur/seeds.webp" },
     custom: { name: "currency", icon: "img/crate.png" },
   };
   // [name, stars, drop %, pity] ; pity = [count, progress] shared by the rarity
@@ -25,7 +25,8 @@
       ["Watermelon", 4, 1.691, 500], ["Sunflower", 4, 1.674, 500], ["Bloodvine", 5, 0.03, 50000]] },
   ];
   const CUSTOM = { id: "custom", name: "Custom", cur: "custom", units: [] };
-  const KINDS = [["normal", "In the shop"], ["limited", "Limited time"], ["event", "Events"], ["removed", "Old crates"]];
+  const KINDS = [["limited", "Limited time"], ["normal", "In the shop"], ["event", "Events"], ["removed", "Old crates"]];
+  const FOLDED = new Set(["event", "removed"]); // shown behind "Show event and old crates"
   const STAR_CLASS = ["s0", "s1", "s2", "s3", "s4", "s5"];
   const MILESTONES = [0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99];
   const CAP = 2e7; // most crates the pity maths walks through
@@ -181,7 +182,10 @@
   function crateBtn(c) {
     const b = el("button", "kcrate" + (c.id === S.crate ? " on" : ""));
     b.type = "button";
-    const ic = el("img"); ic.alt = ""; ic.src = c.id === "custom" ? "img/gear.png" : c.img || "img/crate.png";
+    // the crate's rarest unit stands in for crate art
+    const rare = c.units && c.units.length ? c.units.reduce((m, u) => (u[2] < m[2] ? u : m)) : null;
+    const ic = el("img", "kc-art"); ic.alt = ""; ic.loading = "lazy";
+    ic.src = c.id === "custom" ? "img/gear.png" : c.img || (rare && rare[4]) || "img/crate.png";
     ic.onerror = () => { ic.src = "img/crate.png"; };
     const t = el("span", "kc-t");
     t.append(el("strong", null, c.name));
@@ -202,6 +206,10 @@
     box.textContent = "";
     const many = CRATES.length > 6;
     box.classList.toggle("many", many);
+    const fold = el("details", "kc-more");
+    const foldN = CRATES.filter(c => FOLDED.has(c.kind)).length;
+    fold.append(el("summary", null, `Show event and old crates (${foldN})`));
+    if (FOLDED.has(crate().kind)) fold.open = true;
     for (const [kind, label] of KINDS) {
       const list = CRATES.filter(c => (c.kind || "normal") === kind);
       if (!list.length) continue;
@@ -210,13 +218,13 @@
         g.append(el("h3", "kc-gh", label + " (" + list.length + ")"));
         const row = el("div", "kc-row");
         list.forEach(c => row.append(crateBtn(c)));
+        if (kind === "normal") row.append(crateBtn(CUSTOM));
         g.append(row);
-        box.append(g);
+        (FOLDED.has(kind) ? fold : box).append(g);
       } else list.forEach(c => box.append(crateBtn(c)));
     }
-    const last = many ? el("div", "kc-row kc-custom") : box;
-    last.append(crateBtn(CUSTOM));
-    if (many) box.append(last);
+    if (many && foldN) box.append(fold);
+    if (!many) box.append(crateBtn(CUSTOM));
   }
 
   function unitImg(u) {
@@ -255,8 +263,8 @@
       b.setAttribute("aria-pressed", i === S.unit ? "true" : "false");
       b.setAttribute("aria-label", `${name}, ${drop}%`);
       const art = el("span", "su-art");
-      art.append(el("span", "su-stars", stars > 0 ? "★".repeat(Math.min(stars, 6)) : ""));
-      if (c.kind === "limited" || u[5] === "limited") art.append(el("span", "su-lim", "LIMITED"));
+      art.append(el("span", "su-stars", stars > 0 && stars < 6 ? "★".repeat(stars) : ""));
+      if (c.kind && c.kind !== "normal") { const lim = el("img", "su-lim"); lim.alt = "Limited"; lim.src = "img/limited.png"; art.append(lim); }
       art.append(unitImg(u), el("span", "su-name", name));
       const n = SIM.got[name];
       if (n) art.append(el("span", "su-got", "x" + commas(n)));
@@ -336,8 +344,8 @@
       if (card) { card.classList.remove("hit"); void card.offsetWidth; card.classList.add("hit"); }
     });
     box.hidden = false;
-    const best = Math.max(...pulled.map(i => c.units[i][1]));
-    if (best >= 5 && window.BB && BB.toast) BB.toast("Wow, a " + "★".repeat(best) + " unit!");
+    const best = pulled.map(i => c.units[i]).reduce((m, u) => (u[2] < m[2] ? u : m));
+    if (best[2] < 0.5 && window.BB && BB.toast) BB.toast(`Wow! ${best[0]}, a 1 in ${short(100 / best[2])} pull!`);
   }
 
   function pickCrate(id, keepInputs) {
