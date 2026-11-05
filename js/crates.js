@@ -263,7 +263,10 @@
       b.setAttribute("aria-pressed", i === S.unit ? "true" : "false");
       b.setAttribute("aria-label", `${name}, ${drop}%`);
       const art = el("span", "su-art");
-      art.append(el("span", "su-stars", stars > 0 && stars < 6 ? "★".repeat(stars) : ""));
+      const st = el("span", "su-stars");
+      for (let k = 0; k < (stars > 0 && stars < 6 ? stars : 0); k++) { const si = el("img"); si.src = "img/star.webp"; si.alt = ""; st.append(si); }
+      if (stars > 0 && stars < 6) st.setAttribute("aria-label", stars + " stars");
+      art.append(st);
       if (c.kind && c.kind !== "normal") { const lim = el("img", "su-lim"); lim.alt = "Limited"; lim.src = "img/limited.png"; art.append(lim); }
       art.append(unitImg(u), el("span", "su-name", name));
       const n = SIM.got[name];
