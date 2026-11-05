@@ -14,10 +14,27 @@
     return b;
   }
 
-  function card(it) {
+  const statusKind = st => {
+    const s = String(st || "").toLowerCase();
+    return /ris|up|incr/.test(s) ? "up" : /drop|fall|down|decr/.test(s) ? "down" : /over/.test(s) ? "over" : /under/.test(s) ? "under" : /stab/.test(s) ? "stable" : "other";
+  };
+  function demandBar(d) {
+    const n = demandNum(d), box = el("span", "vdem");
+    box.append(el("span", "vdem-l", "Demand"));
+    if (n >= 0 && n <= 10) {
+      const pips = el("span", "pips " + (n >= 7 ? "hi" : n >= 4 ? "mid" : "lo"));
+      for (let i = 1; i <= 10; i++) pips.append(el("i", i <= Math.round(n) ? "on" : null));
+      pips.title = "Demand " + d;
+      box.append(pips, el("b", null, Math.round(n * 10) / 10 + "/10"));
+    } else box.append(el("b", null, d || "?"));
+    return box;
+  }
+
+  function card(it, rank) {
     const c = el("button", "vcard");
     c.type = "button";
     c.onclick = () => open(it);
+    if (rank) c.append(el("span", "vrank" + (rank <= 3 ? " top" + rank : ""), "#" + rank));
     const top = el("div", "vtop");
     top.append(BB.itemImg(it, "vimg"));
     const t = el("div", "vtitle");
@@ -27,16 +44,28 @@
     if (favs.has(it.name)) { const st = el("span", "vstar", "★"); st.title = "On your watchlist"; top.append(st); }
     const val = el("div", "vval");
     val.append(el("span", "vnum", it.est > 0 ? BB.fmt(it.est) : (it.value_text || "N/A")));
-    if (it.oc) val.append(el("span", "oc", "O/C"));
+    if (it.oc) { const oc = el("span", "oc", "O/C"); oc.title = "Owner's choice: no fixed value"; val.append(oc); }
     const badge = changeBadge(it.change_30d);
     if (badge) val.append(badge);
+    if (it.status) val.append(el("span", "vst st-" + statusKind(it.status), it.status));
     const meta = el("div", "vmeta");
-    meta.append(el("span", null, "Demand " + (it.demand || "?")), el("span", null, it.status || ""));
+    meta.append(demandBar(it.demand));
     const spark = el("div", "spark");
     spark.innerHTML = BB.chart(it.history, 200, 40);
     c.append(top, val, meta, spark);
     return c;
   }
+
+  let view = "grid";
+  try { view = localStorage.getItem("bb-vview") === "list" ? "list" : "grid"; } catch (e) { /* blocked */ }
+  function setView(v) {
+    view = v;
+    $("vgrid").classList.toggle("list", v === "list");
+    document.querySelectorAll("[data-view]").forEach(b => { b.classList.toggle("on", b.dataset.view === v); b.setAttribute("aria-pressed", b.dataset.view === v); });
+    try { localStorage.setItem("bb-vview", v); } catch (e) { /* blocked */ }
+  }
+  setView(view);
+  document.querySelectorAll("[data-view]").forEach(b => { b.onclick = () => setView(b.dataset.view); });
 
   const PAGE = 60;
   let shown = PAGE, lastKey = "";
@@ -55,7 +84,8 @@
     list.sort(by);
     const key = [q, r, sort, cat].join("|");
     if (key !== lastKey) { shown = PAGE; lastKey = key; }
-    $("vgrid").replaceChildren(...list.slice(0, shown).map(card));
+    const ranked = sort === "value";
+    $("vgrid").replaceChildren(...list.slice(0, shown).map((it, i) => card(it, ranked ? i + 1 : 0)));
     const more = $("vmore");
     more.hidden = list.length <= shown;
     more.innerHTML = `<span>Show ${Math.min(PAGE, list.length - shown)} more</span><em>${list.length - shown} left</em><i aria-hidden="true">▾</i>`;

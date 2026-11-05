@@ -389,8 +389,9 @@ values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and game
 <section class="panel filters">
 <input class="search" id="vq" type="search" placeholder="Search a unit…" aria-label="Search units">
 <div class="chips"><button class="chip on" type="button" data-cat="all">All</button><button class="chip" type="button" data-cat="units">Units</button><button class="chip" type="button" data-cat="gamepasses">Gamepasses</button><button class="chip star-chip" type="button" data-cat="fav">★ Watchlist</button></div>
-<select id="vrar" aria-label="Rarity"><option value="">All rarities</option></select>
+<select id="vrar" aria-label="Rarity" data-dots="1"><option value="">All rarities</option></select>
 <select id="vsort" aria-label="Sort"><option value="value">Highest value</option><option value="low">Lowest value</option><option value="demand">Most demand</option><option value="up">Rising most</option><option value="down">Falling most</option><option value="name">A to Z</option></select>
+<div class="chips vview" role="group" aria-label="Layout"><button class="chip on" type="button" data-view="grid" aria-label="Cards" title="Cards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg><span class="vv-t">Cards</span></button><button class="chip" type="button" data-view="list" aria-label="List" title="List"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4zM4 10.5h16v3H4zM4 16h16v3H4z"/></svg><span class="vv-t">List</span></button></div>
 </section>
 <div class="vinfo"><span id="vcount"></span><span id="vupdated"></span></div>
 <div class="skel-grid sk-vals" id="vloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>

@@ -189,3 +189,161 @@
     n.querySelectorAll && n.querySelectorAll('img[src$="trading.png"]').forEach(watch);
   }))).observe(document.body, { childList: true, subtree: true });
 })();
+
+/* Dropdowns: every <select> on the page gets a nicer, animated menu. The real <select>
+   stays underneath, so forms and page code keep reading .value and getting "change". */
+(() => {
+  const VDESC = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
+  const IDESC = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "selectedIndex");
+  let openDD = null;
+
+  function enhance(sel) {
+    if (sel.dataset.dd || sel.multiple || sel.size > 1 || sel.closest("[data-native]")) return;
+    sel.dataset.dd = "1";
+    const wrap = document.createElement("span");
+    wrap.className = "dd";
+    sel.classList.forEach(c => { if (c !== "search") wrap.classList.add("dd-" + c); });
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.append(sel);
+    sel.tabIndex = -1;
+    sel.setAttribute("aria-hidden", "true");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "dd-btn";
+    btn.setAttribute("aria-haspopup", "listbox");
+    btn.setAttribute("aria-expanded", "false");
+    const lab = sel.getAttribute("aria-label");
+    if (lab) btn.setAttribute("aria-label", lab);
+    else if (sel.id) { const l = document.querySelector(`label[for="${sel.id}"]`) || sel.closest("label"); if (l) btn.setAttribute("aria-label", (l.firstChild && l.firstChild.textContent || "").trim()); }
+    const txt = document.createElement("span");
+    txt.className = "dd-txt";
+    const chev = document.createElement("i");
+    chev.className = "dd-chev";
+    btn.append(txt, chev);
+    wrap.append(btn);
+
+    const sync = () => {
+      const o = sel.options[IDESC.get.call(sel)];
+      const t = o ? o.textContent : "";
+      if (txt.textContent !== t) txt.textContent = t;
+      btn.dataset.v = o ? o.value : "";
+    };
+    Object.defineProperty(sel, "value", { configurable: true, get() { return VDESC.get.call(this); }, set(v) { VDESC.set.call(this, v); sync(); } });
+    Object.defineProperty(sel, "selectedIndex", { configurable: true, get() { return IDESC.get.call(this); }, set(v) { IDESC.set.call(this, v); sync(); } });
+    sel.addEventListener("change", sync);
+    sel.addEventListener("focus", () => btn.focus());
+    new MutationObserver(sync).observe(sel, { childList: true, subtree: true, characterData: true });
+    sync();
+
+    function choose(i) {
+      const before = IDESC.get.call(sel);
+      if (i !== before) {
+        IDESC.set.call(sel, i);
+        sync();
+        sel.dispatchEvent(new Event("input", { bubbles: true }));
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
+      }
+      close(true);
+    }
+
+    let list = null, act = -1, items = [];
+    function place() {
+      if (!list) return;
+      const r = btn.getBoundingClientRect(), h = list.offsetHeight, below = innerHeight - r.bottom;
+      const up = below < h + 12 && r.top > below;
+      list.classList.toggle("up", up);
+      list.style.left = Math.max(8, Math.min(r.left, innerWidth - list.offsetWidth - 8)) + "px";
+      list.style.top = (up ? r.top - h - 6 : r.bottom + 6) + "px";
+      list.style.minWidth = r.width + "px";
+    }
+    function setAct(i, scroll) {
+      items.forEach((li, k) => li.classList.toggle("act", k === i));
+      act = i;
+      if (scroll && items[i]) items[i].scrollIntoView({ block: "nearest" });
+    }
+    function open() {
+      if (openDD) openDD.close();
+      list = document.createElement("ul");
+      list.className = "dd-list";
+      list.setAttribute("role", "listbox");
+      if (btn.getAttribute("aria-label")) list.setAttribute("aria-label", btn.getAttribute("aria-label"));
+      items = [];
+      let n = 0;
+      [...sel.children].forEach(ch => {
+        const opts = ch.tagName === "OPTGROUP" ? [...ch.children] : [ch];
+        if (ch.tagName === "OPTGROUP") { const g = document.createElement("li"); g.className = "dd-group"; g.textContent = ch.label; list.append(g); }
+        opts.forEach(o => {
+          const idx = o.index, li = document.createElement("li");
+          li.className = "dd-opt" + (o.selected ? " on" : "") + (o.disabled ? " off" : "");
+          li.setAttribute("role", "option");
+          li.setAttribute("aria-selected", o.selected ? "true" : "false");
+          li.style.setProperty("--i", Math.min(n++, 14));
+          if (sel.dataset.dots && o.value) { const d = document.createElement("b"); d.className = "dd-dot r-" + o.value.toLowerCase().replace(/\W/g, ""); li.append(d); }
+          const s = document.createElement("span");
+          s.textContent = o.textContent;
+          const ck = document.createElement("i");
+          ck.className = "dd-ck";
+          li.append(s, ck);
+          if (!o.disabled) {
+            li.addEventListener("click", () => choose(idx));
+            li.addEventListener("pointermove", () => setAct(items.indexOf(li)));
+          }
+          li._idx = idx;
+          items.push(li);
+          list.append(li);
+        });
+      });
+      document.body.append(list);
+      wrap.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
+      place();
+      setAct(Math.max(0, items.findIndex(li => li.classList.contains("on"))), true);
+      openDD = { close, wrap };
+    }
+    function close(focus) {
+      if (!list) return;
+      const l = list;
+      list = null;
+      l.classList.add("bye");
+      setTimeout(() => l.remove(), 120);
+      wrap.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+      if (openDD && openDD.wrap === wrap) openDD = null;
+      if (focus) btn.focus();
+    }
+    btn.addEventListener("click", () => (list ? close() : open()));
+    btn.addEventListener("keydown", e => {
+      const k = e.key;
+      if (!list) {
+        if (k === "ArrowDown" || k === "ArrowUp" || k === "Enter" || k === " ") { e.preventDefault(); open(); }
+        return;
+      }
+      const usable = i => items[i] && !items[i].classList.contains("off");
+      if (k === "Escape") { e.preventDefault(); close(true); }
+      else if (k === "Tab") close();
+      else if (k === "ArrowDown" || k === "ArrowUp") {
+        e.preventDefault();
+        let i = act, d = k === "ArrowDown" ? 1 : -1;
+        do { i += d; } while (i >= 0 && i < items.length && !usable(i));
+        if (usable(i)) setAct(i, true);
+      } else if (k === "Home" || k === "End") { e.preventDefault(); setAct(k === "Home" ? 0 : items.length - 1, true); }
+      else if (k === "Enter" || k === " ") { e.preventDefault(); if (usable(act)) choose(items[act]._idx); }
+      else if (k.length === 1) {
+        const c = k.toLowerCase(), start = act + 1;
+        for (let j = 0; j < items.length; j++) { const i = (start + j) % items.length; if (usable(i) && items[i].textContent.trim().toLowerCase().startsWith(c)) { setAct(i, true); break; } }
+      }
+    });
+    wrap._dd = { place: () => place(), close };
+  }
+
+  document.addEventListener("pointerdown", e => {
+    if (openDD && !openDD.wrap.contains(e.target) && !e.target.closest(".dd-list")) openDD.close();
+  });
+  addEventListener("resize", () => openDD && openDD.close());
+  addEventListener("scroll", () => openDD && openDD.wrap._dd.place(), { passive: true, capture: true });
+
+  window.BB = window.BB || {};
+  BB.dropdown = enhance;
+  document.querySelectorAll("select").forEach(enhance);
+})();
