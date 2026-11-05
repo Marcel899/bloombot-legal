@@ -244,12 +244,31 @@
   // Pity is shared by each rarity that shows one; the counter resets when you pull that rarity.
   const pityTiers = c => { const t = {}; c.units.forEach(u => { if (u[3]) t[u[1]] = u[3]; }); return t; };
 
+  // Classic's units change every hour, on the hour (UTC); the game shows the time left as the title
+  function rotationTitle() {
+    const left = Math.max(0, 3600 - Math.floor(Date.now() / 1000) % 3600);
+    const two = v => String(v).padStart(2, "0");
+    return `New units in 00:${two(Math.floor(left / 60))}:${two(left % 60)}`;
+  }
+  setInterval(() => { if (S.crate === "classic" && !document.hidden) $("swtitle").textContent = rotationTitle(); }, 1000);
+
+  // names and pity lines stay on one line like in game: shrink the ones that don't fit
+  function fitText() {
+    document.querySelectorAll("#kunits .su-name, #kunits .su-pity").forEach(t => {
+      t.style.fontSize = "";
+      let fs = parseFloat(getComputedStyle(t).fontSize);
+      while (t.scrollWidth > t.clientWidth + 1 && fs > 7) { fs -= 0.5; t.style.fontSize = fs + "px"; }
+    });
+  }
+  let fitT = 0;
+  addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(fitText, 120); });
+
   function drawUnits() {
     const c = crate(), box = $("kunits");
     if (SIM.id !== S.crate) simReset();
     box.textContent = "";
     $("sw").hidden = !c.units.length;
-    $("swtitle").textContent = c.name;
+    $("swtitle").textContent = c.id === "classic" ? rotationTitle() : c.name;
     $("swsub").textContent = c.sub || (c.kind === "limited" ? "Limited time crate" : c.kind === "event" ? "Event crate" : c.kind === "removed" ? "No longer in the shop" : "");
     $("swsub").hidden = !$("swsub").textContent;
     box.className = "sw-grid" + (c.units.length > 8 ? " wide" : "");
@@ -275,6 +294,7 @@
       b.onclick = () => pickUnit(i);
       cell.append(b);
       if (tiers[stars]) cell.append(el("span", "su-pity", `PITY ${SIM.pity[stars] || 0}/${tiers[stars]}`));
+      else if (Object.keys(tiers).length) cell.append(el("span", "su-pity none", "\u00a0"));
       box.append(cell);
     });
     const ci = cur(c);
@@ -285,6 +305,7 @@
     if (c.pack) { $("buynn").textContent = `Buy ${c.pack[0]} -`; $("buynp").textContent = String(c.pack[1]); }
     document.querySelectorAll(".sw-btn img").forEach(im => { im.src = ci.icon; });
     simLine();
+    requestAnimationFrame(fitText);
     $("knote").textContent = c.note || "";
     $("knote").hidden = !$("knote").textContent;
   }

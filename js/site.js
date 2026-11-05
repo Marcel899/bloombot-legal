@@ -250,8 +250,11 @@
     let list = null, act = -1, items = [];
     function place() {
       if (!list) return;
-      const r = btn.getBoundingClientRect(), h = list.offsetHeight, below = innerHeight - r.bottom;
-      const up = below < h + 12 && r.top > below;
+      const r = btn.getBoundingClientRect(), below = innerHeight - r.bottom - 14, above = r.top - 14;
+      list.style.maxHeight = "";
+      const full = list.offsetHeight, up = below < full && above > below;
+      list.style.maxHeight = Math.max(120, Math.min(full, up ? above : below)) + "px";
+      const h = list.offsetHeight;
       list.classList.toggle("up", up);
       list.style.left = Math.max(8, Math.min(r.left, innerWidth - list.offsetWidth - 8)) + "px";
       list.style.top = (up ? r.top - h - 6 : r.bottom + 6) + "px";
@@ -265,7 +268,7 @@
     function open() {
       if (openDD) openDD.close();
       list = document.createElement("ul");
-      list.className = "dd-list";
+      list.className = "dd-list" + (sel.dataset.pills ? " dd-pills" : "");
       list.setAttribute("role", "listbox");
       if (btn.getAttribute("aria-label")) list.setAttribute("aria-label", btn.getAttribute("aria-label"));
       items = [];
@@ -279,12 +282,14 @@
           li.setAttribute("role", "option");
           li.setAttribute("aria-selected", o.selected ? "true" : "false");
           li.style.setProperty("--i", Math.min(n++, 14));
-          if (sel.dataset.dots && o.value) { const d = document.createElement("b"); d.className = "dd-dot r-" + o.value.toLowerCase().replace(/\W/g, ""); li.append(d); }
           const s = document.createElement("span");
           s.textContent = o.textContent;
+          if (sel.dataset.pills && o.value) s.className = "rar r-" + o.value.toLowerCase().replace(/\W/g, "");
+          li.append(s);
+          if (o.dataset.count) { const n = document.createElement("em"); n.className = "dd-n"; n.textContent = o.dataset.count; li.append(n); }
           const ck = document.createElement("i");
           ck.className = "dd-ck";
-          li.append(s, ck);
+          li.append(ck);
           if (!o.disabled) {
             li.addEventListener("click", () => choose(idx));
             li.addEventListener("pointermove", () => setAct(items.indexOf(li)));

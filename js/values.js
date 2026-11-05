@@ -4,7 +4,7 @@
   const { el } = BB;
   let items = [], cat = "all", favs = BB.favs.all();
   const RARITY_ORDER = ["leaderboard", "exclusive", "godly", "secret", "mythic", "legendary", "epic", "rare", "uncommon", "common", "item"];
-  const cap = s => (s || "").replace(/\b\w/g, c => c.toUpperCase());
+  const cap = s => (s || "").replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
   const demandNum = d => { const m = String(d || "").match(/[\d.]+/); return m ? parseFloat(m[0]) : -1; };
 
   function changeBadge(ch) {
@@ -193,7 +193,8 @@
     $("vloading").hidden = true;
     const rars = [...new Set(items.map(i => (i.rarity || "").toLowerCase()).filter(Boolean))]
       .sort((a, b) => (RARITY_ORDER.indexOf(a) + 99) % 99 - (RARITY_ORDER.indexOf(b) + 99) % 99);
-    rars.forEach(r => { const o = el("option", null, cap(r)); o.value = r; $("vrar").append(o); });
+    rars.forEach(r => { const o = el("option", null, cap(r)); o.value = r; o.dataset.count = items.filter(i => (i.rarity || "").toLowerCase() === r).length; $("vrar").append(o); });
+    $("vrar").options[0].dataset.count = items.length;
     const newest = items.map(i => i.updated_at).filter(Boolean).sort().pop();
     if (newest) $("vupdated").textContent = "Synced " + BB.ago(newest);
     render();
