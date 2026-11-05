@@ -365,6 +365,7 @@
       } else {
         S.unit = -1;
         $("kunitname").textContent = "your unit";
+        $("kmore").open = true;
       }
     }
     document.querySelectorAll("[data-cur]").forEach(n => { n.textContent = cur(c).name; });
@@ -408,7 +409,7 @@
   }
 
   let last = null;
-  function update(fromCost) {
+  function update() {
     pityFields();
     setLuck($("kl").value);
     const M = model();
@@ -417,23 +418,20 @@
       err.hidden = false;
       err.textContent = !(M.base > 0) ? "Type the unit's drop chance, like 0.005%." : M.base > 1 ? "A drop chance can't be over 100%." : "Luck has to be more than 0.";
       $("kout").classList.add("dim");
+      if (!(M.base > 0) || M.base > 1) $("kmore").open = true;
       return;
     }
     err.hidden = true;
     $("kout").classList.remove("dim");
 
-    // crates in the chance box
-    let n = Math.floor(num($("kn").value) || 0);
-    if (fromCost) { n = M.afford(num($("kc").value) || 0); $("kn").value = n; }
     const budgetN = M.afford(M.budget);
-
-    const want = [n, budgetN];
-    let R = solve(M, want);
+    const R = solve(M, [budgetN]);
     last = { M, R };
     const p = M.p, c = crate(), cn = cur(c).name, u = c.units[S.unit];
     const uname = u ? u[0] : "your unit";
-    const E = R.expected, n50 = R.need(0.5);
     const tone = g => (g >= 0.9 ? "good" : g >= 0.5 ? "mid" : g >= 0.2 ? "low" : "bad");
+    const money = v => short(v) + " " + cn;
+    const compact = v => (v >= 1e4 && v < 1e6 ? Math.round(v / 100) / 10 + "k" : short(v));
 
     // head
     $("kunitname").textContent = uname;
@@ -441,78 +439,74 @@
     const im = $("krimg"), src = (u && u[4]) || ((values.get(uname.toLowerCase()) || {}).icon_url) || "img/crate.png";
     if (im.getAttribute("src") !== src) { im.src = src; im.onerror = () => { im.src = "img/crate.png"; im.onerror = null; }; }
 
-    // three numbers
-    $("kt1").textContent = p >= 1 ? "Every crate" : "1 in " + short(1 / p);
-    $("kt1s").textContent = pct(p) + (M.luck !== 1 ? ` (${pct(M.base)} × ${M.luck})` : "");
-    $("kt2").textContent = isFinite(E) ? (E < 100 ? String(Math.round(E * 10) / 10) : short(E)) : "Too many";
-    $("kt2s").textContent = isFinite(E) && M.per > 0 ? `≈ ${short(E * M.per)} ${cn}` : "";
+    // your chance
     const gB = M.budget > 0 ? R.got(budgetN) : null;
-    $("kt3box").className = "kr-tile kr-you" + (gB == null ? " empty" : " " + tone(gB));
+    $("kryou").className = "kr-you " + (gB == null ? "empty" : tone(gB));
     $("kt3").textContent = gB == null ? "?" : pct(gB);
-    $("kt3s").textContent = gB == null ? `Type your ${cn} in step 2` : budgetN > 0 ? `${commas(budgetN)} crates with ${short(M.budget)} ${cn}` : "Not enough for 1 crate";
-
-    // meter: your chance on a 0-100% bar
     $("krmeter").hidden = gB == null;
     if (gB != null) {
-      $("krbar").style.width = Math.max(gB * 100, gB > 0 ? 1 : 0) + "%";
+      $("krbar").style.width = Math.max(gB * 100, gB > 0 ? 1.5 : 0) + "%";
       $("krbar").className = tone(gB);
-      $("krlabel").textContent = pct(gB);
     }
+    let line;
+    if (gB == null) line = `Type how many **${cn}** you have in step 2.`;
+    else if (budgetN < 1) line = `That's not enough for 1 crate. One costs **${money(M.cost(1))}**.`;
+    else {
+      const opens = `With **${money(M.budget)}** you can open **${commas(budgetN)} crate${budgetN === 1 ? "" : "s"}**. `;
+      line = opens + (gB >= 1 ? `That's enough to **always** get ${uname}.`
+        : gB >= 0.995 ? `Almost **everyone** gets ${uname} with that.`
+        : gB >= 0.01 ? `About **${Math.round(gB * 100)} out of 100** players get ${uname} with that.`
+        : `Only about **1 in ${short(1 / gB)}** players get ${uname} with that.`);
+    }
+    rich($("krline"), line);
 
-    // verdict in plain words
-    const v = $("krverdict");
-    let words;
-    if (gB == null) words = isFinite(n50) ? `For a 50/50 chance you need **${commas(n50)} crates** (**${short(M.cost(n50))} ${cn}**).` : "";
-    else if (gB >= 1) words = "**You're guaranteed to get it** with your budget.";
-    else if (gB >= 0.9) words = "**Very likely!** You'll almost surely get it.";
-    else if (gB >= 0.5) words = "**Better than a coin flip.** Most players with your budget get it.";
-    else if (gB >= 0.2) words = `**Possible, but don't count on it.** For a 50/50 chance save **${short(M.cost(n50))} ${cn}**.`;
-    else words = isFinite(n50) ? `**Very unlikely** with your budget. For a 50/50 chance save **${short(M.cost(n50))} ${cn}**.` : "**Very unlikely.**";
-    rich(v, words);
-    v.className = "kr-verdict " + (gB == null ? "" : tone(gB));
-    rich($("krnote"), R.guarantee
-      ? `Pity guarantees it by crate **${commas(R.guarantee)}** (${short(M.cost(R.guarantee))} ${cn}).`
-      : M.pity
-        ? `Pity gives a unit of this rarity every **${commas(M.pity.N)} crates**, but it's this one only ${pct(M.pity.s)} of the time.`
-        : `No pity here, so luck decides. About 1 in ${Math.max(2, Math.round(1 / Math.max(1e-9, 1 - R.got(Math.max(1, Math.round(3 * (isFinite(E) ? E : 1)))))))} players still has none after 3× the average.`);
-
-    // what if box
-    if (!fromCost) $("kc").value = n > 0 ? Math.round(M.cost(n)) : "";
-    const g = n > 0 ? R.got(n) : 0;
-    $("kres").textContent = pct(g);
-    $("kres").className = "kbig " + tone(g);
-    $("kresline").textContent = n > 0
-      ? (g >= 1 ? `Everyone opening ${commas(n)} crates gets it.` : g >= 0.995 ? `Almost everyone opening ${commas(n)} crates gets it.` : g >= 0.01
-        ? `About ${Math.round(g * 100)} out of 100 players opening ${commas(n)} crates get it.`
-        : `Only about 1 in ${short(1 / g)} players opening ${commas(n)} crates gets it.`)
-      : "Type how many crates you'll open, or how much you'll spend.";
-
-    // how much to save: one bar per chance
-    const box = $("kmiles");
+    // how much you need: lucky, normal, unlucky (and guaranteed with pity)
+    const box = $("kneed");
     box.textContent = "";
-    const needs = MILESTONES.map(t => R.need(t));
-    const top = Math.max(...needs.filter(isFinite), 1);
-    MILESTONES.forEach((t, i) => {
-      const need = needs[i];
-      const row = el("div", "kbar" + (M.budget > 0 && isFinite(need) ? (need <= budgetN ? " yes" : " no") : ""));
-      row.append(el("span", "kb-p", pct(t)));
-      const track = el("span", "kb-track"), fill = el("i");
-      fill.style.width = (isFinite(need) ? Math.max(2, need / top * 100) : 100) + "%";
-      track.append(fill);
-      row.append(track);
-      const txt = el("span", "kb-v");
-      const b = el("b", null, isFinite(need) ? short(M.cost(need)) + " " + cn : "Too many");
-      if (isFinite(need) && c.cur !== "custom") { const ci = el("img"); ci.alt = ""; ci.src = cur(c).icon; ci.onerror = () => ci.remove(); b.prepend(ci); }
-      txt.append(b, el("small", null, isFinite(need) ? commas(need) + " crates" : ""));
-      row.append(txt);
-      row.append(el("span", "kb-ok", M.budget > 0 && isFinite(need) ? (need <= budgetN ? "✓" : "") : ""));
-      box.append(row);
+    const rows = [
+      ["lucky", "Lucky", 0.25, "1 in 4 players have it by then"],
+      ["normal", "Normal", 0.5, "Half of players have it by then"],
+      ["unlucky", "Unlucky", 0.9, "9 in 10 players have it by then"],
+    ].map(([k, t, q, s]) => [k, t, R.need(q), s]);
+    if (R.guarantee) rows.push(["sure", "Guaranteed", R.guarantee, "Pity gives it to everyone"]);
+    rows.forEach(([k, t, need, small]) => {
+      const ok = isFinite(need);
+      const have = ok && M.budget > 0 && budgetN >= need;
+      const card = el("div", "kn-card kn-" + k + (have ? " have" : ""));
+      card.append(el("span", "kn-t", t));
+      const big = el("strong", null, ok ? (c.cur === "custom" ? money(M.cost(need)) : compact(M.cost(need))) : "Too many");
+      if (ok && c.cur !== "custom") { const ci = el("img"); ci.alt = ""; ci.src = cur(c).icon; ci.onerror = () => ci.remove(); big.prepend(ci); }
+      card.append(big, el("em", null, ok ? commas(need) + " crate" + (need === 1 ? "" : "s") : ""), el("small", null, small));
+      if (have) card.append(el("b", "kn-have", "✓ You have this"));
+      box.append(card);
+    });
+
+    // small print
+    const each = p >= 1 ? "Every crate gives it" : `Each crate: **1 in ${short(1 / p)}** (${pct(p)})`;
+    const pityTxt = R.guarantee ? ` Pity guarantees it by crate **${commas(R.guarantee)}**.`
+      : M.pity ? ` Pity gives a unit of this rarity every ${commas(M.pity.N)} crates, but only ${pct(M.pity.s)} of the time this one.`
+      : " No pity, so it's all luck.";
+    rich($("krnote"), each + (M.luck !== 1 ? ` with ${M.luck}x luck.` : ".") + pityTxt);
+
+    // show more: the plain numbers and every milestone
+    const E = R.expected;
+    $("kx1").textContent = p >= 1 ? "Every crate" : `1 in ${short(1 / p)} (${pct(p)})`;
+    $("kx2").textContent = isFinite(E) ? commas(Math.round(E)) : "Too many";
+    $("kx3").textContent = isFinite(E) && M.per > 0 ? money(E * M.per) : "–";
+    const tb = $("kxtable");
+    tb.textContent = "";
+    MILESTONES.forEach(t => {
+      const need = R.need(t), ok = isFinite(need);
+      const have = ok && M.budget > 0 && budgetN >= need;
+      const row = el("div", "kx-row" + (have ? " have" : ""));
+      row.append(el("span", "kx-p", pct(t)), el("span", "kx-c", ok ? money(M.cost(need)) : "Too many"), el("span", "kx-n", ok ? commas(need) + " crates" : ""), el("span", "kx-ok", have ? "✓" : ""));
+      tb.append(row);
     });
     save();
   }
 
   /* ── share link ───────────────────────────────────────────────── */
-  const FIELDS = ["kd", "kl", "kp", "kpn", "kpp", "kb", "kn", "kyn", "kyk", "kyr"];
+  const FIELDS = ["kd", "kl", "kp", "kpn", "kpp", "kb", "kyn", "kyk", "kyr"];
   function save() {
     const q = new URLSearchParams();
     q.set("c", S.crate);
@@ -549,11 +543,15 @@
   document.querySelectorAll("[data-luck]").forEach(b => { b.onclick = () => { setLuck(b.dataset.luck); update(); }; });
   ["kd", "kl", "kp", "kpn", "kpp", "kb", "kyn", "kyk", "kyr"].forEach(f => $(f).addEventListener("input", () => update()));
   ["kpk", "kpy", "kyt"].forEach(f => $(f).addEventListener("change", () => update()));
-  $("kn").addEventListener("input", () => update());
-  $("kc").addEventListener("input", () => update(true));
-  document.querySelectorAll("[data-n]").forEach(b => { b.onclick = () => { $("kn").value = b.dataset.n === "budget" ? model().afford(model().budget) : b.dataset.n; update(); }; });
+  $("kshow").onclick = () => {
+    const open = $("kextra").hidden;
+    $("kextra").hidden = !open;
+    $("kshow").setAttribute("aria-expanded", open);
+    $("kshow").firstChild.textContent = open ? "Show less" : "Show more";
+    if (open) { $("kextra").classList.remove("pop"); void $("kextra").offsetWidth; $("kextra").classList.add("pop"); }
+  };
   $("kcopy").onclick = () => (window.BB && BB.share ? BB.share(location.href, "Bloombot crate calculator", "Link copied") : navigator.clipboard.writeText(location.href));
-  $("kreset").onclick = () => { history.replaceState(null, "", location.pathname); $("kb").value = ""; $("kn").value = 13; setLuck(1); pickCrate(CRATES[0].id); };
+  $("kreset").onclick = () => { history.replaceState(null, "", location.pathname); $("kb").value = ""; setLuck(1); pickCrate(CRATES[0].id); };
   const buyPack = () => { const c = crate(); if (c.pack) buy(c.pack[0], c.pack[1]); };
   const buyOne = () => { const c = crate(); if (c.price) buy(1, c.price); };
   $("buy1").onclick = buyOne;

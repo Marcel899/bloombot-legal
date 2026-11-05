@@ -25,7 +25,7 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=79f42f53">
+<link rel="stylesheet" href="style.css?v=7a3aae3c">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=122853cd"></script>
@@ -76,17 +76,22 @@
 </section>
 <div class="kgrid">
 <section class="panel kform">
-<h2 class="weld g-blue kh"><img src="img/num_2.png" alt="2">Check your numbers</h2>
-<p class="khint kform-hint">Filled in from the crate. Change anything that is different for you.</p>
+<h2 class="weld g-blue kh"><img src="img/num_2.png" alt="2">How much do you have?</h2>
+<label class="kf kmain">
+<span class="kin"><img data-curimg alt=""><input class="search" id="kb" inputmode="decimal" autocomplete="off" placeholder="Type your amount, like 250k"><b data-cur>Candy</b></span>
+<span>Or what you plan to spend. 1.5m and 20k work too.</span></label>
+<div class="kf">Luck boost <span>Only if you have one.</span>
+<div class="kluck"><button class="chip" type="button" data-luck="1">None</button><button class="chip" type="button" data-luck="1.5">1.5x</button><button class="chip" type="button" data-luck="2">2x</button><button class="chip" type="button" data-luck="3">3x</button></div></div>
+<details class="kmore" id="kmore"><summary>Change the crate's numbers</summary>
+<div class="kmore-in">
+<p class="khint">Already filled in from the crate. Only change them if the game shows something else.</p>
 <label class="kf">Drop chance <span>The unit's chance per crate, like 0.005% or 1/20000</span>
 <span class="kin"><input class="search" id="kd" inputmode="decimal" autocomplete="off" value="0.005"><b>%</b></span></label>
-<label class="kf">Currency you have <span>Or what you plan to spend. 1.5m and 20k work too.</span>
-<span class="kin"><img data-curimg alt=""><input class="search" id="kb" inputmode="decimal" autocomplete="off" placeholder="e.g. 250k"><b data-cur>Candy</b></span></label>
-<div class="kf">Luck <span>2x luck doubles every chance (up to 100%).</span>
-<div class="kluck"><button class="chip" type="button" data-luck="1">1x</button><button class="chip" type="button" data-luck="1.5">1.5x</button><button class="chip" type="button" data-luck="2">2x</button><button class="chip" type="button" data-luck="3">3x</button><span class="kin sm"><input class="search" id="kl" inputmode="decimal" autocomplete="off" value="1" aria-label="Luck multiplier"><b>x</b></span></div></div>
-<label class="kf">Price per crate <span>What one crate costs</span>
+<label class="kf">Exact luck <span>If your boost isn't 1.5x, 2x or 3x</span>
+<span class="kin"><input class="search" id="kl" inputmode="decimal" autocomplete="off" value="1" aria-label="Luck multiplier"><b>x</b></span></label>
+<label class="kf">Price per crate
 <span class="kin"><img data-curimg alt=""><input class="search" id="kp" inputmode="decimal" autocomplete="off" value="666"><b data-cur>Candy</b></span></label>
-<div class="kf">Pack deal <span>Like "Buy 13 for 6666". Turn it on if you buy in packs.</span>
+<div class="kf">Pack deal <span>Like "Buy 13 for 6666".</span>
 <div class="kpack"><label class="ktog"><input type="checkbox" id="kpk" checked><i></i></label><input class="search" id="kpn" inputmode="numeric" autocomplete="off" value="13" aria-label="Crates in a pack"><span>for</span><input class="search" id="kpp" inputmode="decimal" autocomplete="off" value="6666" aria-label="Pack price"></div></div>
 <div class="kf kpyf"><label class="ktog-line"><span class="ktog"><input type="checkbox" id="kpy"><i></i></span><span><strong>This crate has pity</strong><span>A guaranteed drop after a set number of crates.</span></span></label>
 <div class="kpity" id="kpity" hidden>
@@ -95,31 +100,28 @@
 <label class="kf">Pity gives <select id="kyt"><option value="exact">This exact unit</option><option value="tier">A random unit of this rarity</option></select></label>
 <label class="kf" id="kyr-wrap">Chance of the whole rarity <span>All units with the same stars added up</span><span class="kin"><input class="search" id="kyr" inputmode="decimal" autocomplete="off"><b>%</b></span></label>
 </div></div>
+</div>
+</details>
 </section>
 <section class="kout" id="kout">
-<h2 class="weld g-green kh kout-h"><img src="img/num_3.png" alt="3">Your chances</h2>
+<h2 class="weld g-green kh kout-h"><img src="img/num_3.png" alt="3">Your answer</h2>
 <p class="kerr" id="kerr" hidden></p>
 <div class="kres">
 <div class="kr-head"><img class="kr-img" id="krimg" src="img/crate.png" alt=""><div><strong id="kunitname">Grim Gardener</strong><span id="krsub"></span></div></div>
-<div class="kr-tiles">
-<div class="kr-tile"><span>Chance per crate</span><strong id="kt1">–</strong><em id="kt1s"></em></div>
-<div class="kr-tile"><span>Crates on average</span><strong id="kt2">–</strong><em id="kt2s"></em></div>
-<div class="kr-tile kr-you" id="kt3box"><span>Your chance</span><strong id="kt3">–</strong><em id="kt3s"></em></div>
+<div class="kr-you" id="kryou"><span>Your chance to get it</span><strong id="kt3">?</strong></div>
+<div class="kr-meter" id="krmeter"><i id="krbar"></i></div>
+<p class="kr-line" id="krline"></p>
 </div>
-<div class="kr-meter" id="krmeter"><i id="krbar"></i><b id="krlabel"></b></div>
-<p class="kr-verdict" id="krverdict"></p>
+<section class="panel kneed">
+<h3>How much do you need?</h3>
+<div class="kn-cards" id="kneed"></div>
 <p class="kr-note" id="krnote"></p>
+<button class="kshow" id="kshow" type="button" aria-expanded="false" aria-controls="kextra"><span>Show more</span><i></i></button>
+<div class="kextra" id="kextra" hidden>
+<div class="kx-stats"><div><span>Chance per crate</span><strong id="kx1"></strong></div><div><span>Crates on average</span><strong id="kx2"></strong></div><div><span>Cost on average</span><strong id="kx3"></strong></div></div>
+<h4>Every chance, step by step</h4>
+<div class="kx-table" id="kxtable"></div>
 </div>
-<section class="panel ksave">
-<h3>How much should I save?</h3>
-<p class="khint">Pick how sure you want to be. Lucky players need less, unlucky ones more.</p>
-<div class="kbars" id="kmiles"></div>
-</section>
-<section class="panel kchance">
-<h3>What if I open…</h3>
-<div class="kask"><label>Crates<input class="search" id="kn" inputmode="numeric" autocomplete="off" value="13"></label><span>or spend</span><label><b data-cur>Candy</b><input class="search" id="kc" inputmode="decimal" autocomplete="off"></label></div>
-<div class="kquick"><button class="chip" type="button" data-n="1">1</button><button class="chip" type="button" data-n="10">10</button><button class="chip" type="button" data-n="100">100</button><button class="chip" type="button" data-n="1000">1,000</button><button class="chip" type="button" data-n="10000">10,000</button><button class="chip" type="button" data-n="budget">All my currency</button></div>
-<div class="kresult"><span class="kbig" id="kres">–</span><span id="kresline"></span></div>
 </section>
 </section>
 </div>
@@ -135,7 +137,7 @@
 <div class="cbtns kbtns"><button class="brick blue sm" id="kcopy" type="button">Copy link</button><button class="brick dark sm" id="kreset" type="button">Reset</button></div>
 <p class="note">Drop chances and prices are from the in-game shop and can change with updates. Got different numbers? Just type them in. More crates on the <a href="https://gtd.fandom.com/wiki/Crates" target="_blank" rel="noopener">Garden Tower Defense wiki</a>.</p>
 </main>
-<script defer src="js/crates.js?v=b196cac8"></script>
+<script defer src="js/crates.js?v=ea8c1745"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">
