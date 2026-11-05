@@ -148,16 +148,19 @@
     if (!mine || u !== mine.roblox_name) row.roblox_username = u;
     if (l !== ((priv && priv.server_link) || "")) row.server_link = l;
     if (d !== ((mine && mine.description) || "")) row.description = d;
-    if (!Object.keys(row).length) { status("ok", "Nothing changed."); return; }
+    if (!Object.keys(row).length) { status("ok", "Nothing changed."); BB.toast("", "info", { title: "Nothing changed" }); return; }
     busy = true;
     $("psave").disabled = true;
     status("wait", "Saving…");
+    const tt = BB.toast("Sending your changes to Bloombot…", "wait", { title: "Saving your profile" });
     let data, error;
     try { ({ data, error } = await BB.sb.from("profile_updates").insert(row).select("id").single()); }
     catch (err) { error = { message: (err && err.message) || "network error" }; }
     if (error) {
       busy = false; $("psave").disabled = false;
-      status("bad", /row-level|violates/i.test(error.message) ? "Your last change is still being saved. Give it a few seconds." : "Couldn't save: " + error.message);
+      const why = /row-level|violates/i.test(error.message) ? "Your last change is still being saved. Give it a few seconds." : "Couldn't save: " + error.message;
+      status("bad", why);
+      tt.update(why, "bad", { title: "Profile not saved" });
       return;
     }
     const t0 = Date.now();
@@ -167,12 +170,12 @@
       if (r && r.status === "posted") {
         busy = false; $("psave").disabled = false;
         status("ok", "Saved!");
-        BB.toast("Profile saved");
+        tt.update("Your changes are live on the site and in Discord.", "ok", { title: "Profile saved" });
         setTimeout(() => { $("pedit").hidden = true; load(); }, 900);
         return;
       }
-      if (r && r.status === "rejected") { busy = false; $("psave").disabled = false; status("bad", r.reason || "Bloombot couldn't save that."); return; }
-      if (Date.now() - t0 > 60000) { busy = false; $("psave").disabled = false; status("wait", "Bloombot hasn't picked it up yet. If the bot is offline it will save when it's back."); return; }
+      if (r && r.status === "rejected") { busy = false; $("psave").disabled = false; status("bad", r.reason || "Bloombot couldn't save that."); tt.update(r.reason || "Bloombot couldn't save that.", "bad", { title: "Profile not saved" }); return; }
+      if (Date.now() - t0 > 60000) { busy = false; $("psave").disabled = false; status("wait", "Bloombot hasn't picked it up yet. If the bot is offline it will save when it's back."); tt.update("Bloombot seems busy or offline. It will save it when it's back.", "info", { title: "Still waiting" }); return; }
       setTimeout(poll, 2000);
     };
     setTimeout(poll, 1200);

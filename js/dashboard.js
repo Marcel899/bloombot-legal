@@ -46,22 +46,24 @@
   }
 
   async function send(action, slot, value, ctrl) {
-    if (busy) { BB.toast("Wait for the last change to finish"); return; }
+    if (busy) { BB.toast("Wait for the last change to finish.", "info", { title: "One at a time" }); return; }
     busy = true;
     const row = ctrl && ctrl.closest(".drow");
     if (row) row.classList.add("saving");
     document.querySelectorAll("#dpanel select, #dpanel button.sw, #dpanel .dclear").forEach(x => { x.disabled = true; });
     status("Saving…", "wait");
+    const tt = BB.toast("Bloombot is applying it to your server…", "wait", { title: "Saving change" });
     let data, error;
     try { ({ data, error } = await BB.sb.from("dash_updates").insert({ guild_id: cur.guild_id, action, slot, value }).select("id").single()); }
     catch (err) { error = { message: (err && err.message) || "network error" }; }
-    const done = (msg, kind) => { busy = false; status(msg, kind); reload(); };
+    const TT = { ok: "Saved", bad: "Change not saved", wait: "Still waiting" };
+    const done = (msg, kind) => { busy = false; status(msg, kind); tt.update(msg, kind === "wait" ? "info" : kind, { title: TT[kind] }); reload(); };
     if (error) { done(/row-level|violates/i.test(error.message) ? "Not allowed. You may have lost admin in this server, or you made too many changes. Wait a few minutes." : "Couldn't save: " + error.message, "bad"); return; }
     const t0 = Date.now();
     const poll = async () => {
       let r = null;
       try { ({ data: r } = await BB.sb.from("dash_updates").select("status,reason").eq("id", data.id).single()); } catch (err) { /* retry */ }
-      if (r && r.status === "posted") { BB.toast(r.reason || "Saved"); done(r.reason || "Saved!", /failed/.test(r.reason || "") ? "bad" : "ok"); return; }
+      if (r && r.status === "posted") { done(r.reason || "Saved!", /failed/.test(r.reason || "") ? "bad" : "ok"); return; }
       if (r && r.status === "rejected") { done(r.reason || "Bloombot refused that change.", "bad"); return; }
       if (Date.now() - t0 > 60000) { done("Bloombot hasn't picked it up yet. If the bot is offline it will apply it when it's back.", "wait"); return; }
       setTimeout(poll, 1500);
@@ -141,7 +143,7 @@
       const ctl = el("div", "dctl");
       const s = channelSelect(cur, v.missing ? "" : v.id, webhook);
       s.setAttribute("aria-label", label + " channel");
-      s.onchange = () => { if (s.value) send("channel", slot, s.value, s); else if (!required) send("clear_channel", slot, null, s); else { s.value = v.id || ""; BB.toast(label + " is required"); } };
+      s.onchange = () => { if (s.value) send("channel", slot, s.value, s); else if (!required) send("clear_channel", slot, null, s); else { s.value = v.id || ""; BB.toast("Pick another channel instead of clearing it.", "info", { title: label + " is required" }); } };
       ctl.append(s);
       if (!required && v.id) {
         const x = el("button", "brick dark sm dclear", "Clear");

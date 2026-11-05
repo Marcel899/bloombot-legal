@@ -242,7 +242,7 @@
       const have = pick[key].find(r => r.item.name === it.name);
       if (have) have.qty = Math.min(999, have.qty + 1);
       else if (pick[key].length < 15) pick[key].push({ item: it, qty: 1, bulk: false });
-      else BB.toast("That\u2019s a lot of units. Keep it to 15 per side.", "bad");
+      else BB.toast("Keep it to 15 per side.", "info", { title: "That\u2019s a lot of units" });
       if (key === "want") { pick.tags.delete("want-offers"); pick.tags.delete("want-any"); syncTags(); }
       input.value = ""; opts = []; draw(); drawChips(); compose(); input.focus();
     };
@@ -298,6 +298,7 @@
     busy = true;
     counter();
     status("wait", "Sending your trade ad to Bloombot…");
+    const tt = BB.toast("Sending it to Bloombot…", "wait", { title: "Posting your trade ad" });
     let data, error;
     try {
       ({ data, error } = await BB.sb.from("ad_submissions").insert({ content }).select("id").single());
@@ -306,10 +307,12 @@
     }
     if (error) {
       busy = false;
-      status("bad", /row-level security|violates/i.test(error.message)
+      const why = /row-level security|violates/i.test(error.message)
         ? "You already have a trade ad waiting. Give it a few seconds."
         : /JWT|token|auth/i.test(error.message) ? "Your login expired. Log out and in again, then retry."
-        : "Couldn't send it: " + error.message);
+        : "Couldn't send it: " + error.message;
+      status("bad", why);
+      tt.update(why, "bad", { title: "Trade ad not posted" });
       counter();
       return;
     }
@@ -321,16 +324,18 @@
       if (row && row.status === "posted") {
         clearComposer();
         done("ok", row.reason || `Posted to ${row.servers} server${row.servers === 1 ? "" : "s"}! It's on the board below.`);
-        BB.toast("Trade ad posted!");
+        tt.update(`It's live in ${row.servers} server${row.servers === 1 ? "" : "s"} and on the board.`, "ok", { title: "Trade ad posted!" });
         load();
         return;
       }
-      if (row && row.status === "rejected") { done("bad", row.reason || "Bloombot couldn't post that trade ad."); return; }
+      if (row && row.status === "rejected") { done("bad", row.reason || "Bloombot couldn't post that trade ad."); tt.update(row.reason || "Bloombot couldn't post that trade ad.", "bad", { title: "Trade ad not posted" }); return; }
       if (Date.now() - started > 90000) {
         done("wait", "Bloombot hasn't picked it up yet. If the bot is offline it will post when it's back.");
+        tt.update("Bloombot seems busy or offline. It will post your ad when it's back.", "info", { title: "Still waiting" });
         return;
       }
       status("wait", row && row.status === "processing" ? "Posting to every server…" : "Waiting for Bloombot…");
+      if (row && row.status === "processing" && tt.text !== "Posting to every server…") tt.update("Posting to every server…", "wait", { title: "Posting your trade ad" });
       setTimeout(poll, 2500);
     };
     setTimeout(poll, 1500);

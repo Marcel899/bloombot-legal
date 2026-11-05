@@ -81,7 +81,7 @@
         try { const { data } = await BB.sb.rpc("claim_giveaway_task", { gid: g.id, t: t.key }); if (data === "ok") got += t.pts; } catch (e) { /* skip */ }
       }
     }
-    if (got) { BB.toast(`Giveaway: +${got} entries added`); confetti(90); load(); }
+    if (got) { BB.toast(`+${got} entries added for you.`, "ok", { title: "Giveaway entries" }); confetti(90); load(); }
   }
 
   async function claim(g, t, btn) {
@@ -94,12 +94,12 @@
     busy = false;
     if (error || res !== "ok") {
       const msg = error ? "Couldn't reach Bloombot. Try again." : res;
-      BB.toast(msg);
+      BB.toast(msg, "bad", { title: "Not yet" });
       if (/account first/.test(msg || "")) setTimeout(() => { location.href = "profile.html#edit"; }, 1200);
       render();
       return;
     }
-    BB.toast(t.key === "join" ? "You're in! Good luck" : `+${t.pts} entries`);
+    BB.toast(t.key === "join" ? "Good luck!" : `+${t.pts} entries`, "ok", { title: t.key === "join" ? "You're in the giveaway" : "Task done" });
     confetti(t.key === "join" ? 180 : 90);
     load();
   }
@@ -195,7 +195,7 @@
           try { const { data } = await BB.sb.rpc("claim_giveaway_task", { gid: g.id, t: t.key }); if (data === "ok") got += t.pts; } catch (e) { /* skip */ }
         }
         busy = false;
-        BB.toast(got ? `+${got} entries` : "Nothing new yet. Finish a task, then check again.");
+        BB.toast(got ? `+${got} entries` : "Finish a task, then check again.", got ? "ok" : "info", { title: got ? "Entries added" : "Nothing new yet" });
         load();
       };
       root.append(all);

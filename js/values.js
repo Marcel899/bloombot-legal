@@ -141,7 +141,8 @@
       const on = BB.favs.toggle(it.name);
       favs = BB.favs.all();
       label();
-      BB.toast(on ? it.name + " added to your watchlist" : it.name + " removed from your watchlist");
+      BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your watchlist" : "Removed from your watchlist",
+        action: { label: "Undo", run: () => { BB.favs.toggle(it.name); favs = BB.favs.all(); label(); render(); } } });
       render();
     };
     const share = el("button", "brick dark sm", "Copy link");

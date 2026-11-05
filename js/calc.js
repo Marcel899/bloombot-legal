@@ -23,7 +23,7 @@
     const row = sides[side].find(r => r.item.name === item.name);
     if (row) row.qty = Math.min(999, row.qty + qty);
     else if (sides[side].length < 20) sides[side].push({ item, qty });
-    else BB.toast("20 different units per side is the limit", "bad");
+    else BB.toast("20 different units per side is the limit.", "info", { title: "That side is full" });
     update();
   }
 
@@ -175,17 +175,17 @@
 
   /* Sharing: the link holds the trade; the text is ready to paste in Discord. */
   $("copylink").onclick = () => {
-    if (!sides.give.length && !sides.get.length) { BB.toast("Add some units first", "bad"); return; }
+    if (!sides.give.length && !sides.get.length) { BB.toast("Pick units for one or both sides.", "info", { title: "Add some units first" }); return; }
     BB.share(location.href, "Trade check · Bloombot", "Link copied. Anyone who opens it sees this trade.");
   };
   $("copytext").onclick = () => {
-    if (!sides.give.length || !sides.get.length) { BB.toast("Add units to both sides first", "bad"); return; }
+    if (!sides.give.length || !sides.get.length) { BB.toast("Both sides need at least one unit.", "info", { title: "Add units to both sides" }); return; }
     const line = side => sides[side].map(r => (r.qty > 1 ? r.qty + "x " : "") + r.item.name).join(", ") + " (" + BB.fmt(total(side)) + ")";
     const v = $("verdict");
     BB.copy(`**I give:** ${line("give")}\n**I get:** ${line("get")}\n**Result:** ${v.querySelector("strong").textContent}. ${v.querySelector("span").textContent}\n-# [Open this trade in the Bloombot calculator](<${location.href}>)`, "Copied. Paste it in Discord.");
   };
   $("postad").onclick = () => {
-    if (!sides.give.length) { BB.toast("Add what you're trading first", "bad"); return; }
+    if (!sides.give.length) { BB.toast("Add what you're giving first.", "info", { title: "Nothing to trade yet" }); return; }
     const enc = side => sides[side].filter(r => !r.item.custom).map(r => encodeURIComponent(r.item.name).replace(/%20/g, "_") + (r.qty > 1 ? "~" + r.qty : "")).join("!");
     location.href = "trades.html#post&have=" + enc("give") + "&want=" + enc("get");
   };

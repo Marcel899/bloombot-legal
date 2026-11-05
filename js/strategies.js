@@ -105,10 +105,13 @@
     e.preventDefault();
     $("sbtn").disabled = true;
     status("wait", "Sending your strategy to Bloombot…");
+    const tt = BB.toast("Bloombot is checking it…", "wait", { title: "Sharing your strategy" });
     const row = { title: $("st").value.trim(), description: $("sd").value.trim(), category: $("sc").value };
     const { data, error } = await BB.sb.from("strategy_submissions").insert(row).select("id").single();
     if (error) {
-      status("bad", /row-level security/i.test(error.message) ? "Your last strategy is still being checked. Give it a few seconds." : "Couldn't send it: " + error.message);
+      const why = /row-level security/i.test(error.message) ? "Your last strategy is still being checked. Give it a few seconds." : "Couldn't send it: " + error.message;
+      status("bad", why);
+      tt.update(why, "bad", { title: "Strategy not shared" });
       counters();
       return;
     }
@@ -117,13 +120,14 @@
       const { data: r } = await BB.sb.from("strategy_submissions").select("status,reason").eq("id", data.id).single();
       if (r && r.status === "posted") {
         status("ok", "Shared! It's on the list below and in /home → Strategies in Discord.");
+        tt.update("It's on the list and in /home → Strategies in Discord.", "ok", { title: "Strategy shared!" });
         $("st").value = ""; $("sd").value = "";
         counters();
         setTimeout(load, 1500);
         return;
       }
-      if (r && r.status === "rejected") { status("bad", r.reason || "Bloombot couldn't add that strategy."); counters(); return; }
-      if (Date.now() - started > 90000) { status("wait", "Bloombot is busy. It will show up soon."); counters(); return; }
+      if (r && r.status === "rejected") { status("bad", r.reason || "Bloombot couldn't add that strategy."); tt.update(r.reason || "Bloombot couldn't add that strategy.", "bad", { title: "Strategy not shared" }); counters(); return; }
+      if (Date.now() - started > 90000) { status("wait", "Bloombot is busy. It will show up soon."); tt.update("Bloombot is busy. It will show up soon.", "info", { title: "Still waiting" }); counters(); return; }
       setTimeout(poll, 2500);
     };
     setTimeout(poll, 1500);

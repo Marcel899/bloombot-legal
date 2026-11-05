@@ -144,19 +144,108 @@
     .replace(/\*\*|__|~~|\|\||`/g, "").replace(/(^|[^\w])[*_](?=\S)|(?<=\S)[*_](?=[^\w]|$)/g, "$1")
     .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, "$1").replace(/[ \t]+/g, " ").trim();
 
-  /* Small message at the bottom of the screen. */
-  BB.toast = (text, kind = "ok") => {
+  /* Notification popups. BB.toast(text, kind, opts) shows one and returns a handle:
+     t.update(text, kind, opts) changes it in place (handy for "Saving…" -> "Saved"),
+     t.close() hides it. Kinds: ok, bad, info, wait (spinner, stays until updated).
+     opts: { title, time (ms, 0 = stay), action: { label, run } }. */
+  const T_ICONS = {
+    ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    bad: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v6.5M12 17.2v.1" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+    info: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 11v6M12 7v.1" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+    wait: '<svg viewBox="0 0 24 24" aria-hidden="true" class="spin"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="34 60"/></svg>',
+  };
+  const T_TITLES = { ok: "Done", bad: "Something went wrong", info: "Heads up", wait: "Working on it" };
+  const T_TIME = { ok: 3400, bad: 6500, info: 4200, wait: 0 };
+  const T_MAX = 3;
+  BB.toast = (text, kind = "ok", opts = {}) => {
+    if (!T_ICONS[kind]) kind = "ok";
     let box = document.getElementById("toasts");
-    if (!box) { box = BB.el("div", "toasts"); box.id = "toasts"; box.setAttribute("role", "status"); document.body.append(box); }
-    const t = BB.el("div", "toast " + kind, text);
+    if (!box) { box = BB.el("div", "toasts"); box.id = "toasts"; document.body.append(box); }
+    /* The same message twice in a row: bump a counter instead of stacking copies. */
+    const same = [...box.children].find(x => x._h && !x._gone && x._h.text === text && x._h.kind === kind);
+    if (same) { same._h.bump(); return same._h; }
+
+    const t = BB.el("div", "toast");
+    const ic = BB.el("span", "t-ic");
+    const body = BB.el("div", "t-body");
+    const head = BB.el("strong", "t-title");
+    const msg = BB.el("span", "t-msg");
+    const count = BB.el("span", "t-count");
+    const act = BB.el("button", "t-act");
+    act.type = "button";
+    const x = BB.el("button", "t-x", "×");
+    x.type = "button";
+    x.setAttribute("aria-label", "Dismiss");
+    const bar = BB.el("i", "t-bar");
+    body.append(head, msg);
+    t.append(ic, body, count, act, x, bar);
+
+    let timer = null, left = 0, started = 0, n = 1;
+    const h = { text, kind };
+    const stop = () => { clearTimeout(timer); timer = null; };
+    const run = () => {
+      stop();
+      if (!left) return;
+      started = Date.now();
+      timer = setTimeout(h.close, left);
+    };
+    h.close = () => {
+      if (t._gone) return;
+      t._gone = true; stop();
+      t.classList.add("out");
+      setTimeout(() => t.remove(), 260);
+    };
+    h.update = (newText, newKind = h.kind, o = {}) => {
+      if (!T_ICONS[newKind]) newKind = "ok";
+      h.text = newText; h.kind = newKind; h.o = o;
+      t.className = "toast " + newKind + (t._gone ? " out" : "");
+      t.setAttribute("role", newKind === "bad" ? "alert" : "status");
+      ic.innerHTML = T_ICONS[newKind];
+      head.textContent = o.title || T_TITLES[newKind];
+      msg.textContent = newText || "";
+      msg.hidden = !newText;
+      act.hidden = !o.action;
+      if (o.action) { act.textContent = o.action.label; act.onclick = () => { h.close(); o.action.run(); }; }
+      left = o.time != null ? o.time : T_TIME[newKind];
+      bar.hidden = !left;
+      if (left) { bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = ""; bar.style.animationDuration = left + "ms"; }
+      if (h.kind !== "wait" && t.isConnected) { t.classList.remove("flash"); void t.offsetWidth; t.classList.add("flash"); }
+      run();
+      return h;
+    };
+    h.bump = () => {
+      n += 1; count.textContent = "×" + n; count.classList.remove("bump"); void count.offsetWidth; count.classList.add("bump");
+      left = h.o.time != null ? h.o.time : T_TIME[h.kind];
+      if (left) { bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = ""; bar.style.animationDuration = left + "ms"; }
+      run();
+    };
+    t._h = h;
+    x.onclick = h.close;
+    /* Hover or touch pauses the timer, so there's time to read it. */
+    const pause = () => { if (!timer) return; stop(); left = Math.max(800, left - (Date.now() - started)); t.classList.add("paused"); };
+    const resume = () => { if (t._gone || !left || timer) return; t.classList.remove("paused"); run(); };
+    t.addEventListener("mouseenter", pause);
+    t.addEventListener("mouseleave", resume);
+    /* Swipe it away on phones. */
+    let sx = null;
+    t.addEventListener("touchstart", e => { sx = e.touches[0].clientX; pause(); }, { passive: true });
+    t.addEventListener("touchmove", e => { if (sx == null) return; const dx = e.touches[0].clientX - sx; t.style.transform = `translateX(${dx}px)`; t.style.opacity = String(Math.max(0, 1 - Math.abs(dx) / 220)); }, { passive: true });
+    t.addEventListener("touchend", e => {
+      const dx = sx == null ? 0 : e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(dx) > 80) { t.classList.add(dx > 0 ? "swiped-r" : "swiped-l"); h.close(); return; }
+      t.style.transform = ""; t.style.opacity = ""; resume();
+    });
+
+    h.update(text, kind, opts);
     box.append(t);
-    setTimeout(() => t.classList.add("out"), 2600);
-    setTimeout(() => t.remove(), 3000);
+    const live = [...box.children].filter(c => !c._gone);
+    if (live.length > T_MAX) live.slice(0, live.length - T_MAX).forEach(c => c._h.close());
+    return h;
   };
   /* Copy text: clipboard API, then the old select-and-copy way, then show it to copy by hand. */
   BB.copy = async (text, done = "Copied!") => {
     try {
-      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); BB.toast(done); return true; }
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); BB.toast("", "ok", { title: done }); return true; }
     } catch (e) { /* fall through */ }
     const ta = BB.el("textarea");
     ta.value = text;
@@ -167,7 +256,7 @@
     let ok = false;
     try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
     ta.remove();
-    if (ok) { BB.toast(done); return true; }
+    if (ok) { BB.toast("", "ok", { title: done }); return true; }
     window.prompt("Copy this:", text);
     return false;
   };
@@ -445,13 +534,14 @@
         : "It is removed from the website and from /home → Strategies in Discord.",
     });
     if (!sure) return false;
+    const tt = BB.toast("", "wait", { title: ad ? "Deleting trade ad…" : "Deleting strategy…" });
     let data, error;
     try { ({ data, error } = await BB.sb.rpc(ad ? "delete_my_trade_ad" : "delete_my_strategy", ad ? { ad_id: id } : { sid: id })); }
     catch (err) { error = { message: (err && err.message) || "network error" }; }
-    if (error) { BB.toast("Couldn't delete it: " + error.message, "bad"); return false; }
-    if (data === "login") { BB.toast("Log in again and retry.", "bad"); return false; }
-    if (data === "not_found") { BB.toast("It's already gone.", "bad"); return true; }
-    BB.toast(ad ? "Trade ad deleted" : "Strategy deleted");
+    if (error) { tt.update(error.message, "bad", { title: "Couldn't delete it" }); return false; }
+    if (data === "login") { tt.update("Log in again and retry.", "bad", { title: "Couldn't delete it" }); return false; }
+    if (data === "not_found") { tt.update("", "info", { title: "It's already gone" }); return true; }
+    tt.update(ad ? "It's off the board here and in Discord." : "It's off the website and Discord.", "ok", { title: ad ? "Trade ad deleted" : "Strategy deleted" });
     return true;
   };
 
@@ -463,15 +553,16 @@
       type: "DELETE",
     });
     if (!sure) return false;
+    const tt = BB.toast("", "wait", { title: "Deleting your account…" });
     let data, error;
     try { ({ data, error } = await BB.sb.rpc("delete_my_account")); }
     catch (err) { error = { message: (err && err.message) || "network error" }; }
-    if (error || data !== "ok") { BB.toast("Couldn't delete your account: " + ((error && error.message) || "log in again and retry."), "bad"); return false; }
+    if (error || data !== "ok") { tt.update((error && error.message) || "Log in again and retry.", "bad", { title: "Couldn't delete your account" }); return false; }
     try {
       Object.keys(localStorage).filter(k => /^bb_acct_/.test(k)).forEach(k => localStorage.removeItem(k));
     } catch (e) { /* storage blocked */ }
     try { await BB.sb.auth.signOut({ scope: "local" }); } catch (e) { /* the login is already gone */ }
-    BB.toast("Your account was deleted");
+    tt.update("Sorry to see you go. Your levels are kept.", "ok", { title: "Account deleted" });
     return true;
   };
 
@@ -540,7 +631,7 @@
       const poll = async () => {
         let r = null;
         try { ({ data: r } = await BB.sb.from("profile_updates").select("status,reason").eq("id", data.id).single()); } catch (err) { /* retry */ }
-        if (r && r.status === "posted") { remember(id, "has"); say("ok", "Your account is ready!"); BB.toast("Welcome to Bloombot"); setTimeout(close, 1200); return; }
+        if (r && r.status === "posted") { remember(id, "has"); say("ok", "Your account is ready!"); BB.toast("Your account is ready.", "ok", { title: "Welcome to Bloombot!" }); setTimeout(close, 1200); return; }
         if (r && r.status === "rejected") { busy = false; go.disabled = false; say("bad", r.reason || "Bloombot couldn't create it."); return; }
         if (Date.now() - t0 > 45000) { remember(id, "has"); say("wait", "Bloombot will finish creating it as soon as it's online."); setTimeout(close, 2500); return; }
         setTimeout(poll, 1500);

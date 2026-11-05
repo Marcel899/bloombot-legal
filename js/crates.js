@@ -369,7 +369,7 @@
     });
     box.hidden = false;
     const best = pulled.map(i => c.units[i]).reduce((m, u) => (u[2] < m[2] ? u : m));
-    if (best[2] < 0.5 && window.BB && BB.toast) BB.toast(`Wow! ${best[0]}, a 1 in ${short(100 / best[2])} pull!`);
+    if (best[2] < 0.5 && window.BB && BB.toast) BB.toast(`${best[0]}, a 1 in ${short(100 / best[2])} pull!`, "ok", { title: "Wow, lucky!" });
   }
 
   function pickCrate(id, keepInputs) {
