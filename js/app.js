@@ -709,6 +709,186 @@
     }
   });
 
+  /* ── profile popup: opens a player's profile on top of the current page ── */
+  const POP_COLORS = [["#5865f2", "#14aeea"], ["#28a828", "#14aeea"], ["#a94fff", "#5865f2"], ["#f5a623", "#dc3232"], ["#14aeea", "#28a828"], ["#dc3232", "#a94fff"]];
+  let popOpen = null;
+  BB.openProfile = async (id, hint = {}) => {
+    const el = BB.el;
+    if (popOpen) popOpen(true);
+    const opener = document.activeElement;
+    const back = el("div", "wm-back upop-back");
+    const box = el("div", "upop");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", (hint.name || "Player") + "'s profile");
+    box.tabIndex = -1;
+    const n = [...String(id || "0")].reduce((a, c) => a + c.charCodeAt(0), 0);
+    const [c1, c2] = POP_COLORS[n % POP_COLORS.length];
+    const banner = el("div", "upop-ban");
+    banner.style.setProperty("--c1", c1);
+    banner.style.setProperty("--c2", c2);
+    const x = el("button", "upop-x");
+    x.type = "button";
+    x.setAttribute("aria-label", "Close profile");
+    x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg>';
+    const body = el("div", "upop-body");
+    box.append(banner, x, body);
+    back.append(box);
+    document.body.append(back);
+    document.documentElement.classList.add("upop-lock");
+    const img = (src, cls) => {
+      const i = el("img", cls);
+      i.alt = "";
+      i.src = BB.safeUrl(src) || "img/flower.png";
+      i.onerror = () => { if (i.src.indexOf("img/flower.png") < 0) i.src = "img/flower.png"; };
+      return i;
+    };
+    const close = quick => {
+      if (!back.isConnected) return;
+      popOpen = null;
+      document.removeEventListener("keydown", key);
+      document.documentElement.classList.remove("upop-lock");
+      if (quick) back.remove();
+      else { back.classList.add("out"); setTimeout(() => back.remove(), 180); }
+      if (opener && opener.focus && !quick) opener.focus({ preventScroll: true });
+    };
+    popOpen = close;
+    const key = e => {
+      if (e.key === "Escape" && !document.querySelector(".wm-back:not(.upop-back)")) { e.preventDefault(); close(); }
+      if (e.key === "Tab") {
+        const f = [...box.querySelectorAll("a[href],button:not([disabled])")];
+        if (!f.length) return;
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+      }
+    };
+    document.addEventListener("keydown", key);
+    back.addEventListener("click", e => { if (e.target === back) close(); });
+    x.onclick = () => close();
+    setTimeout(() => x.focus({ preventScroll: true }), 30);
+
+    const top = el("div", "upop-top");
+    const avs = el("div", "upop-avs");
+    avs.append(img(hint.avatar, "upop-av"));
+    top.append(avs);
+    const name = el("h2", "upop-name", hint.name || "Loading…");
+    const tags = el("div", "p-tags");
+    body.append(top, name, tags, el("div", "upop-sk"));
+
+    if (!BB.session) {
+      body.querySelector(".upop-sk").remove();
+      const p = el("p", "hint upop-note", "Log in with Discord to see player profiles.");
+      const b = el("button", "brick discord sm", "Log in with Discord");
+      b.type = "button";
+      b.onclick = () => BB.login();
+      const acts = el("div", "upop-acts"); acts.append(b);
+      body.append(p, acts);
+      return;
+    }
+    const isMe = BB.user(BB.session).id === id;
+    let p = null, ads = [], strs = [];
+    try {
+      const [a, b, c] = await Promise.all([
+        BB.sb.from("profiles").select("*").eq("discord_id", id).maybeSingle(),
+        BB.sb.from("trade_ads").select("id,content,created_at,expires_at").eq("discord_id", id).order("created_at", { ascending: false }).limit(10),
+        BB.sb.from("strategies").select("id,title,category").eq("author_id", id).order("id", { ascending: false }).limit(10),
+      ]);
+      p = a.data; ads = (b.data || []).filter(r => !r.expires_at || new Date(r.expires_at) > Date.now()); strs = c.data || [];
+    } catch (err) { /* show what we have */ }
+    if (!back.isConnected) return;
+    body.querySelector(".upop-sk").remove();
+    if (isMe && !p) p = { discord_name: BB.user(BB.session).name, discord_avatar: BB.user(BB.session).avatar };
+    const nm = (p && p.discord_name) || hint.name || "Unknown player";
+    name.textContent = nm;
+    box.setAttribute("aria-label", nm + "'s profile");
+    if (p && p.discord_avatar) avs.firstChild.src = BB.safeUrl(p.discord_avatar) || avs.firstChild.src;
+    if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "upop-rav"));
+    if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + new Date(p.registered_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })));
+    if (isMe) tags.append(el("span", "p-tag you", "You"));
+
+    if (!p || (!p.roblox_name && !isMe)) body.append(el("p", "hint upop-note", "This player hasn't linked a Roblox account to Bloombot yet."));
+    if (p && p.description) {
+      const d = el("div", "upop-sec");
+      d.append(el("h3", null, "About me"), BB.md(p.description, { cls: "p-desc" }));
+      body.append(d);
+    }
+    const stats = el("div", "upop-stats");
+    const stat = (v, l) => { const s = el("div"); s.append(el("strong", null, String(v)), el("span", null, l)); return s; };
+    stats.append(stat(p && p.level ? p.level : "–", "Level"), stat(ads.length, ads.length === 1 ? "Trade ad" : "Trade ads"), stat(strs.length, strs.length === 1 ? "Strategy" : "Strategies"));
+    body.append(stats);
+
+    const accs = el("div", "upop-accs");
+    const pill = (kind, label, val, href) => {
+      const a = el(href ? "a" : "span", "acc " + kind);
+      if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener nofollow"; }
+      const t = el("span", "acc-t");
+      t.append(el("em", null, label), el("strong", null, val));
+      a.append(t);
+      return a;
+    };
+    if (!isMe) accs.append(pill("discord", "Discord", "Message", "https://discord.com/users/" + id));
+    accs.append(p && p.roblox_name ? pill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url)) : pill("roblox", "Roblox", "Not linked", null));
+    body.append(accs);
+
+    if (ads.length) {
+      const s = el("div", "upop-sec");
+      const h = el("div", "upop-sh");
+      const all = el("a", null, "All ads →"); all.href = isMe ? "trades.html?mine=1" : "trades.html";
+      h.append(el("h3", null, "Live trade ads"), all);
+      s.append(h);
+      ads.slice(0, 3).forEach(a => {
+        const c = el("div", "upop-ad");
+        c.append(BB.md(a.content, { cls: "tc-text" }), el("span", "upop-ago", BB.ago(a.created_at)));
+        s.append(c);
+      });
+      body.append(s);
+    }
+    if (strs.length) {
+      const s = el("div", "upop-sec");
+      s.append(el("h3", null, "Strategies"));
+      const l = el("div", "upop-strs");
+      strs.slice(0, 4).forEach(st => {
+        const a = el("a", "upop-str");
+        a.href = "strategies.html#s-" + st.id;
+        const t = el("strong"); BB.mdInline(t, st.title);
+        a.append(t, el("span", null, (st.category || "").replace("-", " ")));
+        a.onclick = () => close(true);
+        l.append(a);
+      });
+      s.append(l);
+      body.append(s);
+    }
+
+    const acts = el("div", "upop-acts");
+    if (isMe) {
+      const e = el("a", "brick blue sm", "Edit profile"); e.href = "profile.html#edit";
+      acts.append(e);
+    }
+    const link = location.origin + location.pathname.replace(/[^/]*$/, "profile.html") + "?id=" + encodeURIComponent(id);
+    const cp = el("button", "brick dark sm", "Copy link"); cp.type = "button";
+    cp.onclick = () => BB.share(link, "Bloombot profile");
+    const full = el("a", "brick dark sm", "Full profile"); full.href = "profile.html?id=" + encodeURIComponent(id); full.dataset.page = "";
+    acts.append(cp, full);
+    body.append(acts);
+  };
+
+  /* Any link to a profile opens the popup instead (Ctrl/middle click still opens the page). */
+  document.addEventListener("click", e => {
+    if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest && e.target.closest('a[href^="profile.html"]');
+    if (!a || a.hasAttribute("data-page") || !BB.sb) return;
+    const u = new URL(a.href, location.href);
+    if (u.hash === "#edit") return;
+    const id = u.searchParams.get("id") || (BB.session && BB.user(BB.session).id);
+    if (!id) return;
+    e.preventDefault();
+    const acct = document.getElementById("acct");
+    if (acct) acct.classList.remove("open");
+    const av = a.querySelector("img");
+    const nm = a.dataset.name || (a.querySelector("strong, span:not(.me-view):not(.me-meta)") || {}).textContent;
+    BB.openProfile(id, { name: nm && nm.trim(), avatar: av && av.src });
+  });
+
   function init() {
     const burger = document.getElementById("burger");
     if (burger) burger.onclick = () => {
