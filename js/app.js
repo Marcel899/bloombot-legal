@@ -504,6 +504,10 @@
       link("trades.html?mine=1", "trading", "My trade ads"),
       link("dashboard.html", "shield", "Server dashboard"),
       sep(), out);
+    /* owner-only link; Supabase also checks on every giveaway call */
+    BB.sb.rpc("is_site_owner").then(({ data }) => {
+      if (data === true) out.before(link("giveaway-admin.html", "gift", "Manage giveaways"), sep());
+    }, () => {});
 
     const items = () => [...menu.querySelectorAll("[role=menuitem]")];
     const setOpen = (open, focus) => {

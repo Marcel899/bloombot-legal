@@ -2354,3 +2354,40 @@ html.upop-lock{overflow:hidden}
 }
 @keyframes nlpop{0%{transform:scaleY(1)}30%{transform:scaleY(.86)}60%{transform:scaleY(1.06)}100%{transform:scaleY(1)}}
 @media (prefers-reduced-motion:reduce){.nl-ind,.nl-hov{transition:none!important;animation:none!important}}
+/* ── Giveaway manager (giveaway-admin.html) ── */
+.gwa{padding-top:120px;padding-bottom:48px}
+.gwa-top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.gwa-top h1{margin:0;font:800 1.8rem Nunito,system-ui,sans-serif}
+.gwa-top .hint{margin:2px 0 0;color:var(--muted);font-weight:600}
+.gwa-grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:22px;align-items:start}
+.gwa-form{position:sticky;top:96px}
+.gwa-quick{display:flex;flex-wrap:wrap;gap:6px}
+.gwa-quick button{padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:var(--card-2);color:var(--soft);font:800 .82rem Nunito,system-ui,sans-serif;cursor:pointer}
+.gwa-quick button:hover{border-color:#14aeea;color:var(--text)}
+.gwa-prev{display:flex;flex-direction:column;gap:6px}
+.gwa-pv{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--card-2);border:1px dashed var(--border)}
+.gwa-pv img{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none}
+.gwa-pv div{display:flex;flex-direction:column;min-width:0}
+.gwa-pv strong{font-size:1.05rem;overflow-wrap:anywhere}
+.gwa-pv small{color:var(--muted);font-weight:600;overflow-wrap:anywhere}
+.gwa-pv em{font-style:normal;color:#14aeea;font-weight:800;font-size:.85rem}
+.gwa-list .sec-head{margin-top:0}
+#glist{display:flex;flex-direction:column;gap:12px}
+.gwa-card{display:flex;gap:14px;padding:16px;text-align:left}
+.gwa-card.live{border-left:4px solid #28a828}
+.gwa-pic{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:none}
+.gwa-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.gwa-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gwa-t{font-size:1.1rem;overflow-wrap:anywhere}
+.gwa-st{padding:2px 9px;border-radius:999px;font-size:.75rem;font-weight:800;background:var(--card-2);color:var(--muted)}
+.gwa-st.live{background:rgba(40,168,40,.16);color:#3fcf5f}
+.gwa-st.won{background:rgba(245,200,60,.16);color:#d9a91c}
+.gwa-sub{margin:0;color:var(--muted);font-weight:600;overflow-wrap:anywhere}
+.gwa-meta{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--soft);font-size:.86rem;font-weight:700}
+.gwa-win{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:800}
+.gwa-win a{color:#d9a91c}
+.gwa-copy{border:0;background:none;color:var(--muted);font:700 .8rem Nunito,system-ui,sans-serif;text-decoration:underline;cursor:pointer}
+.gwa-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.gwa-empty{color:var(--muted);text-align:center}
+@media (max-width:860px){.gwa-grid{grid-template-columns:1fr}.gwa-form{position:static}}
+@media (max-width:480px){.gwa-card{flex-direction:column}.gwa-btns .brick{flex:1 1 auto}}

@@ -617,6 +617,41 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 """
 open("dashboard.html", "w").write(page("Bloombot Server Dashboard", "Change Bloombot's channels, pings and features for your Discord server from the website.", dash_body, "", "dashboard.html", index=False))
 
+# ── Giveaway manager (site owner only, checked by Supabase) ─────────────
+JSVER["gwadmin"] = hashlib.md5(open("js/gwadmin.js", "rb").read()).hexdigest()[:8]
+gwa_body = f"""<main class="wrap gwa" id="main">
+<div class="gwa-top"><span class="pe-ico"><img src="img/gift.png" alt=""></span><div><h1>Giveaways</h1><p class="hint">Create and run the giveaways shown in the website popup. Only you can see this page.</p></div></div>
+<section class="panel login" id="glogin" hidden>
+<img class="login-icon" src="img/shield.png" alt="">
+<h2>Log in to manage giveaways</h2>
+<p>This page is only for the Bloombot owner.</p>
+<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+</section>
+<section class="panel login" id="gnope" hidden>
+<img class="login-icon" src="img/warning.png" alt="">
+<h2>Owner only</h2>
+<p>Your account can't manage giveaways.</p>
+<a class="brick dark" href="./">Back home</a>
+</section>
+<div class="skel-grid sk-prof" id="gloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
+<div class="gwa-grid" id="gmain" hidden>
+<form class="panel pedit gwa-form" id="gform" novalidate>
+<div class="pe-head"><div><h2 id="gform-h">New giveaway</h2><p class="hint" id="gform-sub">It shows up in the popup on every page as soon as you save.</p></div></div>
+<div class="pe-field"><label for="gt">Prize</label><div class="pe-in"><input id="gt" maxlength="80" autocomplete="off" placeholder="Chicken Coop" required></div></div>
+<div class="pe-field"><label for="gs">Subtitle <em>optional</em></label><div class="pe-in"><input id="gs" maxlength="160" autocomplete="off" placeholder="Winner gets it traded in game"></div></div>
+<div class="pe-field"><label for="gi">Picture link <em>optional</em></label><div class="pe-in"><input id="gi" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…png"></div><p class="pe-msg">Right-click a picture in Discord → Copy Link. Leave empty for the gift icon.</p></div>
+<div class="pe-field"><label for="ge">Ends</label><div class="pe-in"><input id="ge" type="datetime-local" required></div>
+<div class="gwa-quick" id="gquick"><button type="button" data-h="24">1 day</button><button type="button" data-h="72">3 days</button><button type="button" data-h="168">1 week</button><button type="button" data-h="336">2 weeks</button></div></div>
+<div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><em id="gpe"></em></div></div></div>
+<div class="pe-bar"><span class="pe-sp"></span><button class="brick dark sm" type="button" id="gcancel" hidden>Cancel edit</button><button class="brick green" id="gsave" type="submit">Start giveaway</button></div>
+</form>
+<section class="gwa-list"><div class="sec-head"><h2>All giveaways</h2></div><div id="glist"></div></section>
+</div>
+</main>
+<script defer src="js/gwadmin.js?v={JSVER['gwadmin']}"></script>
+"""
+open("giveaway-admin.html", "w").write(page("Bloombot Giveaways", "Manage Bloombot website giveaways.", gwa_body, "", "giveaway-admin.html", index=False))
+
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/trading.png" alt="">
 <div><h2>Let's get you back</h2><p>Head home, or open the Privacy Policy or Terms of Service.</p></div>
