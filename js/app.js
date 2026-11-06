@@ -522,6 +522,9 @@
     /* Other code closes the menu by removing .open; keep aria-expanded in sync. */
     new MutationObserver(() => btn.setAttribute("aria-expanded", String(box.classList.contains("open")))).observe(box, { attributes: true, attributeFilter: ["class"] });
     btn.onclick = e => { e.stopPropagation(); setOpen(!box.classList.contains("open"), e.detail === 0); };
+    /* Start loading the level + Roblox name on hover, so it is there when the menu opens. */
+    btn.addEventListener("pointerenter", loadMeta);
+    btn.addEventListener("focus", loadMeta);
     btn.onkeydown = e => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); setOpen(true, true); } };
     menu.onkeydown = e => {
       const list = items(), i = list.indexOf(document.activeElement);

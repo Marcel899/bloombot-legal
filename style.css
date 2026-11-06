@@ -2593,3 +2593,6 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 @media (max-width:600px){main.dash,main.gwa{max-width:none}}
 @media (max-width:600px){.ptabs{width:100%;box-sizing:border-box}.ptabs button{flex:1 1 auto;justify-content:center;padding:8px 8px;font-size:.86rem;gap:5px}}
 @media (max-width:600px){.dhead>div{flex:1 1 160px}.dhead .dopen{flex:1 1 100%;text-align:center}}
+/* Account menu: the meta line stays one line, so the menu keeps its size when the level + Roblox name arrive. */
+.me-meta{white-space:nowrap;overflow:hidden;min-height:1.25rem}
+.me-meta>span:not(.me-lvl){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
