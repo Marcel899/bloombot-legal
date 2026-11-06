@@ -30,11 +30,27 @@
     who.append(el("h1", null, (p && p.discord_name) || fallbackName || "Bloombot player"));
     const tags = el("div", "p-tags");
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + since(p.registered_at)));
+    if (p && p.level) tags.append(BB.rankTag(p.level));
     if (p && p.roblox_name) tags.append(BB.robloxTag(p));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
     who.append(tags);
     top.append(avs, who);
     c.append(top);
+    c.classList.toggle("rk-ring", !!(p && p.level >= 20));
+    if (p && p.level) c.style.setProperty("--rk", BB.rankFor(p.level).color);
+    who.firstChild.classList.toggle("ancient-name", !!(p && p.level >= 50));
+    if (p && p.xp != null) {
+      /* small level bar; the full one is on levels.html */
+      const L = BB.levelFromXp(p.xp);
+      const bar = el("a", "p-xp");
+      bar.href = "levels.html";
+      bar.style.setProperty("--rk", BB.rankFor(L.level).color);
+      const tr = el("span", "p-xp-tr"), fill = el("i");
+      tr.append(fill);
+      bar.append(el("span", "p-xp-l", "Level " + L.level), tr, el("span", "p-xp-n", L.into.toLocaleString() + " / " + L.need.toLocaleString() + " XP"));
+      c.append(bar);
+      requestAnimationFrame(() => setTimeout(() => { fill.style.width = (100 * L.into / L.need).toFixed(1) + "%"; }, 60));
+    }
     const stats = el("div", "upop-stats pstats");
     const stat = (v, l, g, ic, id) => {
       const s = el("div", "weld " + g);
@@ -233,7 +249,8 @@
       b.onclick = () => { if (pick.tex !== t) { pick.tex = t; paint(); commit(); } };
       return b;
     });
-    const btns = BB.BANNERS.map(([k, name]) => {
+    const myLevel = (mine && mine.level) || 1;
+    const btns = BB.BANNERS.map(([k, name, need]) => {
       const b = el("button", "ban-opt");
       b.type = "button";
       b.setAttribute("role", "radio");
@@ -241,6 +258,21 @@
       if (k === "auto") sw.classList.add("auto");
       b.append(sw, el("span", "ban-n", name));
       b.dataset.k = k;
+      const locked = need && myLevel < need;
+      if (need) {
+        const r = BB.rankFor(need);
+        const lk = el("span", "ban-lv" + (locked ? " locked" : ""), (locked ? "\u{1F512} " : "") + "Lv " + need);
+        lk.title = r.name + " rank perk";
+        sw.append(lk);
+      }
+      if (locked) {
+        b.classList.add("locked");
+        b.setAttribute("aria-disabled", "true");
+        b.title = "Unlocks at level " + need + " (" + BB.rankFor(need).name + ")";
+        b.onclick = () => BB.toast("Reach level " + need + " to unlock the " + name + " banner. See how on the level page.", "info",
+          { title: name + " is locked", action: { label: "Level page", run: () => { location.href = "levels.html"; } } });
+        return b;
+      }
       b.onclick = () => { if (pick.color !== k) { pick.color = k; paint(); commit(); } };
       return b;
     });

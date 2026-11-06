@@ -437,6 +437,8 @@
     options: { redirectTo: here(), scopes: "identify" },
   });
   BB.login = () => loginDialog();
+  BB.googleReady = !!GOOGLE_CLIENT_ID;
+  BB.addGoogle = () => addGoogleDialog();
 
   /* ── login dialog: Discord or Google ─────────────────────── */
   function modal(labelId) {
@@ -651,7 +653,11 @@
         const { data: p } = await BB.sb.from("profiles").select("*").eq("discord_id", u.id).maybeSingle();
         meta.replaceChildren();
         if (!p) { meta.append(BB.el("span", "me-setup", "Finish setting up your account")); return; }
-        if (p.level) meta.append(BB.el("span", "me-lvl", "Lv " + p.level));
+        if (p.level) {
+          const lv = BB.el("span", "me-lvl", "Lv " + p.level);
+          lv.title = BB.rankFor(p.level).name + " rank";
+          meta.append(lv);
+        }
         const rb = BB.el("span", "me-rbx", p.roblox_name || "No Roblox linked");
         if (p.roblox_name && p.roblox_verified) { rb.classList.add("ok"); rb.title = "Verified Roblox account"; }
         meta.append(rb);
@@ -689,6 +695,7 @@
     else if (!u.hasGoogle && GOOGLE_CLIENT_ID) extra.push(act("plus", "Add Google login", addGoogleDialog), sep());
     menu.append(head, sep(), ...extra,
       link("profile.html#edit", "gear", "Edit profile"),
+      link("levels.html", "medal_gold", "Levels & perks"),
       link("values.html#watchlist", "wish_star", "My watchlist"),
       sep(),
       link("trades.html#post", "plus", "Post a trade ad"),
@@ -1042,12 +1049,48 @@
     }
   });
 
+  /* ── levels + ranks (same numbers as bot/leveling.py) ── */
+  const EMO = id => "https://cdn.discordapp.com/emojis/" + id + ".png?size=96&quality=lossless";
+  BB.RANKS = [
+    { level: 1, name: "Seedling", color: "#8b95a1", icon: EMO("1548052374604484689") },
+    { level: 5, name: "Sprout", color: "#c7834a", icon: EMO("1548052510328234064") },
+    { level: 10, name: "Bloom", color: "#d0c8c6", icon: EMO("1548052388810850334") },
+    { level: 20, name: "Blossom", color: "#6fb2ff", icon: EMO("1548052382448099408") },
+    { level: 35, name: "Grove", color: "#b07cff", icon: EMO("1548052473451773983") },
+    { level: 50, name: "Ancient Tree", color: "#ffc447", icon: EMO("1548052475964039189") },
+  ];
+  BB.xpForNext = lv => 5 * lv * lv + 50 * lv + 100;
+  /* total XP -> { level, into, need, total } */
+  BB.levelFromXp = xp => {
+    let level = 1, rest = Math.max(0, Math.floor(Number(xp) || 0));
+    while (rest >= BB.xpForNext(level) && level < 1000) { rest -= BB.xpForNext(level); level++; }
+    return { level, into: rest, need: BB.xpForNext(level), total: Math.max(0, Math.floor(Number(xp) || 0)) };
+  };
+  BB.xpAtLevel = lv => { let t = 0; for (let i = 1; i < lv; i++) t += BB.xpForNext(i); return t; };
+  BB.rankFor = lv => BB.RANKS.reduce((r, x) => (lv >= x.level ? x : r), BB.RANKS[0]);
+  BB.rankTag = lv => {
+    const r = BB.rankFor(lv || 1);
+    const t = BB.el("a", "p-tag rank-tag");
+    t.href = "levels.html";
+    t.dataset.page = "";
+    t.style.setProperty("--rk", r.color);
+    if (r.level >= 50) t.classList.add("ancient");
+    const i = BB.el("img"); i.alt = ""; i.src = r.icon;
+    i.onerror = () => { if (i.src.indexOf("img/shield.png") < 0) i.src = "img/shield.png"; };
+    t.append(i, BB.el("span", null, r.name));
+    t.title = r.name + " rank · Level " + (lv || 1);
+    return t;
+  };
+
   /* ── profile banners (Profile settings → Banner; table profile_banners) ── */
   BB.BANNERS = [
     ["auto", "Surprise me"], ["green", "Grass"], ["blue", "Sky"], ["purple", "Mythic"],
     ["red", "Brick"], ["orange", "Sunset"], ["yellow", "Gold"], ["ocean", "Ocean"], ["candy", "Candy"],
     ["night", "Night"], ["rainbow", "Rainbow"],
+    ["aurora", "Aurora", 5], ["lava", "Lava", 10], ["galaxy", "Galaxy", 20], ["royal", "Royal", 35], ["ancient", "Ancient", 50],
   ];
+  /* banner colour -> level it unlocks at (checked again by set_my_banner) */
+  BB.bannerLevel = color => ((BB.BANNERS.find(b => b[0] === color) || [])[2] || 0);
   const AUTO = ["blue", "green", "purple", "orange", "ocean", "candy"];
   /* key = colour, optionally + "-weld" (default texture is studs) */
   BB.bannerParts = key => {
@@ -1171,8 +1214,12 @@
     if (p && p.discord_avatar) avs.firstChild.src = BB.safeUrl(p.discord_avatar) || avs.firstChild.src;
     if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "upop-rav"));
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + new Date(p.registered_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })));
+    if (p && p.level) tags.append(BB.rankTag(p.level));
     if (p && p.roblox_name) tags.append(BB.robloxTag(p));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
+    if (p && p.level >= 50) name.classList.add("ancient-name");
+    if (p && p.level >= 20) box.classList.add("rk-ring");
+    if (p && p.level) box.style.setProperty("--rk", BB.rankFor(p.level).color);
     if (isMe) {
       const cb = el("a", "upop-cb", "Change banner");
       cb.href = "profile.html#edit";

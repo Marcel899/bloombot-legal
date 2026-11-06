@@ -26,13 +26,14 @@ KEYWORDS = ("Garden Tower Defense, GTD, Roblox, Discord bot, GTD Discord, Garden
 PAGE_KW = {
     "values.html": "GTD value list, Garden Tower Defense value list, unit values, gamepass values, demand, value trends",
     "calculator.html": "GTD trade calculator, Garden Tower Defense trade calculator, win or loss, WFL, fair trade",
+    "levels.html": "Bloombot levels, GTD Discord bot XP, rank perks, XP tasks, Garden Tower Defense trading rank",
     "crates.html": "GTD crate calculator, Garden Tower Defense summon calculator, drop chance, summon odds, pity, luck, how many summons, Skull Summon, Classic Summon",
     "trades.html": "GTD trade ads, Garden Tower Defense trading server, trade ads, LF NLF",
     "strategies.html": "GTD strategies, Garden Tower Defense strategy, best units, meta units, loadouts, map guides",
     "features.html": "Discord trading bot, Roblox trading bot, slash commands, wishlist, trade check",
 }
 # Pages Google should list (profile, dashboard and 404 are noindex).
-SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
+SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "levels.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>'
 
 HEAD = """<!doctype html>
@@ -96,7 +97,7 @@ FOOT = """<footer>
 <div class="foot-cta"><a class="brick discord sm" href="{invite}">{dsvg}Add to Discord</a><a class="brick dark sm" href="{support}"><img src="img/envelope.png" alt="">Support</a></div>
 </div>
 <nav class="foot-cols" aria-label="Footer">
-<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a></div>
+<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
 <div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
 <div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a></div>
 </nav>
@@ -544,7 +545,7 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
 <div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
 <label>Details<textarea id="sd" rows="5" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea></label>
-<div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Details <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes. You need a linked account (<code>/link</code>).</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
+<div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Details <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). You need a linked account (<code>/link</code>).</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
 <p class="post-status" id="sstatus" hidden></p>
 </form>
 </section>
@@ -560,6 +561,35 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <script defer src="js/strategies.js?v={JSVER['strategies']}"></script>
 """
 open("strategies.html", "w").write(page("Bloombot Strategies · Garden Tower Defense", "Community Garden Tower Defense strategies: meta units, map-specific guides and general tips.", strat_body, "s", "strategies.html"))
+
+# ── Levels & perks ───────────────────────────────────────────────────────
+JSVER["levels"] = hashlib.md5(open("js/levels.js", "rb").read()).hexdigest()[:8]
+levels_body = hero("medal_gold", "Levels", "Earn XP in Discord and on the website, climb the ranks and unlock perks.", "t_levels") + f"""<main class="wrap lv" id="main">
+<div class="skel-grid sk-prof" id="lvloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
+<section class="panel lv-card" id="lvcard" hidden aria-live="polite"></section>
+<nav class="lv-road" id="lvroad" aria-label="Ranks"></nav>
+<section class="lv-sec" id="tasks">
+<div class="lv-sh"><h2><img src="img/lightning.png" alt="">XP tasks</h2><span class="count-pill" id="lvtsum"></span></div>
+<p class="hint lv-sub">One-time bonuses. Do the task, then press <b>Claim</b>. Bloombot checks it and adds the XP to your level in Discord too.</p>
+<div class="lv-tasks" id="lvtasks"></div>
+</section>
+<section class="lv-sec" id="earn">
+<div class="lv-sh"><h2><img src="img/chart_up.png" alt="">How to earn XP</h2></div>
+<div class="lv-earn">
+<div class="weld g-blue"><img src="img/gem.png" alt=""><strong>+15 XP</strong><span>for a command in any Bloombot server, once every 30 seconds</span></div>
+<div class="weld g-purple"><img src="img/swap.png" alt=""><strong>+50 XP</strong><span>for a trade ad, your first 3 each day</span></div>
+<div class="weld g-green"><img src="img/lightning.png" alt=""><strong>Bonus XP</strong><span>from the tasks above, and from XP boosts during events</span></div>
+</div>
+</section>
+<section class="lv-sec" id="perks">
+<div class="lv-sh"><h2><img src="img/medal_gold.png" alt="">Every perk</h2></div>
+<p class="hint lv-sub">Perks stack: you keep everything from the ranks below yours. <span class="pk-where pk-k">Discord</span> perks work in every server, <span class="pk-where pk-k web">Website</span> perks work here.</p>
+<div class="lv-perks" id="lvperks"></div>
+</section>
+</main>
+<script defer src="js/levels.js?v={JSVER['levels']}"></script>
+"""
+open("levels.html", "w").write(page("Bloombot Levels & Perks · Garden Tower Defense", "Your Bloombot level, every rank perk in Discord and on the website, and one-time tasks for bonus XP.", levels_body, "", "levels.html"))
 
 # ── Profiles ─────────────────────────────────────────────────────────────
 JSVER["profile"] = hashlib.md5(open("js/profile.js", "rb").read()).hexdigest()[:8]

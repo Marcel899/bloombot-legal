@@ -58,6 +58,7 @@
       if (age < 3500) requestAnimationFrame(tick); else c.remove();
     })(t0);
   }
+  BB.confetti = confetti;
 
   function left(t) {
     let s = Math.max(0, Math.floor((new Date(t) - Date.now()) / 1000));
