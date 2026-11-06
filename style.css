@@ -2700,7 +2700,7 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 
 .lv-road{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:6px 0}
 .rd-line{position:absolute;left:calc(100%/12);right:calc(100%/12);top:34px;height:6px;border-radius:6px;background:rgba(255,255,255,.08)}
-.rd-line i{position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0)*100%);border-radius:6px;background:linear-gradient(90deg,#8b95a1,#c7834a,#d0c8c6,#6fb2ff,#b07cff,#ffc447);background-size:calc(100%/max(var(--p,1),.01)) 100%;box-shadow:0 0 12px rgba(255,255,255,.25);transition:width 1.6s cubic-bezier(.22,1,.36,1)}
+.rd-line i{position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0)*100%);border-radius:6px;background:linear-gradient(90deg,#8b95a1,#c7834a,#d0c8c6,#6fb2ff,#e63c37,#ffc447);background-size:calc(100%/max(var(--p,1),.01)) 100%;box-shadow:0 0 12px rgba(255,255,255,.25);transition:width 1.6s cubic-bezier(.22,1,.36,1)}
 .rd-node{--rk:#8b95a1;position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;text-decoration:none;color:var(--muted);font-size:.8rem;font-weight:700}
 .rd-ic{display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:var(--card);border:3px solid #0c0e12;box-shadow:0 0 0 3px rgba(255,255,255,.06);transition:transform .2s,box-shadow .2s}
 .rd-ic img{width:40px;height:40px;object-fit:contain;filter:grayscale(1) brightness(.6)}
@@ -2817,10 +2817,6 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 [data-theme=light] .p-xp{background:rgba(20,32,52,.06)}
 [data-theme=light] .pk-where{color:#3b47c4}[data-theme=light] .pk-web .pk-where,[data-theme=light] .pk-k.web{color:#1d7a1d}
 
-/* Grove and Ancient Tree share the filled Masters emblem; a coloured glow tells them apart */
-img[src*="1548052475964039189"][src$="#grove"]{filter:drop-shadow(0 0 6px rgba(176,124,255,.85))}
-img[src*="1548052475964039189"]:not([src$="#grove"]){filter:drop-shadow(0 0 6px rgba(255,196,71,.85))}
-.rd-node:not(.got) img[src*="1548052475964039189"]{filter:grayscale(1) brightness(.6)}
 /* ── Profile settings: sections + connected accounts ─────── */
 .pe-sec{display:flex;flex-direction:column;gap:14px;padding-top:18px;border-top:1px solid var(--border)}
 .pe-st{margin:0;padding:0;background:none;border:0;box-shadow:none;font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
