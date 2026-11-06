@@ -4,7 +4,7 @@
   // Public project URL and publishable key: reads are limited by row level security.
   const C = { url: "https://rkzgsndfzzgezoltddvx.supabase.co", key: "sb_publishable_CfTjHiYYCGqLZMlgpiKN-Q_m7JNITb5" };
   // Google OAuth web client ID (public, not a secret). Empty hides the Google button.
-  const GOOGLE_CLIENT_ID = "";
+  const GOOGLE_CLIENT_ID = "176922833460-baahbdu5amjao5etlos65cc056enai8l.apps.googleusercontent.com";
   const listeners = [];
   const BB = window.BB = {
     sb: null, session: null, ready: false,
