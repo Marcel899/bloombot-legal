@@ -463,25 +463,42 @@
     if (document.querySelector(".lg-box")) return;
     const { box, close } = modal("lg-h");
     box.classList.add("lg-box");
+    const x = BB.el("button", "lg-close");
+    x.type = "button";
+    x.setAttribute("aria-label", "Close");
+    x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>';
+    x.onclick = close;
     const h = BB.el("h2", null, "Log in to Bloombot"); h.id = "lg-h";
     const sub = BB.el("p", "hint", "New here? Logging in creates your account.");
+    const perks = BB.el("ul", "lg-perks");
+    [["trading", "Trade ads"], ["bullseye", "Strategies"], ["medal_gold", "Your profile"]].forEach(([i, t]) => {
+      const li = BB.el("li"); const im = BB.el("img"); im.src = `img/${i}.png`; im.alt = "";
+      im.onerror = () => { im.src = "img/swap.png"; };
+      li.append(im, BB.el("span", null, t)); perks.append(li);
+    });
     const opts = BB.el("div", "lg-opts");
-    const dc = BB.el("button", "brick discord lg-btn");
+    const dc = BB.el("button", "lg-btn lg-dc");
     dc.type = "button";
     dc.innerHTML = dcSvg();
     dc.append(BB.el("span", null, "Continue with Discord"));
-    dc.onclick = () => { dc.disabled = true; BB.loginDiscord(); };
+    dc.onclick = () => { dc.disabled = true; dc.classList.add("busy"); BB.loginDiscord(); };
     opts.append(dc);
     const st = BB.el("p", "post-status"); st.hidden = true;
     const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t; };
     if (GOOGLE_CLIENT_ID) {
       const slot = BB.el("div", "lg-google");
-      slot.setAttribute("aria-label", "Continue with Google");
       opts.append(slot);
       googleButton(slot, "login", say, close);
     }
-    const x = BB.el("button", "brick dark sm lg-x", "Cancel"); x.type = "button"; x.onclick = close;
-    box.append(logoImg(), h, sub, opts, st, BB.el("p", "hint lg-note", "Bloombot never sees your password."), x);
+    const note = BB.el("p", "lg-note");
+    note.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>';
+    note.append(BB.el("span", null, "Bloombot never sees your password."));
+    const legal = BB.el("p", "lg-legal");
+    legal.append("By continuing you agree to the ");
+    const tl = BB.el("a", null, "Terms"); tl.href = "terms.html";
+    const pl = BB.el("a", null, "Privacy Policy"); pl.href = "privacy.html";
+    legal.append(tl, " and ", pl, ".");
+    box.append(x, logoImg(), h, sub, perks, opts, st, note, legal);
     setTimeout(() => dc.focus(), 50);
   }
   BB.loginDialog = loginDialog;
@@ -516,10 +533,9 @@
       callback: r => onGoogle(r && r.credential, raw, mode, say, done),
     });
     slot.replaceChildren();
-    const light = document.documentElement.dataset.theme === "light";
     google.accounts.id.renderButton(slot, {
-      type: "standard", size: "large", shape: "pill", text: mode === "link" ? "continue_with" : "continue_with",
-      theme: light ? "outline" : "filled_black", logo_alignment: "left", width: Math.min(400, Math.max(240, slot.clientWidth || 320)),
+      type: "standard", size: "large", shape: "pill", text: "continue_with",
+      theme: "outline", logo_alignment: "center", width: Math.min(400, Math.max(200, Math.floor(slot.getBoundingClientRect().width) || 320)),
     });
   }
   const googleErr = msg => /already|exists|linked/i.test(msg || "")
@@ -570,7 +586,7 @@
     box.classList.add("lg-box");
     const h = BB.el("h2", null, "One more step: connect Discord"); h.id = "cd-h";
     const sub = BB.el("p", "hint", "Bloombot lives in Discord, so your trade ads, strategies and levels belong to your Discord account. Connect it once, then Google logs you straight in.");
-    const dc = BB.el("button", "brick discord lg-btn");
+    const dc = BB.el("button", "lg-btn lg-dc");
     dc.type = "button";
     dc.innerHTML = dcSvg();
     dc.append(BB.el("span", null, "Connect Discord"));
