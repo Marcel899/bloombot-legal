@@ -2884,3 +2884,9 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 
 .tk.st-ready{border-color:rgba(63,207,95,.55);box-shadow:0 0 18px -6px rgba(63,207,95,.6),inset 0 2px 0 rgba(255,255,255,.04)}
 .tk-do{text-decoration:none}
+
+/* weld stays visible on dark and locked banners */
+.pban[data-tex=weld]:is([data-banner=night],[data-banner=galaxy],[data-banner=royal],[data-banner=aurora])::after{background-image:url(img/weld-light.png);filter:none;opacity:.45}
+.ban-opt.locked{opacity:1}
+.ban-opt.locked .ban-sw{filter:saturate(.6) brightness(.8)}
+.ban-opt.locked .ban-n{opacity:.6}
