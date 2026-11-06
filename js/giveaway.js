@@ -87,8 +87,10 @@
   function expand(g) { store("bb_gw_min_" + g.id, "0"); anim = "open"; render(); }
 
   async function load() {
-    const { data } = await BB.sb.from("giveaways").select("id,title,subtitle,image_url,ends_at,rules").is("winner_id", null)
+    const q = cols => BB.sb.from("giveaways").select(cols).is("winner_id", null)
       .gt("ends_at", new Date().toISOString()).order("ends_at").limit(3);
+    let { data, error } = await q("id,title,subtitle,image_url,ends_at,rules");
+    if (error) ({ data } = await q("id,title,subtitle,image_url,ends_at"));  /* before the rules SQL has run */
     list = data || [];
     if (!list.length) { if (root) root.remove(); root = null; return; }
     cur = Math.min(cur, list.length - 1);
@@ -98,7 +100,8 @@
     }));
     mine = new Set();
     if (BB.session) {
-      const { data: e } = await BB.sb.from("giveaway_entries").select("giveaway_id,task,pts").in("giveaway_id", list.map(g => g.id));
+      let { data: e, error: ee } = await BB.sb.from("giveaway_entries").select("giveaway_id,task,pts").in("giveaway_id", list.map(g => g.id));
+      if (ee) ({ data: e } = await BB.sb.from("giveaway_entries").select("giveaway_id,task").in("giveaway_id", list.map(g => g.id)));
       (e || []).forEach(r => { mine.add(r.giveaway_id + ":" + r.task); if (r.pts) ptsOf.set(r.giveaway_id + ":" + r.task, r.pts); });
     }
     render();
