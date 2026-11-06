@@ -720,8 +720,16 @@
     ["night", "Night"], ["rainbow", "Rainbow"],
   ];
   const AUTO = ["blue", "green", "purple", "orange", "ocean", "candy"];
+  /* key = colour, optionally + "-weld" (default texture is studs) */
+  BB.bannerParts = key => {
+    const m = String(key || "auto").match(/^(.*?)(?:-(studs|weld))?$/);
+    return { color: BB.BANNERS.some(b => b[0] === m[1]) ? m[1] : "auto", tex: m[2] || "studs" };
+  };
+  BB.bannerKey = (color, tex) => tex === "weld" ? color + "-weld" : color;
   BB.paintBanner = (node, key, id) => {
-    let k = BB.BANNERS.some(b => b[0] === key) ? key : "auto";
+    const parts = BB.bannerParts(key);
+    node.dataset.tex = parts.tex;
+    let k = parts.color;
     if (k === "auto") k = AUTO[[...String(id || "0")].reduce((a, c) => a + c.charCodeAt(0), 0) % AUTO.length];
     node.dataset.banner = k;
     return k;

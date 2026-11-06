@@ -203,37 +203,58 @@
   /* banner picker: saves straight away, separate from the Save button */
   async function banners() {
     const g = $("fban");
-    let cur = await BB.getBanner(me);
+    let cur = BB.bannerParts(await BB.getBanner(me));
+    let pick = { ...cur };
+    const texBtns = [["studs", "Studs"], ["weld", "Weld"]].map(([t, name]) => {
+      const b = el("button", "ban-tex", name);
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.dataset.t = t;
+      b.onclick = () => { if (pick.tex !== t) { pick.tex = t; paint(); commit(); } };
+      return b;
+    });
     const btns = BB.BANNERS.map(([k, name]) => {
       const b = el("button", "ban-opt");
       b.type = "button";
       b.setAttribute("role", "radio");
-      b.setAttribute("aria-checked", String(k === cur));
       const sw = el("span", "ban-sw pban");
-      BB.paintBanner(sw, k, me);
       if (k === "auto") sw.classList.add("auto");
       b.append(sw, el("span", "ban-n", name));
-      b.onclick = async () => {
-        if (b.getAttribute("aria-checked") === "true") return;
-        btns.forEach(x => x.setAttribute("aria-checked", String(x === b)));
-        $("fb-s").textContent = "Saving…";
-        const err = await BB.setBanner(k);
-        if (err) {
-          $("fb-s").textContent = "";
-          BB.toast(/function|relation|schema/i.test(err.message) ? "Banners aren't switched on yet. Try again later." : "Couldn't save: " + err.message, "bad", { title: "Banner not saved" });
-          btns.forEach(x => x.setAttribute("aria-checked", String(x.dataset.k === cur)));
-          return;
-        }
-        cur = k;
-        $("fb-s").textContent = "Saved";
-        setTimeout(() => { $("fb-s").textContent = ""; }, 1600);
-        const pb = document.querySelector(".p-ban");
-        if (pb) BB.paintBanner(pb, k, me);
-      };
       b.dataset.k = k;
+      b.onclick = () => { if (pick.color !== k) { pick.color = k; paint(); commit(); } };
       return b;
     });
+    function paint() {
+      texBtns.forEach(x => x.setAttribute("aria-checked", String(x.dataset.t === pick.tex)));
+      btns.forEach(x => {
+        x.setAttribute("aria-checked", String(x.dataset.k === pick.color));
+        BB.paintBanner(x.firstChild, BB.bannerKey(x.dataset.k, pick.tex), me);
+      });
+      const pb = document.querySelector(".p-ban");
+      if (pb) BB.paintBanner(pb, BB.bannerKey(pick.color, pick.tex), me);
+    }
+    async function commit() {
+      $("fb-s").textContent = "Saving…";
+      const err = await BB.setBanner(BB.bannerKey(pick.color, pick.tex));
+      if (err) {
+        $("fb-s").textContent = "";
+        BB.toast(/function|relation|schema/i.test(err.message) ? "Banners aren't switched on yet. Try again later." : "Couldn't save: " + err.message, "bad", { title: "Banner not saved" });
+        pick = { ...cur };
+        paint();
+        return;
+      }
+      cur = { ...pick };
+      $("fb-s").textContent = "Saved";
+      setTimeout(() => { $("fb-s").textContent = ""; }, 1600);
+    }
+    const tex = el("div", "ban-texs");
+    tex.setAttribute("role", "radiogroup");
+    tex.setAttribute("aria-label", "Banner texture");
+    tex.append(el("span", null, "Texture"), ...texBtns);
     g.replaceChildren(...btns);
+    g.before(tex);
+    document.querySelectorAll(".ban-texs").forEach(x => { if (x !== tex) x.remove(); });
+    paint();
   }
 
   let busy = false;

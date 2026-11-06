@@ -2457,3 +2457,17 @@ html.upop-lock{overflow:hidden}
 .upop-stats>.weld{background:var(--bg);border:3px solid var(--bd)}
 [data-theme=light] .upop-stats>.weld{background:var(--bg);border-color:var(--bd)}
 .p-ban{margin-bottom:-44px}
+
+/* banners: one texture at a time (data-tex = studs | weld) */
+.pban[data-tex=weld]{--st:linear-gradient(transparent,transparent)}
+.upop-ban::after,.p-ban::after,.ban-sw::after{content:none}
+.pban[data-tex=weld]{position:relative}
+.pban[data-tex=weld]::after{content:"";position:absolute;inset:0;border-radius:inherit;background:url(img/weld.png) 0 0/45px 45px repeat;filter:grayscale(100%);opacity:.35;pointer-events:none}
+.ban-sw.pban[data-tex=weld]::after{background-size:30px 30px}
+.ban-texs{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.85rem;font-weight:800;color:var(--muted)}
+.ban-texs span{margin-right:4px}
+.ban-tex{padding:5px 14px;border:2px solid transparent;border-radius:99px;background:rgba(255,255,255,.06);color:var(--soft);font:800 .85rem "Nunito",sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
+.ban-tex:hover{background:rgba(255,255,255,.1)}
+.ban-tex[aria-checked=true]{border-color:#14aeea;background:rgba(20,174,234,.14);color:#fff}
+[data-theme=light] .ban-tex{background:#f6f3ea}
+[data-theme=light] .ban-tex[aria-checked=true]{background:#e3f4fc;color:var(--text)}
