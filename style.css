@@ -2626,3 +2626,9 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 [data-theme=light] .lg-perks li{background:rgba(0,0,0,.04);border-color:var(--line)}
 [data-theme=light] .lg-close:hover{background:rgba(0,0,0,.06)}
 [data-theme=light] .lg-btn:focus-visible{outline-color:#3aa52c}
+
+/* giveaway popup: no sunburst; seconds tick without transform (Firefox drew a dark box over it) */
+.gw-picw::before,[data-theme=light] .gw-picw::before{content:none;animation:none}
+.gw-u b{position:relative;z-index:1;transform:none}
+.gw-u b.tk{animation:gwTick2 .3s ease-out}
+@keyframes gwTick2{from{opacity:.35}to{opacity:1}}
