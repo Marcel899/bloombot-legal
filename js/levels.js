@@ -19,16 +19,16 @@
 
   /* One-time tasks. XP must match xp_task_amount() in Supabase and XP_TASKS in the bot. */
   const TASKS = [
-    { k: "account", t: "Create your Bloombot account", d: "Pick your Roblox name once. Takes 10 seconds.", xp: 50, ic: "flower", go: "profile.html#edit", gl: "Set up" },
+    { k: "account", t: "Create your Bloombot account", d: "Pick your Roblox name once. Takes 10 seconds.", xp: 50, ic: "task_user", go: "profile.html#edit", gl: "Set up" },
     { k: "roblox", t: "Verify your Roblox account", d: "Prove it's you with a short code in your Roblox About.", xp: 300, ic: "shield", go: "#verify", gl: "Verify" },
     { k: "in_server", t: "Join the Bloombot Discord", d: "News, giveaways and other traders. Counts after about 2 minutes.", xp: 200, ic: "envelope", go: support, gl: "Join", ext: true },
-    { k: "add_bot", t: "Add Bloombot to your server", d: "Any server you own or run. Shows up within 3 minutes.", xp: 300, ic: "big_add", go: invite, gl: "Add", ext: true },
-    { k: "google", t: "Connect a Google login", d: "Log in with Google next time. Handy on your phone.", xp: 150, ic: "plus", run: () => BB.addGoogle(), gl: "Connect" },
+    { k: "add_bot", t: "Add Bloombot to your server", d: "Any server you own or run. Shows up within 3 minutes.", xp: 300, ic: "task_addbot", go: invite, gl: "Add", ext: true },
+    { k: "google", t: "Connect a Google login", d: "Log in with Google next time. Handy on your phone.", xp: 150, ic: "task_google", run: () => BB.addGoogle(), gl: "Connect" },
     { k: "trade_ad", t: "Post a trade ad", d: "From the website or any Bloombot server.", xp: 150, ic: "trading", go: "trades.html#post", gl: "Post" },
     { k: "strategy", t: "Share a strategy", d: "Help other players beat a map.", xp: 200, ic: "bullseye", go: "strategies.html#share", gl: "Share" },
-    { k: "server_link", t: "Add your private server link", d: "So traders can join you straight away.", xp: 100, ic: "gear", go: "profile.html#edit", gl: "Add" },
-    { k: "about", t: "Write an About me", d: "Ten characters or more in profile settings.", xp: 75, ic: "offer", go: "profile.html#edit", gl: "Write" },
-    { k: "banner", t: "Pick a profile banner", d: "Any colour you like. Some unlock with your rank.", xp: 50, ic: "wish_star", go: "profile.html#edit", gl: "Pick" },
+    { k: "server_link", t: "Add your private server link", d: "So traders can join you straight away.", xp: 100, ic: "task_link", go: "profile.html#edit", gl: "Add" },
+    { k: "about", t: "Write an About me", d: "Ten characters or more in profile settings.", xp: 75, ic: "task_about", go: "profile.html#edit", gl: "Write" },
+    { k: "banner", t: "Pick a profile banner", d: "Any colour you like. Some unlock with your rank.", xp: 50, ic: "task_banner", go: "profile.html#edit", gl: "Pick" },
     { k: "giveaway", t: "Enter a website giveaway", d: "Look for the gift in the bottom corner.", xp: 50, ic: "gift", run: openGiveaway, gl: "Open" },
   ];
   const TASK_TOTAL = TASKS.reduce((a, t) => a + t.xp, 0);
