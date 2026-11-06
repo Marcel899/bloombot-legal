@@ -1674,7 +1674,7 @@ body:has(.gw) .totop{right:auto;left:20px}
 [data-theme=light] .kx-row.have .kx-c,[data-theme=light] .kx-ok{color:#24731a}
 [data-theme=light] .kr-meter{background:#efe8d6;border-color:var(--line-2)}
 /* summon window: built to look like the in-game shop */
-.kc-cur{width:16px;height:16px;vertical-align:-3px;margin-right:3px}
+.kcrate .kc-cur{width:16px;height:16px;flex:none;vertical-align:-3px;margin-right:3px}
 .kc-tag.k-limited{background:#3fae2a}.kc-tag.k-event{background:#e07a10}.kc-tag.k-removed{background:#6b7280}
 .kcrates.many{display:flex;flex-direction:column;gap:14px}
 .kc-gh{margin:0 0 8px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -1704,7 +1704,7 @@ body:has(.gw) .totop{right:auto;left:20px}
 .su-art{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;aspect-ratio:1/1;overflow:hidden;border:3px solid var(--d);background:var(--a)}
 .su-img{position:absolute;inset:4% 6% 14%;width:88%;height:82%;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 .su-stars{position:absolute;top:2px;left:2px;z-index:3;display:flex}
-.su-stars img{width:clamp(14px,20cqw,40px);height:auto;margin-right:-4.5cqw;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
+.su-stars img{width:clamp(11px,15cqw,30px);height:auto;margin-right:-3.4cqw;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
 .su-lim{position:absolute;top:0;right:0;z-index:2;width:74%;height:auto;pointer-events:none}
 .su-name{position:relative;z-index:2;max-width:100%;padding:0 3px 3px;font-size:clamp(9px,10.5cqw,21px);line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .su-got{position:absolute;top:34%;left:4px;z-index:3;font-size:.9rem;color:#9cf27d}
