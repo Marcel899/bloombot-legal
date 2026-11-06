@@ -478,3 +478,18 @@
   BB.dropdown = enhance;
   document.querySelectorAll("select").forEach(enhance);
 })();
+
+/* Calculator switcher: slide the highlight to the picked tab, then open that page. */
+(() => {
+  const nav = document.querySelector(".ctabs");
+  if (!nav) return;
+  nav.addEventListener("click", e => {
+    const a = e.target.closest(".ctab");
+    if (!a || a.classList.contains("on") || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    e.preventDefault();
+    nav.dataset.tab = a.dataset.i;
+    nav.querySelectorAll(".ctab").forEach(t => t.classList.toggle("on", t === a));
+    setTimeout(() => { location.href = a.href; }, 260);
+  });
+})();

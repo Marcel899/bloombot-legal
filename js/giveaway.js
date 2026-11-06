@@ -50,6 +50,26 @@
     return (d ? d + "d " : "") + p(Math.floor(s / 3600)) + ":" + p(Math.floor(s % 3600 / 60)) + ":" + p(s % 60);
   }
 
+  function parts(t) {
+    let s = Math.max(0, Math.floor((new Date(t) - Date.now()) / 1000));
+    const p = n => String(n).padStart(2, "0");
+    return [Math.floor(s / 86400), p(Math.floor(s % 86400 / 3600)), p(Math.floor(s % 3600 / 60)), p(s % 60)];
+  }
+  const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let anim = "open";
+  /* minimize: panel shrinks into the corner, then the pill pops in */
+  function shrink(g) {
+    store("bb_gw_min_" + g.id, "1");
+    if (calm() || !root) { render(); return; }
+    root.classList.remove("opening");
+    root.classList.add("closing");
+    let done = false;
+    const fin = () => { if (done) return; done = true; anim = "pop"; render(); };
+    root.addEventListener("animationend", e => { if (e.target === root) fin(); }, { once: true });
+    setTimeout(fin, 400);
+  }
+  function expand(g) { store("bb_gw_min_" + g.id, "0"); anim = "open"; render(); }
+
   async function load() {
     const { data } = await BB.sb.from("giveaways").select("id,title,subtitle,image_url,ends_at").is("winner_id", null)
       .gt("ends_at", new Date().toISOString()).order("ends_at").limit(3);
@@ -113,23 +133,30 @@
     const g = list[cur];
     const saved = store("bb_gw_min_" + g.id);
     const min = saved === "1" || (saved === null && matchMedia("(max-width:600px)").matches);
-    root.className = "gw" + (min ? " min" : "");
+    const how = calm() ? "" : anim;
+    anim = "";
+    root.className = "gw" + (min ? " min" : "") + (how === "open" && !min ? " opening" : "");
     root.replaceChildren();
     if (min) {
       const b = el("button", "brick purple gw-pill");
       b.type = "button";
       const i = el("img"); i.src = "img/gift.png"; i.alt = "";
       b.append(i, el("span", null, "Giveaway"), el("em", "gw-cd", left(g.ends_at)));
-      b.onclick = () => { store("bb_gw_min_" + g.id, "0"); render(); };
+      b.setAttribute("aria-label", "Open giveaway");
+      b.onclick = () => expand(g);
+      if (how) { b.classList.add("pop"); b.addEventListener("animationend", () => b.classList.remove("pop"), { once: true }); }
       root.append(b);
       tick();
       return;
     }
     const top = el("div", "gw-top");
-    top.append(el("span", "gw-kicker", "Sitewide giveaway"));
-    const x = el("button", "gw-x", "×");
-    x.type = "button"; x.setAttribute("aria-label", "Minimize giveaway");
-    x.onclick = () => { store("bb_gw_min_" + g.id, "1"); render(); };
+    const kick = el("span", "gw-kicker");
+    kick.append(el("i", "gw-live"), document.createTextNode("Live giveaway"));
+    top.append(kick);
+    const x = el("button", "gw-x");
+    x.type = "button"; x.setAttribute("aria-label", "Minimize giveaway"); x.title = "Minimize";
+    x.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    x.onclick = () => shrink(g);
     top.append(x);
     const head = el("div", "gw-head");
     const pic = el("img", "gw-pic"); pic.alt = ""; pic.src = BB.safeUrl(g.image_url) || "img/gift.png";
@@ -138,12 +165,22 @@
     const meta = el("div", "gw-meta");
     const done = TASKS.filter(t => mine.has(g.id + ":" + t.key));
     const my = done.reduce((s, t) => s + t.pts, 0);
-    meta.append(el("span", "gw-cd", "Ends in " + left(g.ends_at)), el("span", null, (totals[g.id] || 0).toLocaleString() + " entries"));
+    meta.append(el("span", "gw-chip", (totals[g.id] || 0).toLocaleString() + " entries"));
+    if (mine.has(g.id + ":join")) meta.append(el("span", "gw-chip in", "You're in"));
     ht.append(el("h3", null, g.title));
     if (g.subtitle) ht.append(el("p", "gw-sub", g.subtitle));
     ht.append(meta);
-    head.append(pic, ht);
-    root.append(top, head);
+    const pw = el("div", "gw-picw"); pw.append(pic);
+    head.append(pw, ht);
+    const clock = el("div", "gw-clock");
+    clock.setAttribute("aria-label", "Time left");
+    parts(g.ends_at).forEach((v, i) => {
+      const u = el("div", "gw-u");
+      const n = el("b", null, String(v)); n.dataset.u = i;
+      u.append(n, el("small", null, ["days", "hours", "min", "sec"][i]));
+      clock.append(u);
+    });
+    root.append(top, head, clock);
     if (list.length > 1) {
       const tabs = el("div", "gw-tabs");
       list.forEach((o, i) => { const b = el("button", "gw-tab" + (i === cur ? " on" : ""), o.title); b.type = "button"; b.onclick = () => { cur = i; render(); }; tabs.append(b); });
@@ -204,6 +241,10 @@
       ? (joined ? (open.length ? `You have ${my} ${my === 1 ? "entry" : "entries"}. Do more tasks for extra entries.` : `All tasks done. You have the most entries possible. Good luck!`) : "You need a Bloombot account to join.")
       : "Log in with Discord and have a Bloombot account to join.");
     root.append(foot);
+    if (root.classList.contains("opening")) {
+      [...root.children].forEach((c, i) => c.style.setProperty("--i", i));
+      root.addEventListener("animationend", e => { if (e.target === root) root.classList.remove("opening"); }, { once: true });
+    }
     tick();
   }
 
@@ -213,7 +254,9 @@
       const g = list[cur];
       if (!g || !root) return clearInterval(timer);
       if (new Date(g.ends_at) <= Date.now()) { clearInterval(timer); load(); return; }
-      root.querySelectorAll(".gw-cd").forEach(c => { c.textContent = (c.closest(".gw-pill") ? "" : "Ends in ") + left(g.ends_at); });
+      root.querySelectorAll(".gw-cd").forEach(c => { c.textContent = left(g.ends_at); });
+      const pt = parts(g.ends_at);
+      root.querySelectorAll(".gw-u b").forEach(b => { const v = String(pt[b.dataset.u]); if (b.textContent !== v) { b.textContent = v; b.classList.remove("tk"); void b.offsetWidth; b.classList.add("tk"); } });
     }, 1000);
   }
 

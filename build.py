@@ -417,10 +417,11 @@ def side(key, title, color):
 
 
 def calc_tabs(cur):
-    tabs = [("trade", "calculator.html", "calculator", 'Trade<span class="ct-l"> calculator</span>'), ("crate", "crates.html", "crate", 'Crate<span class="ct-l"> calculator</span>')]
-    return '<nav class="ctabs" aria-label="Calculators">' + "".join(
-        f'<a class="ctab{" on" if k == cur else ""}" href="{h}"{" aria-current=\"page\"" if k == cur else ""}><img src="img/{i}.png" alt="">{t}</a>'
-        for k, h, i, t in tabs) + "</nav>\n"
+    tabs = [("trade", "calculator.html", "calculator", "Trade", "Win, fair or loss"), ("crate", "crates.html", "crate", "Crate", "Summon odds")]
+    i = [k for k, *_ in tabs].index(cur)
+    return f'<nav class="ctabs" aria-label="Calculators" data-tab="{i}"><span class="ctab-ind weld" aria-hidden="true"></span>' + "".join(
+        f'<a class="ctab{" on" if k == cur else ""}" href="{h}" data-i="{n}"{" aria-current=\"page\"" if k == cur else ""}><img src="img/{ic}.png" alt=""><span class="ct-t"><b>{t}<span class="ct-l"> calculator</span></b><small>{sub}</small></span></a>'
+        for n, (k, h, ic, t, sub) in enumerate(tabs)) + "</nav>\n"
 
 
 calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss? Add both sides and find out.", "t_calc") + f"""<main class="wrap calc" id="main">

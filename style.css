@@ -2146,3 +2146,89 @@ a.me-head:hover,a.me-head:focus-visible{background:linear-gradient(135deg,rgba(8
 @media (hover:none),(max-width:600px){.sw-key{display:none}}
 @media (max-width:600px){.sw-btn{flex:1 1 0;padding:9px 10px;gap:7px;font-size:clamp(.95rem,4.6vw,1.3rem)}}
 @media (max-width:380px){.ct-l{display:none}.ctab{padding:7px 14px}}
+
+/* ── Calculator switcher v2: sliding weld highlight ───────── */
+.ctabs{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:min(520px,100%);padding:6px;border-radius:16px;background:rgba(14,16,21,.85);border:1px solid var(--border);box-shadow:0 14px 30px -18px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.04)}
+.ctab-ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc(50% - 9px);border-radius:11px;padding:0;z-index:0;transform:translateX(0);transition:transform .38s cubic-bezier(.3,1.35,.5,1),background-color .25s,border-color .25s;view-transition-name:ctab-ind}
+.ctab-ind::before{border-radius:8px}
+.ctabs[data-tab="1"] .ctab-ind{transform:translateX(calc(100% + 6px));--bg:#14aeea;--bd:#174b63;--gl:20,174,234}
+.ctab{position:relative;z-index:1;justify-content:center;gap:10px;padding:9px 14px;border-radius:11px;transition:color .2s,background .15s}
+.ctab.on,.ctab.on:hover{background:none;box-shadow:none;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.ctab:not(.on):hover{background:rgba(255,255,255,.05)}
+.ctab img{width:30px;height:30px;flex:none;transition:transform .3s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.ctab:hover img{transform:translateY(-2px) rotate(-6deg)}
+.ctab.on img{transform:scale(1.08)}
+.ct-t{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.ct-t b{font-weight:900;font-size:1rem}
+.ct-t small{font-size:.74rem;font-weight:800;opacity:.7}
+.ctab.on .ct-t small{opacity:.9}
+[data-theme=light] .ctabs{background:rgba(255,253,247,.95);border-color:var(--line);box-shadow:0 12px 26px -18px rgba(90,70,20,.45)}
+[data-theme=light] .ctab.on,[data-theme=light] .ctab.on:hover{background:none;box-shadow:none;color:#fff}
+[data-theme=light] .ctab:not(.on){color:var(--soft)}
+[data-theme=light] .ctab:not(.on):hover{background:var(--hov);color:var(--text)}
+@media (max-width:600px){.ctab{padding:8px 8px;gap:8px}.ctab img{width:24px;height:24px}.ct-t b{font-size:.92rem}.ct-t small{font-size:.68rem}}
+@media (max-width:380px){.ct-t small{display:none}}
+@media (prefers-reduced-motion:reduce){.ctab-ind,.ctab img{transition:none}}
+
+/* ── Rarity tags (Marcel's colours, same in light and dark) ── */
+.rar.r-common,.rar.r-uncommon,.rar.r-rare,.rar.r-epic,.rar.r-legendary,.rar.r-godly,.rar.r-exclusive,.rar.r-administrator,
+.rarity-common,.rarity-uncommon,.rarity-rare,.rarity-epic,.rarity-legendary,.rarity-godly,.rarity-exclusive,.rarity-administrator{padding:3px 6px;border-radius:4px;font-weight:bold;border:0}
+.r-common,.rarity-common,[data-theme=light] .r-common{background:gray;color:#fff}
+.r-uncommon,.rarity-uncommon,[data-theme=light] .r-uncommon{background:#3b82f6;color:#dde1e0}
+.r-rare,.rarity-rare,[data-theme=light] .r-rare{background:green;color:#fff}
+.r-epic,.rarity-epic,[data-theme=light] .r-epic{background:#7F5500;color:#dde1e0}
+.r-legendary,.rarity-legendary,[data-theme=light] .r-legendary{background:red;color:#fff}
+.r-godly,.rarity-godly,[data-theme=light] .r-godly{background:#D66ACF;color:#dde1e0}
+.r-exclusive,.rarity-exclusive,[data-theme=light] .r-exclusive{background:#50297A;color:#dde1e0}
+.r-administrator,.rarity-administrator,[data-theme=light] .r-administrator{background:linear-gradient(270deg,#3F5400,#668B00,#3F5400,#668B00);background-size:200% 200%;color:#dde1e0;animation:rainbow 5s linear infinite}
+@keyframes rainbow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.dd-opt .rar.r-common,.dd-opt .rar.r-uncommon,.dd-opt .rar.r-rare,.dd-opt .rar.r-epic,.dd-opt .rar.r-legendary,.dd-opt .rar.r-godly,.dd-opt .rar.r-exclusive,.dd-opt .rar.r-administrator{padding:3px 8px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){.r-administrator,.rarity-administrator{animation:none}}
+
+/* ── Giveaway v3: open/close animation, countdown tiles ───── */
+.gw:not(.min){padding:14px 14px 12px;border-radius:20px;animation:none;transform-origin:calc(100% - 40px) calc(100% - 20px)}
+.gw.opening{animation:gwIn .45s cubic-bezier(.2,1.25,.4,1) both}
+.gw.opening>*{animation:gwKid .4s cubic-bezier(.2,1,.4,1) both;animation-delay:calc(80ms + var(--i,0) * 45ms)}
+.gw.closing{animation:gwOut .28s cubic-bezier(.55,0,.8,.2) both;pointer-events:none}
+@keyframes gwIn{from{opacity:0;transform:translateY(30px) scale(.5);filter:blur(4px)}}
+@keyframes gwKid{from{opacity:0;transform:translateY(10px)}}
+@keyframes gwOut{to{opacity:0;transform:translateY(34px) scale(.45);filter:blur(3px)}}
+.gw .brick.gw-pill.pop{animation:gwPop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes gwPop{0%{opacity:0;transform:scale(.3) translateY(10px)}60%{opacity:1}100%{transform:none}}
+.gw-kicker{display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 8px;border-radius:99px;background:rgba(169,79,255,.16);border:1px solid rgba(169,79,255,.35);color:#d9b8ff;font-size:.7rem}
+.gw-live{width:8px;height:8px;border-radius:50%;background:#ff4d6d;box-shadow:0 0 0 0 rgba(255,77,109,.7);animation:gwLive 1.6s ease-out infinite}
+@keyframes gwLive{0%{box-shadow:0 0 0 0 rgba(255,77,109,.7)}70%,100%{box-shadow:0 0 0 7px rgba(255,77,109,0)}}
+.gw-x{display:grid;place-items:center;width:32px;height:32px;padding:0;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);transition:background .15s,transform .15s,color .15s}
+.gw-x:hover{background:rgba(255,255,255,.12);color:#fff;transform:translateY(1px)}
+.gw-head{gap:14px;margin:12px 0 10px}
+.gw-picw{position:relative;flex:none}
+.gw-picw::after{content:"";position:absolute;inset:-6px;border-radius:18px;background:conic-gradient(from 0deg,transparent,rgba(245,200,60,.55),transparent 40%);animation:gwSpin 4s linear infinite;z-index:-1;filter:blur(6px)}
+.gw-picw{isolation:isolate}
+@keyframes gwSpin{to{transform:rotate(1turn)}}
+.gw-pic{width:64px;height:64px;border-radius:14px}
+.gw-head h3{font-size:1.3rem;letter-spacing:-.01em}
+.gw-meta{margin-top:6px;gap:6px}
+.gw-chip{padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--soft);font-size:.76rem;font-weight:900}
+.gw-chip.in{background:rgba(40,168,40,.2);color:#7ef0a0}
+.gw-clock{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 12px}
+.gw-u{display:flex;flex-direction:column;align-items:center;padding:7px 0 5px;border-radius:12px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.07);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.gw-u b{font:900 1.25rem/1.1 "Nunito",sans-serif;font-variant-numeric:tabular-nums;color:#fff}
+.gw-u b.tk{animation:gwTick .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes gwTick{from{transform:translateY(-5px);opacity:.3}}
+.gw-u small{font-size:.62rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gw-task{transition:transform .15s,border-color .15s,background .15s}
+.gw-task:not(.done):not(.locked):hover{transform:translateX(2px);border-color:rgba(169,79,255,.4)}
+.gw-bar{height:10px}
+.gw-bar i{position:relative;overflow:hidden}
+.gw-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-100%);animation:gwShine 2.6s ease-in-out infinite}
+@keyframes gwShine{60%,100%{transform:translateX(100%)}}
+[data-theme=light] .gw-kicker{background:#f1e6ff;border-color:#d8bdf7;color:#6a2fb0}
+[data-theme=light] .gw-x{background:#f2f0e8;border-color:var(--line);color:var(--soft)}
+[data-theme=light] .gw-x:hover{background:#e9e5d8;color:var(--text)}
+[data-theme=light] .gw-chip{background:rgba(20,32,52,.07)}
+[data-theme=light] .gw-chip.in{background:#d7f0d2;color:#17762f}
+[data-theme=light] .gw-u{background:#fff;border-color:var(--line);box-shadow:inset 0 -3px 0 rgba(90,70,20,.08)}
+[data-theme=light] .gw-u b{color:var(--text)}
+[data-theme=light] .gw-task:not(.done):not(.locked):hover{border-color:#c9a6f2}
+@media (max-width:600px){.gw-clock{gap:4px;margin-bottom:8px}.gw-u{padding:4px 0 3px}.gw-u b{font-size:1.02rem}.gw-pic{width:46px;height:46px}.gw-head{margin:8px 0}}
+@media (prefers-reduced-motion:reduce){.gw.opening,.gw.opening>*,.gw.closing,.gw .brick.gw-pill.pop,.gw-live,.gw-picw::after,.gw-u b.tk,.gw-bar i::after{animation:none}}
