@@ -21,7 +21,7 @@
   const TASKS = [
     { k: "account", t: "Create your Bloombot account", d: "Pick your Roblox name once. Takes 10 seconds.", xp: 50, ic: "task_user", go: "profile.html#edit", gl: "Set up" },
     { k: "roblox", t: "Verify your Roblox account", d: "Prove it's you with a short code in your Roblox About.", xp: 300, ic: "shield", go: "#verify", gl: "Verify" },
-    { k: "in_server", t: "Join the Bloombot Discord", d: "News, giveaways and other traders. Counts after about 2 minutes.", xp: 200, ic: "envelope", go: support, gl: "Join", ext: true },
+    { k: "in_server", t: "Join the official Bloombot Discord", d: "Our own server: news, giveaways and other traders. Counts after about 2 minutes.", xp: 200, ic: "envelope", go: support, gl: "Join", ext: true },
     { k: "add_bot", t: "Add Bloombot to your server", d: "Any server you own or run. Shows up within 3 minutes.", xp: 300, ic: "task_addbot", go: invite, gl: "Add", ext: true },
     { k: "google", t: "Connect a Google login", d: "Log in with Google next time. Handy on your phone.", xp: 150, ic: "task_google", run: () => BB.addGoogle(), gl: "Connect" },
     { k: "trade_ad", t: "Post a trade ad", d: "From the website or any Bloombot server.", xp: 150, ic: "trading", go: "trades.html#post", gl: "Post" },
