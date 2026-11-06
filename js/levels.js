@@ -272,15 +272,71 @@
     }
     if (data === "ok" || data === "done") {
       tt.update("Nice! Bloombot is adding " + t.xp + " XP to your level.", "ok", { title: "Task done" });
-      claims[t.k] = claims[t.k] || { task: t.k, status: "pending" };
+      claims[t.k] = claims[t.k] || { task: t.k, status: "pending", xp: t.xp };
+      await claimFx(btn.closest(".tk"), t.xp);
       tasks();
       const row = $("lvtasks").querySelector('[data-k="' + t.k + '"]');
       if (row && !calm) row.classList.add("pop");
+      ghost();
       watch();
       return;
     }
     const act = t.go || t.run ? { label: t.gl, run: () => { if (t.run) t.run(); else if (t.ext) open(t.go, "_blank", "noopener"); else location.href = t.go; } } : null;
     tt.update(String(data || "Not done yet."), "bad", { title: "Not done yet", action: act });
+  }
+
+  /* Claim show: the row stamps "Claimed", XP orbs fly from the task into the level bar. */
+  function claimFx(row, xp) {
+    if (!row || calm) return Promise.resolve();
+    row.classList.add("claiming");
+    const stamp = el("span", "tk-stamp");
+    stamp.append(el("b", null, "+" + xp + " XP"));
+    row.append(stamp);
+    const bar = document.querySelector("#lvcard .lv-bar");
+    const from = row.querySelector(".tk-xp").getBoundingClientRect();
+    const sx = from.left + from.width / 2, sy = from.top + from.height / 2;
+    let tx = innerWidth / 2, ty = 40;
+    if (bar) {
+      const b = bar.getBoundingClientRect();
+      const f = bar.querySelector(".lv-fill").getBoundingClientRect();
+      tx = Math.min(b.right - 10, Math.max(b.left + 10, f.right));
+      ty = b.top + b.height / 2;
+    }
+    const n = Math.max(6, Math.min(14, Math.round(xp / 25)));
+    const flights = [];
+    for (let i = 0; i < n; i++) {
+      const o = el("i", "xp-orb");
+      o.style.left = sx + "px";
+      o.style.top = sy + "px";
+      document.body.append(o);
+      const dx = tx - sx, dy = ty - sy;
+      const bend = (Math.random() - 0.5) * 220, lift = -80 - Math.random() * 120;
+      const a = o.animate([
+        { transform: "translate(-50%,-50%) scale(.3)", opacity: 0 },
+        { transform: `translate(calc(-50% + ${bend * 0.6}px),calc(-50% + ${lift}px)) scale(1.15)`, opacity: 1, offset: 0.25 },
+        { transform: `translate(calc(-50% + ${dx * 0.6 + bend}px),calc(-50% + ${dy * 0.55 + lift}px)) scale(1)`, opacity: 1, offset: 0.6 },
+        { transform: `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.5)`, opacity: 0.9 },
+      ], { duration: 900 + i * 45, delay: i * 55, easing: "cubic-bezier(.45,.05,.3,1)", fill: "forwards" });
+      flights.push(a.finished.then(() => {
+        o.remove();
+        if (bar) { bar.classList.remove("hit"); void bar.offsetWidth; bar.classList.add("hit"); }
+      }, () => o.remove()));
+    }
+    return new Promise(res => setTimeout(res, 650)).then(() => { Promise.all(flights).then(() => { if (bar) setTimeout(() => bar.classList.remove("hit"), 400); }); });
+  }
+
+  /* Pending XP shows as a striped ghost segment in the bar until the bot adds it. */
+  function ghost() {
+    const bar = document.querySelector("#lvcard .lv-bar");
+    if (!bar || !shown) return;
+    const pend = Object.values(claims).filter(c => c.status === "pending" || c.status === "processing").reduce((a, c) => a + (c.xp || 0), 0);
+    let g = bar.querySelector(".lv-ghost");
+    if (!pend) { if (g) g.remove(); return; }
+    if (!g) { g = el("div", "lv-ghost"); bar.prepend(g); }
+    const start = 100 * shown.into / shown.need;
+    g.style.left = start + "%";
+    g.style.width = Math.min(100 - start, 100 * pend / shown.need) + "%";
+    g.dataset.xp = "+" + fmt(pend) + " XP incoming";
   }
 
   /* After a claim, wait for the bot (every ~10s) to add the XP, then animate. */
@@ -322,7 +378,7 @@
     if (!prof) $("lvcard").append(el("p", "hint lv-wait", "You don't have a Bloombot account yet. Claim the first task below to make one and start levelling."));
     perks();
     tasks();
-    if (Object.values(claims).some(x => x.status === "pending" || x.status === "processing")) watch();
+    if (Object.values(claims).some(x => x.status === "pending" || x.status === "processing")) { ghost(); watch(); }
   }
 
   function demo() {
