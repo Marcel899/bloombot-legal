@@ -388,6 +388,7 @@
     if (!session) { $("ploading").hidden = true; $("plogin").hidden = false; $("pcard").hidden = true; $("pedit").hidden = true; return; }
     $("plogin").hidden = true;
     const id = BB.user(session).id;
+    if (!id && !want) { $("ploading").hidden = true; BB.requireDiscord(); return; }
     if (started && id === me) return;
     me = id; started = true;
     load();

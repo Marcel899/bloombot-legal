@@ -2596,3 +2596,11 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 /* Account menu: the meta line stays one line, so the menu keeps its size when the level + Roblox name arrive. */
 .me-meta{white-space:nowrap;overflow:hidden;min-height:1.25rem}
 .me-meta>span:not(.me-lvl){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+/* ── Login dialog (Discord / Google) ─────────────────────── */
+.lg-box{max-width:400px;align-items:stretch}
+.lg-opts{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.lg-btn{justify-content:center;width:100%;min-height:44px}
+.lg-btn .dc{width:20px;height:20px}
+.lg-google{display:flex;justify-content:center;min-height:44px;align-items:center}
+.lg-note{font-size:.82rem;text-align:center;margin:0}
+.lg-x{align-self:center}

@@ -1,8 +1,10 @@
-/* Shared site code: Discord login (Supabase), the profile menu, the phone menu,
+/* Shared site code: Discord + Google login (Supabase), the profile menu, the phone menu,
    value loading and small helpers. Pages read window.BB. */
 (() => {
   // Public project URL and publishable key: reads are limited by row level security.
   const C = { url: "https://rkzgsndfzzgezoltddvx.supabase.co", key: "sb_publishable_CfTjHiYYCGqLZMlgpiKN-Q_m7JNITb5" };
+  // Google OAuth web client ID (public, not a secret). Empty hides the Google button.
+  const GOOGLE_CLIENT_ID = "";
   const listeners = [];
   const BB = window.BB = {
     sb: null, session: null, ready: false,
@@ -410,18 +412,192 @@
 
   /* ── account ─────────────────────────────────────────────── */
   BB.user = s => {
-    const m = (s && s.user && s.user.user_metadata) || {};
-    const ident = s && s.user && (s.user.identities || []).find(i => i.provider === "discord");
+    const u = (s && s.user) || {};
+    const m = u.user_metadata || {};
+    const ids = u.identities || [];
+    const dc = ids.find(i => i.provider === "discord");
+    const go = ids.find(i => i.provider === "google");
+    const dm = (dc && dc.identity_data) || {}, gm = (go && go.identity_data) || {};
+    /* Only a real Discord identity gives a Discord ID: a Google ID must never be used as one. */
+    let id = dc ? String(dc.id || dm.provider_id || dm.sub || "") || null : null;
+    if (!ids.length && u.app_metadata && u.app_metadata.provider === "discord") id = m.provider_id || null;
     return {
-      id: (ident && ident.id) || m.provider_id || null,
-      name: (m.custom_claims && m.custom_claims.global_name) || m.full_name || m.name || "Discord user",
-      avatar: BB.safeUrl(m.avatar_url) || "img/flower.png",
+      id,
+      hasDiscord: !!id,
+      hasGoogle: !!go,
+      via: dc ? "Discord" : go ? "Google" : "Discord",
+      name: (dm.custom_claims && dm.custom_claims.global_name) || dm.full_name || dm.name
+        || (m.custom_claims && m.custom_claims.global_name) || gm.full_name || gm.name || m.full_name || m.name || "Bloombot user",
+      avatar: BB.safeUrl(dm.avatar_url) || BB.safeUrl(gm.avatar_url) || BB.safeUrl(m.avatar_url) || "img/flower.png",
     };
   };
-  BB.login = () => BB.sb.auth.signInWithOAuth({
+  const here = () => location.origin + location.pathname + location.search;
+  BB.loginDiscord = () => BB.sb.auth.signInWithOAuth({
     provider: "discord",
-    options: { redirectTo: location.origin + location.pathname + location.search, scopes: "identify" },
+    options: { redirectTo: here(), scopes: "identify" },
   });
+  BB.login = () => loginDialog();
+
+  /* ── login dialog: Discord or Google ─────────────────────── */
+  function modal(labelId) {
+    const back = BB.el("div", "wm-back");
+    const box = BB.el("div", "wm panel");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-labelledby", labelId);
+    back.append(box);
+    const close = () => { back.remove(); document.removeEventListener("keydown", esc); };
+    const esc = e => { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", esc);
+    back.addEventListener("mousedown", e => { if (e.target === back) close(); });
+    document.body.append(back);
+    return { back, box, close };
+  }
+  const logoImg = () => { const i = BB.el("img", "wm-logo"); i.src = "img/flower.png"; i.alt = ""; return i; };
+  const dcSvg = () => (document.querySelector(".add .dc") || { outerHTML: "" }).outerHTML;
+
+  function loginDialog() {
+    if (!BB.sb) return;
+    if (document.querySelector(".lg-box")) return;
+    const { box, close } = modal("lg-h");
+    box.classList.add("lg-box");
+    const h = BB.el("h2", null, "Log in to Bloombot"); h.id = "lg-h";
+    const sub = BB.el("p", "hint", "New here? Logging in creates your account.");
+    const opts = BB.el("div", "lg-opts");
+    const dc = BB.el("button", "brick discord lg-btn");
+    dc.type = "button";
+    dc.innerHTML = dcSvg();
+    dc.append(BB.el("span", null, "Continue with Discord"));
+    dc.onclick = () => { dc.disabled = true; BB.loginDiscord(); };
+    opts.append(dc);
+    const st = BB.el("p", "post-status"); st.hidden = true;
+    const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t; };
+    if (GOOGLE_CLIENT_ID) {
+      const slot = BB.el("div", "lg-google");
+      slot.setAttribute("aria-label", "Continue with Google");
+      opts.append(slot);
+      googleButton(slot, "login", say, close);
+    }
+    const x = BB.el("button", "brick dark sm lg-x", "Cancel"); x.type = "button"; x.onclick = close;
+    box.append(logoImg(), h, sub, opts, st, BB.el("p", "hint lg-note", "Bloombot never sees your password."), x);
+    setTimeout(() => dc.focus(), 50);
+  }
+  BB.loginDialog = loginDialog;
+
+  /* Google uses its own "Sign in with Google" button (Google Identity Services), so Google's
+     window shows this website's address, not the Supabase one. Google hands back a signed ID
+     token; Supabase checks its signature, our client ID and the nonce before logging in. */
+  let gisP = null;
+  const loadGis = () => gisP || (gisP = new Promise((ok, bad) => {
+    if (window.google && google.accounts && google.accounts.id) { ok(); return; }
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true;
+    s.onload = ok;
+    s.onerror = () => { gisP = null; bad(new Error("load")); };
+    document.head.append(s);
+  }));
+  const hex = b => Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
+  async function googleButton(slot, mode, say, done) {
+    slot.replaceChildren(BB.el("span", "hint", "Loading Google…"));
+    try { await loadGis(); }
+    catch (e) { slot.replaceChildren(); say("bad", "Google sign-in didn't load. Turn off blockers for this site or use Discord."); return; }
+    const raw = hex(crypto.getRandomValues(new Uint8Array(32)));
+    const hashed = hex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw))));
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      nonce: hashed,
+      ux_mode: "popup",
+      context: mode === "link" ? "use" : "signin",
+      use_fedcm_for_button: true,
+      itp_support: true,
+      callback: r => onGoogle(r && r.credential, raw, mode, say, done),
+    });
+    slot.replaceChildren();
+    const light = document.documentElement.dataset.theme === "light";
+    google.accounts.id.renderButton(slot, {
+      type: "standard", size: "large", shape: "pill", text: mode === "link" ? "continue_with" : "continue_with",
+      theme: light ? "outline" : "filled_black", logo_alignment: "left", width: Math.min(400, Math.max(240, slot.clientWidth || 320)),
+    });
+  }
+  const googleErr = msg => /already|exists|linked/i.test(msg || "")
+    ? "That Google account already belongs to another Bloombot login."
+    : /nonce|audience|aud|client/i.test(msg || "") ? "Google sign-in isn't set up right yet. Try Discord for now."
+    : "Google sign-in failed: " + (msg || "unknown error");
+  async function onGoogle(token, raw, mode, say, done) {
+    if (!token) return;
+    say("wait", mode === "link" ? "Adding Google…" : "Logging you in…");
+    if (mode === "login") {
+      let error;
+      try { ({ error } = await BB.sb.auth.signInWithIdToken({ provider: "google", token, nonce: raw })); }
+      catch (e) { error = e; }
+      if (error) { say("bad", googleErr(error.message)); return; }
+      done();
+      return;
+    }
+    /* link Google to the account that's logged in now */
+    try {
+      const { data: { session } } = await BB.sb.auth.getSession();
+      if (!session) { say("bad", "You're logged out. Log in again and retry."); return; }
+      const r = await fetch(C.url + "/auth/v1/token?grant_type=id_token", {
+        method: "POST",
+        headers: { apikey: C.key, Authorization: "Bearer " + session.access_token, "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: "google", id_token: token, nonce: raw, link_identity: true }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { say("bad", googleErr(j.msg || j.error_description || j.message || r.status)); return; }
+      const { data } = await BB.sb.auth.refreshSession();
+      if (!data || !data.session || !BB.user(data.session).hasGoogle) { say("bad", "Google wasn't added. Try again in a minute."); return; }
+      done();
+      BB.toast("You can now log in with Google too.", "ok", { title: "Google added" });
+    } catch (e) { say("bad", googleErr(e && e.message)); }
+  }
+
+  /* Google-only logins: Bloombot accounts are Discord accounts, so connect Discord once. */
+  BB.connectDiscord = async () => {
+    const { data, error } = await BB.sb.auth.linkIdentity({ provider: "discord", options: { redirectTo: here(), scopes: "identify" } });
+    if (error) BB.toast(/manual linking/i.test(error.message) ? "Connecting accounts is switched off right now. Try again later." : error.message, "bad", { title: "Couldn't connect Discord" });
+    return data;
+  };
+  function connectDialog(force) {
+    if (document.querySelector(".lg-box")) return;
+    const s = BB.session;
+    const key = "bb_link_" + (s && s.user && s.user.id);
+    if (!force) { try { if (sessionStorage.getItem(key)) return; } catch (e) { /* storage blocked */ } }
+    const { box, close } = modal("cd-h");
+    box.classList.add("lg-box");
+    const h = BB.el("h2", null, "One more step: connect Discord"); h.id = "cd-h";
+    const sub = BB.el("p", "hint", "Bloombot lives in Discord, so your trade ads, strategies and levels belong to your Discord account. Connect it once, then Google logs you straight in.");
+    const dc = BB.el("button", "brick discord lg-btn");
+    dc.type = "button";
+    dc.innerHTML = dcSvg();
+    dc.append(BB.el("span", null, "Connect Discord"));
+    dc.onclick = async () => { dc.disabled = true; await BB.connectDiscord(); dc.disabled = false; };
+    const later = BB.el("button", "brick dark sm lg-x", "Later"); later.type = "button";
+    later.onclick = () => { try { sessionStorage.setItem(key, "1"); } catch (e) { /* ignore */ } close(); };
+    box.append(logoImg(), h, sub, BB.el("div", "lg-opts"), BB.el("p", "hint lg-note", "Already logged in with Discord before? Log out, log in with Discord, then add Google from your account menu."), later);
+    box.querySelector(".lg-opts").append(dc);
+    setTimeout(() => dc.focus(), 50);
+  }
+  /* Pages call this before anything that needs a Discord ID (posting, profiles). */
+  BB.requireDiscord = () => {
+    if (!BB.session) { loginDialog(); return false; }
+    if (BB.user(BB.session).id) return true;
+    connectDialog(true);
+    return false;
+  };
+  function addGoogleDialog() {
+    const { box, close } = modal("ag-h");
+    box.classList.add("lg-box");
+    const h = BB.el("h2", null, "Add Google login"); h.id = "ag-h";
+    const st = BB.el("p", "post-status"); st.hidden = true;
+    const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t; };
+    const slot = BB.el("div", "lg-google");
+    const opts = BB.el("div", "lg-opts"); opts.append(slot);
+    const x = BB.el("button", "brick dark sm lg-x", "Cancel"); x.type = "button"; x.onclick = close;
+    box.append(logoImg(), h, BB.el("p", "hint", "Log in to this same Bloombot account with Google next time."), opts, st, x);
+    googleButton(slot, "link", say, close);
+  }
 
   function renderAcct() {
     const box = document.getElementById("acct");
@@ -463,12 +639,13 @@
     hav.src = u.avatar;
     hav.onerror = () => { hav.src = "img/flower.png"; };
     const who = BB.el("div", "me-who");
-    const meta = BB.el("span", "me-meta", "Logged in with Discord");
+    const meta = BB.el("span", "me-meta", "Logged in with " + u.via);
     who.append(BB.el("strong", null, u.name), meta);
     head.append(hav, who, BB.el("span", "me-view", "View"));
     let loaded = false;
     const loadMeta = async () => {
-      if (loaded || !BB.sb || !u.id) return;
+      if (!u.id) { meta.replaceChildren(BB.el("span", "me-setup", "Connect Discord to finish")); return; }
+      if (loaded || !BB.sb) return;
       loaded = true;
       try {
         const { data: p } = await BB.sb.from("profiles").select("roblox_name,level").eq("discord_id", u.id).maybeSingle();
@@ -496,7 +673,19 @@
     out.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>';
     out.append(BB.el("span", null, "Log out"));
     out.onclick = async () => { out.disabled = true; await BB.sb.auth.signOut(); };
-    menu.append(head, sep(),
+    const act = (icon, label, run) => {
+      const b = BB.el("button", "me-item");
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      const i = BB.el("img"); i.src = `img/${icon}.png`; i.alt = "";
+      b.append(i, BB.el("span", null, label));
+      b.onclick = () => { box.classList.remove("open"); run(); };
+      return b;
+    };
+    const extra = [];
+    if (!u.hasDiscord) extra.push(act("plus", "Connect Discord", () => connectDialog(true)), sep());
+    else if (!u.hasGoogle && GOOGLE_CLIENT_ID) extra.push(act("plus", "Add Google login", addGoogleDialog), sep());
+    menu.append(head, sep(), ...extra,
       link("profile.html#edit", "gear", "Edit profile"),
       link("values.html#watchlist", "wish_star", "My watchlist"),
       sep(),
@@ -545,6 +734,11 @@
     renderAcct();
     listeners.forEach(fn => { try { fn(s); } catch (e) { console.error(e); } });
     if (s) checkAccount(s);
+    if (BB.loginError && !document.getElementById("loginerr")) {
+      const t = BB.loginError;
+      BB.loginError = null;
+      BB.toast(/already|exists/i.test(t) ? "That Discord account already has its own Bloombot login. Log in with Discord instead." : t, "bad", { title: "Login didn't work" });
+    }
   }
 
   /* ── confirm dialog: resolves true when the user agrees ──── */
@@ -628,7 +822,8 @@
   let checked = null;
   async function checkAccount(s) {
     const id = BB.user(s).id;
-    if (!id || checked === id) return;
+    if (!id) { if (!/profile\.html/.test(location.pathname)) connectDialog(false); return; }
+    if (checked === id) return;
     checked = id;
     if (/profile\.html/.test(location.pathname)) return;
     let skip = null;

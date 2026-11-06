@@ -25,10 +25,10 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=3fe9b76b">
+<link rel="stylesheet" href="style.css?v=a8c29d27">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
-<script defer src="js/app.js?v=c1f5234c"></script>
+<script defer src="js/app.js?v=fced048f"></script>
 <script defer src="js/site.js?v=3817029f"></script>
 <script defer src="js/giveaway.js?v=6515840b"></script>
 </head>
@@ -99,7 +99,7 @@
 <p>Bloombot does not read, log or store any other messages.</p>
 <p><strong>Activity and levels.</strong> We store your XP, level and how many commands you have used, plus a log of commands used (command name, user ID, whether it worked, how long it took, and when) for statistics and troubleshooting.</p>
 <p><strong>Moderation.</strong> If staff take action against an account or server (for example a bot ban), we store the action, the IDs involved, the moderator and the reason.</p>
-<p><strong>Website login.</strong> When you log in on the Bloombot website with Discord, Discord gives us your Discord ID, username, display name, avatar and email address. We use this only to log you in and show your name. We only post a trade ad when you send one yourself, and it is stored and shown like any other trade ad.</p>
+<p><strong>Website login.</strong> When you log in on the Bloombot website with Discord, Discord gives us your Discord ID, username, display name, avatar and email address. If you log in with Google, Google gives us your Google account ID, name, email address and profile picture. Google logins are connected to your Discord account, because Bloombot accounts live in Discord. We use this only to log you in and show your name. We only post a trade ad when you send one yourself, and it is stored and shown like any other trade ad.</p>
 <p><strong>Server settings.</strong> For servers that set up Bloombot we store channel and role IDs, webhook links Bloombot created, enabled features, and who completed the setup.</p>
 <p><strong>Error and server logs.</strong> When an error happens, details of it (including the command, user ID and server name and ID) are sent to a private developer channel. We also log when Bloombot joins or leaves a server.</p>
 
@@ -118,10 +118,11 @@
 <h2 id="services-we-rely-on" class="weld g-purple"><span class="num">4</span><span>Services we rely on</span><a class="anchor" href="#services-we-rely-on" aria-label="Link to this section">#</a></h2>
 <ul>
 <li><strong>Discord</strong>, which delivers all messages and interactions (<a href="https://discord.com/privacy">Discord Privacy Policy</a>).</li>
+<li><strong>Google</strong>, if you choose to log in with Google (<a href="https://policies.google.com/privacy">Google Privacy Policy</a>).</li>
 <li><strong>Roblox public API</strong>, to look up Roblox user IDs and avatars from a username.</li>
 <li><strong>Sightengine</strong>, which checks images attached to trade ads and profiles for inappropriate content. The image is sent to Sightengine for this check (<a href="https://sightengine.com/privacy">Sightengine Privacy Policy</a>).</li>
 <li><strong>Wispbyte</strong>, the hosting provider where the bot and its database run.</li>
-<li><strong>Supabase</strong>, which handles the website's Discord login and holds a copy of the live trade ads for the website (<a href="https://supabase.com/privacy">Supabase Privacy Policy</a>).</li>
+<li><strong>Supabase</strong>, which handles the website's Discord and Google login and holds a copy of the live trade ads for the website (<a href="https://supabase.com/privacy">Supabase Privacy Policy</a>).</li>
 <li><strong>GitHub Pages</strong>, which hosts this website.</li>
 </ul>
 <p>Bloombot also reads public game data (such as unit values and the Garden Tower Defense wiki). That involves no personal data.</p>

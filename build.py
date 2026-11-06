@@ -226,7 +226,7 @@ home = f"""<section class="hero big">
 <section class="how">
 <div class="sec-head"><h2>How it works</h2><a href="features.html">All features &rarr;</a></div>
 <div class="steps">
-<div class="step"><img src="img/num_1.png" alt="1"><div><h3>Make your account</h3><p>Log in here with Discord, or run <code>/link</code>, and add your Roblox username.</p></div></div>
+<div class="step"><img src="img/num_1.png" alt="1"><div><h3>Make your account</h3><p>Log in here with Discord or Google, or run <code>/link</code>, and add your Roblox username.</p></div></div>
 <div class="step"><img src="img/num_2.png" alt="2"><div><h3>Post a trade ad</h3><p>Post it on this site or in a Global Trade Ad Channel. It reaches every server running Bloombot.</p></div></div>
 <div class="step"><img src="img/num_3.png" alt="3"><div><h3>Get offers</h3><p>Traders DM you, and Bloombot DMs you when a unit on your wishlist is offered.</p></div></div>
 </div>
@@ -339,7 +339,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 <img class="login-icon" src="img/trading.png" alt="">
 <h2>Log in to see trade ads</h2>
 <p>Trade ads are only shown to Discord users. We use your Discord account only to log you in.</p>
-<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+<button class="brick green" type="button" data-login>Log in</button>
 <p class="err" id="loginerr" hidden></p>
 </section>
 <section id="board" hidden>
@@ -382,7 +382,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 </main>
 <script defer src="js/trades.js?v={JSVER['trades']}"></script>
 """
-open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense", "Browse and post Garden Tower Defense trade ads from every Bloombot server. Log in with Discord.", trades_body, "a", "trades.html"))
+open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense", "Browse and post Garden Tower Defense trade ads from every Bloombot server. Log in with Discord or Google.", trades_body, "a", "trades.html"))
 
 # ── Values ───────────────────────────────────────────────────────────────
 values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and gamepass, with demand and 30-day trends.", "t_values") + f"""<main class="wrap vals" id="main">
@@ -539,7 +539,7 @@ open("crates.html", "w").write(page("Bloombot Crate Calculator · Garden Tower D
 # ── Strategies ───────────────────────────────────────────────────────────
 strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tower Defense. Share yours and it shows up in /home in Discord too.", "t_strategies") + f"""<main class="wrap strats" id="main">
 <section class="panel share" id="share">
-<div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in with Discord to share it with every Bloombot server.</span></div><button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in to share</button></div>
+<div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in to share it with every Bloombot server.</span></div><button class="brick green" type="button" data-login>Log in to share</button></div>
 <form id="sform" hidden>
 <h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
 <div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
@@ -568,7 +568,7 @@ profile_body = f"""<main class="wrap prof" id="main">
 <img class="login-icon" src="img/medal_gold.png" alt="">
 <h2>Log in to see profiles</h2>
 <p>Profiles are only shown to Discord users. We use your Discord account only to log you in.</p>
-<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+<button class="brick green" type="button" data-login>Log in</button>
 </section>
 <div class="skel-grid sk-prof" id="ploading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
 <section class="panel pcard" id="pcard" hidden></section>
@@ -603,7 +603,7 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 <img class="login-icon" src="img/shield.png" alt="">
 <h2>Log in to manage your servers</h2>
 <p>We check you're the owner or an administrator of a server before showing its settings.</p>
-<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+<button class="brick green" type="button" data-login>Log in</button>
 </section>
 <div class="skel-grid sk-prof" id="dloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
 <section class="panel login" id="dempty" hidden>
@@ -629,7 +629,7 @@ gwa_body = f"""<main class="wrap gwa" id="main">
 <img class="login-icon" src="img/shield.png" alt="">
 <h2>Log in to manage giveaways</h2>
 <p>This page is only for the Bloombot owner.</p>
-<button class="brick discord" type="button" data-login>{DISCORD_SVG}Log in with Discord</button>
+<button class="brick green" type="button" data-login>Log in</button>
 </section>
 <section class="panel login" id="gnope" hidden>
 <img class="login-icon" src="img/warning.png" alt="">

@@ -295,6 +295,7 @@
       return;
     }
     if (!BB.sb || !BB.session) { status("bad", "You're logged out. Log in again and retry."); return; }
+    if (!BB.requireDiscord()) { status("bad", "Connect Discord to post trade ads."); return; }
     busy = true;
     counter();
     status("wait", "Sending your trade ad to Bloombot…");

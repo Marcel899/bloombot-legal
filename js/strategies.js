@@ -103,6 +103,7 @@
   }
   async function submit(e) {
     e.preventDefault();
+    if (!BB.requireDiscord()) return;
     $("sbtn").disabled = true;
     status("wait", "Sending your strategy to Bloombot…");
     const tt = BB.toast("Bloombot is checking it…", "wait", { title: "Sharing your strategy" });
