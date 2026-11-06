@@ -713,8 +713,36 @@
     }
   });
 
+  /* ── profile banners (Profile settings → Banner; table profile_banners) ── */
+  BB.BANNERS = [
+    ["auto", "Surprise me"], ["garden", "Garden"], ["green", "Grass"], ["blue", "Sky"], ["purple", "Mythic"],
+    ["red", "Brick"], ["orange", "Sunset"], ["yellow", "Gold"], ["ocean", "Ocean"], ["candy", "Candy"],
+    ["night", "Night"], ["rainbow", "Rainbow"],
+  ];
+  const AUTO = ["blue", "green", "purple", "orange", "ocean", "candy"];
+  BB.paintBanner = (node, key, id) => {
+    let k = BB.BANNERS.some(b => b[0] === key) ? key : "auto";
+    if (k === "auto") k = AUTO[[...String(id || "0")].reduce((a, c) => a + c.charCodeAt(0), 0) % AUTO.length];
+    node.dataset.banner = k;
+    return k;
+  };
+  const bannerCache = {};
+  BB.getBanner = async id => {
+    if (!id || !BB.sb || !BB.session) return "auto";
+    if (bannerCache[id]) return bannerCache[id];
+    try {
+      const { data, error } = await BB.sb.from("profile_banners").select("banner").eq("discord_id", id).maybeSingle();
+      if (error) return "auto";
+      return (bannerCache[id] = (data && data.banner) || "auto");
+    } catch (e) { return "auto"; }
+  };
+  BB.setBanner = async key => {
+    const { error } = await BB.sb.rpc("set_my_banner", { b: key });
+    if (!error) bannerCache[BB.user(BB.session).id] = key;
+    return error;
+  };
+
   /* ── profile popup: opens a player's profile on top of the current page ── */
-  const POP_COLORS = [["#5865f2", "#14aeea"], ["#28a828", "#14aeea"], ["#a94fff", "#5865f2"], ["#f5a623", "#dc3232"], ["#14aeea", "#28a828"], ["#dc3232", "#a94fff"]];
   let popOpen = null;
   BB.openProfile = async (id, hint = {}) => {
     const el = BB.el;
@@ -726,11 +754,8 @@
     box.setAttribute("aria-modal", "true");
     box.setAttribute("aria-label", (hint.name || "Player") + "'s profile");
     box.tabIndex = -1;
-    const n = [...String(id || "0")].reduce((a, c) => a + c.charCodeAt(0), 0);
-    const [c1, c2] = POP_COLORS[n % POP_COLORS.length];
-    const banner = el("div", "upop-ban");
-    banner.style.setProperty("--c1", c1);
-    banner.style.setProperty("--c2", c2);
+    const banner = el("div", "upop-ban pban");
+    BB.paintBanner(banner, bannerCache[id] || "auto", id);
     const x = el("button", "upop-x");
     x.type = "button";
     x.setAttribute("aria-label", "Close profile");
@@ -792,6 +817,7 @@
     const isMe = BB.user(BB.session).id === id;
     let p = null, ads = [], strs = [];
     try {
+      BB.getBanner(id).then(k => BB.paintBanner(banner, k, id));
       const [a, b, c] = await Promise.all([
         BB.sb.from("profiles").select("*").eq("discord_id", id).maybeSingle(),
         BB.sb.from("trade_ads").select("id,content,created_at,expires_at").eq("discord_id", id).order("created_at", { ascending: false }).limit(10),
@@ -808,17 +834,29 @@
     if (p && p.discord_avatar) avs.firstChild.src = BB.safeUrl(p.discord_avatar) || avs.firstChild.src;
     if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "upop-rav"));
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + new Date(p.registered_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })));
+    if (p && p.roblox_name) tags.append(el("span", "p-tag ok", "Roblox linked"));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
+    if (isMe) {
+      const cb = el("a", "upop-cb", "Change banner");
+      cb.href = "profile.html#edit";
+      cb.dataset.page = "";
+      box.append(cb);
+    }
 
     if (!p || (!p.roblox_name && !isMe)) body.append(el("p", "hint upop-note", "This player hasn't linked a Roblox account to Bloombot yet."));
     if (p && p.description) {
       const d = el("div", "upop-sec");
-      d.append(el("h3", null, "About me"), BB.md(p.description, { cls: "p-desc" }));
+      d.append(el("h3", "upop-h", "About me"), BB.md(p.description, { cls: "p-desc" }));
       body.append(d);
     }
     const stats = el("div", "upop-stats");
-    const stat = (v, l) => { const s = el("div"); s.append(el("strong", null, String(v)), el("span", null, l)); return s; };
-    stats.append(stat(p && p.level ? p.level : "–", "Level"), stat(ads.length, ads.length === 1 ? "Trade ad" : "Trade ads"), stat(strs.length, strs.length === 1 ? "Strategy" : "Strategies"));
+    const stat = (v, l, g, ic) => {
+      const s = el("div", "weld " + g);
+      const i = el("img"); i.alt = ""; i.src = "img/" + ic + ".png";
+      s.append(i, el("strong", null, String(v)), el("span", null, l));
+      return s;
+    };
+    stats.append(stat(p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"), stat(ads.length, ads.length === 1 ? "Trade ad" : "Trade ads", "g-blue", "swap"), stat(strs.length, strs.length === 1 ? "Strategy" : "Strategies", "g-purple", "bullseye"));
     body.append(stats);
 
     const accs = el("div", "upop-accs");
@@ -838,7 +876,7 @@
       const s = el("div", "upop-sec");
       const h = el("div", "upop-sh");
       const all = el("a", null, "All ads →"); all.href = isMe ? "trades.html?mine=1" : "trades.html";
-      h.append(el("h3", null, "Live trade ads"), all);
+      h.append(el("h3", "upop-h", "Live trade ads"), all);
       s.append(h);
       ads.slice(0, 3).forEach(a => {
         const c = el("div", "upop-ad");
@@ -849,7 +887,7 @@
     }
     if (strs.length) {
       const s = el("div", "upop-sec");
-      s.append(el("h3", null, "Strategies"));
+      s.append(el("h3", "upop-h", "Strategies"));
       const l = el("div", "upop-strs");
       strs.slice(0, 4).forEach(st => {
         const a = el("a", "upop-str");

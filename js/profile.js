@@ -17,6 +17,11 @@
   function card(p, isMe, fallbackName) {
     const c = $("pcard");
     c.replaceChildren();
+    const did0 = p ? p.discord_id : want;
+    const ban = el("div", "p-ban pban");
+    BB.paintBanner(ban, "auto", did0);
+    BB.getBanner(did0).then(k => BB.paintBanner(ban, k, did0));
+    c.append(ban);
     const top = el("div", "p-top");
     const avs = el("div", "p-avs");
     avs.append(img(p && p.discord_avatar, "p-av"));
@@ -185,6 +190,8 @@
     $("fd").value = orig.d;
     touched = {};
     preview(false);
+    $("fb-f").hidden = !mine;
+    if (mine) banners();
     $("pdanger").hidden = !mine;
     $("pclose").hidden = !mine;
     $("pcancel").hidden = !mine;
@@ -193,6 +200,42 @@
     $("pedit").scrollIntoView({ block: "start", behavior: "smooth" });
     setTimeout(() => $("fu").focus({ preventScroll: true }), 250);
   }
+  /* banner picker: saves straight away, separate from the Save button */
+  async function banners() {
+    const g = $("fban");
+    let cur = await BB.getBanner(me);
+    const btns = BB.BANNERS.map(([k, name]) => {
+      const b = el("button", "ban-opt");
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", String(k === cur));
+      const sw = el("span", "ban-sw pban");
+      BB.paintBanner(sw, k, me);
+      if (k === "auto") sw.classList.add("auto");
+      b.append(sw, el("span", "ban-n", name));
+      b.onclick = async () => {
+        if (b.getAttribute("aria-checked") === "true") return;
+        btns.forEach(x => x.setAttribute("aria-checked", String(x === b)));
+        $("fb-s").textContent = "Saving…";
+        const err = await BB.setBanner(k);
+        if (err) {
+          $("fb-s").textContent = "";
+          BB.toast(/function|relation|schema/i.test(err.message) ? "Banners aren't switched on yet. Try again later." : "Couldn't save: " + err.message, "bad", { title: "Banner not saved" });
+          btns.forEach(x => x.setAttribute("aria-checked", String(x.dataset.k === cur)));
+          return;
+        }
+        cur = k;
+        $("fb-s").textContent = "Saved";
+        setTimeout(() => { $("fb-s").textContent = ""; }, 1600);
+        const pb = document.querySelector(".p-ban");
+        if (pb) BB.paintBanner(pb, k, me);
+      };
+      b.dataset.k = k;
+      return b;
+    });
+    g.replaceChildren(...btns);
+  }
+
   let busy = false;
   const done = () => { busy = false; $("psave").classList.remove("busy"); check(); };
   async function save(e) {

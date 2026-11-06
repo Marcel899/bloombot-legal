@@ -2391,3 +2391,70 @@ html.upop-lock{overflow:hidden}
 .gwa-empty{color:var(--muted);text-align:center}
 @media (max-width:860px){.gwa-grid{grid-template-columns:1fr}.gwa-form{position:static}}
 @media (max-width:480px){.gwa-card{flex-direction:column}.gwa-btns .brick{flex:1 1 auto}}
+
+/* ── Profile banners (BB.BANNERS) + welded profile popup v2 ── */
+.pban{--st:url(img/studs-50.png) 0 0/96px 96px repeat;background:var(--st),linear-gradient(135deg,#5865f2,#14aeea)}
+.pban[data-banner=green]{background:var(--st),linear-gradient(135deg,#3cc43c,#145c14)}
+.pban[data-banner=blue]{background:var(--st),linear-gradient(135deg,#5865f2,#14aeea)}
+.pban[data-banner=purple]{background:var(--st),linear-gradient(135deg,#a94fff,#5b2fb8)}
+.pban[data-banner=red]{background:var(--st),linear-gradient(135deg,#ff5a4a,#8f1c1c)}
+.pban[data-banner=orange]{background:var(--st),linear-gradient(135deg,#ffb020,#e0502a 55%,#a3307a)}
+.pban[data-banner=yellow]{background:var(--st),linear-gradient(135deg,#ffe27a,#e0a810)}
+.pban[data-banner=ocean]{background:var(--st),linear-gradient(135deg,#14aeea,#12b8a0)}
+.pban[data-banner=candy]{background:var(--st),linear-gradient(135deg,#ff7ac8,#a94fff)}
+.pban[data-banner=night]{background:var(--st),radial-gradient(circle at 80% 20%,#3a4a8a,transparent 60%),linear-gradient(135deg,#1b2140,#0c0f1c)}
+.pban[data-banner=rainbow]{background:var(--st),linear-gradient(120deg,#dc3232,#f5a623,#f5c83c,#28a828,#14aeea,#a94fff)}
+.pban[data-banner=garden]{background:var(--st),url(img/garden.jpg) center/cover}
+.upop-ban,.p-ban{position:relative;border-bottom:3px solid rgba(0,0,0,.35);box-shadow:inset 0 -3px 0 rgba(255,255,255,.18)}
+.upop-ban::after,.p-ban::after{content:"";position:absolute;inset:0;background:url(img/weld.png) 0 0/45px 45px repeat;filter:grayscale(100%);opacity:.22;pointer-events:none;border-radius:inherit}
+.upop-ban{height:110px}
+
+.upop{border:3px solid #0c0e12}
+.upop-cb{position:absolute;top:12px;left:12px;padding:6px 11px;border-radius:99px;background:rgba(0,0,0,.4);color:#fff;font-size:.8rem;font-weight:900;text-decoration:none;transition:background .15s}
+.upop-cb:hover,.upop-cb:focus-visible{background:rgba(0,0,0,.6)}
+.upop-av{box-shadow:0 0 0 4px #191c24,0 0 0 7px rgba(255,255,255,.12)}
+.upop .p-tag{position:relative;isolation:isolate;overflow:hidden;border-radius:8px;border:2px solid rgba(0,0,0,.3);box-shadow:inset 0 2px 0 rgba(255,255,255,.12)}
+.upop .p-tag::before{content:"";position:absolute;inset:0;z-index:-1;background:url(img/weld.png) 0 0/30px 30px;filter:grayscale(100%);opacity:.18}
+.p-tag.ok{background:rgba(40,168,40,.18);color:#8fe58f}
+.upop-stats>.weld{flex-direction:column;align-items:center;gap:1px;padding:10px 6px 9px;border-radius:12px;box-shadow:0 3px 6px -3px rgba(0,0,0,.5),inset 0 3px 0 rgba(255,255,255,.28),inset 0 -3px 0 rgba(0,0,0,.14)}
+.upop-stats>.weld img{width:26px;height:26px;margin-bottom:2px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.upop-stats>.weld strong{font-size:1.35rem;color:#fff}
+.upop-stats>.weld span{color:rgba(255,255,255,.88)}
+.upop-stats>.weld.g-yellow strong,.upop-stats>.weld.g-yellow span{color:#3b2a00}
+.upop-accs .acc{position:relative;isolation:isolate;overflow:hidden;border-width:3px;border-radius:10px;box-shadow:inset 0 3px 0 rgba(255,255,255,.16),inset 0 -3px 0 rgba(0,0,0,.15)}
+.upop-accs .acc::before{content:"";position:absolute;inset:0;z-index:-1;background:url(img/weld.png) 0 0/45px 45px;filter:grayscale(100%);opacity:.25}
+.upop-accs .acc.discord{background:#5865f2;border-color:#2c3391}
+.upop-accs .acc.roblox{background:#3a4050;border-color:#1b1f27}
+.upop-sec{border-top:0;padding-top:0}
+.upop-h{align-self:flex-start;position:relative;isolation:isolate;overflow:hidden;padding:4px 10px!important;border-radius:8px;background:#3a4050;border:2px solid #1b1f27;color:#fff!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.15)}
+.upop-h::before{content:"";position:absolute;inset:0;z-index:-1;background:url(img/weld.png) 0 0/30px 30px;filter:grayscale(100%);opacity:.3}
+.upop-sh .upop-h{align-self:center}
+.upop-ad,.upop-str{position:relative;isolation:isolate;overflow:hidden;border:3px solid #0c0e12;background:#222632}
+.upop-ad::before,.upop-str::before{content:"";position:absolute;inset:0;z-index:-1;background:url(img/weld-light.png) 0 0/45px 45px;opacity:.07}
+.upop-str:hover{background:#2a2f3b}
+
+/* full profile page banner */
+.pcard{position:relative;overflow:hidden;padding-top:0}
+.p-ban{height:130px;margin:0 -28px -60px}
+.pcard>.p-top{position:relative;align-items:flex-end}
+.pcard .p-av{box-shadow:0 0 0 4px var(--card)}
+@media (max-width:600px){.p-ban{height:100px;margin:0 -16px -50px}}
+
+/* banner picker in Profile settings */
+.ban-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:6px}
+.ban-opt{display:flex;flex-direction:column;gap:5px;padding:5px;border:2px solid transparent;border-radius:12px;background:rgba(255,255,255,.04);color:var(--soft);font:800 .8rem "Nunito",sans-serif;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.ban-opt:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
+.ban-opt[aria-checked=true]{border-color:#14aeea;background:rgba(20,174,234,.12);color:#fff}
+.ban-sw{display:block;height:40px;border-radius:8px;--st:url(img/studs-50.png) 0 0/48px 48px repeat}
+.ban-sw.auto{background:var(--st),conic-gradient(from 90deg,#5865f2,#28a828,#a94fff,#e0502a,#12b8a0,#ff7ac8,#5865f2)}
+.pe-bs{color:#8fe58f;font-size:.8rem;font-weight:800}
+[data-theme=light] .upop{border-color:var(--line)}
+[data-theme=light] .upop-ad,[data-theme=light] .upop-str{background:#f6f3ea;border-color:var(--line)}
+[data-theme=light] .upop-av{box-shadow:0 0 0 4px #fffdf7,0 0 0 7px rgba(20,32,52,.1)}
+[data-theme=light] .ban-opt{background:#f6f3ea}
+[data-theme=light] .ban-opt[aria-checked=true]{background:#e3f4fc;color:var(--text)}
+[data-theme=light] .p-tag.ok{background:#e1f4e4;color:#1d7a1d}
+[data-theme=light] .pcard .p-av{box-shadow:0 0 0 4px #fffdf7}
+.upop-stats>.weld{background:var(--bg);border:3px solid var(--bd)}
+[data-theme=light] .upop-stats>.weld{background:var(--bg);border-color:var(--bd)}
+.p-ban{margin-bottom:-44px}
