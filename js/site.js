@@ -493,3 +493,79 @@
     setTimeout(() => { location.href = a.href; }, 260);
   });
 })();
+
+/* Top nav: one springy pill slides between tabs (stretches toward the target),
+   a soft hover pill follows the mouse, then the page opens. Desktop only. */
+(() => {
+  const nav = document.getElementById("links");
+  if (!nav) return;
+  const tabs = [...nav.querySelectorAll(".nl")];
+  if (!tabs.length) return;
+  const ind = document.createElement("span");
+  ind.className = "nl-ind";
+  const hov = document.createElement("span");
+  hov.className = "nl-hov";
+  ind.setAttribute("aria-hidden", "true");
+  hov.setAttribute("aria-hidden", "true");
+  nav.prepend(hov, ind);
+  const desk = matchMedia("(min-width:1181px)");
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
+  let cur = tabs.find(t => t.classList.contains("on"));
+  const box = (el, t) => {
+    el.style.left = t.offsetLeft + "px";
+    el.style.right = (nav.clientWidth - t.offsetLeft - t.offsetWidth) + "px";
+    el.style.top = t.offsetTop + "px";
+    el.style.height = t.offsetHeight + "px";
+  };
+  const paint = t => {
+    ind.className = "nl-ind g-" + t.dataset.g;
+  };
+  const place = () => {
+    if (!cur) { ind.style.opacity = "0"; return; }
+    ind.classList.add("snap");
+    box(ind, cur); paint(cur);
+    ind.style.opacity = "1";
+    ind.offsetWidth;
+    ind.classList.remove("snap");
+  };
+  const go = t => {
+    const from = cur ? cur.offsetLeft : t.offsetLeft;
+    const dir = t.offsetLeft >= from ? "r" : "l";
+    ind.dataset.dir = dir;
+    if (!cur) { ind.classList.add("snap"); box(ind, t); ind.offsetWidth; ind.classList.remove("snap"); }
+    box(ind, t); paint(t);
+    ind.style.opacity = "1";
+    ind.classList.remove("pop"); ind.offsetWidth; ind.classList.add("pop");
+    tabs.forEach(x => x.classList.toggle("on", x === t));
+    cur = t;
+  };
+  nav.classList.add("has-ind");
+  place();
+  addEventListener("resize", place);
+  desk.addEventListener?.("change", place);
+  document.fonts && document.fonts.ready.then(place);
+  addEventListener("pageshow", e => { if (e.persisted) { cur = tabs.find(t => t.classList.contains("on")) || cur; place(); } });
+
+  let hovOn = false;
+  tabs.forEach(t => {
+    t.addEventListener("pointerenter", () => {
+      if (!desk.matches) return;
+      if (!hovOn) { hov.classList.add("snap"); box(hov, t); hov.offsetWidth; hov.classList.remove("snap"); }
+      box(hov, t);
+      hov.classList.toggle("over-on", t === cur);
+      hov.style.opacity = "1";
+      hovOn = true;
+    });
+  });
+  nav.addEventListener("pointerleave", () => { hov.style.opacity = "0"; hovOn = false; });
+
+  nav.addEventListener("click", e => {
+    const a = e.target.closest(".nl");
+    if (!a || !desk.matches || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    if (a === cur) return;
+    if (calm.matches) return;
+    e.preventDefault();
+    go(a);
+    setTimeout(() => { location.href = a.href; }, 300);
+  });
+})();

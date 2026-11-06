@@ -128,7 +128,7 @@ GWVER = hashlib.md5(open("js/giveaway.js", "rb").read()).hexdigest()[:8]
 
 def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
     nav = "".join(
-        f'<a class="nl{" on g-" + color if key == cur else ""}" href="{href}"><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
+        f'<a class="nl{" on g-" + color if key == cur else ""}" data-g="{color}" href="{href}"><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
         for key, href, icon, label, color in NAV)
     kw = kw or PAGE_KW.get(path, "")
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
