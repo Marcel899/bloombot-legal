@@ -29,17 +29,31 @@
     const who = el("div", "p-who");
     who.append(el("h1", null, (p && p.discord_name) || fallbackName || "Bloombot player"));
     const tags = el("div", "p-tags");
-    if (p && p.level) tags.append(el("span", "p-tag lvl", "Level " + p.level));
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + since(p.registered_at)));
+    if (p && p.roblox_name) tags.append(el("span", "p-tag ok", "Roblox linked"));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
     who.append(tags);
     top.append(avs, who);
     c.append(top);
+    const stats = el("div", "upop-stats pstats");
+    const stat = (v, l, g, ic, id) => {
+      const s = el("div", "weld " + g);
+      const i = el("img"); i.alt = ""; i.src = "img/" + ic + ".png";
+      const n = el("strong", null, String(v));
+      if (id) n.id = id;
+      const lb = el("span", null, l);
+      if (id) lb.id = id + "-l";
+      s.append(i, n, lb);
+      return s;
+    };
+    stats.append(stat(p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"), stat("…", "Trade ads", "g-blue", "swap", "pst-ads"), stat("…", "Strategies", "g-purple", "bullseye", "pst-strs"));
+    c.append(stats);
     if (p && p.description) {
-      const d = BB.md(p.description, { cls: "p-desc" });
+      const d = el("div", "upop-sec");
+      d.append(el("h3", "upop-h", "About me"), BB.md(p.description, { cls: "p-desc" }));
       c.append(d);
     }
-    const acc = el("div", "p-accs");
+    const acc = el("div", "p-accs upop-accs");
     const pill = (kind, label, name, href) => {
       const a = el(href ? "a" : "span", "acc " + kind);
       if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener nofollow"; }
@@ -84,23 +98,21 @@
     return b;
   }
   function adCard(a, own) {
-    const c = el("article", "tcard");
-    const foot = el("div", "tc-foot");
-    const head = el("div", "tc-who");
-    head.append(el("span", null, BB.ago(a.created_at)));
-    foot.append(head);
+    const c = el("article", "upop-ad");
+    const foot = el("div", "upop-adf");
+    foot.append(el("span", "upop-ago", BB.ago(a.created_at)));
     if (own) foot.append(delBtn("trade_ad", a.id, "Delete this trade ad", a.discord_id));
     c.append(BB.md(a.content, { cls: "tc-text" }), foot);
     return c;
   }
   function stratCard(s, own, did) {
-    const c = el("a", "hs");
+    const c = el("a", "upop-str");
     c.href = "strategies.html#s-" + s.id;
     const t = el("strong");
     BB.mdInline(t, s.title);
     c.append(t, el("span", null, (s.category || "").replace("-", " ")));
     if (!own) return c;
-    const row = el("div", "hs-row");
+    const row = el("div", "hs-row pstr-row");
     row.append(c, delBtn("strategy", s.id, "Delete your strategy", did));
     return row;
   }
@@ -117,6 +129,10 @@
     $("pads-all").href = did === me ? "trades.html?mine=1" : "trades.html";
     $("pstrs").replaceChildren(...(strs || []).map(s => stratCard(s, own, did)));
     $("pstr-sec").hidden = !(strs || []).length;
+    const n = (strs || []).length;
+    if ($("pst-ads")) { $("pst-ads").textContent = live.length; $("pst-ads-l").textContent = live.length === 1 ? "Trade ad" : "Trade ads"; }
+    if ($("pst-strs")) { $("pst-strs").textContent = n; $("pst-strs-l").textContent = n === 1 ? "Strategy" : "Strategies"; }
+    $("pempty").hidden = !!(live.length || n);
   }
 
   /* ── settings ────────────────────────────────────────────── */

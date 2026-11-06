@@ -924,7 +924,7 @@
 
   /* Any link to a profile opens the popup instead (Ctrl/middle click still opens the page). */
   document.addEventListener("click", e => {
-    if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest && e.target.closest('a[href^="profile.html"]');
     if (!a || a.hasAttribute("data-page") || !BB.sb) return;
     const u = new URL(a.href, location.href);
@@ -936,8 +936,11 @@
     if (acct) acct.classList.remove("open");
     const av = a.querySelector("img");
     const nm = a.dataset.name || (a.querySelector("strong, span:not(.me-view):not(.me-meta)") || {}).textContent;
+    e.stopPropagation();
+    const qs = a.closest(".qs-wrap");
+    if (qs) qs.dispatchEvent(new MouseEvent("mousedown", { bubbles: false }));
     BB.openProfile(id, { name: nm && nm.trim(), avatar: av && av.src });
-  });
+  }, true);
 
   function init() {
     const burger = document.getElementById("burger");

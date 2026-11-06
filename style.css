@@ -2506,3 +2506,37 @@ html.upop-lock{overflow:hidden}
 .pedit .gwa-pt,.pedit .gwa-chk{display:flex;flex-direction:row;align-items:center;gap:10px;margin:0}
 .pedit .gwa-pt input{flex:none;margin:0 0 0 auto}
 .pedit .gwa-chk input{margin:0}
+
+/* ── Profile page v2: same look as the profile popup ─────── */
+.prof{max-width:1000px}
+.pcard{gap:14px;border:3px solid #0c0e12}
+.pcard .p-who h1{margin-bottom:8px}
+.pcard .p-tag{position:relative;isolation:isolate;overflow:hidden;border-radius:8px;border:2px solid rgba(0,0,0,.3);box-shadow:inset 0 2px 0 rgba(255,255,255,.12)}
+.pcard .p-tag::before{content:"";position:absolute;inset:0;z-index:-1;background:url(img/weld.png) 0 0/30px 30px;filter:grayscale(100%);opacity:.18}
+.pcard .p-tag.you{background:rgba(169,79,255,.2);color:#d4adff}
+.pstats{max-width:520px}
+.p-accs.upop-accs{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.p-accs .acc.server{background:#28a828;border-color:#145c14}
+.pcard .p-acts{justify-content:flex-start}
+.pcols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.pcols>[hidden]{display:none}
+.pcols:has(>section[hidden])>section{grid-column:1/-1}
+.psec{display:flex;flex-direction:column;gap:12px;padding:18px;border:3px solid #0c0e12}
+.psec .upop-sh a{font-size:.88rem;font-weight:800}
+.plist{display:flex;flex-direction:column;gap:8px}
+.upop-adf{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pstr-row{gap:8px}
+.pstr-row>.upop-str{flex:1;min-width:0}
+.pempty{margin:0;text-align:center}
+@media (max-width:800px){.pcols{grid-template-columns:1fr}}
+[data-theme=light] .pcard,[data-theme=light] .psec{border-color:var(--line)}
+[data-theme=light] .p-accs .acc.server{background:#28a828;border-color:#145c14;color:#fff}
+.pcols>.psec{margin:0}
+.psec .upop-h,.pcard .upop-h{margin:0;font-size:.78rem;line-height:1.3;letter-spacing:.07em;text-transform:uppercase}
+.psec .upop-h::after,.pcard .upop-h::after{display:none}
+.upop-accs .acc .acc-t em{color:rgba(255,255,255,.8);opacity:1}
+@media (max-width:600px){
+  .pcard>.p-top{flex-direction:column;align-items:flex-start;gap:10px}
+  .p-ban{margin-bottom:-56px}
+  .pcard .p-av{width:84px;height:84px}
+}

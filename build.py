@@ -586,8 +586,11 @@ profile_body = f"""<main class="wrap prof" id="main">
 <p class="post-status" id="pstatus" hidden role="status"></p>
 <div class="pdanger" id="pdanger" hidden><div><strong>Delete account</strong><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div>
 </form>
-<section class="psec" id="pads-sec" hidden><div class="sec-head"><h2>Live trade ads</h2><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="tlist" id="pads"></div></section>
-<section class="psec" id="pstr-sec" hidden><div class="sec-head"><h2>Strategies</h2><a href="strategies.html">All strategies &rarr;</a></div><div class="slist" id="pstrs"></div></section>
+<div class="pcols">
+<section class="panel psec" id="pads-sec" hidden><div class="upop-sh"><h3 class="upop-h">Live trade ads</h3><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="plist" id="pads"></div></section>
+<section class="panel psec" id="pstr-sec" hidden><div class="upop-sh"><h3 class="upop-h">Strategies</h3><a href="strategies.html">All strategies &rarr;</a></div><div class="plist" id="pstrs"></div></section>
+</div>
+<p class="panel pempty hint" id="pempty" hidden>No live trade ads or strategies yet.</p>
 </main>
 <script defer src="js/profile.js?v={JSVER['profile']}"></script>
 """
