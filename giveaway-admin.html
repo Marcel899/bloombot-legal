@@ -25,12 +25,12 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=3bd41ed5">
+<link rel="stylesheet" href="style.css?v=33963e74">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=aa125b5b"></script>
 <script defer src="js/site.js?v=913674a9"></script>
-<script defer src="js/giveaway.js?v=e99364ed"></script>
+<script defer src="js/giveaway.js?v=8e144aed"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -71,13 +71,19 @@
 <div class="pe-field"><label for="gi">Picture link <em>optional</em></label><div class="pe-in"><input id="gi" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…png"></div><p class="pe-msg">Right-click a picture in Discord → Copy Link. Leave empty for the gift icon.</p></div>
 <div class="pe-field"><label for="ge">Ends</label><div class="pe-in"><input id="ge" type="datetime-local" required></div>
 <div class="gwa-quick" id="gquick"><button type="button" data-h="24">1 day</button><button type="button" data-h="72">3 days</button><button type="button" data-h="168">1 week</button><button type="button" data-h="336">2 weeks</button></div></div>
+<fieldset class="gwa-set"><legend>Entries per task</legend><p class="pe-msg">How many entries each task gives. 0 turns a task off.</p><div class="gwa-pts" id="gpts"></div></fieldset>
+<fieldset class="gwa-set"><legend>Needed to join</legend><p class="pe-msg">Checked again when the winner is picked, so leaving the server or deleting an ad loses the prize.</p>
+<div class="gwa-req" id="greq"></div></fieldset>
 <div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><em id="gpe"></em></div></div></div>
 <div class="pe-bar"><span class="pe-sp"></span><button class="brick dark sm" type="button" id="gcancel" hidden>Cancel edit</button><button class="brick green" id="gsave" type="submit">Start giveaway</button></div>
 </form>
-<section class="gwa-list"><div class="sec-head"><h2>All giveaways</h2></div><div id="glist"></div></section>
+<div class="gwa-side"><section class="gwa-list"><div class="sec-head"><h2>All giveaways</h2></div><div id="glist"></div></section>
+<section class="gwa-list"><div class="sec-head"><h2>Blocked people</h2></div><p class="hint gwa-bh">Blocked people can't join any giveaway and lose their entries in running ones.</p>
+<form class="panel gwa-bform" id="gbform"><div class="pe-in"><input id="gbid" inputmode="numeric" maxlength="21" autocomplete="off" placeholder="Discord user ID" aria-label="Discord user ID"></div><div class="pe-in"><input id="gbwhy" maxlength="200" autocomplete="off" placeholder="Reason (only you see it)" aria-label="Reason"></div><button class="brick red sm" type="submit">Block</button></form>
+<div id="gblocks"></div></section></div>
 </div>
 </main>
-<script defer src="js/gwadmin.js?v=8149ea46"></script>
+<script defer src="js/gwadmin.js?v=4f8c869f"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

@@ -1,11 +1,27 @@
 /* Sitewide giveaway popup (bottom right). Entries are checked in the database. */
 (() => {
-  const TASKS = [
+  const ALL = [
     { key: "join", label: "Join the giveaway", pts: 1, icon: "plus" },
+    { key: "in_server", label: "Join our Discord", pts: 0, icon: "envelope", href: "https://discord.gg/tGuXfcJxwf", go: "Join", ext: true },
+    { key: "roblox", label: "Link Roblox", pts: 0, icon: "shield", href: "profile.html#edit", go: "Link" },
     { key: "trade_ad", label: "Have a live trade ad", pts: 4, icon: "trading", href: "trades.html#post", go: "Post one" },
     { key: "strategy", label: "Share a strategy", pts: 3, icon: "bullseye", href: "strategies.html", go: "Share" },
     { key: "server_link", label: "Add your private server link", pts: 1, icon: "gear", href: "profile.html#edit", go: "Add" },
   ];
+  /* each giveaway picks its own entries per task (0 = off) and join requirements */
+  const tasksOf = g => ALL.map(t => ({ ...t, pts: Math.max(0, Number(((g.rules || {}).entries || {})[t.key] ?? t.pts) || 0) }))
+    .filter(t => t.key === "join" || t.pts > 0).map(t => (t.key === "join" ? { ...t, pts: Math.max(1, t.pts) } : t));
+  function needs(g) {
+    const q = (g.rules || {}).req || {}, out = [];
+    if (q.in_server) out.push(["In the Bloombot Discord", "https://discord.gg/tGuXfcJxwf"]);
+    if (q.roblox) out.push(["Roblox linked", "profile.html#edit"]);
+    if (q.trade_ad) out.push(["A live trade ad", "trades.html#post"]);
+    if (q.min_level > 0) out.push(["Level " + q.min_level + "+"]);
+    if (q.discord_days > 0) out.push(["Discord account " + q.discord_days + "+ days old"]);
+    if (q.bloombot_days > 0) out.push(["Bloombot account " + q.bloombot_days + "+ days old"]);
+    return out;
+  }
+  const ptsOf = new Map();
   let list = [], cur = 0, mine = new Set(), totals = {}, root = null, timer = null, busy = false;
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
   const el = (...a) => BB.el(...a);
@@ -71,7 +87,7 @@
   function expand(g) { store("bb_gw_min_" + g.id, "0"); anim = "open"; render(); }
 
   async function load() {
-    const { data } = await BB.sb.from("giveaways").select("id,title,subtitle,image_url,ends_at").is("winner_id", null)
+    const { data } = await BB.sb.from("giveaways").select("id,title,subtitle,image_url,ends_at,rules").is("winner_id", null)
       .gt("ends_at", new Date().toISOString()).order("ends_at").limit(3);
     list = data || [];
     if (!list.length) { if (root) root.remove(); root = null; return; }
@@ -82,8 +98,8 @@
     }));
     mine = new Set();
     if (BB.session) {
-      const { data: e } = await BB.sb.from("giveaway_entries").select("giveaway_id,task").in("giveaway_id", list.map(g => g.id));
-      (e || []).forEach(r => mine.add(r.giveaway_id + ":" + r.task));
+      const { data: e } = await BB.sb.from("giveaway_entries").select("giveaway_id,task,pts").in("giveaway_id", list.map(g => g.id));
+      (e || []).forEach(r => { mine.add(r.giveaway_id + ":" + r.task); if (r.pts) ptsOf.set(r.giveaway_id + ":" + r.task, r.pts); });
     }
     render();
     autoCheck();
@@ -96,7 +112,7 @@
     let got = 0;
     for (const g of list) {
       if (!mine.has(g.id + ":join")) continue;
-      for (const t of TASKS) {
+      for (const t of tasksOf(g)) {
         if (t.key === "join" || mine.has(g.id + ":" + t.key)) continue;
         try { const { data } = await BB.sb.rpc("claim_giveaway_task", { gid: g.id, t: t.key }); if (data === "ok") got += t.pts; } catch (e) { /* skip */ }
       }
@@ -163,8 +179,9 @@
     pic.onerror = () => { pic.src = "img/gift.png"; };
     const ht = el("div");
     const meta = el("div", "gw-meta");
+    const TASKS = tasksOf(g);
     const done = TASKS.filter(t => mine.has(g.id + ":" + t.key));
-    const my = done.reduce((s, t) => s + t.pts, 0);
+    const my = done.reduce((s, t) => s + (ptsOf.get(g.id + ":" + t.key) || t.pts), 0);
     meta.append(el("span", "gw-chip", (totals[g.id] || 0).toLocaleString() + " entries"));
     if (mine.has(g.id + ":join")) meta.append(el("span", "gw-chip in", "You're in"));
     ht.append(el("h3", null, g.title));
@@ -181,6 +198,17 @@
       clock.append(u);
     });
     root.append(top, head, clock);
+    const nd = needs(g);
+    if (nd.length) {
+      const box = el("div", "gw-need");
+      box.append(el("span", "gw-need-t", "Needed to join"));
+      nd.forEach(([t, href]) => {
+        const c = el(href ? "a" : "span", "gw-chip", t);
+        if (href) { c.href = href; if (/^https:/.test(href)) { c.target = "_blank"; c.rel = "noopener"; } }
+        box.append(c);
+      });
+      root.append(box);
+    }
     if (list.length > 1) {
       const tabs = el("div", "gw-tabs");
       list.forEach((o, i) => { const b = el("button", "gw-tab" + (i === cur ? " on" : ""), o.title); b.type = "button"; b.onclick = () => { cur = i; render(); }; tabs.append(b); });
@@ -213,7 +241,7 @@
         } else if (t.key === "join" || joined) {
           const b = el("button", "brick sm gw-btn " + (t.key === "join" ? "green" : "dark"), t.key === "join" ? "Join" : "Check");
           b.type = "button"; b.onclick = () => claim(g, t, b);
-          if (t.href) { const a = el("a", "gw-go", t.go); a.href = t.href; row.append(a); }
+          if (t.href) { const a = el("a", "gw-go", t.go); a.href = t.href; if (t.ext) { a.target = "_blank"; a.rel = "noopener"; } row.append(a); }
           row.append(b);
         } else row.classList.add("locked");
       }
