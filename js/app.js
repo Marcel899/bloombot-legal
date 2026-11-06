@@ -1063,7 +1063,7 @@
     { level: 5, name: "Sprout", color: "#c7834a", icon: EMO("1548052510328234064") },
     { level: 10, name: "Bloom", color: "#d0c8c6", icon: EMO("1548052388810850334") },
     { level: 20, name: "Blossom", color: "#6fb2ff", icon: EMO("1548052382448099408") },
-    { level: 35, name: "Grove", color: "#b07cff", icon: EMO("1548052473451773983") },
+    { level: 35, name: "Grove", color: "#b07cff", icon: EMO("1548052475964039189") + "#grove" },
     { level: 50, name: "Ancient Tree", color: "#ffc447", icon: EMO("1548052475964039189") },
   ];
   BB.xpForNext = lv => 5 * lv * lv + 50 * lv + 100;

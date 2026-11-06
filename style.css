@@ -2783,8 +2783,8 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 .pban[data-banner=aurora]{background:var(--st),radial-gradient(80% 120% at 20% 0%,rgba(80,255,180,.6),transparent 60%),radial-gradient(80% 120% at 90% 10%,rgba(140,90,255,.6),transparent 60%),linear-gradient(135deg,#0f2a3a,#123d4a)}
 .pban[data-banner=lava]{background:var(--st),radial-gradient(60% 90% at 70% 100%,#ffcf3a,transparent 60%),linear-gradient(135deg,#ff6a1a,#b3160e 55%,#3a0705)}
 .pban[data-banner=galaxy]{background:var(--st),radial-gradient(1.5px 1.5px at 20% 30%,#fff,transparent),radial-gradient(1.5px 1.5px at 70% 60%,#fff,transparent),radial-gradient(2px 2px at 45% 80%,#fff,transparent),radial-gradient(60% 80% at 60% 40%,rgba(169,79,255,.7),transparent 70%),linear-gradient(135deg,#140b3a,#3a1170 55%,#0a0820)}
-.pban[data-banner=royal]{background:var(--st),linear-gradient(90deg,transparent 46%,rgba(255,215,106,.55) 48%,rgba(255,215,106,.55) 52%,transparent 54%),linear-gradient(135deg,#4a1a8a,#7a2fb8 50%,#2a0d55)}
-.pban[data-banner=ancient]{background:var(--st),linear-gradient(110deg,#a86b00,#ffd76a 25%,#fff4c2 35%,#ffb800 50%,#a86b00 70%,#ffd76a);background-size:96px 96px,250% 100%;animation:lvbanner 6s linear infinite}
+.pban[data-banner=royal]{background:var(--st),linear-gradient(105deg,transparent 44%,rgba(255,236,170,.45) 50%,transparent 56%) -50% 0/300% 100% no-repeat,radial-gradient(circle,#ffe9a8 0 1.2px,transparent 2px) 0 0/38px 38px,radial-gradient(circle,rgba(255,255,255,.85) 0 1px,transparent 1.6px) 19px 13px/53px 53px,repeating-linear-gradient(45deg,rgba(255,215,106,.1) 0 2px,transparent 2px 24px),repeating-linear-gradient(-45deg,rgba(255,215,106,.1) 0 2px,transparent 2px 24px),radial-gradient(70% 130% at 50% 115%,rgba(205,120,255,.6),transparent 70%),linear-gradient(135deg,#24093f,#5a1b9a 45%,#7a2fb8 55%,#24093f);animation:bnroyal 7s linear infinite}
+.pban[data-banner=ancient]{background:var(--st),linear-gradient(105deg,transparent 44%,rgba(255,255,255,.6) 50%,transparent 56%) -50% 0/300% 100% no-repeat,radial-gradient(circle,#fff 0 1.3px,transparent 2.2px) 0 0/44px 44px,repeating-conic-gradient(from 0deg at 50% 130%,rgba(255,255,255,.12) 0 5deg,transparent 5deg 15deg),radial-gradient(60% 120% at 50% 120%,rgba(255,150,0,.55),transparent 70%),linear-gradient(110deg,#8a5200,#e0a010 20%,#ffd76a 35%,#fff1b8 45%,#ffc23a 60%,#b87400 80%,#8a5200) 0 0/250% 100%;animation:bnancient 8s linear infinite}
 
 @keyframes lvspin{to{transform:rotate(360deg)}}
 @keyframes lvbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
@@ -2799,8 +2799,9 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 @keyframes lvhere{0%,100%{transform:none}50%{transform:translateY(-4px)}}
 @keyframes lvpop{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
 @keyframes lvring{0%,100%{box-shadow:0 0 0 4px #191c24,0 0 0 7px var(--rk),0 0 14px 2px color-mix(in srgb,var(--rk) 45%,transparent)}50%{box-shadow:0 0 0 4px #191c24,0 0 0 7px var(--rk),0 0 28px 6px color-mix(in srgb,var(--rk) 70%,transparent)}}
-@keyframes lvbanner{to{background-position:0 0,-250% 0}}
-@media (prefers-reduced-motion:reduce){.lv-em-ring,.lv-em-i,.lv-shine,.lv-spark,.lv-motes,.rd-node.here .rd-ic,.rk-ring .upop-av,.rk-ring .p-av,.pban[data-banner=ancient],.ancient-name,.rank-tag.ancient span,.lv-card.ancient .lv-rank-n{animation:none!important}.lv-fill,.rd-line i{transition:none}}
+@keyframes bnroyal{from{background-position:0 0,-50% 0,0 0,19px 13px,0 0,0 0,0 0,0 0}to{background-position:0 0,150% 0,38px -38px,72px -40px,0 0,0 0,0 0,0 0}}
+@keyframes bnancient{from{background-position:0 0,-50% 0,0 0,0 0,0 0,0 0}to{background-position:0 0,150% 0,44px -44px,0 0,0 0,-250% 0}}
+@media (prefers-reduced-motion:reduce){.lv-em-ring,.lv-em-i,.lv-shine,.lv-spark,.lv-motes,.rd-node.here .rd-ic,.rk-ring .upop-av,.rk-ring .p-av,.pban[data-banner=ancient],.pban[data-banner=royal],.ancient-name,.rank-tag.ancient span,.lv-card.ancient .lv-rank-n{animation:none!important}.lv-fill,.rd-line i{transition:none}}
 @media (max-width:720px){.lv-card{padding:20px 16px 18px}.lv-num{font-size:2.8rem}.lv-next{width:100%}.lv-stats,.lv-earn{grid-template-columns:1fr}.lv-stats{grid-template-columns:repeat(3,1fr)}.lv-st{grid-template-columns:1fr;text-align:center;justify-items:center;padding:8px 4px}.lv-st img{grid-row:auto;width:22px;height:22px}
 .lv-road{grid-template-columns:repeat(3,1fr);row-gap:14px}.rd-line{display:none}.rd-ic{width:52px;height:52px}.rd-ic img{width:34px;height:34px}
 .tk{grid-template-columns:auto 1fr auto}.tk-ic{grid-row:1;width:40px;height:40px}.tk-txt{grid-row:1}.tk-xp{grid-column:3;grid-row:1;align-self:start}.tk-acts{grid-column:1/4;grid-row:2}}
@@ -2815,3 +2816,8 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 [data-theme=light] .rank-tag{filter:brightness(.75) saturate(1.3)}
 [data-theme=light] .p-xp{background:rgba(20,32,52,.06)}
 [data-theme=light] .pk-where{color:#3b47c4}[data-theme=light] .pk-web .pk-where,[data-theme=light] .pk-k.web{color:#1d7a1d}
+
+/* Grove and Ancient Tree share the filled Masters emblem; a coloured glow tells them apart */
+img[src*="1548052475964039189"][src$="#grove"]{filter:drop-shadow(0 0 6px rgba(176,124,255,.85))}
+img[src*="1548052475964039189"]:not([src$="#grove"]){filter:drop-shadow(0 0 6px rgba(255,196,71,.85))}
+.rd-node:not(.got) img[src*="1548052475964039189"]{filter:grayscale(1) brightness(.6)}
