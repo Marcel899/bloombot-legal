@@ -231,7 +231,7 @@
     const order = [...TASKS].sort((a, b) => (!!claims[a.k] - !!claims[b.k]));
     order.forEach(t => {
       const c = claims[t.k];
-      const state = !c ? "open" : c.status === "given" ? "done" : c.status === "failed" ? "failed" : "wait";
+      const state = !c ? "open" : c.status === "failed" ? "failed" : "done";
       const row = el("article", "tk st-" + state);
       row.dataset.k = t.k;
       const ic = el("span", "tk-ic"); ic.append(icon(t.ic));
@@ -271,13 +271,13 @@
       return;
     }
     if (data === "ok" || data === "done") {
-      tt.update("Nice! Bloombot is adding " + t.xp + " XP to your level.", "ok", { title: "Task done" });
+      tt.close();
+      const before = shownXp();
+      const fresh = !claims[t.k];
       claims[t.k] = claims[t.k] || { task: t.k, status: "pending", xp: t.xp };
       await claimFx(btn.closest(".tk"), t.xp);
       tasks();
-      const row = $("lvtasks").querySelector('[data-k="' + t.k + '"]');
-      if (row && !calm) row.classList.add("pop");
-      ghost();
+      if (fresh) { celebrate(before, shownXp(), t.t + " done."); perks(); }
       watch();
       return;
     }
@@ -325,43 +325,36 @@
     return new Promise(res => setTimeout(res, 650)).then(() => { Promise.all(flights).then(() => { if (bar) setTimeout(() => bar.classList.remove("hit"), 400); }); });
   }
 
-  /* Pending XP shows as a striped ghost segment in the bar until the bot adds it. */
-  function ghost() {
-    const bar = document.querySelector("#lvcard .lv-bar");
-    if (!bar || !shown) return;
-    const pend = Object.values(claims).filter(c => c.status === "pending" || c.status === "processing").reduce((a, c) => a + (c.xp || 0), 0);
-    let g = bar.querySelector(".lv-ghost");
-    if (!pend) { if (g) g.remove(); return; }
-    if (!g) { g = el("div", "lv-ghost"); bar.prepend(g); }
-    const start = 100 * shown.into / shown.need;
-    g.style.left = start + "%";
-    g.style.width = Math.min(100 - start, 100 * pend / shown.need) + "%";
-    g.dataset.xp = "+" + fmt(pend) + " XP incoming";
-  }
+  /* XP shown = the bot's total + claims it hasn't added yet, so a claim counts straight away. */
+  const pendingXp = () => Object.values(claims).filter(c => c.status === "pending" || c.status === "processing").reduce((a, c) => a + (c.xp || 0), 0);
+  const baseXp = () => prof && prof.xp != null ? Number(prof.xp) : BB.xpAtLevel((prof && prof.level) || 1);
+  const shownXp = () => baseXp() + pendingXp();
 
-  /* After a claim, wait for the bot (every ~10s) to add the XP, then animate. */
+  /* In the background, wait for the bot to confirm (about 10s) and quietly line the numbers up. */
   function watch() {
     if (polling) return;
     let tries = 0;
-    const before = prof && prof.xp != null ? Number(prof.xp) : null;
     polling = setInterval(async () => {
       tries++;
       const { data } = await BB.sb.from("xp_task_claims").select("task,status,xp,reason").eq("discord_id", me);
       const next = Object.fromEntries((data || []).map(r => [r.task, r]));
-      const fresh = Object.keys(next).filter(k => next[k].status === "given" && (!claims[k] || claims[k].status !== "given"));
+      const failed = Object.keys(next).filter(k => next[k].status === "failed" && (!claims[k] || claims[k].status !== "failed"));
+      const given = Object.keys(next).some(k => next[k].status === "given" && claims[k] && claims[k].status !== "given");
+      const before = shownXp();
       claims = next;
-      const waiting = Object.values(claims).some(c => c.status === "pending" || c.status === "processing");
-      if (fresh.length) {
-        tasks();
+      if (given) {
         const p = (await BB.sb.from("profiles").select("*").eq("discord_id", me).maybeSingle()).data;
-        const gain = fresh.reduce((a, k) => a + (claims[k].xp || 0), 0);
-        if (p && p.xp != null && before != null && Number(p.xp) > before) { prof = p; celebrate(before, Number(p.xp)); }
-        else if (before != null) { prof = Object.assign(prof || {}, { xp: before + gain }); celebrate(before, before + gain); }
-        else { prof = p || prof; card(prof && prof.xp != null ? prof.xp : BB.xpAtLevel((prof && prof.level) || 1), { noXp: !(prof && prof.xp != null) }); }
-        perks();
-      } else if (Object.values(claims).some(c => c.status === "failed")) tasks();
-      if (!waiting || tries > 30) { clearInterval(polling); polling = null; tasks(); }
-    }, 3000);
+        if (p && p.xp != null && (prof == null || prof.xp == null || Number(p.xp) >= Number(prof.xp))) prof = p;
+      }
+      if (failed.length) {
+        failed.forEach(k => BB.toast(next[k].reason || "Bloombot couldn't add this XP.", "bad", { title: "XP not added" }));
+        tasks();
+      }
+      const after = shownXp();
+      if (after !== before) card(after, { from: before, noXp: !(prof && prof.xp != null) });
+      const waiting = pendingXp() > 0;
+      if (!waiting || tries > 40) { clearInterval(polling); polling = null; }
+    }, 2500);
   }
 
   async function load() {
@@ -373,12 +366,11 @@
     claims = Object.fromEntries(((c && c.data) || []).map(r => [r.task, r]));
     $("lvloading").hidden = true;
     $("lvcard").hidden = false;
-    if (prof && prof.xp != null) card(Number(prof.xp));
-    else card(BB.xpAtLevel((prof && prof.level) || 1), { noXp: !!prof });
+    card(shownXp(), { noXp: !!prof && prof.xp == null });
     if (!prof) $("lvcard").append(el("p", "hint lv-wait", "You don't have a Bloombot account yet. Claim the first task below to make one and start levelling."));
     perks();
     tasks();
-    if (Object.values(claims).some(x => x.status === "pending" || x.status === "processing")) { ghost(); watch(); }
+    if (pendingXp() > 0) watch();
   }
 
   function demo() {
