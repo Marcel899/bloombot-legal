@@ -1676,7 +1676,7 @@ body:has(.gw) .totop{right:auto;left:20px}
 .kcrates.many{display:flex;flex-direction:column;gap:14px}
 .kc-gh{margin:0 0 8px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .kc-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-.smw{--sf:"Fredoka","Nunito",system-ui,sans-serif;--st:url(img/studs.png) 0 0/76px 76px;position:relative;padding:10px 14px 12px;border-radius:3px;
+.smw{--sf:"Fredoka","Nunito",system-ui,sans-serif;--st:url(img/studs-80.png) 0 0/100px 100px;position:relative;padding:10px 14px 12px;border-radius:3px;
   border:3px solid #5f5f5f;background:var(--st),#dcdcdc;box-shadow:0 18px 34px -20px rgba(0,0,0,.95)}
 .sw-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 64px 6px 4px;min-height:44px}
 .sw-title,.sw-sub,.su-name,.su-pct,.su-pity,.su-stars,.sw-btn,.sw-key,.su-got,.sw-x{font-family:var(--sf);font-weight:500;color:#fff;letter-spacing:.045em;
