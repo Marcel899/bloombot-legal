@@ -30,7 +30,7 @@
     who.append(el("h1", null, (p && p.discord_name) || fallbackName || "Bloombot player"));
     const tags = el("div", "p-tags");
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + since(p.registered_at)));
-    if (p && p.roblox_name) tags.append(el("span", "p-tag ok", "Roblox linked"));
+    if (p && p.roblox_name) tags.append(BB.robloxTag(p));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
     who.append(tags);
     top.append(avs, who);
@@ -208,6 +208,10 @@
     preview(false);
     $("fb-f").hidden = !mine;
     if (mine) banners();
+    const vf = !!(mine && mine.roblox_name && mine.roblox_verified);
+    $("fv-row").classList.toggle("ok", vf);
+    $("fv-s").textContent = vf ? "Verified Roblox account" : mine && mine.roblox_name ? "Not verified yet. Prove it's yours to get the verified tag." : "Prefer to prove it's yours? Verify with a code instead.";
+    $("fverify").textContent = vf ? "Verify again" : "Verify";
     $("pdanger").hidden = !mine;
     $("pclose").hidden = !mine;
     $("pcancel").hidden = !mine;
@@ -331,6 +335,8 @@
     setTimeout(poll, 1200);
   }
   $("pedit").onsubmit = save;
+  $("fverify").onclick = () => BB.verifyRoblox({ name: $("fu").value.trim() || (mine && mine.roblox_name) || "" });
+  document.addEventListener("bb:roblox-verified", () => { if (me) { orig = vals(); closeEdit(); setTimeout(load, 600); } });
   $("pdel").onclick = async () => {
     $("pdel").disabled = true;
     if (await BB.deleteAccount()) { setTimeout(() => { location.href = "./"; }, 1200); return; }

@@ -5,9 +5,9 @@
   let rows = [], editing = null, busy = false, started = false, blocks = [];
   const PTS = [
     ["join", "Join", "gift", 1], ["trade_ad", "Live trade ad", "trading", 4], ["strategy", "Share a strategy", "bullseye", 3],
-    ["server_link", "Private server link", "gear", 1], ["in_server", "Join the Bloombot Discord", "envelope", 0], ["roblox", "Link Roblox", "shield", 0],
+    ["server_link", "Private server link", "gear", 1], ["in_server", "Join the Bloombot Discord", "envelope", 0], ["roblox", "Verify Roblox", "shield", 0],
   ];
-  const REQ_BOX = [["in_server", "Be in the Bloombot Discord server"], ["roblox", "Have Roblox linked"], ["trade_ad", "Have a live trade ad"]];
+  const REQ_BOX = [["in_server", "Be in the Bloombot Discord server"], ["roblox", "Have a verified Roblox account"], ["trade_ad", "Have a live trade ad"]];
   const REQ_NUM = [["min_level", "Bloombot level at least", 200], ["discord_days", "Discord account age (days)", 3650], ["bloombot_days", "Bloombot account age (days)", 3650]];
   const DEF = { entries: Object.fromEntries(PTS.map(p => [p[0], p[3]])), req: { in_server: false, roblox: false, trade_ad: false, min_level: 0, discord_days: 0, bloombot_days: 0 } };
 

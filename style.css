@@ -2604,3 +2604,24 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 .lg-google{display:flex;justify-content:center;min-height:44px;align-items:center}
 .lg-note{font-size:.82rem;text-align:center;margin:0}
 .lg-x{align-self:center}
+
+/* ── Verify Roblox dialog + verified tags ─────────────────── */
+.rv-step{display:flex;flex-direction:column;gap:10px}
+.rv-code{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.22)}
+.rv-code code{flex:1;min-width:0;font:800 1.02rem/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#ffd96a;word-break:break-word;user-select:all}
+.rv-list{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;color:var(--soft);font-weight:700}
+.rv-list a{color:#8fd8ff;font-weight:800}
+.rv-other{align-self:center;background:none;border:0;padding:4px;color:var(--muted);font:800 .88rem "Nunito",sans-serif;text-decoration:underline;cursor:pointer}
+.rv-other:hover{color:var(--text,#fff)}
+.rv-row{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 8px 8px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
+.rv-row img{width:22px;height:22px;flex:none}
+.rv-row span{flex:1;min-width:0;font-weight:700;font-size:.88rem;color:var(--soft)}
+.rv-row.ok{background:rgba(40,168,40,.13)}.rv-row.ok span{color:#8fe58f}
+.p-tag.vf::before{content:"✓ ";font-weight:900}
+.me-rbx.ok::after{content:" ✓";color:#7ef0a0;font-weight:900}
+[data-theme=light] .rv-code{background:#f4f6fa;border-color:rgba(20,32,52,.2)}
+[data-theme=light] .rv-code code{color:#875c00}
+[data-theme=light] .rv-list a{color:#0b6f9e}
+[data-theme=light] .rv-row{background:rgba(20,32,52,.05)}
+[data-theme=light] .rv-row.ok{background:#e1f4e4}[data-theme=light] .rv-row.ok span{color:#1d7a1d}
+[data-theme=light] .me-rbx.ok::after{color:#1d7a1d}

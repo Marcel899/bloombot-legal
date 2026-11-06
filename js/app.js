@@ -648,11 +648,13 @@
       if (loaded || !BB.sb) return;
       loaded = true;
       try {
-        const { data: p } = await BB.sb.from("profiles").select("roblox_name,level").eq("discord_id", u.id).maybeSingle();
+        const { data: p } = await BB.sb.from("profiles").select("*").eq("discord_id", u.id).maybeSingle();
         meta.replaceChildren();
         if (!p) { meta.append(BB.el("span", "me-setup", "Finish setting up your account")); return; }
         if (p.level) meta.append(BB.el("span", "me-lvl", "Lv " + p.level));
-        meta.append(BB.el("span", "me-rbx", p.roblox_name || "No Roblox linked"));
+        const rb = BB.el("span", "me-rbx", p.roblox_name || "No Roblox linked");
+        if (p.roblox_name && p.roblox_verified) { rb.classList.add("ok"); rb.title = "Verified Roblox account"; }
+        meta.append(rb);
       } catch (e) { loaded = false; }
     };
 
@@ -858,7 +860,9 @@
     const later = el("button", "brick dark sm", "Later"); later.type = "button";
     const go = el("button", "brick green", "Create account"); go.type = "submit";
     const acts = el("div", "post-actions"); acts.append(later, go);
-    box.append(logo, h, sub, lab("Roblox username", u), lab("Private server link", k, true), acts, st);
+    const rv = el("button", "rv-other", "Or verify with your Roblox account instead"); rv.type = "button";
+    rv.onclick = () => { close(); BB.verifyRoblox({ name: u.value.trim() }); };
+    box.append(logo, h, sub, lab("Roblox username", u), lab("Private server link", k, true), acts, rv, st);
     back.append(box);
     document.body.append(back);
     setTimeout(() => u.focus(), 50);
@@ -892,6 +896,133 @@
       setTimeout(poll, 1000);
     };
   }
+
+  /* ── Verify Roblox: a code in your Roblox About text proves the account is yours ──
+     rpc roblox_verify_start gives the code, rpc roblox_verify_check hands it to the bot,
+     which reads the public profile and sets the row to verified/failed. */
+  /* Any page: a link to #verify opens the verify dialog once you're logged in. */
+  let verifyHash = location.hash === "#verify";
+  BB.onAuth(sess => {
+    if (!verifyHash || !sess) return;
+    verifyHash = false;
+    history.replaceState(null, "", location.pathname + location.search);
+    BB.verifyRoblox();
+  });
+  addEventListener("hashchange", () => {
+    if (location.hash !== "#verify") return;
+    history.replaceState(null, "", location.pathname + location.search);
+    BB.verifyRoblox();
+  });
+
+  BB.robloxTag = p => {
+    const t = BB.el("span", "p-tag ok" + (p.roblox_verified ? " vf" : ""), p.roblox_verified ? "Roblox verified" : "Roblox linked");
+    t.title = p.roblox_verified ? "Proved they own this Roblox account" : "Not verified yet";
+    return t;
+  };
+  BB.verifyRoblox = (opts = {}) => {
+    if (!BB.requireDiscord()) return;
+    const el = BB.el, me = BB.user(BB.session).id;
+    const back = el("div", "wm-back");
+    const box = el("form", "wm panel rv");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-labelledby", "rv-h");
+    const logo = el("img", "wm-logo"); logo.src = "img/shield.png"; logo.alt = "";
+    const h = el("h2", null, "Verify your Roblox account"); h.id = "rv-h";
+    const sub = el("p", "hint", "Prove the account is yours with a code in your Roblox About. You get a verified tag, and it creates your Bloombot account if you don't have one yet.");
+    const lab = el("label", null, "Roblox username");
+    const u = el("input", "search wm-in"); u.maxLength = 20; u.autocomplete = "off"; u.spellcheck = false;
+    u.autocapitalize = "off"; u.placeholder = "CoolGardener123"; u.value = opts.name || "";
+    lab.append(u);
+    const step2 = el("div", "rv-step"); step2.hidden = true;
+    const st = el("p", "post-status"); st.hidden = true; st.setAttribute("role", "status");
+    const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t || ""; };
+    const cancel = el("button", "brick dark sm", "Cancel"); cancel.type = "button";
+    const go = el("button", "brick green", "Get my code"); go.type = "submit";
+    const acts = el("div", "post-actions"); acts.append(cancel, go);
+    box.append(logo, h, sub, lab, step2, acts, st);
+    back.append(box);
+    document.body.append(back);
+    setTimeout(() => u.focus(), 50);
+    let vid = null, code = "", busy = false, done = false;
+    const close = () => { back.remove(); document.removeEventListener("keydown", esc); };
+    const esc = e => { if (e.key === "Escape" && !busy) close(); };
+    document.addEventListener("keydown", esc);
+    cancel.onclick = close;
+    back.onclick = e => { if (e.target === back && !busy) close(); };
+
+    function showCode(name) {
+      lab.hidden = true;
+      sub.textContent = "Do this for " + name + ". You can remove the code once you're verified.";
+      const codeBox = el("div", "rv-code");
+      const txt = el("code", null, code);
+      const cp = el("button", "brick blue sm", "Copy"); cp.type = "button";
+      cp.onclick = () => BB.copy(code, "Code copied");
+      codeBox.append(txt, cp);
+      const ol = el("ol", "rv-list");
+      const li = (...kids) => { const x = el("li"); x.append(...kids); ol.append(x); };
+      li(document.createTextNode("Copy the code above."));
+      const open = el("a", null, "your Roblox profile"); open.href = "https://www.roblox.com/users/profile"; open.target = "_blank"; open.rel = "noopener";
+      li(document.createTextNode("Open "), open, document.createTextNode(" and press the pencil next to About."));
+      li(document.createTextNode("Paste the code anywhere in About and press Save."));
+      li(document.createTextNode("Come back and press Check."));
+      const other = el("button", "rv-other", "Use a different username"); other.type = "button";
+      other.onclick = () => { if (busy) return; vid = null; step2.hidden = true; lab.hidden = false; go.textContent = "Get my code"; say("", ""); u.focus(); };
+      step2.replaceChildren(codeBox, ol, other);
+      step2.hidden = false;
+      go.textContent = "Check";
+    }
+
+    async function start() {
+      const name = u.value.trim();
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) { say("bad", "Your Roblox username needs 3 to 20 letters, numbers or underscores."); u.focus(); return; }
+      busy = true; go.disabled = true; say("wait", "Getting your code…");
+      const { data, error } = await BB.sb.rpc("roblox_verify_start", { p_username: name }).then(r => r, e => ({ error: e }));
+      busy = false; go.disabled = false;
+      if (error) { say("bad", /function|schema/i.test(error.message || "") ? "Roblox verify isn't switched on yet. Try again later." : "Couldn't get a code: " + (error.message || "network error")); return; }
+      if (!data || data.error) { say("bad", (data && data.error) || "Couldn't get a code."); return; }
+      vid = data.id; code = data.code;
+      say("", "");
+      showCode(name);
+    }
+
+    async function check() {
+      busy = true; go.disabled = true; go.classList.add("busy");
+      say("wait", "Bloombot is reading your Roblox profile…");
+      const stop = (kind, t) => { busy = false; go.disabled = false; go.classList.remove("busy"); say(kind, t); };
+      const { data: r0, error } = await BB.sb.rpc("roblox_verify_check", { vid }).then(r => r, e => ({ error: e }));
+      if (error) return stop("bad", "Couldn't check: " + (error.message || "network error"));
+      if (r0 !== "ok" && r0 !== "verified") return stop("bad", r0 || "Couldn't check.");
+      const t0 = Date.now();
+      const poll = async () => {
+        if (!back.isConnected) return;
+        let r = null;
+        try { ({ data: r } = await BB.sb.from("roblox_verifications").select("status,reason").eq("id", vid).single()); } catch (e) { /* retry */ }
+        if (r && r.status === "verified") {
+          done = true; busy = false; go.classList.remove("busy");
+          try { localStorage.setItem("bb_acct_" + me, "has"); } catch (e) { /* ignore */ }
+          say("ok", "Verified! Your Roblox account is linked to Bloombot.");
+          go.textContent = "Done"; go.disabled = false; cancel.hidden = true;
+          step2.querySelectorAll(".rv-other").forEach(x => x.remove());
+          BB.toast("Your Roblox account is verified.", "ok", { title: "Roblox verified" });
+          document.dispatchEvent(new CustomEvent("bb:roblox-verified"));
+          if (opts.done) opts.done();
+          return;
+        }
+        if (r && r.status === "failed") return stop("bad", r.reason || "Bloombot couldn't find the code.");
+        if (Date.now() - t0 > 45000) return stop("wait", "Bloombot is busy or offline. Press Check again in a minute.");
+        setTimeout(poll, 1500);
+      };
+      setTimeout(poll, 1200);
+    }
+
+    box.onsubmit = e => {
+      e.preventDefault();
+      if (busy) return;
+      if (done) { close(); return; }
+      if (vid) check(); else start();
+    };
+  };
 
   document.addEventListener("click", e => {
     if (e.target.closest("[data-login]")) { e.preventDefault(); BB.login(); return; }
@@ -1040,7 +1171,7 @@
     if (p && p.discord_avatar) avs.firstChild.src = BB.safeUrl(p.discord_avatar) || avs.firstChild.src;
     if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "upop-rav"));
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + new Date(p.registered_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })));
-    if (p && p.roblox_name) tags.append(el("span", "p-tag ok", "Roblox linked"));
+    if (p && p.roblox_name) tags.append(BB.robloxTag(p));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
     if (isMe) {
       const cb = el("a", "upop-cb", "Change banner");

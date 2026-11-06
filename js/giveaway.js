@@ -3,7 +3,7 @@
   const ALL = [
     { key: "join", label: "Join the giveaway", pts: 1, icon: "plus" },
     { key: "in_server", label: "Join our Discord", pts: 0, icon: "envelope", href: "https://discord.gg/tGuXfcJxwf", go: "Join", ext: true },
-    { key: "roblox", label: "Link Roblox", pts: 0, icon: "shield", href: "profile.html#edit", go: "Link" },
+    { key: "roblox", label: "Verify your Roblox", pts: 0, icon: "shield", href: "#verify", go: "Verify" },
     { key: "trade_ad", label: "Have a live trade ad", pts: 4, icon: "trading", href: "trades.html#post", go: "Post one" },
     { key: "strategy", label: "Share a strategy", pts: 3, icon: "bullseye", href: "strategies.html", go: "Share" },
     { key: "server_link", label: "Add your private server link", pts: 1, icon: "gear", href: "profile.html#edit", go: "Add" },
@@ -14,7 +14,7 @@
   function needs(g) {
     const q = (g.rules || {}).req || {}, out = [];
     if (q.in_server) out.push(["In the Bloombot Discord", "https://discord.gg/tGuXfcJxwf"]);
-    if (q.roblox) out.push(["Roblox linked", "profile.html#edit"]);
+    if (q.roblox) out.push(["Roblox verified", "#verify"]);
     if (q.trade_ad) out.push(["A live trade ad", "trades.html#post"]);
     if (q.min_level > 0) out.push(["Level " + q.min_level + "+"]);
     if (q.discord_days > 0) out.push(["Discord account " + q.discord_days + "+ days old"]);
