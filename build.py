@@ -251,7 +251,7 @@ ALL_FEATURES = [
     ("bell", "Value alerts", "Follow a unit and get a DM when its price moves 20% or more."),
     ("lightning", "DPS ranking", "Every unit ranked by damage, refreshed each week, plus full unit and enemy stats."),
     ("medal_gold", "Levels and ranks", "Earn XP for using Bloombot. Higher ranks keep their trade ads up longer and auto-bump them."),
-    ("offer", "Giveaways", "Run giveaways with entry rules like a role, a linked Roblox account, invites or a level."),
+    ("gift", "Giveaways", "Run giveaways with entry rules like a role, a linked Roblox account, invites or a level."),
     ("bullseye", "Team finder and strategies", "Find teammates across servers, plus meta loadouts and community guides."),
     ("clock", "Weekly recap", "Every Sunday: the biggest value moves, new units and balance changes."),
     ("shield", "Safe trading", "Ads are screened for scams, bad words and NSFW images, and anyone can report a user."),
