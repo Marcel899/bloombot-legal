@@ -2249,3 +2249,16 @@ a.me-head:hover,a.me-head:focus-visible{background:linear-gradient(135deg,rgba(8
 [data-theme=light] .gw-u,[data-theme=light] .gw-task{background-image:none}
 @media (max-width:600px){.gw-picw,.gw-pic,[data-theme=light] .gw-pic{width:52px;height:52px}.gw-picw::before{width:100px;height:100px;margin:-50px 0 0 -50px}}
 @media (prefers-reduced-motion:reduce){.gw-picw::before{animation:none}}
+
+/* ── Giveaway v5: bigger 50% studs, weld badge + countdown ── */
+.gw:not(.min){background:url(img/studs-50.png) 0 0/96px 96px repeat,linear-gradient(180deg,rgba(169,79,255,.2),rgba(20,174,234,.06) 140px,#16191f 240px),#16191f;background-blend-mode:normal}
+[data-theme=light] .gw:not(.min){background:url(img/studs-50.png) 0 0/96px 96px repeat,linear-gradient(180deg,rgba(126,200,80,.2),rgba(245,200,60,.08) 140px,#fffdf7 240px),#fffdf7;background-blend-mode:normal}
+.gw-task,[data-theme=light] .gw-task{background-image:url(img/studs-50.png);background-size:96px 96px;background-blend-mode:normal}
+.gw-kicker,.gw-u,[data-theme=light] .gw-kicker,[data-theme=light] .gw-u{position:relative;isolation:isolate;overflow:hidden;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);background-image:none}
+.gw-kicker,[data-theme=light] .gw-kicker{background-color:#a94fff;border:2px solid #553078;box-shadow:0 0 8px rgba(169,79,255,.45),inset 0 2px 0 rgba(255,255,255,.3);color:#fff}
+.gw-u,[data-theme=light] .gw-u{background-color:#3a4050;border:3px solid #1b1f27;border-radius:10px;box-shadow:0 3px 5px -2px rgba(0,0,0,.3),inset 0 3px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.15)}
+.gw-kicker::before,.gw-u::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url(img/weld-x.webp) center/45px 45px repeat;filter:grayscale(100%);opacity:.4}
+.gw-u b,[data-theme=light] .gw-u b{color:#fff}
+.gw-u small,[data-theme=light] .gw-u small{color:rgba(255,255,255,.75)}
+.gw-live{background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.7)}
+@keyframes gwLive{0%{box-shadow:0 0 0 0 rgba(255,255,255,.75)}70%,100%{box-shadow:0 0 0 7px rgba(255,255,255,0)}}
