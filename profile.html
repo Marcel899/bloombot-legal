@@ -25,10 +25,10 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=19aa0222">
+<link rel="stylesheet" href="style.css?v=142219d9">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
-<script defer src="js/app.js?v=d58ca2e7"></script>
+<script defer src="js/app.js?v=832af165"></script>
 <script defer src="js/site.js?v=4d400359"></script>
 <script defer src="js/giveaway.js?v=fd981593"></script>
 </head>
@@ -59,17 +59,28 @@
 <section class="panel pcard" id="pcard" hidden></section>
 <form class="panel pedit" id="pedit" hidden novalidate>
 <div class="pe-head"><span class="pe-ico"><img src="img/gear.png" alt=""></span><div><h2 id="pedit-h">Profile settings</h2><p class="hint" id="pedit-sub">Changes are saved to your Bloombot account, the same as /home → Settings in Discord.</p></div><button class="pe-x" type="button" id="pclose" aria-label="Close settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg></button></div>
+<section class="pe-sec" aria-labelledby="ps-rbx"><h3 class="pe-st" id="ps-rbx">Roblox</h3>
 <div class="pfields">
-<div class="pe-field" id="fu-f"><label for="fu">Roblox username</label><div class="pe-in"><span class="pe-pre" aria-hidden="true">@</span><input id="fu" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="CoolGardener123" aria-describedby="fu-m"><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fu-m">Your exact Roblox name, not your display name.</p><div class="rv-row" id="fv-row"><img src="img/shield.png" alt=""><span id="fv-s"></span><button class="brick blue sm" type="button" id="fverify">Verify</button></div></div>
+<div class="pe-field" id="fu-f"><label for="fu">Username</label><div class="pe-in"><span class="pe-pre" aria-hidden="true">@</span><input id="fu" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="CoolGardener123" aria-describedby="fu-m"><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fu-m">Your exact Roblox name, not your display name.</p></div>
 <div class="pe-field" id="fl-f"><label for="fl">Private server link <em>optional</em></label><div class="pe-in"><input id="fl" maxlength="300" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://www.roblox.com/share?code=…&amp;type=Server" aria-describedby="fl-m"><button class="pe-paste" type="button" id="fpaste" hidden>Paste</button><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fl-m">Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.</p></div>
 </div>
+</section>
+<section class="pe-sec" id="pacc-sec" aria-labelledby="ps-acc"><h3 class="pe-st" id="ps-acc">Connected accounts</h3>
+<div class="pacc" id="pacc">
+<div class="pacc-row" id="pa-dc"><span class="pacc-ic dc-ic"><svg class="dc" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.1 14.1 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></span><div class="pacc-t"><strong>Discord</strong><span id="pa-dc-s">Connected</span></div><span class="pacc-ok">Connected</span></div>
+<div class="pacc-row" id="pa-go" hidden><span class="pacc-ic go-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg></span><div class="pacc-t"><strong>Google</strong><span id="pa-go-s">Log in with Google too</span></div><button class="brick dark sm" type="button" id="pa-go-b">Connect</button></div>
+<div class="pacc-row rv-row" id="fv-row"><span class="pacc-ic"><img src="img/shield.png" alt=""></span><div class="pacc-t"><strong>Roblox</strong><span id="fv-s"></span></div><button class="brick blue sm" type="button" id="fverify">Verify</button></div>
+</div>
+</section>
+<section class="pe-sec" aria-labelledby="ps-look"><h3 class="pe-st" id="ps-look">Your profile</h3>
 <div class="pe-field pe-ban" id="fb-f"><div class="pe-lrow"><label id="fb-l">Profile banner</label><span class="pe-bs" id="fb-s" role="status"></span></div><div class="ban-grid" id="fban" role="radiogroup" aria-labelledby="fb-l"></div><p class="pe-msg">Shown at the top of your profile. Saves by itself as soon as you pick one, no need to press Save changes.</p></div>
 <div class="pe-field" id="fd-f"><div class="pe-lrow"><label for="fd">About me <em>optional</em></label><div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="fdw" aria-selected="true">Write</button><button type="button" role="tab" id="fdp" aria-selected="false">Preview</button></div></div>
 <div class="pe-ta"><textarea id="fd" rows="4" maxlength="300" placeholder="How you play, what you collect, when you're online…"></textarea><div class="pe-prev" id="fdprev" hidden></div></div>
 <div class="pe-foot"><span><b>**bold**</b> <i>*italic*</i> and emojis work</span><span class="count" id="fdc">0/300</span></div></div>
+</section>
 <div class="pe-bar"><span class="pe-dirty" id="pdirty" hidden>Unsaved changes</span><span class="pe-sp"></span><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
 <p class="post-status" id="pstatus" hidden role="status"></p>
-<div class="pdanger" id="pdanger" hidden><div><strong>Delete account</strong><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div>
+<details class="pe-danger" id="pdanger" hidden><summary>Delete account</summary><div class="pdanger"><div><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div></details>
 </form>
 <div class="pcols">
 <section class="panel psec" id="pads-sec" hidden><div class="upop-sh"><h3 class="upop-h">Live trade ads</h3><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="plist" id="pads"></div></section>
@@ -77,7 +88,7 @@
 </div>
 <p class="panel pempty hint" id="pempty" hidden>No live trade ads or strategies yet.</p>
 </main>
-<script defer src="js/profile.js?v=0cf9a2cf"></script>
+<script defer src="js/profile.js?v=de122f2d"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

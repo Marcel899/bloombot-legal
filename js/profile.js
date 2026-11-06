@@ -228,6 +228,7 @@
     $("fv-row").classList.toggle("ok", vf);
     $("fv-s").textContent = vf ? "Verified Roblox account" : mine && mine.roblox_name ? "Not verified yet. Prove it's yours to get the verified tag." : "Prefer to prove it's yours? Verify with a code instead.";
     $("fverify").textContent = vf ? "Verify again" : "Verify";
+    accounts();
     $("pdanger").hidden = !mine;
     $("pclose").hidden = !mine;
     $("pcancel").hidden = !mine;
@@ -236,6 +237,29 @@
     $("pedit").scrollIntoView({ block: "start", behavior: "smooth" });
     setTimeout(() => $("fu").focus({ preventScroll: true }), 250);
   }
+  /* Connected accounts: Discord (always), Google (add/remove), Roblox (verify) */
+  function accounts() {
+    const u = BB.user(BB.session);
+    $("pa-dc-s").textContent = u.hasDiscord ? "Logged in as " + u.name : "Not connected";
+    const go = $("pa-go");
+    go.hidden = !BB.googleReady;
+    if (go.hidden) return;
+    go.classList.toggle("ok", u.hasGoogle);
+    $("pa-go-s").textContent = u.hasGoogle ? "You can log in with Google" : "Log in with Google too";
+    const b = $("pa-go-b");
+    b.textContent = u.hasGoogle ? "Remove" : "Connect";
+    b.className = "brick sm " + (u.hasGoogle ? "dark" : "blue");
+    b.onclick = async () => {
+      if (!u.hasGoogle) { BB.addGoogle(); return; }
+      const ok = await BB.confirm({ title: "Remove Google login?", text: "You'll log in with Discord only. You can add Google again any time.", ok: "Remove" });
+      if (!ok) return;
+      b.disabled = true;
+      if (await BB.unlinkGoogle()) BB.toast("Log in with Discord from now on.", "ok", { title: "Google removed" });
+      b.disabled = false;
+    };
+  }
+  document.addEventListener("bb:accounts", () => { if (!$("pedit").hidden) accounts(); });
+
   /* banner picker: saves straight away, separate from the Save button */
   async function banners() {
     const g = $("fban");

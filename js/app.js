@@ -437,7 +437,7 @@
     options: { redirectTo: here(), scopes: "identify" },
   });
   BB.login = () => loginDialog();
-  BB.googleReady = !!GOOGLE_CLIENT_ID;
+  BB.googleReady = /^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/.test(GOOGLE_CLIENT_ID);
   BB.addGoogle = () => addGoogleDialog();
 
   /* ── login dialog: Discord or Google ─────────────────────── */
@@ -557,10 +557,33 @@
       if (!r.ok) { say("bad", googleErr(j.msg || j.error_description || j.message || r.status)); return; }
       const { data } = await BB.sb.auth.refreshSession();
       if (!data || !data.session || !BB.user(data.session).hasGoogle) { say("bad", "Google wasn't added. Try again in a minute."); return; }
+      BB.session = data.session;
       done();
+      document.dispatchEvent(new CustomEvent("bb:accounts"));
       BB.toast("You can now log in with Google too.", "ok", { title: "Google added" });
     } catch (e) { say("bad", googleErr(e && e.message)); }
   }
+
+  /* Remove Google from this account (Discord stays, so you can always log in). */
+  BB.unlinkGoogle = async () => {
+    try {
+      const { data, error } = await BB.sb.auth.getUserIdentities();
+      if (error) throw error;
+      const ids = (data && data.identities) || [];
+      const go = ids.find(i => i.provider === "google");
+      if (!go) return true;
+      if (!ids.some(i => i.provider === "discord")) throw new Error("Connect Discord first, so you can still log in.");
+      const r = await BB.sb.auth.unlinkIdentity(go);
+      if (r.error) throw r.error;
+      const { data: d } = await BB.sb.auth.refreshSession();
+      if (d && d.session) BB.session = d.session;
+      document.dispatchEvent(new CustomEvent("bb:accounts"));
+      return true;
+    } catch (e) {
+      BB.toast((e && e.message) || "Try again in a minute.", "bad", { title: "Couldn't remove Google" });
+      return false;
+    }
+  };
 
   /* Google-only logins: Bloombot accounts are Discord accounts, so connect Discord once. */
   BB.connectDiscord = async () => {
@@ -699,7 +722,6 @@
     };
     const extra = [];
     if (!u.hasDiscord) extra.push(act("plus", "Connect Discord", () => connectDialog(true)), sep());
-    else if (!u.hasGoogle && hasGis) extra.push(act("plus", "Add Google login", addGoogleDialog), sep());
     menu.append(head, sep(), ...extra,
       link("profile.html#edit", "gear", "Edit profile"),
       link("levels.html", "medal_gold", "Levels & perks"),
