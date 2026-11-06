@@ -485,7 +485,7 @@
     opts.append(dc);
     const st = BB.el("p", "post-status"); st.hidden = true;
     const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t; };
-    if (GOOGLE_CLIENT_ID) {
+    if (hasGis) {
       const slot = BB.el("div", "lg-google");
       opts.append(slot);
       googleButton(slot, "login", say, close);
@@ -506,37 +506,28 @@
   /* Google uses its own "Sign in with Google" button (Google Identity Services), so Google's
      window shows this website's address, not the Supabase one. Google hands back a signed ID
      token; Supabase checks its signature, our client ID and the nonce before logging in. */
-  let gisP = null;
-  const loadGis = () => gisP || (gisP = new Promise((ok, bad) => {
-    if (window.google && google.accounts && google.accounts.id) { ok(); return; }
-    const s = document.createElement("script");
-    s.src = "https://accounts.google.com/gsi/client";
-    s.async = true;
-    s.onload = ok;
-    s.onerror = () => { gisP = null; bad(new Error("load")); };
-    document.head.append(s);
-  }));
-  const hex = b => Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
-  async function googleButton(slot, mode, say, done) {
+  const hasGis = /^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/.test(GOOGLE_CLIENT_ID);
+  function googleButton(slot, mode, say, done) {
     slot.replaceChildren(BB.el("span", "hint", "Loading Google…"));
-    try { await loadGis(); }
-    catch (e) { slot.replaceChildren(); say("bad", "Google sign-in didn't load. Turn off blockers for this site or use Discord."); return; }
-    const raw = hex(crypto.getRandomValues(new Uint8Array(32)));
-    const hashed = hex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw))));
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      nonce: hashed,
-      ux_mode: "popup",
-      context: mode === "link" ? "use" : "signin",
-      use_fedcm_for_button: true,
-      itp_support: true,
-      callback: r => onGoogle(r && r.credential, raw, mode, say, done),
-    });
-    slot.replaceChildren();
-    google.accounts.id.renderButton(slot, {
-      type: "standard", size: "large", shape: "pill", text: "continue_with",
-      theme: "outline", logo_alignment: "center", width: Math.min(400, Math.max(200, Math.floor(slot.getBoundingClientRect().width) || 320)),
-    });
+    const w = Math.min(400, Math.max(200, Math.floor(slot.getBoundingClientRect().width) || 320));
+    const f = document.createElement("iframe");
+    f.title = "Sign in with Google";
+    f.className = "lg-gframe";
+    f.width = String(w);
+    f.height = "44";
+    f.src = "gsi.html?" + new URLSearchParams({ cid: GOOGLE_CLIENT_ID, mode, w: String(w) });
+    f.hidden = true;
+    slot.append(f);
+    const onMsg = e => {
+      if (!slot.isConnected) { window.removeEventListener("message", onMsg); return; }
+      if (e.origin !== location.origin || e.source !== f.contentWindow || !e.data || e.data.bbgsi !== 1) return;
+      const d = e.data;
+      if (d.ready) { f.hidden = false; if (slot.firstChild !== f) slot.firstChild.remove(); return; }
+      if (d.error) { slot.replaceChildren(); say("bad", "Google sign-in didn't load. Turn off blockers for this site or use Discord."); return; }
+      if (typeof d.credential === "string" && typeof d.nonce === "string") onGoogle(d.credential, d.nonce, mode, say, done);
+    };
+    window.addEventListener("message", onMsg);
+    setTimeout(() => { if (slot.isConnected && f.hidden) { slot.replaceChildren(); say("bad", "Google sign-in didn't load. Turn off blockers for this site or use Discord."); } }, 12000);
   }
   const googleErr = msg => /already|exists|linked/i.test(msg || "")
     ? "That Google account already belongs to another Bloombot login."
@@ -708,7 +699,7 @@
     };
     const extra = [];
     if (!u.hasDiscord) extra.push(act("plus", "Connect Discord", () => connectDialog(true)), sep());
-    else if (!u.hasGoogle && GOOGLE_CLIENT_ID) extra.push(act("plus", "Add Google login", addGoogleDialog), sep());
+    else if (!u.hasGoogle && hasGis) extra.push(act("plus", "Add Google login", addGoogleDialog), sep());
     menu.append(head, sep(), ...extra,
       link("profile.html#edit", "gear", "Edit profile"),
       link("levels.html", "medal_gold", "Levels & perks"),
