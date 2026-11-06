@@ -233,9 +233,17 @@
       const pb = document.querySelector(".p-ban");
       if (pb) BB.paintBanner(pb, BB.bannerKey(pick.color, pick.tex), me);
     }
-    async function commit() {
+    /* The server ignores a second change within 2s, so wait out the gap and send only the latest pick. */
+    let lastSave = 0, timer = null;
+    function commit() {
       $("fb-s").textContent = "Saving…";
-      const err = await BB.setBanner(BB.bannerKey(pick.color, pick.tex));
+      clearTimeout(timer);
+      timer = setTimeout(send, Math.max(250, lastSave + 2200 - Date.now()));
+    }
+    async function send() {
+      const want = { ...pick };
+      lastSave = Date.now();
+      const err = await BB.setBanner(BB.bannerKey(want.color, want.tex));
       if (err) {
         $("fb-s").textContent = "";
         BB.toast(/function|relation|schema/i.test(err.message) ? "Banners aren't switched on yet. Try again later." : "Couldn't save: " + err.message, "bad", { title: "Banner not saved" });
@@ -243,9 +251,11 @@
         paint();
         return;
       }
-      cur = { ...pick };
+      cur = want;
+      if (pick.color !== want.color || pick.tex !== want.tex) return;
       $("fb-s").textContent = "Saved";
-      setTimeout(() => { $("fb-s").textContent = ""; }, 1600);
+      BB.toast("Your new banner is live.", "ok", { title: "Banner saved" });
+      setTimeout(() => { if ($("fb-s").textContent === "Saved") $("fb-s").textContent = ""; }, 2000);
     }
     const tex = el("div", "ban-texs");
     tex.setAttribute("role", "radiogroup");
