@@ -2404,7 +2404,6 @@ html.upop-lock{overflow:hidden}
 .pban[data-banner=candy]{background:var(--st),linear-gradient(135deg,#ff7ac8,#a94fff)}
 .pban[data-banner=night]{background:var(--st),radial-gradient(circle at 80% 20%,#3a4a8a,transparent 60%),linear-gradient(135deg,#1b2140,#0c0f1c)}
 .pban[data-banner=rainbow]{background:var(--st),linear-gradient(120deg,#dc3232,#f5a623,#f5c83c,#28a828,#14aeea,#a94fff)}
-.pban[data-banner=garden]{background:var(--st),url(img/garden.jpg) center/cover}
 .upop-ban,.p-ban{position:relative;border-bottom:3px solid rgba(0,0,0,.35);box-shadow:inset 0 -3px 0 rgba(255,255,255,.18)}
 .upop-ban::after,.p-ban::after{content:"";position:absolute;inset:0;background:url(img/weld.png) 0 0/45px 45px repeat;filter:grayscale(100%);opacity:.22;pointer-events:none;border-radius:inherit}
 .upop-ban{height:110px}

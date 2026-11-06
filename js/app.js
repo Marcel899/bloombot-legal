@@ -715,7 +715,7 @@
 
   /* ── profile banners (Profile settings → Banner; table profile_banners) ── */
   BB.BANNERS = [
-    ["auto", "Surprise me"], ["garden", "Garden"], ["green", "Grass"], ["blue", "Sky"], ["purple", "Mythic"],
+    ["auto", "Surprise me"], ["green", "Grass"], ["blue", "Sky"], ["purple", "Mythic"],
     ["red", "Brick"], ["orange", "Sunset"], ["yellow", "Gold"], ["ocean", "Ocean"], ["candy", "Candy"],
     ["night", "Night"], ["rainbow", "Rainbow"],
   ];
