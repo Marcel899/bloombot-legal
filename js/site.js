@@ -295,7 +295,8 @@
   /* features.html#cmd=/value fills the command search. */
   const m = location.hash.match(/^#cmd=(.+)$/), cq = document.getElementById("cmdq");
   if (m && cq) {
-    cq.value = decodeURIComponent(m[1]);
+    let q = m[1]; try { q = decodeURIComponent(q); } catch (e) { /* malformed link */ }
+    cq.value = q.slice(0, 60);
     cq.dispatchEvent(new Event("input"));
     setTimeout(() => document.getElementById("commands").scrollIntoView({ block: "start" }), 50);
   }

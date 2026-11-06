@@ -166,7 +166,8 @@
   }
   function fromHash() {
     if (location.hash === "#watchlist") { setCat("fav"); return; }
-    const want = decodeURIComponent(location.hash.slice(1));
+    let want = location.hash.slice(1);
+    try { want = decodeURIComponent(want); } catch (e) { return; }
     const hit = want && items.find(i => i.name === want);
     if (hit) open(hit);
   }
