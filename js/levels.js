@@ -33,7 +33,14 @@
   ];
   const TASK_TOTAL = TASKS.reduce((a, t) => a + t.xp, 0);
 
-  let me = null, prof = null, claims = {}, shown = null, polling = null;
+  let me = null, prof = null, claims = {}, shown = null, polling = null, ready = null;
+  /* Tasks done but not claimed (rpc xp_tasks_ready); null when the check isn't available. */
+  async function loadReady() {
+    try {
+      const { data, error } = await BB.sb.rpc("xp_tasks_ready");
+      ready = error || !Array.isArray(data) ? null : new Set(data);
+    } catch (e) { ready = null; }
+  }
 
   function openGiveaway() {
     const b = document.querySelector(".gw-pill, .gw button");
@@ -84,7 +91,11 @@
     bar.setAttribute("aria-valuemax", String(L.need));
     bar.setAttribute("aria-valuenow", String(L.into));
     const fill = el("div", "lv-fill");
-    fill.append(el("span", "lv-shine"), el("span", "lv-spark"));
+    const clip = el("span", "lv-clip");
+    clip.append(el("span", "lv-shine"));
+    const spark = el("span", "lv-spark");
+    spark.append(el("i"));
+    fill.append(clip, spark);
     const ticks = el("div", "lv-ticks");
     for (let i = 1; i < 4; i++) ticks.append(el("i"));
     const motes = el("div", "lv-motes");
@@ -228,7 +239,8 @@
     box.replaceChildren();
     const got = TASKS.filter(t => claims[t.k] && claims[t.k].status !== "failed").reduce((a, t) => a + t.xp, 0);
     $("lvtsum").textContent = me ? fmt(got) + " / " + fmt(TASK_TOTAL) + " XP claimed" : "Up to " + fmt(TASK_TOTAL) + " XP";
-    const order = [...TASKS].sort((a, b) => (!!claims[a.k] - !!claims[b.k]));
+    const rank = t => claims[t.k] ? 2 : ready && ready.has(t.k) ? 0 : 1;
+    const order = [...TASKS].sort((a, b) => rank(a) - rank(b));
     order.forEach(t => {
       const c = claims[t.k];
       const state = !c ? "open" : c.status === "failed" ? "failed" : "done";
@@ -246,13 +258,18 @@
       } else if (t.k === "google" && !BB.googleReady) {
         acts.append(el("span", "tk-soon", "Coming soon"));
       } else {
-        const go = el(t.go ? "a" : "button", "tk-go", t.gl);
+        /* Claim only shows once Supabase says the task is done (ready = null: unknown, show it). */
+        const can = !ready || ready.has(t.k);
+        const go = el(t.go ? "a" : "button", can ? "tk-go" : "brick blue sm tk-do", t.gl);
         if (t.go) { go.href = t.go; if (t.ext) { go.target = "_blank"; go.rel = "noopener"; } }
         else { go.type = "button"; go.onclick = t.run; }
-        const cl = el("button", "brick green sm tk-claim", "Claim");
-        cl.type = "button";
-        cl.onclick = () => claim(t, cl);
-        acts.append(go, cl);
+        if (can) {
+          const cl = el("button", "brick green sm tk-claim", "Claim");
+          cl.type = "button";
+          cl.onclick = () => claim(t, cl);
+          acts.append(go, cl);
+          if (ready) row.classList.add("st-ready");
+        } else acts.append(go);
       }
       row.append(ic, txt, xp, acts);
       box.append(row);
@@ -275,6 +292,7 @@
       const before = shownXp();
       const fresh = !claims[t.k];
       claims[t.k] = claims[t.k] || { task: t.k, status: "pending", xp: t.xp };
+      if (ready) ready.delete(t.k);
       await claimFx(btn.closest(".tk"), t.xp);
       tasks();
       if (fresh) { celebrate(before, shownXp(), t.t + " done."); perks(); }
@@ -361,6 +379,7 @@
     const [p, c] = await Promise.all([
       BB.sb.from("profiles").select("*").eq("discord_id", me).maybeSingle(),
       BB.sb.from("xp_task_claims").select("task,status,xp,reason").eq("discord_id", me),
+      loadReady(),
     ]);
     prof = p.data;
     claims = Object.fromEntries(((c && c.data) || []).map(r => [r.task, r]));
@@ -374,7 +393,7 @@
   }
 
   function demo() {
-    me = null; prof = null; claims = {};
+    me = null; prof = null; claims = {}; ready = null;
     $("lvloading").hidden = true;
     $("lvcard").hidden = false;
     card(BB.xpAtLevel(12) + 410, { demo: true });
