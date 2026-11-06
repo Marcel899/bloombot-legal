@@ -7,7 +7,7 @@
 
   /* ── crates (from the in-game shop) ────────────────────────────── */
   let CUR = {
-    candy: { name: "Candy", icon: "img/cur/candy.webp" },
+    candy: { name: "Candy", icon: "img/cur/candy-2.webp" },
     seeds: { name: "Seeds", icon: "img/cur/seeds.webp" },
     custom: { name: "currency", icon: "img/crate.png" },
   };

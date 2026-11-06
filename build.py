@@ -473,8 +473,8 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 <label class="kf kmain">
 <span class="kin"><img data-curimg alt=""><input class="search" id="kb" inputmode="decimal" autocomplete="off" placeholder="Type your amount, like 250k"><b data-cur>Candy</b></span>
 <span>Or what you plan to spend. 1.5m and 20k work too.</span></label>
-<div class="kf">Luck boost <span>Only if you have one.</span>
-<div class="kluck"><button class="chip" type="button" data-luck="1">None</button><button class="chip" type="button" data-luck="1.5">1.5x</button><button class="chip" type="button" data-luck="2">2x</button><button class="chip" type="button" data-luck="3">3x</button></div></div>
+<div class="kf"><span class="kluck-h"><img src="img/luck.webp" alt="">Luck boost</span><span>Only if you have one.</span>
+<div class="kluck"><button class="chip" type="button" data-luck="1">None</button><button class="chip" type="button" data-luck="1.5"><img src="img/luck.webp" alt="">1.5x</button><button class="chip" type="button" data-luck="2"><img src="img/luck.webp" alt="">2x</button><button class="chip" type="button" data-luck="3"><img src="img/luck.webp" alt="">3x</button></div></div>
 <details class="kmore" id="kmore"><summary>Change the crate's numbers</summary>
 <div class="kmore-in">
 <p class="khint">Already filled in from the crate. Only change them if the game shows something else.</p>
