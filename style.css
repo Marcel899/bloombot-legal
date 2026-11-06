@@ -2213,7 +2213,7 @@ a.me-head:hover,a.me-head:focus-visible{background:linear-gradient(135deg,rgba(8
 .gw-clock{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 12px}
 .gw-u{display:flex;flex-direction:column;align-items:center;padding:7px 0 5px;border-radius:12px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.07);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
 .gw-u b{font:900 1.25rem/1.1 "Nunito",sans-serif;font-variant-numeric:tabular-nums;color:#fff}
-.gw-u b.tk{animation:gwTick .35s cubic-bezier(.2,1.4,.4,1)}
+.gw-u b.gw-tick{animation:gwTick .35s cubic-bezier(.2,1.4,.4,1)}
 @keyframes gwTick{from{transform:translateY(-5px);opacity:.3}}
 .gw-u small{font-size:.62rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gw-task{transition:transform .15s,border-color .15s,background .15s}
@@ -2231,7 +2231,7 @@ a.me-head:hover,a.me-head:focus-visible{background:linear-gradient(135deg,rgba(8
 [data-theme=light] .gw-u b{color:var(--text)}
 [data-theme=light] .gw-task:not(.done):not(.locked):hover{border-color:#c9a6f2}
 @media (max-width:600px){.gw-clock{gap:4px;margin-bottom:8px}.gw-u{padding:4px 0 3px}.gw-u b{font-size:1.02rem}.gw-pic{width:46px;height:46px}.gw-head{margin:8px 0}}
-@media (prefers-reduced-motion:reduce){.gw.opening,.gw.opening>*,.gw.closing,.gw .brick.gw-pill.pop,.gw-live,.gw-picw::after,.gw-u b.tk,.gw-bar i::after{animation:none}}
+@media (prefers-reduced-motion:reduce){.gw.opening,.gw.opening>*,.gw.closing,.gw .brick.gw-pill.pop,.gw-live,.gw-picw::after,.gw-u b.gw-tick,.gw-bar i::after{animation:none}}
 
 /* ── Giveaway v4: rotating sunburst behind the prize ── */
 .gw:not(.min){background:linear-gradient(180deg,rgba(169,79,255,.2),rgba(20,174,234,.06) 140px,#16191f 240px),#16191f}
@@ -2630,7 +2630,7 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 /* giveaway popup: no sunburst; seconds tick without transform (Firefox drew a dark box over it) */
 .gw-picw::before,[data-theme=light] .gw-picw::before{content:none;animation:none}
 .gw-u b{position:relative;z-index:1;transform:none}
-.gw-u b.tk{animation:gwTick2 .3s ease-out}
+.gw-u b.gw-tick{animation:gwTick2 .3s ease-out}
 @keyframes gwTick2{from{opacity:.35}to{opacity:1}}
 /* ── Verify Roblox dialog + verified tags ─────────────────── */
 .rv-step{display:flex;flex-direction:column;gap:10px}

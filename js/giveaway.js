@@ -288,7 +288,7 @@
       if (new Date(g.ends_at) <= Date.now()) { clearInterval(timer); load(); return; }
       root.querySelectorAll(".gw-cd").forEach(c => { c.textContent = left(g.ends_at); });
       const pt = parts(g.ends_at);
-      root.querySelectorAll(".gw-u b").forEach(b => { const v = String(pt[b.dataset.u]); if (b.textContent !== v) { b.textContent = v; b.classList.remove("tk"); void b.offsetWidth; b.classList.add("tk"); } });
+      root.querySelectorAll(".gw-u b").forEach(b => { const v = String(pt[b.dataset.u]); if (b.textContent !== v) { b.textContent = v; b.classList.remove("gw-tick"); void b.offsetWidth; b.classList.add("gw-tick"); } });
     }, 1000);
   }
 
