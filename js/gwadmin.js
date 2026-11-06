@@ -40,14 +40,73 @@
     PTS.forEach(([k]) => { entries[k] = clamp($("gp_" + k).value, k === "join" ? 1 : 0, 25); });
     REQ_BOX.forEach(([k]) => { req[k] = $("gr_" + k).checked; });
     REQ_NUM.forEach(([k, , max]) => { req[k] = clamp($("gr_" + k).value, 0, max); });
-    return { entries, req };
+    const out = { entries, req };
+    if (item) { out.item = item.name; out.show_value = $("gsv").checked; }
+    return out;
   }
   function setRules(r) {
     const e = { ...DEF.entries, ...((r && r.entries) || {}) }, q = { ...DEF.req, ...((r && r.req) || {}) };
     PTS.forEach(([k]) => { $("gp_" + k).value = e[k]; });
     REQ_BOX.forEach(([k]) => { $("gr_" + k).checked = !!q[k]; });
     REQ_NUM.forEach(([k]) => { $("gr_" + k).value = q[k] || ""; });
+    $("gsv").checked = !!(r && r.show_value);
+    pickItem(r && r.item ? byName(r.item) || { name: r.item } : null, false);
   }
+
+  /* ── prize autocomplete from the value list ── */
+  let items = [], item = null, sugIdx = -1, sug = [];
+  BB.loadValues().then(d => { items = d || []; if (item && !item.category) pickItem(byName(item.name) || item, false); }).catch(() => {});
+  const norm = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const byName = n => items.find(i => norm(i.name) === norm(n));
+  const valueText = it => (it && (it.value_text || (it.est > 0 ? BB.fmt(it.est) : ""))) || "";
+  const pic = it => BB.safeUrl(it.image_url) || BB.safeUrl(it.icon_url) || "";
+  function pickItem(it, setFields) {
+    item = it;
+    $("gsvw").hidden = !it;
+    $("gsvn").textContent = it && valueText(it) ? "(" + valueText(it) + ")" : "";
+    $("gtm").textContent = it ? `Linked to ${it.name}${it.category ? " · " + it.category : ""}.` : "Pick a unit or item to use its picture and value, or type any prize.";
+    if (it && setFields) {
+      $("gt").value = it.name;
+      const u = pic(it);
+      if (u) $("gi").value = u;
+      $("gsv").checked = true;
+    }
+    preview();
+  }
+  function closeSug() { $("gtl").hidden = true; $("gt").setAttribute("aria-expanded", "false"); $("gt").removeAttribute("aria-activedescendant"); sugIdx = -1; }
+  function hilite(i) {
+    sugIdx = i;
+    [...$("gtl").children].forEach((c, j) => { c.classList.toggle("on", j === i); c.setAttribute("aria-selected", String(j === i)); });
+    if (i >= 0) { $("gt").setAttribute("aria-activedescendant", "gtl-" + i); $("gtl").children[i].scrollIntoView({ block: "nearest" }); }
+  }
+  function showSug() {
+    const q = norm($("gt").value);
+    if (!q || !items.length) { closeSug(); return; }
+    sug = items.map(i => { const n = norm(i.name); return [i, n === q ? 0 : n.startsWith(q) ? 1 : n.includes(q) ? 2 : 9]; })
+      .filter(x => x[1] < 9).sort((a, b) => a[1] - b[1] || (b[0].est || 0) - (a[0].est || 0)).slice(0, 8).map(x => x[0]);
+    if (!sug.length) { closeSug(); return; }
+    $("gtl").replaceChildren(...sug.map((it, i) => {
+      const o = el("div", "gwa-opt"); o.id = "gtl-" + i; o.setAttribute("role", "option");
+      const t = el("span", "gwa-on"); t.append(el("strong", null, it.name), el("small", null, [it.category, it.rarity].filter(Boolean).join(" · ")));
+      o.append(BB.itemImg(it, "gwa-oi"), t, el("span", "gwa-ov", valueText(it)));
+      o.onmousedown = e => { e.preventDefault(); pickItem(it, true); closeSug(); };
+      return o;
+    }));
+    $("gtl").hidden = false; $("gt").setAttribute("aria-expanded", "true"); hilite(-1);
+  }
+  $("gt").addEventListener("input", () => {
+    if (item && norm($("gt").value) !== norm(item.name)) pickItem(null, false);
+    else if (!item) { const m = byName($("gt").value); if (m) pickItem(m, false); }
+    showSug();
+  });
+  $("gt").addEventListener("keydown", e => {
+    if ($("gtl").hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hilite((sugIdx + (e.key === "ArrowDown" ? 1 : -1) + sug.length) % sug.length); }
+    else if (e.key === "Enter" && sugIdx >= 0) { e.preventDefault(); pickItem(sug[sugIdx], true); closeSug(); }
+    else if (e.key === "Escape") { e.preventDefault(); closeSug(); }
+  });
+  $("gt").addEventListener("blur", () => setTimeout(closeSug, 120));
+  $("gsv").addEventListener("change", () => preview());
   function ruleText(r) {
     const e = { ...DEF.entries, ...((r && r.entries) || {}) }, q = { ...DEF.req, ...((r && r.req) || {}) };
     const out = [];
@@ -91,6 +150,8 @@
     const u = BB.safeUrl($("gi").value.trim());
     $("gpi").src = u || "img/gift.png";
     $("gpe").textContent = $("ge").value ? left(new Date($("ge").value)) : "";
+    const v = item && $("gsv").checked ? valueText(item) : "";
+    $("gpv").hidden = !v; $("gpv").textContent = v ? "Worth " + v : "";
   }
   $("gpi").onerror = () => { $("gpi").src = "img/gift.png"; };
 
@@ -225,6 +286,10 @@
         el("span", null, `${Number(g.entrants).toLocaleString()} joined`),
         el("span", null, `${Number(g.entries).toLocaleString()} entries`));
       body.append(meta);
+      if (g.rules && g.rules.item) {
+        const it = byName(g.rules.item), v = it && g.rules.show_value ? valueText(it) : "";
+        meta.append(el("span", null, "Item: " + g.rules.item + (v ? " · worth " + v : g.rules.show_value ? "" : " · value hidden")));
+      }
       const rt = ruleText(g.rules);
       const chips = el("div", "gwa-rules");
       rt.req.forEach(t => chips.append(el("span", "gwa-rq", t)));

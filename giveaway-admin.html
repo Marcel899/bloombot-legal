@@ -25,12 +25,12 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=3b88bb8c">
+<link rel="stylesheet" href="style.css?v=a292598d">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=d3f602ce"></script>
 <script defer src="js/site.js?v=4d400359"></script>
-<script defer src="js/giveaway.js?v=7701c7a2"></script>
+<script defer src="js/giveaway.js?v=89fc0ac3"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -68,12 +68,14 @@
 <section class="gwa-list" data-pane="list" role="tabpanel" aria-labelledby="gtab-list"><div id="glist"></div></section>
 <form class="panel pedit gwa-form" id="gform" data-pane="form" role="tabpanel" aria-labelledby="gtab-form" hidden novalidate>
 <div class="pe-head"><div><h2 id="gform-h">New giveaway</h2><p class="hint" id="gform-sub">It shows up in the popup on every page as soon as you save.</p></div></div>
-<div class="gwa-cols"><div class="gwa-col"><div class="pe-field"><label for="gt">Prize</label><div class="pe-in"><input id="gt" maxlength="80" autocomplete="off" placeholder="Chicken Coop" required></div></div>
+<div class="gwa-cols"><div class="gwa-col"><div class="pe-field gwa-ac"><label for="gt">Prize</label><div class="pe-in"><input id="gt" maxlength="80" autocomplete="off" spellcheck="false" placeholder="Type a unit or item…" required role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="gtl"></div><div class="gwa-sug" id="gtl" role="listbox" hidden></div>
+<p class="pe-msg" id="gtm">Pick a unit or item to use its picture and value, or type any prize.</p>
+<label class="gwa-chk gwa-sv" id="gsvw" hidden><input type="checkbox" id="gsv"><span>Show the item's value <em id="gsvn"></em></span></label></div>
 <div class="pe-field"><label for="gs">Subtitle <em>optional</em></label><div class="pe-in"><input id="gs" maxlength="160" autocomplete="off" placeholder="Winner gets it traded in game"></div></div>
 <div class="pe-field"><label for="gi">Picture link <em>optional</em></label><div class="pe-in"><input id="gi" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…png"></div><p class="pe-msg">Right-click a picture in Discord → Copy Link. Leave empty for the gift icon.</p></div>
 <div class="pe-field"><label for="ge">Ends</label><div class="pe-in"><input id="ge" type="datetime-local" required></div>
 <div class="gwa-quick" id="gquick"><button type="button" data-h="24">1 day</button><button type="button" data-h="72">3 days</button><button type="button" data-h="168">1 week</button><button type="button" data-h="336">2 weeks</button></div></div>
-<div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><em id="gpe"></em></div></div></div>
+<div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><span class="gw-chip gwa-val" id="gpv" hidden></span><em id="gpe"></em></div></div></div>
 </div><div class="gwa-col"><fieldset class="gwa-set"><legend>Entries per task</legend><p class="pe-msg">How many entries each task gives. 0 turns a task off.</p><div class="gwa-pts" id="gpts"></div></fieldset>
 <fieldset class="gwa-set"><legend>Needed to join</legend><p class="pe-msg">Checked again when the winner is picked, so leaving the server or deleting an ad loses the prize.</p>
 <div class="gwa-req" id="greq"></div></fieldset>
@@ -85,7 +87,7 @@
 <div id="gblocks"></div></section>
 </div>
 </main>
-<script defer src="js/gwadmin.js?v=4f378820"></script>
+<script defer src="js/gwadmin.js?v=d6a9ea32"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

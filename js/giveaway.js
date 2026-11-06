@@ -22,6 +22,20 @@
     return out;
   }
   const ptsOf = new Map();
+  /* prize value from the value list, when the owner ticked "Show the item's value" */
+  let vals = null;
+  const nm = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  function worthOf(g) {
+    const r = g.rules || {};
+    if (!r.show_value || !r.item) return "";
+    if (!vals) {
+      vals = [];
+      BB.loadValues().then(d => { vals = d || []; if (root) render(); }).catch(() => {});
+      return "";
+    }
+    const it = vals.find(i => nm(i.name) === nm(r.item));
+    return it ? it.value_text || (it.est > 0 ? BB.fmt(it.est) : "") : "";
+  }
   let list = [], cur = 0, mine = new Set(), totals = {}, root = null, timer = null, busy = false;
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
   const el = (...a) => BB.el(...a);
@@ -190,6 +204,8 @@
     if (mine.has(g.id + ":join")) meta.append(el("span", "gw-chip in", "You're in"));
     ht.append(el("h3", null, g.title));
     if (g.subtitle) ht.append(el("p", "gw-sub", g.subtitle));
+    const worth = worthOf(g);
+    if (worth) { const w = el("p", "gw-worth"); w.append(el("span", null, "Worth "), el("b", null, worth)); ht.append(w); }
     ht.append(meta);
     const pw = el("div", "gw-picw"); pw.append(pic);
     head.append(pw, ht);

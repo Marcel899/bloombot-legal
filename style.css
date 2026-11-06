@@ -2890,3 +2890,20 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 .ban-opt.locked{opacity:1}
 .ban-opt.locked .ban-sw{filter:saturate(.6) brightness(.8)}
 .ban-opt.locked .ban-n{opacity:.6}
+/* giveaway manager: prize autocomplete + value */
+.gwa-ac{position:relative}
+.gwa-sug{position:absolute;z-index:30;left:0;right:0;top:78px;max-height:320px;overflow:auto;padding:6px;border-radius:14px;background:var(--card);border:1px solid var(--border);box-shadow:0 14px 34px rgba(0,0,0,.35)}
+.gwa-opt{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:10px;cursor:pointer}
+.gwa-opt:hover,.gwa-opt.on{background:var(--card-2)}
+.gwa-oi{width:34px;height:34px;object-fit:contain;flex:none}
+.gwa-on{display:flex;flex-direction:column;flex:1;min-width:0}
+.gwa-on strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gwa-on small{color:var(--muted);font-weight:700;font-size:.76rem}
+.gwa-ov{color:#3fcf5f;font-weight:900;font-size:.85rem;white-space:nowrap}
+.pedit .gwa-sv{margin-top:2px}
+.gwa-sv em{font-style:normal;color:#3fcf5f;font-weight:800}
+.gwa-val{align-self:flex-start;margin:3px 0 1px;background:rgba(40,168,40,.18);color:#5fe07f}
+.gw-worth{margin:2px 0 0;font-size:.82rem;font-weight:800;color:var(--muted)}
+.gw-worth b{color:#5fe07f;font-weight:900}
+[data-theme=light] .gwa-ov,[data-theme=light] .gwa-sv em,[data-theme=light] .gw-worth b{color:#17762f}
+[data-theme=light] .gwa-val{color:#17762f}
