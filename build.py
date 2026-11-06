@@ -613,8 +613,8 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 <a class="brick discord" href="{INVITE}">{DISCORD_SVG}Add Bloombot to a server</a>
 </section>
 <div class="dgrid" id="dmain" hidden>
-<aside class="dside"><h3>Your servers</h3><input class="search dgq" id="dgq" placeholder="Find a server…" hidden aria-label="Find a server"><div id="dglist"></div><a class="dadd" href="{INVITE}">+ Add to another server</a></aside>
-<div><p class="panel dpick" id="dpick" hidden>Pick a server to change its settings.</p><section class="panel dpanel" id="dpanel" hidden></section></div>
+<section class="dbar" aria-label="Your servers"><div class="dbar-head"><h3>Your servers</h3><input class="search dgq" id="dgq" placeholder="Find a server…" hidden aria-label="Find a server"><a class="dadd" href="{INVITE}">+ Add server</a></div><div id="dglist"></div></section>
+<p class="panel dpick" id="dpick" hidden>Pick a server above to change its settings.</p><section class="panel dpanel" id="dpanel" hidden></section>
 </div>
 </main>
 <script defer src="js/dashboard.js?v={JSVER['dashboard']}"></script>
@@ -639,23 +639,25 @@ gwa_body = f"""<main class="wrap gwa" id="main">
 </section>
 <div class="skel-grid sk-prof" id="gloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="gwa-grid" id="gmain" hidden>
-<form class="panel pedit gwa-form" id="gform" novalidate>
+<div class="ptabs" role="tablist" aria-label="Giveaway manager" id="gtabs"><button type="button" role="tab" id="gtab-list" data-tab="list" aria-selected="true">Giveaways<i id="gcnt"></i></button><button type="button" role="tab" id="gtab-form" data-tab="form" aria-selected="false"><span id="gtab-ft">New giveaway</span></button><button type="button" role="tab" id="gtab-blocks" data-tab="blocks" aria-selected="false">Blocked<i id="gbcnt"></i></button></div>
+<section class="gwa-list" data-pane="list" role="tabpanel" aria-labelledby="gtab-list"><div id="glist"></div></section>
+<form class="panel pedit gwa-form" id="gform" data-pane="form" role="tabpanel" aria-labelledby="gtab-form" hidden novalidate>
 <div class="pe-head"><div><h2 id="gform-h">New giveaway</h2><p class="hint" id="gform-sub">It shows up in the popup on every page as soon as you save.</p></div></div>
-<div class="pe-field"><label for="gt">Prize</label><div class="pe-in"><input id="gt" maxlength="80" autocomplete="off" placeholder="Chicken Coop" required></div></div>
+<div class="gwa-cols"><div class="gwa-col"><div class="pe-field"><label for="gt">Prize</label><div class="pe-in"><input id="gt" maxlength="80" autocomplete="off" placeholder="Chicken Coop" required></div></div>
 <div class="pe-field"><label for="gs">Subtitle <em>optional</em></label><div class="pe-in"><input id="gs" maxlength="160" autocomplete="off" placeholder="Winner gets it traded in game"></div></div>
 <div class="pe-field"><label for="gi">Picture link <em>optional</em></label><div class="pe-in"><input id="gi" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…png"></div><p class="pe-msg">Right-click a picture in Discord → Copy Link. Leave empty for the gift icon.</p></div>
 <div class="pe-field"><label for="ge">Ends</label><div class="pe-in"><input id="ge" type="datetime-local" required></div>
 <div class="gwa-quick" id="gquick"><button type="button" data-h="24">1 day</button><button type="button" data-h="72">3 days</button><button type="button" data-h="168">1 week</button><button type="button" data-h="336">2 weeks</button></div></div>
-<fieldset class="gwa-set"><legend>Entries per task</legend><p class="pe-msg">How many entries each task gives. 0 turns a task off.</p><div class="gwa-pts" id="gpts"></div></fieldset>
+<div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><em id="gpe"></em></div></div></div>
+</div><div class="gwa-col"><fieldset class="gwa-set"><legend>Entries per task</legend><p class="pe-msg">How many entries each task gives. 0 turns a task off.</p><div class="gwa-pts" id="gpts"></div></fieldset>
 <fieldset class="gwa-set"><legend>Needed to join</legend><p class="pe-msg">Checked again when the winner is picked, so leaving the server or deleting an ad loses the prize.</p>
 <div class="gwa-req" id="greq"></div></fieldset>
-<div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><em id="gpe"></em></div></div></div>
+</div></div>
 <div class="pe-bar"><span class="pe-sp"></span><button class="brick dark sm" type="button" id="gcancel" hidden>Cancel edit</button><button class="brick green" id="gsave" type="submit">Start giveaway</button></div>
 </form>
-<div class="gwa-side"><section class="gwa-list"><div class="sec-head"><h2>All giveaways</h2></div><div id="glist"></div></section>
-<section class="gwa-list"><div class="sec-head"><h2>Blocked people</h2></div><p class="hint gwa-bh">Blocked people can't join any giveaway and lose their entries in running ones.</p>
+<section class="gwa-list gwa-blk" data-pane="blocks" role="tabpanel" aria-labelledby="gtab-blocks" hidden><p class="hint gwa-bh">Blocked people can't join any giveaway and lose their entries in running ones.</p>
 <form class="panel gwa-bform" id="gbform"><div class="pe-in"><input id="gbid" inputmode="numeric" maxlength="21" autocomplete="off" placeholder="Discord user ID" aria-label="Discord user ID"></div><div class="pe-in"><input id="gbwhy" maxlength="200" autocomplete="off" placeholder="Reason (only you see it)" aria-label="Reason"></div><button class="brick red sm" type="submit">Block</button></form>
-<div id="gblocks"></div></section></div>
+<div id="gblocks"></div></section>
 </div>
 </main>
 <script defer src="js/gwadmin.js?v={JSVER['gwadmin']}"></script>

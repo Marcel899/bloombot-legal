@@ -127,9 +127,12 @@
       p.append(w);
     }
 
-    const sec = (title, ic) => { const s = el("section", "dsec"); const h = el("h3"); const i = el("img"); i.src = "img/" + ic + ".png"; i.alt = ""; h.append(i, el("span", null, title)); s.append(h); p.append(s); return s; };
+    const cols = el("div", "dcols"), colA = el("div", "dcol"), colB = el("div", "dcol");
+    cols.append(colA, colB);
+    p.append(cols);
+    const sec = (title, ic, box) => { const s = el("section", "dsec"); const h = el("h3"); const i = el("img"); i.src = "img/" + ic + ".png"; i.alt = ""; h.append(i, el("span", null, title)); s.append(h); box.append(s); return s; };
 
-    const cs = sec("Channels", "envelope");
+    const cs = sec("Channels", "envelope", colA);
     for (const [slot, label, desc, ic, required, webhook] of SLOTS) {
       const v = chans[slot] || {};
       const row = el("div", "drow");
@@ -155,7 +158,7 @@
       cs.append(row);
     }
 
-    const rs = sec("Value update ping", "bell");
+    const rs = sec("Value update ping", "bell", colB);
     const row = el("div", "drow");
     const t = el("div", "dlabel");
     const tt = el("div");
@@ -171,7 +174,7 @@
     row.append(t, rc);
     rs.append(row);
 
-    const fs = sec("Features", "gem");
+    const fs = sec("Features", "gem", colB);
     for (const [key, label, desc] of FEATURES) {
       const on = feats[key] !== false;
       const r = el("div", "drow");
@@ -193,7 +196,7 @@
     const st = el("p", "post-status", "");
     st.id = "dstatus"; st.hidden = true;
     p.append(st);
-    const hs = sec("Recent changes", "clock");
+    const hs = sec("Recent changes", "clock", p);
     const hl = el("div", "dhist"); hl.append(el("p", "hint", "Loading…"));
     hs.append(hl);
     history(cur.guild_id, hl);
@@ -221,6 +224,8 @@
     const m = /g=(\d+)/.exec(location.hash);
     cur = (m && guilds.find(g => g.guild_id === m[1])) || (guilds.length === 1 ? guilds[0] : null);
     list();
+    const on = document.querySelector("#dglist .dg.on");
+    if (on) { const b = $("dglist"), l = on.offsetLeft - b.offsetLeft; if (l < b.scrollLeft || l + on.offsetWidth > b.scrollLeft + b.clientWidth) b.scrollLeft = l - 12; }
     const keep = $("dstatus") && !$("dstatus").hidden ? [$("dstatus").textContent, $("dstatus").className.split(" ").pop()] : null;
     panel();
     if (keep) status(keep[0], keep[1]);

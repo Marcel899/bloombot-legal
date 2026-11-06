@@ -59,6 +59,19 @@
     return { req: out, tasks };
   }
 
+  function tab(name, focus) {
+    document.querySelectorAll("#gtabs [role=tab]").forEach(b => { const on = b.dataset.tab === name; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; b.classList.toggle("on", on); if (on && focus) b.focus(); });
+    document.querySelectorAll("#gmain [data-pane]").forEach(p => { p.hidden = p.dataset.pane !== name; });
+    try { history.replaceState(null, "", name === "list" ? location.pathname + location.search : "#" + name); } catch (e) { /* ignore */ }
+  }
+  $("gtabs").onclick = e => { const b = e.target.closest("[role=tab]"); if (b) tab(b.dataset.tab); };
+  $("gtabs").onkeydown = e => {
+    const all = [...document.querySelectorAll("#gtabs [role=tab]")], i = all.indexOf(document.activeElement);
+    if (i < 0 || !/^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)) return;
+    e.preventDefault();
+    const n = e.key === "Home" ? 0 : e.key === "End" ? all.length - 1 : (i + (e.key === "ArrowRight" ? 1 : -1) + all.length) % all.length;
+    tab(all[n].dataset.tab, true);
+  };
   const show = id => ["glogin", "gnope", "gloading", "gmain"].forEach(k => { $(k).hidden = k !== id; });
   const pad = n => String(n).padStart(2, "0");
   const local = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -92,6 +105,7 @@
     $("gform-sub").textContent = g ? "Changes show up in the popup right away." : "It shows up in the popup on every page as soon as you save.";
     $("gsave").textContent = g ? "Save changes" : "Start giveaway";
     $("gcancel").hidden = !g;
+    $("gtab-ft").textContent = g ? "Editing: " + (g.title.length > 18 ? g.title.slice(0, 17) + "…" : g.title) : "New giveaway";
     preview();
   }
 
@@ -99,6 +113,7 @@
     const { data, error } = await BB.sb.rpc("gw_admin_list");
     if (error) throw error;
     rows = data || [];
+    $("gcnt").textContent = rows.length || "";
     list();
   }
 
@@ -166,6 +181,7 @@
     const { data, error } = await BB.sb.rpc("gw_admin_blocks");
     if (error) throw error;
     blocks = data || [];
+    $("gbcnt").textContent = blocks.length || "";
     const box = $("gblocks");
     if (!blocks.length) { box.replaceChildren(el("p", "hint gwa-bh", "Nobody is blocked.")); return; }
     box.replaceChildren(...blocks.map(r => {
@@ -193,7 +209,7 @@
 
   function list() {
     const box = $("glist");
-    if (!rows.length) { box.replaceChildren(el("p", "panel gwa-empty", "No giveaways yet. Start one with the form.")); return; }
+    if (!rows.length) { box.replaceChildren(el("p", "panel gwa-empty", "No giveaways yet. Start one in New giveaway.")); return; }
     box.replaceChildren(...rows.map(g => {
       const [cls, label] = state(g);
       const card = el("article", "panel gwa-card " + cls);
@@ -228,7 +244,7 @@
       const b = (text, kind, fn) => { const x = el("button", "brick sm " + kind, text); x.type = "button"; x.onclick = () => fn(x); btns.append(x); return x; };
       const ent = el("div", "gwa-ent"); ent.hidden = true;
       if (Number(g.entrants)) b("Entrants", "dark", x => entrants(g, ent, x));
-      b("Edit", "dark", () => { fill(g); $("gform").scrollIntoView({ behavior: "smooth", block: "start" }); $("gt").focus({ preventScroll: true }); });
+      b("Edit", "dark", () => { fill(g); tab("form"); $("gtabs").scrollIntoView({ behavior: "smooth", block: "nearest" }); $("gt").focus({ preventScroll: true }); });
       if (cls === "live") b("End now", "dark", x => act(x, { title: "End this giveaway?", text: `"${g.title}" stops taking entries now. You can pick a winner after.`, ok: "End now" }, async () => {
         const { error } = await BB.sb.rpc("gw_admin_end", { gid: g.id }); if (error) throw error; return "Giveaway ended.";
       }, "Giveaway ended"));
@@ -267,9 +283,10 @@
     if (error) { t.update(errText(error), "bad", { title: "Didn't save" }); return; }
     t.update(editing ? "Changes are live." : "It's live in the popup now.", "ok", { title: editing ? "Giveaway saved" : "Giveaway started" });
     fill(null);
+    tab("list");
     load().catch(() => {});
   };
-  $("gcancel").onclick = () => fill(null);
+  $("gcancel").onclick = () => { fill(null); tab("list"); };
   ["gt", "gs", "gi", "ge"].forEach(id => $(id).addEventListener("input", preview));
   $("gquick").onclick = e => {
     const h = e.target.closest("button[data-h]");
@@ -287,6 +304,7 @@
     if (error || !ok) { show("gnope"); return; }
     fill(null);
     show("gmain");
+    tab(/^#(form|blocks)$/.test(location.hash) ? location.hash.slice(1) : "list");
     loadBlocks().catch(() => {});
     try { await load(); } catch (e) { BB.toast("Couldn't load giveaways. Refresh to try again.", "bad", { title: "Giveaways" }); }
   });
