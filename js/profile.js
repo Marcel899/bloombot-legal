@@ -2,7 +2,8 @@
 (() => {
   const $ = id => document.getElementById(id);
   const { el } = BB;
-  const want = new URLSearchParams(location.search).get("id");
+  const asked = new URLSearchParams(location.search).get("id");
+  const want = BB.isId(asked) ? asked : null;
   let me = null, mine = null, priv = null, started = false;
 
   function img(src, cls, fallback = "img/flower.png") {

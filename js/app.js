@@ -19,6 +19,14 @@
     return e;
   };
   BB.safeUrl = u => (typeof u === "string" && /^https:\/\//.test(u) ? u : null);
+  /* Discord user ids only: keeps odd ?id= values out of profile links. */
+  BB.isId = id => typeof id === "string" && /^[0-9]{15,22}$/.test(id);
+  const hostOf = u => {
+    try { return new URL(/^https?:\/\//i.test(u) ? u : "https://" + u).hostname.replace(/^www\./, "").toLowerCase(); }
+    catch (e) { return ""; }
+  };
+  /* Link text that looks like a web address (e.g. "roblox.com/free") */
+  const looksLikeUrl = t => /^\s*(?:https?:\/\/|www\.)\S|^\s*[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:[/:?#]\S*)?\s*$/i.test(t);
   BB.fmt = n => {
     if (n == null || isNaN(n)) return "–";
     const a = Math.abs(n);
@@ -83,7 +91,9 @@
         const href = BB.safeUrl(m[14] || m[15]);
         const a = BB.el("a", null);
         a.href = href; a.target = "_blank"; a.rel = "noopener nofollow ugc";
-        a.textContent = m[13] || m[15];
+        a.title = href;
+        /* A link whose text is a different web address is a trick: show where it really goes. */
+        a.textContent = m[13] && looksLikeUrl(m[13]) && hostOf(m[13]) !== hostOf(href) ? href : (m[13] || m[15]);
         parent.append(a);
       }
     }
@@ -1163,6 +1173,8 @@
   /* ── profile popup: opens a player's profile on top of the current page ── */
   let popOpen = null;
   BB.openProfile = async (id, hint = {}) => {
+    id = String(id || "");
+    if (!BB.isId(id)) return;
     const el = BB.el;
     if (popOpen) popOpen(true);
     const opener = document.activeElement;
@@ -1352,7 +1364,7 @@
     const u = new URL(a.href, location.href);
     if (u.hash === "#edit") return;
     const id = u.searchParams.get("id") || (BB.session && BB.user(BB.session).id);
-    if (!id) return;
+    if (!BB.isId(id)) return;
     e.preventDefault();
     const acct = document.getElementById("acct");
     if (acct) acct.classList.remove("open");
@@ -1379,7 +1391,9 @@
       setTimeout(() => setSession(s), 0);
     });
     const p = new URLSearchParams(location.hash.slice(1) + "&" + location.search.slice(1));
-    if (p.get("error_description")) BB.loginError = p.get("error_description");
+    /* Only our own wording: the link's text could say anything. */
+    const err = p.get("error_description") || "";
+    if (err) BB.loginError = /already|exists|linked/i.test(err) ? "That Discord account already has its own Bloombot login. Log in with Discord instead." : "Login didn't finish. Please try again.";
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
