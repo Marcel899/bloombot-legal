@@ -1,7 +1,7 @@
 /* Cookie notice: shown once on the first visit. The choice is kept in localStorage bb_consent
-   ("all" or "essential"). Essential-only turns off optional storage (recent searches, remembered popups). */
+   ("all" or "essential"). Essential-only turns off optional storage (recent searches, remembered popups, anonymous visit count). */
 (() => {
-  const KEY = "bb_consent", OPTIONAL = [/^bb_qs_recent$/, /^bb_gw_min_/];
+  const KEY = "bb_consent", OPTIONAL = [/^bb_qs_recent$/, /^bb_gw_min_/, /^bb_seen$/];
   const get = () => { try { return localStorage.getItem(KEY); } catch (e) { return "essential"; } };
   window.BB_CONSENT = { get, optional: () => get() === "all", open };
   let box = null;
@@ -38,7 +38,7 @@
     txt.className = "ck-txt";
     const h = document.createElement("h2"); h.textContent = "We use cookies";
     const p = document.createElement("p");
-    p.append("Only to keep you logged in and remember your settings. No ads, no tracking. ");
+    p.append("To keep you logged in and remember your settings. With Accept all we also count your visit anonymously. No ads, no tracking. ");
     const a = document.createElement("a"); a.href = "/privacy.html#cookies"; a.textContent = "Learn more";
     p.append(a);
     txt.append(h, p);

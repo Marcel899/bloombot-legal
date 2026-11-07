@@ -68,6 +68,7 @@ HEAD = """<!doctype html>
 <script defer src="js/site.js?v={sitever}"></script>
 <script defer src="js/giveaway.js?v={gwver}"></script>
 <script defer src="js/consent.js?v={ckver}"></script>
+<script defer src="js/track.js?v={trver}"></script>
 {ld}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -125,6 +126,7 @@ SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
 THEMEVER = hashlib.md5(open("js/theme.js", "rb").read()).hexdigest()[:8]
 GWVER = hashlib.md5(open("js/giveaway.js", "rb").read()).hexdigest()[:8]
 CKVER = hashlib.md5(open("js/consent.js", "rb").read()).hexdigest()[:8]
+TRVER = hashlib.md5(open("js/track.js", "rb").read()).hexdigest()[:8]
 
 
 def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
@@ -134,7 +136,7 @@ def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
     kw = kw or PAGE_KW.get(path, "")
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
                         invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
-                        appver=APPVER, themever=THEMEVER, sitever=SITEVER, gwver=GWVER, ckver=CKVER,
+                        appver=APPVER, themever=THEMEVER, sitever=SITEVER, gwver=GWVER, ckver=CKVER, trver=TRVER,
                         robots="index, follow, max-image-preview:large" if index else "noindex, follow",
                         ld=ld, keywords=(kw + ", " if kw else "") + KEYWORDS)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE).replace("{dsvg}", DISCORD_SVG))
@@ -829,8 +831,9 @@ notfound = hero("warning", "Page not found", "That page doesn't exist. It may ha
 """
 open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", index=False, body=notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>').replace('<a class="foot-mark" href="./">', '<a class="foot-mark" href="/">')))
 
-# Admin dashboard (frontend preview with sample data). Own layout, not linked anywhere, noindex.
-ADMVER = {n: hashlib.md5(open(f, "rb").read()).hexdigest()[:8] for n, f in (("css", "admin.css"), ("data", "js/admin-data.js"), ("charts", "js/admin-charts.js"), ("app", "js/admin.js"))}
+# Admin dashboard. Owner only: the data comes from owner-checked Supabase functions (sql/site-admin.sql).
+# Own layout, linked only from the owner menu, noindex.
+ADMVER = {n: hashlib.md5(open(f, "rb").read()).hexdigest()[:8] for n, f in (("css", "admin.css"), ("charts", "js/admin-charts.js"), ("app", "js/admin.js"))}
 ADMIN_HTML = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -844,16 +847,17 @@ ADMIN_HTML = f"""<!doctype html>
 <link rel="icon" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css?v=1">
 <link rel="stylesheet" href="admin.css?v={ADMVER['css']}">
-<script defer src="js/admin-data.js?v={ADMVER['data']}"></script>
+<script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/admin-charts.js?v={ADMVER['charts']}"></script>
 <script defer src="js/admin.js?v={ADMVER['app']}"></script>
 </head>
-<body>
+<body class="gated">
+<div class="gate" id="gate"><div class="gbox"><img class="gflower" src="img/flower.png" alt=""><h1 id="gtitle">Bloombot Admin</h1><p id="gtext">Checking your login…</p><div class="gload" id="gloading"><i></i><i></i><i></i></div><button class="brick" id="glogin" type="button" hidden>Log in with Discord</button><a class="gback" href="./">Back to the website</a></div></div>
 <div class="app">
 <aside class="side" aria-label="Admin menu">
 <a class="brand" href="#overview"><img class="flower" src="img/flower.png" alt=""><img class="word" src="img/logo.png" alt="Bloombot"><span class="tag weld g-red">Admin</span></a>
 <nav class="snav" id="snav"></nav>
-<div class="side-foot"><div class="botcard"><img src="img/favicon.png" alt=""><div><b>Bloombot</b><small><span class="st good"><i></i>Online · 1,284 servers</span></small></div></div></div>
+<div class="side-foot"><div class="botcard"><img src="img/favicon.png" alt=""><div><b>Bloombot</b><small><span class="st" id="bstat"><i></i>Loading…</span></small></div></div></div>
 </aside>
 <div class="sideshade"></div>
 <div class="main">
@@ -862,9 +866,9 @@ ADMIN_HTML = f"""<!doctype html>
 <button class="ibtn collapse-btn" id="collapse" type="button" aria-label="Collapse menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM9 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></button>
 <div class="crumb" id="crumb"></div>
 <div class="gsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><label class="sr" for="gs">Search users, units, commands and pages</label><input id="gs" type="search" placeholder="Search users, units, pages…" autocomplete="off" role="combobox" aria-controls="gres" aria-expanded="false"><kbd>Ctrl K</kbd><div class="pop sres" id="gres" role="listbox"></div></div>
-<div class="wrapr"><button class="ibtn" id="nbtn" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/></svg><span class="dot" id="ndot">3</span></button><div class="pop notes" id="npop"></div></div>
-<div class="wrapr"><button class="me" id="mebtn" type="button" aria-label="Account menu" aria-expanded="false"><img src="img/task_user.png" alt=""><div><b>Marcel</b><small>Owner</small></div></button>
-<div class="pop" id="mepop"><div class="ph">Marcel <span class="pill purple">Owner</span></div><a class="pi" href="./"><img src="img/flower.png" alt="">View website</a><a class="pi" href="#roles"><img src="img/medal_gold.png" alt="">Roles &amp; permissions</a><button class="pi" type="button" data-t="Settings open in the full version"><img src="img/gear.png" alt="">Settings</button><hr><button class="pi" type="button" data-t="Sign out works in the full version"><img src="img/login.png" alt="">Sign out</button></div></div>
+<div class="wrapr"><button class="ibtn" id="nbtn" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/></svg><span class="dot" id="ndot" hidden></span></button><div class="pop notes" id="npop"></div></div>
+<div class="wrapr"><button class="me" id="mebtn" type="button" aria-label="Account menu" aria-expanded="false"><img id="meav" src="img/task_user.png" alt="" referrerpolicy="no-referrer"><div><b id="mename">Owner</b><small>Owner</small></div></button>
+<div class="pop" id="mepop"><div class="ph"><b>Owner</b> <span class="pill purple">Owner</span></div><a class="pi" href="./"><img src="img/flower.png" alt="">Back to website</a><button class="pi" type="button" id="mref"><img src="img/clock.png" alt="">Refresh data</button><div class="lastload" id="lastload"></div><hr><button class="pi" type="button" id="mout"><img src="img/login.png" alt="">Log out</button></div></div>
 </header>
 <main class="content" id="main"><div id="view" class="view"></div></main>
 </div>
