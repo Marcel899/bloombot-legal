@@ -2968,3 +2968,10 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 [data-theme=light] .cmd mark{background:rgba(245,200,60,.5)}
 [data-theme=light] .strat:hover{box-shadow:0 14px 28px -18px rgba(90,70,20,.45)}
 @media (max-width:600px){.share-ico{display:none}.share-login .brick{width:100%}.sd-tools{width:100%;justify-content:space-between}.board-bar select,.board-bar .dd{flex:1}}
+/* Profile settings save bar: disabled Save stays solid (weld visible), just quieter */
+.pedit .pe-bar .brick:disabled{opacity:1;filter:none;cursor:not-allowed;transform:none;--bg:#2f3542;--bd:#1b1f27;--gl:0,0,0;color:rgba(255,255,255,.62);text-shadow:none;box-shadow:0 3px 5px -2px rgba(0,0,0,.25),inset 0 3px 0 rgba(255,255,255,.12),inset 0 -3px 0 rgba(0,0,0,.1)}
+.pedit .pe-bar .brick:disabled::before{opacity:.28}
+.pedit .pe-bar .brick:disabled::after{display:none}
+.pedit .pe-bar .brick:not(:disabled)::before{opacity:.4}
+[data-theme=light] .pedit .pe-bar .brick:disabled{--bg:#d9dde4;--bd:#aeb4bf;color:#5b6370}
+[data-theme=light] .pedit .pe-bar .brick:disabled::before{opacity:.22}
