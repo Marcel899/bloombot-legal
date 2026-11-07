@@ -3054,3 +3054,6 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 .p-tag.vf{display:inline-flex;align-items:center;gap:5px}
 .p-tag.vf::before{content:none}
 .p-tag .vbadge{width:16px;height:16px;margin:0}
+/* save bar: no own background, so the panel's weld texture runs through it */
+.pedit .pe-bar,[data-theme=light] .pedit .pe-bar{position:static;margin:0;padding:16px 0 0;background:none;border-radius:0}
+@media (max-width:640px){.pedit .pe-bar{position:static;margin:0;padding:14px 0 0;background:none}}
