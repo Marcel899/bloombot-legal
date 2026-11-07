@@ -826,6 +826,28 @@
   });
 
   /* Delete your own trade ad ("trade_ad") or strategy ("strategy"). Resolves true when deleted. */
+  /* Bump your own trade ad: the bot moves it to the bottom of every trade channel. */
+  BB.bumpMine = async id => {
+    const tt = BB.toast("Moving your ad to the bottom of every trade channel…", "wait", { title: "Bumping trade ad" });
+    const bad = msg => { tt.update(msg, "bad", { title: "Couldn't bump it" }); return false; };
+    let data, error;
+    try { ({ data, error } = await BB.sb.rpc("bump_my_trade_ad", { ad_id: id })); }
+    catch (err) { error = { message: (err && err.message) || "network error" }; }
+    if (error) return bad(/function|schema/i.test(error.message) ? "Bumping from the website isn't switched on yet." : error.message);
+    if (data === "login") return bad("Log in again and retry.");
+    if (data === "not_found") return bad("This trade ad is gone.");
+    if (data === "busy") return bad("Your last bump is still going. Give it a few seconds.");
+    const t0 = Date.now();
+    for (;;) {
+      await new Promise(r => setTimeout(r, 2000));
+      let r = null;
+      try { ({ data: r } = await BB.sb.from("delete_requests").select("status,reason").eq("id", Number(data)).single()); } catch (err) { /* retry */ }
+      if (r && r.status === "done") { tt.update("It's at the bottom of every trade channel again.", "ok", { title: "Trade ad bumped" }); return true; }
+      if (r && r.status === "failed") return bad(r.reason || "Bloombot couldn't bump it.");
+      if (Date.now() - t0 > 60000) { tt.update("Bloombot seems busy or offline. It will bump it when it's back.", "info", { title: "Still waiting" }); return false; }
+    }
+  };
+
   BB.deleteMine = async (kind, id) => {
     const ad = kind === "trade_ad";
     const sure = await BB.confirm({

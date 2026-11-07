@@ -1083,6 +1083,10 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 .del-btn:disabled{opacity:.5;cursor:default}
 .tc-head .del-btn{margin-left:4px}
 .tc-head .tag+.del-btn{margin-left:4px}
+.bump-btn{border:0;background:none;color:#7ee07e;font:800 .8rem Nunito,system-ui,sans-serif;cursor:pointer;padding:2px 6px;border-radius:6px;margin-left:4px}
+.bump-btn:hover{color:#fff;background:rgba(40,168,40,.4)}
+.bump-btn:disabled{opacity:.5;cursor:default}
+.tc-head .bump-btn+.del-btn{margin-left:0}
 .tc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .hs-row{display:flex;align-items:stretch;gap:6px}.hs-row>.hs{flex:1;min-width:0}
 .hs-row>.del-btn{align-self:center}
@@ -1228,6 +1232,8 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 [data-theme=light] .cmd code{background:#e8eef6;color:var(--text)}
 [data-theme=light] .err,[data-theme=light] .count.bad,[data-theme=light] .post-foot .count.bad,[data-theme=light] .del-btn,[data-theme=light] .dlabel .dbad{color:#c62828!important}
 [data-theme=light] .del-btn:hover{color:#fff!important;background:#dc3232}
+[data-theme=light] .bump-btn{color:#24731a}
+[data-theme=light] .bump-btn:hover{color:#fff;background:#3aa52c}
 [data-theme=light] .post-status.wait{background:#e3f4fc;color:#0b6f9e}
 [data-theme=light] .post-status.ok{background:#e3f6e6;color:#17762f}
 [data-theme=light] .post-status.bad{background:#fde8e8;color:#b21f1f}

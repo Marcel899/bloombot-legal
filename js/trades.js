@@ -86,7 +86,15 @@
         if (await BB.deleteMine("trade_ad", a.id)) { ads = ads.filter(x => x.id !== a.id); render(); }
         else del.disabled = false;
       };
-      head.append(el("span", "tag", "Yours"), del);
+      const bump = el("button", "bump-btn", "Bump");
+      bump.type = "button";
+      bump.title = "Move this ad to the bottom of every trade channel";
+      bump.onclick = async () => {
+        bump.disabled = true;
+        if (await BB.bumpMine(a.id)) { await load(); return; }
+        bump.disabled = false;
+      };
+      head.append(el("span", "tag", "Yours"), bump, del);
     }
     c.append(head, adText(a.content));
     const img = BB.safeUrl(a.image_url);
