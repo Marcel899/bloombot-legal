@@ -731,6 +731,9 @@ profile_body = f"""<main class="wrap prof" id="main">
 <div class="pe-ta"><textarea id="fd" rows="4" maxlength="300" placeholder="How you play, what you collect, when you're online…"></textarea><div class="pe-prev" id="fdprev" hidden></div></div>
 <div class="pe-foot"><span><b>**bold**</b> <i>*italic*</i> and emojis work</span><span class="count" id="fdc">0/300</span></div></div>
 </section>
+<section class="pe-sec" id="fab-sec" aria-labelledby="ps-ads" hidden><h3 class="pe-st" id="ps-ads">Trade ads</h3>
+<label class="ktog-line pe-tog"><span class="ktog"><input type="checkbox" id="fab" aria-describedby="fab-m"><i></i></span><span><strong>Auto-bump my trade ads</strong><span id="fab-m"></span></span></label>
+</section>
 <div class="pe-bar"><span class="pe-dirty" id="pdirty" hidden>Unsaved changes</span><span class="pe-sp"></span><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
 <p class="post-status" id="pstatus" hidden role="status"></p>
 <details class="pe-danger" id="pdanger" hidden><summary>Delete account</summary><div class="pdanger"><div><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div></details>

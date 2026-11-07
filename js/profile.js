@@ -181,9 +181,17 @@
   const USER = /^[A-Za-z0-9_]{3,20}$/, LINK = /^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/;
   const FU_HINT = "Your exact Roblox name, not your display name.";
   const FL_HINT = "Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.";
-  let orig = { u: "", l: "", d: "" }, touched = {};
-  const vals = () => ({ u: $("fu").value.trim(), l: $("fl").value.trim(), d: $("fd").value.trim() });
-  const dirty = () => { const v = vals(); return v.u !== orig.u || v.l !== orig.l || v.d !== orig.d; };
+  let orig = { u: "", l: "", d: "", a: true }, touched = {};
+  const vals = () => ({ u: $("fu").value.trim(), l: $("fl").value.trim(), d: $("fd").value.trim(), a: $("fab").checked });
+  const dirty = () => { const v = vals(); return v.u !== orig.u || v.l !== orig.l || v.d !== orig.d || v.a !== orig.a; };
+  /* Rank auto-bump perk: level -> minutes (same as the bot's ranks). */
+  const BUMP = [[50, 5], [35, 10], [20, 20], [10, 30]];
+  const bumpHint = on => {
+    const lv = (mine && mine.level) || 1;
+    const m = (BUMP.find(([need]) => lv >= need) || [])[1];
+    if (!m) return "Your ads get bumped automatically from level 10. Turn this off to keep them where they are.";
+    return on ? "Your rank moves your ads back to the bottom every " + m + " minutes." : "Your ads stay where they are until you bump them.";
+  };
   function field(id, state, msg) {
     const f = $(id + "-f");
     f.classList.toggle("ok", state === "ok");
@@ -236,8 +244,11 @@
       ? "Saved to your Bloombot account, the same as /home → Settings in Discord."
       : "Link your Roblox account to post trade ads and share strategies. This is the same as /link in Discord.";
     $("psave").textContent = mine ? "Save changes" : "Create account";
-    orig = { u: (mine && mine.roblox_name) || "", l: (priv && priv.server_link) || "", d: (mine && mine.description) || "" };
+    orig = { u: (mine && mine.roblox_name) || "", l: (priv && priv.server_link) || "", d: (mine && mine.description) || "", a: !(priv && priv.auto_bump === false) };
     $("fu").value = orig.u;
+    $("fab").checked = orig.a;
+    $("fab-m").textContent = bumpHint(orig.a);
+    $("fab-sec").hidden = !(mine && priv && "auto_bump" in priv);
     $("fl").value = orig.l;
     $("fd").value = orig.d;
     touched = {};
@@ -376,6 +387,7 @@
     if (!mine || u !== mine.roblox_name) row.roblox_username = u;
     if (l !== ((priv && priv.server_link) || "")) row.server_link = l;
     if (d !== ((mine && mine.description) || "")) row.description = d;
+    if (!$("fab-sec").hidden && vals().a !== orig.a) row.auto_bump = vals().a;
     if (!Object.keys(row).length) { status("ok", "Nothing changed."); BB.toast("", "info", { title: "Nothing changed" }); return; }
     busy = true;
     $("psave").disabled = true;
@@ -425,6 +437,7 @@
   };
   $("pcancel").onclick = cancel;
   $("pclose").onclick = cancel;
+  $("fab").addEventListener("change", () => { $("fab-m").textContent = bumpHint($("fab").checked); check(); });
   ["fu", "fl", "fd"].forEach(id => {
     $(id).addEventListener("input", check);
     $(id).addEventListener("blur", () => { if ($(id).value.trim()) touched[id] = true; check(); });
@@ -451,7 +464,9 @@
     const isMe = did === me;
     const [{ data: p }, privRes] = await Promise.all([
       BB.sb.from("profiles").select("*").eq("discord_id", did).maybeSingle(),
-      isMe ? BB.sb.from("profile_private").select("server_link").eq("discord_id", did).maybeSingle() : Promise.resolve({ data: null }),
+      isMe ? BB.sb.from("profile_private").select("server_link,auto_bump").eq("discord_id", did).maybeSingle()
+        .then(r => r.error ? BB.sb.from("profile_private").select("server_link").eq("discord_id", did).maybeSingle() : r)
+        : Promise.resolve({ data: null }),
     ]);
     $("ploading").hidden = true;
     if (isMe) { mine = p; priv = privRes.data; }
