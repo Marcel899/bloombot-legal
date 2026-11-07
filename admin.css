@@ -1,4 +1,4 @@
-/* Bloombot admin dashboard (frontend preview, sample data). Dark only. */
+/* Bloombot admin dashboard. Dark by default, light with the website's theme switch. */
 :root{
   color-scheme:dark;
   --bg:#101217;--side:#14171d;--card:#1b1e26;--card-2:#222632;--card-3:#2a2f3c;
@@ -541,3 +541,104 @@ tr.click:hover td,.row.click:hover{background:var(--card-2)}
 .lastload{padding:2px 12px 6px 40px;color:var(--faint);font-size:.76rem}
 .lastload:empty{display:none}
 #meav{border-radius:50%}
+
+/* ---------- site integration: links back, theme button, refresh ---------- */
+.side-foot{display:flex;flex-direction:column;gap:8px}
+.si.back{margin:0;height:36px;color:var(--muted);font-size:.9rem}
+.si.back img{width:20px;height:20px}
+.si.ext .xi{width:11px;height:11px;margin-left:auto;color:var(--faint);flex:none}
+.si.ext:hover .xi{color:inherit}
+.app.collapsed .si.ext .xi,.app.collapsed .si.back span{display:none}
+.theme-b img{width:22px;height:22px;transition:transform .2s}
+.theme-b .i-moon{display:none}
+:root[data-theme="light"] .theme-b .i-sun{display:none}
+:root[data-theme="light"] .theme-b .i-moon{display:block}
+@media (hover:hover){.theme-b:hover img{transform:scale(1.12) rotate(-10deg)}}
+#tref.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loadbar{position:sticky;top:var(--top-h);z-index:19;height:3px;margin-bottom:-3px;overflow:hidden;opacity:0;transition:opacity .2s;pointer-events:none}
+.loadbar.on{opacity:1}
+.loadbar::after{content:"";position:absolute;top:0;bottom:0;width:35%;border-radius:3px;background:linear-gradient(90deg,transparent,#33c46a,transparent);animation:lb 1.1s ease-in-out infinite}
+
+/* ---------- first load: page shell with placeholders ---------- */
+body.booting .snav,body.booting .botcard small{opacity:.55}
+.sk-h{width:220px;height:28px;margin-bottom:8px}
+.sk-p{width:320px;max-width:70vw}
+.kpi .skel.sk-big{width:45%;height:28px;margin:10px 0}
+.kpi .skel{width:60%}
+.sk-chart{height:260px;width:100%!important;border-radius:10px}
+
+/* ---------- layout fixes ---------- */
+.g-21>.card,.g-12>.card,.g2>.card,.g3>.card{display:flex;flex-direction:column}
+.side .snav{padding-bottom:10px}
+.content{scroll-margin-top:var(--top-h)}
+.t thead th{top:0}
+.tw{border-radius:var(--r)}
+@media (max-width:640px){
+  .filters{gap:8px}
+  .filters .seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}
+  .filters .seg::-webkit-scrollbar{display:none}
+  .filters .rseg{width:100%}
+  .filters .rseg button{flex:1 0 auto}
+  .filters .date-in{flex:1;width:0}
+  .filters .rtext,.filters .sp{display:none}
+  .phead .acts.opt{display:none}
+  .phead{margin-bottom:12px}
+  .ibtn{width:38px;height:38px}
+  #tref{display:none}
+}
+
+/* ---------- light theme (same switch and colours as the website) ---------- */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f4f1e6;--side:#fbf8ef;--card:#fffdf7;--card-2:#f6f2e6;--card-3:#ece6d6;
+  --line:#e6dcc4;--line-2:#d4c6a3;
+  --text:#2a2a1f;--soft:#4a4636;--muted:#76705c;--faint:#9a937c;
+  --grid:#ece5d3;--axis:#cfc4a8;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#6250d6;--s8:#e34948;
+}
+:root[data-theme="light"] body{
+  background:radial-gradient(900px 500px at 15% 0,rgba(126,200,80,.14),transparent 70%),linear-gradient(rgba(244,241,230,.93),rgba(244,241,230,.93)),url(img/studs-bg.png) 0 0/160px 160px,var(--bg);
+  background-attachment:scroll,fixed,fixed,fixed;
+}
+:where(:root[data-theme="light"]) a{color:#1a63d0}
+:root[data-theme="light"] :focus-visible{outline-color:#1a63d0}
+:root[data-theme="light"] .top{background:rgba(251,248,239,.9)}
+:root[data-theme="light"] .side::before{opacity:.05}
+:root[data-theme="light"] .brand .flower,:root[data-theme="light"] .si img{filter:drop-shadow(0 2px 2px rgba(80,60,20,.18))}
+:root[data-theme="light"] .si:hover,:root[data-theme="light"] .pi:hover,:root[data-theme="light"] .pi.act{background:rgba(120,100,40,.08);color:var(--text)}
+:root[data-theme="light"] .si.on,:root[data-theme="light"] .si.on:hover{color:#fff}
+:root[data-theme="light"] .ibtn:hover,:root[data-theme="light"] .seg button:hover,:root[data-theme="light"] .tabs button:hover,
+:root[data-theme="light"] .tabs button.on,:root[data-theme="light"] .t th.sort:hover,:root[data-theme="light"] .t th.asc .ar,
+:root[data-theme="light"] .t th.desc .ar,:root[data-theme="light"] .mini-btn:hover{color:var(--text)}
+:root[data-theme="light"] .seg button.on{color:var(--text);background:var(--card-3)}
+:root[data-theme="light"] .pop,:root[data-theme="light"] .modal,:root[data-theme="light"] .drawer{background:var(--card)}
+:root[data-theme="light"] .pop,:root[data-theme="light"] .modal{box-shadow:0 18px 40px -14px rgba(80,60,20,.35)}
+:root[data-theme="light"] .drawer{box-shadow:-20px 0 40px -20px rgba(80,60,20,.35)}
+:root[data-theme="light"] .pop .ph button,:root[data-theme="light"] .linkbtn{color:#1a63d0}
+:root[data-theme="light"] .card,:root[data-theme="light"] .kpi{box-shadow:0 8px 24px -18px rgba(80,60,20,.35)}
+:root[data-theme="light"] .t th{background:var(--card-2)}
+:root[data-theme="light"] .t tbody tr:hover,:root[data-theme="light"] tr.click:hover td,:root[data-theme="light"] .row.click:hover{background:rgba(120,100,40,.05)}
+:root[data-theme="light"] .tip,:root[data-theme="light"] .toast{background:#fffdf7;color:var(--text);box-shadow:0 10px 30px -10px rgba(80,60,20,.4)}
+:root[data-theme="light"] .sel option{background:#fffdf7}
+:root[data-theme="light"] .sel{background-color:var(--card)}
+:root[data-theme="light"] .date-in{color-scheme:light}
+:root[data-theme="light"] .delta.up{color:#178a3f}
+:root[data-theme="light"] .delta.down{color:#c8312f}
+:root[data-theme="light"] .pill.green{background:rgba(23,138,63,.12);color:#146b33}
+:root[data-theme="light"] .pill.red{background:rgba(200,49,47,.12);color:#a3201f}
+:root[data-theme="light"] .pill.yellow{background:rgba(190,140,0,.14);color:#7a5600}
+:root[data-theme="light"] .pill.blue{background:rgba(26,99,208,.12);color:#1a55b0}
+:root[data-theme="light"] .pill.purple{background:rgba(120,60,190,.12);color:#6a32a8}
+:root[data-theme="light"] .blist .bt,:root[data-theme="light"] .meter{background:rgba(120,100,40,.1)}
+:root[data-theme="light"] .chart .hair{stroke:#9a937c}
+:root[data-theme="light"] .heat .hc:hover{outline-color:var(--text)}
+:root[data-theme="light"] .scrim,:root[data-theme="light"] .sideshade{background:rgba(60,50,20,.3)}
+:root[data-theme="light"] pre.trace{background:var(--card-2)}
+:root[data-theme="light"] .g-dark{--bg:#5b6172;--bd:#30343f}
+:root[data-theme="light"] .gate{background:linear-gradient(rgba(244,241,230,.95),rgba(244,241,230,.95)),url(img/studs-bg.png) 0 0/160px 160px,var(--bg)}
+:root[data-theme="light"] .gbox{box-shadow:0 20px 50px -24px rgba(80,60,20,.4)}
+:root[data-theme="light"] .tog{background:#cfc4a8}
+:root[data-theme="light"] .ibtn .dot{border-color:var(--side)}
+:root[data-theme="light"] .sgrp>button{color:var(--faint)}
+:root[data-theme="light"] .snav{scrollbar-color:#d4c6a3 transparent}

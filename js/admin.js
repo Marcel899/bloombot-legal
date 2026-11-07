@@ -40,7 +40,7 @@
 
   // ---------- state ----------
   let sb = null, session = null;
-  const S = { ov: null, profiles: [], users: [], byId: new Map(), D: null, loadedAt: null, trade: null, logs: null, values: null, gw: null };
+  const S = { ov: null, profiles: [], users: [], byId: new Map(), D: null, loadedAt: null, trade: null, logs: null, values: null, gw: null, first: new WeakMap() };
 
   // ---------- server calls ----------
   async function rpc(fn, args) {
@@ -82,6 +82,12 @@
     D.totalVerified = t.verified != null ? t.verified : (ov.accounts || {}).verified || 0;
     D.totals = t;
     S.D = D;
+    // first day each series has data, so "vs previous period" is only shown when that period is covered
+    const firstNz = (a) => { const i = a.findIndex((x) => x > 0); return i < 0 ? null : i; };
+    const tStart = D.hasTraffic ? idx.get(String(tr.first_day).slice(0, 10)) : null;
+    S.first = new WeakMap();
+    [D.visits, D.uniques].forEach((a) => S.first.set(a, tStart == null ? (D.hasTraffic ? 0 : null) : tStart));
+    [D.regs, D.verified, D.cmds, D.cmdErr, D.cmdMs, D.active, D.ads, D.webAds, D.webTries, D.lookups, ...Object.values(D.cats)].forEach((a) => S.first.set(a, firstNz(a)));
     // users: bot accounts merged with website profiles
     const map = new Map();
     const get = (id) => { let u = map.get(id); if (!u) { u = { id, name: "", avatar: "", roblox: "", robloxUrl: "", verified: false, registered: null, last: null, cmds: 0, ads: 0, warns: 0, banned: false, xp: null, level: null }; map.set(id, u); } return u; };
@@ -216,7 +222,7 @@
     return { html: `<div class="kpi"><div class="kl"><img src="${ic(icon)}" alt="">${esc(label)}</div><div class="kv">${value}</div><div class="kd">${cur == null ? "" : deltaHtml(cur, prev)}<span>${esc(note || (prev ? "vs previous period" : ""))}</span></div><div class="spk"></div></div>`, spark, color };
   }
   function renderKpis(host, list) {
-    host.className = "kpis";
+    host.classList.add("kpis");
     host.innerHTML = list.map((k) => k.html).join("");
     $$(".spk", host).forEach((s, i) => { const sp = list[i].spark; if (sp && sp.some((x) => x > 0)) s.replaceWith(C.spark(sp, list[i].color || C.PAL[0])); else s.remove(); });
   }
@@ -239,7 +245,11 @@
     return [Math.max(0, D.N - RANGE.days), D.N - 1];
   }
   const slice = (a) => { const [x, y] = rangeIdx(); return a.slice(x, y + 1); };
-  const prevSlice = (a) => { const [x, y] = rangeIdx(); const n = y - x + 1; return x - n < 0 ? [] : a.slice(x - n, x); };
+  const prevSlice = (a) => { const [x, y] = rangeIdx(); const n = y - x + 1; return x - n < 0 || !hasFrom(a, x - n) ? null : a.slice(x - n, x); };
+  // true when series a already had data on day index i (so a comparison from there is fair)
+  const hasFrom = (a, i) => { const f = S.first.get(a); return f != null && f <= i; };
+  const at = (a, i) => (hasFrom(a, i) ? a[i] : null);
+  const psum = (a, from, to) => (hasFrom(a, from) ? sum(a.slice(from, to)) : null);
   const rangeLabels = () => { const [x, y] = rangeIdx(); return S.D.days.slice(x, y + 1); };
   function bucket(arrs) {
     const L = rangeLabels();
@@ -309,13 +319,16 @@
     ["Dashboard", [["overview", "Overview", "gem"], ["analytics", "Analytics", "chart_up"], ["users", "Users", "task_user"]]],
     ["Bot", [["ads", "Trade ads", "swap"], ["commands", "Commands", "lightning"], ["moderation", "Moderation", "shield"], ["servers", "Servers", "discord_stud_white"], ["values", "Values & demand", "dollar"], ["giveaways", "Giveaways", "gift"]]],
     ["Site & system", [["website", "Website", "task_about"], ["logs", "Activity log", "task_addbot"], ["system", "System health", "lightning"], ["reports", "Reports", "calculator"]]],
+    ["Open on the website", [["x-values", "Value list", "dollar", "values.html"], ["x-trades", "Trade ads", "swap", "trades.html"], ["x-strat", "Strategies", "bullseye", "strategies.html"], ["x-dash", "Server dashboard", "gear", "dashboard.html"], ["x-gw", "Giveaway manager", "gift", "giveaway-admin.html"]]],
   ];
   const PAGES = {};
-  NAV.forEach(([g, items]) => items.forEach(([id, label, icon]) => { PAGES[id] = { id, label, icon, group: g }; }));
+  NAV.forEach(([g, items]) => items.forEach(([id, label, icon, href]) => { if (!href) PAGES[id] = { id, label, icon, group: g }; }));
   function buildNav() {
     let open = {};
     try { open = JSON.parse(localStorage.getItem("bb_admin_groups") || "{}"); } catch (e) { /* storage off */ }
-    $("#snav").innerHTML = NAV.map(([g, items]) => `<div class="sgrp${open[g] === false ? " shut" : ""}" data-g="${esc(g)}"><button type="button" aria-expanded="${open[g] !== false}"><span>${esc(g)}</span><svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button><ul><div>${items.map(([id, label, icon]) => `<li><a class="si" href="#${id}" data-id="${id}" title="${esc(label)}"><img src="${ic(icon)}" alt=""><span>${esc(label)}</span><em class="cnt" data-cnt="${id}" hidden></em></a></li>`).join("")}</div></ul></div>`).join("");
+    // the website links start folded so the admin pages stay in view
+    const isOpen = (g) => (g === "Open on the website" ? open[g] === true : open[g] !== false);
+    $("#snav").innerHTML = NAV.map(([g, items]) => `<div class="sgrp${isOpen(g) ? "" : " shut"}" data-g="${esc(g)}"><button type="button" aria-expanded="${isOpen(g)}"><span>${esc(g)}</span><svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button><ul><div>${items.map(([id, label, icon, href]) => `<li><a class="si${href ? " ext" : ""}" href="${href || "#" + id}" data-id="${id}" title="${esc(label)}"><img src="${ic(icon)}" alt=""><span>${esc(label)}</span>${href ? '<svg class="xi" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' : `<em class="cnt" data-cnt="${id}" hidden></em>`}</a></li>`).join("")}</div></ul></div>`).join("");
     $$(".sgrp>button").forEach((b) => b.addEventListener("click", () => {
       const g = b.parentElement;
       if ($(".app").classList.contains("collapsed") && innerWidth > 900) return;
@@ -332,7 +345,7 @@
 
   R.overview = (v) => {
     const D = S.D;
-    v.innerHTML = `<div class="phead"><div><h1>Overview</h1><p>Live numbers from Bloombot and the website.</p></div><div class="acts"><a class="btn g-dark" href="#reports"><img src="img/calculator.png" alt="">Reports</a><a class="btn g-blue" href="#analytics"><img src="img/chart_up.png" alt="">Full analytics</a></div></div>
+    v.innerHTML = `<div class="phead"><div><h1>Overview</h1><p>Live numbers from Bloombot and the website.</p></div><div class="acts opt"><a class="btn g-dark" href="#reports"><img src="img/calculator.png" alt="">Reports</a><a class="btn g-blue" href="#analytics"><img src="img/chart_up.png" alt="">Full analytics</a></div></div>
       <div id="ovr"></div><div id="ovk"></div>
       <div class="grid g-21 mt"><section class="card"><div class="ch"><div class="hl"><h2><img src="img/chart_up.png" alt="">Website traffic</h2></div><div id="ovm"></div></div><div id="ovc"></div></section>
         <section class="card"><div class="ch"><h2><img src="img/favicon.png" alt="">Bot status</h2><span id="ovst"></span></div><div id="ovb"></div></section></div>
@@ -341,16 +354,16 @@
         <section class="card"><div class="ch"><h2><img src="img/task_addbot.png" alt="">Latest bot events</h2><a href="#logs" class="muted">Logs</a></div><div id="ova"></div></section></div>`;
     let metric = "both";
     const draw = () => {
-      const p = (a) => sum(prevSlice(a)), c = (a) => sum(slice(a));
+      const p = (a) => { const x = prevSlice(a); return x ? sum(x) : null; }, c = (a) => sum(slice(a));
       const N = D.N;
       renderKpis($("#ovk"), [
         kpi("Registered users", "task_user", full(D.totalUsers), c(D.regs), p(D.regs), slice(D.regs), "#3987e5", "+" + full(c(D.regs)) + " this period"),
         kpi("Verified Roblox users", "verified_stud", full(D.totalVerified), c(D.verified), p(D.verified), slice(D.verified), "#199e70", D.totalUsers ? ((D.totalVerified / D.totalUsers) * 100).toFixed(0) + "% of users" : ""),
         kpi("Website visits", "chart_up", D.hasTraffic ? full(c(D.visits)) : "–", D.hasTraffic ? c(D.visits) : null, p(D.visits), slice(D.visits), "#3987e5", D.hasTraffic ? full(sum(D.visits)) + " since " + fshort(D.trafficSince) : "counting starts with this update"),
-        kpi("Visitors today", "rise", D.hasTraffic ? full(D.uniques[N - 1]) : "–", D.hasTraffic ? D.uniques[N - 1] : null, D.uniques[N - 8], D.uniques.slice(-14), "#9085e9", "vs same day last week"),
-        kpi("Visitors this week", "rise", D.hasTraffic ? full(sum(D.uniques.slice(-7))) : "–", D.hasTraffic ? sum(D.uniques.slice(-7)) : null, sum(D.uniques.slice(-14, -7)), D.uniques.slice(-28), "#9085e9", "vs last week"),
-        kpi("Visitors this month", "rise", D.hasTraffic ? full(sum(D.uniques.slice(-30))) : "–", D.hasTraffic ? sum(D.uniques.slice(-30)) : null, sum(D.uniques.slice(-60, -30)), D.uniques.slice(-90), "#9085e9", "vs previous 30 days"),
-        kpi("Active users today", "lightning", D.hasBot ? full(D.active[N - 1]) : "–", D.hasBot ? D.active[N - 1] : null, D.active[N - 8], D.active.slice(-30), "#d55181", "used a command"),
+        kpi("Visitors today", "rise", D.hasTraffic ? full(D.uniques[N - 1]) : "–", D.hasTraffic ? D.uniques[N - 1] : null, at(D.uniques, N - 8), D.uniques.slice(-14), "#9085e9", "vs same day last week"),
+        kpi("Visitors this week", "rise", D.hasTraffic ? full(sum(D.uniques.slice(-7))) : "–", D.hasTraffic ? sum(D.uniques.slice(-7)) : null, psum(D.uniques, N - 14, N - 7), D.uniques.slice(-28), "#9085e9", "vs last week"),
+        kpi("Visitors this month", "rise", D.hasTraffic ? full(sum(D.uniques.slice(-30))) : "–", D.hasTraffic ? sum(D.uniques.slice(-30)) : null, psum(D.uniques, N - 60, N - 30), D.uniques.slice(-90), "#9085e9", "vs previous 30 days"),
+        kpi("Active users today", "lightning", D.hasBot ? full(D.active[N - 1]) : "–", D.hasBot ? D.active[N - 1] : null, at(D.active, N - 8), D.active.slice(-30), "#d55181", "used a command"),
         kpi("New registrations", "plus", full(c(D.regs)), c(D.regs), p(D.regs), slice(D.regs), "#3987e5"),
         kpi("Trade ads posted", "swap", D.hasBot ? full(c(D.ads)) : "–", D.hasBot ? c(D.ads) : null, p(D.ads), slice(D.ads), "#d95926", (S.ov.live_ads || 0) + " live now"),
         kpi("Value lookups", "dollar", D.hasBot ? full(c(D.lookups)) : "–", D.hasBot ? c(D.lookups) : null, p(D.lookups), slice(D.lookups), "#199e70", "value commands"),
@@ -436,6 +449,8 @@
       chartOr($("#tac"), [b.arrs[5], b.arrs[7]], ...NO_BOT, () => C.bars($("#tac"), { labels: b.labels.map(fshort), series: [{ name: "From Discord", values: discordAds, color: "#d95926" }, { name: "From the website", values: b.arrs[7], color: "#9085e9" }], stacked: true, height: 250, tipLabel: tip, label: "Trade ads posted" }));
       const avg7 = b.arrs[4].map((_, i) => Math.round(sum(b.arrs[4].slice(Math.max(0, i - 6), i + 1)) / Math.min(7, i + 1)));
       chartOr($("#auc"), [b.arrs[4]], ...NO_BOT, () => C.line($("#auc"), { labels: b.labels, series: [{ name: b.weekly ? "Active users (week total)" : "Daily active users", values: b.arrs[4], color: "#d55181" }, { name: "7-point average", values: avg7, color: "#3987e5", dash: true }], height: 250, xfmt: fshort, tipLabel: tip, label: "Active users" }));
+      const cm = (stats().commands || []).slice().sort((a, c) => (+c[3] || 0) - (+a[3] || 0)).filter((c) => +c[3] > 0).slice(0, 10);
+      if (cm.length) C.blist($("#cmc"), cm.map((c) => ({ name: "/" + c[0], value: +c[3] || 0 })), { unit: "uses, 30 days" }); else empty($("#cmc"), ...NO_BOT);
       drawCompare();
     };
     function drawCompare() {
@@ -465,10 +480,11 @@
         nameC = String(y); nameP = String(y - 1); note = "Totals per quarter, this year vs last year.";
       }
       $("#cmpnote").textContent = note;
-      const a = sum(cur), b = sum(prev);
+      const prevStart = { daily: N - 14, weekly: N - 112, monthly: Math.max(0, N - 365 - 186), yearly: 0 }[cmp];
+      const a = sum(cur), b = hasFrom(arr, prevStart) ? sum(prev) : null;
       renderKpis($("#cmpk"), [
-        kpi(nameC, "chart_up", full(a), a, b, null, null, b ? "vs " + nameP.toLowerCase() : "nothing to compare with yet"),
-        kpi(nameP, "clock", full(b), null, null, null, null, ""),
+        kpi(nameC, "chart_up", full(a), a, b, null, null, b ? "vs " + nameP.toLowerCase() : "not enough history to compare yet"),
+        kpi(nameP, "clock", b == null ? "–" : full(b), null, null, null, null, ""),
         kpi("Best " + { daily: "day", weekly: "week", monthly: "month", yearly: "quarter" }[cmp], "medal_gold", a ? labels[cur.indexOf(Math.max(...cur))] : "–", null, null, null, null, a ? full(Math.max(...cur)) : ""),
       ]);
       chartOr($("#cmpc"), [cur, prev], cmpm === "visits" ? NO_TRAFFIC[0] : NO_BOT[0], cmpm === "visits" ? NO_TRAFFIC[1] : NO_BOT[1], () => C.bars($("#cmpc"), { labels, series: [{ name: nameP, values: prev, color: "#9085e9" }, { name: nameC, values: cur, color: "#3987e5" }], height: 230, label: "Period comparison" }));
@@ -511,7 +527,7 @@
   function countryName(c) { try { REGION = REGION || new Intl.DisplayNames(["en"], { type: "region" }); return REGION.of(c) || c; } catch (e) { return c; } }
   function heatmap(host, grid, unit) {
     const max = Math.max(1, ...grid.flat());
-    const ramp = ["#16243a", "#184f95", "#1c5cab", "#256abf", "#2a78d6", "#3987e5", "#5598e7", "#86b6ef", "#b7d3f6"];
+    const ramp = document.documentElement.getAttribute("data-theme") === "light" ? ["#ece6d6", "#d4e4f8", "#b7d3f6", "#86b6ef", "#5598e7", "#3987e5", "#2a78d6", "#1c5cab", "#184f95"] : ["#16243a", "#184f95", "#1c5cab", "#256abf", "#2a78d6", "#3987e5", "#5598e7", "#86b6ef", "#b7d3f6"];
     const order = [1, 2, 3, 4, 5, 6, 0];
     let html = `<div class="heat" role="img" aria-label="${esc(unit)} by weekday and hour"><span></span>`;
     for (let hr = 0; hr < 24; hr++) html += `<span class="hx">${hr % 6 === 0 ? hr : ""}</span>`;
@@ -1001,7 +1017,7 @@
       kpi("Errors, 24h", "warning", full(err24), null, null, null, null, "reported to the dev log"),
       kpi("Version", "gear", st ? esc(st.data.version || "–") : "–", null, null, null, null, st ? "Python " + esc(st.data.python || "") + " · discord.py " + esc(st.data.discord_py || "") : ""),
     ]);
-    chartOr($("#slat"), [D.cmdMs.slice(-30)], ...NO_BOT, () => C.line($("#slat"), { labels: D.days.slice(-30), series: [{ name: "Average response", values: D.cmdMs.slice(-30), color: "#3987e5" }], area: true, height: 250, xfmt: fshort, fmt: (x) => Math.round(x) + " ms", yfmt: (x) => Math.round(x) + "ms", tipLabel: (i) => fdate(D.days[D.N - 30 + i]) }));
+    chartOr($("#slat"), [D.cmdMs.slice(-30)], ...NO_BOT, () => C.line($("#slat"), { labels: D.days.slice(-30), series: [{ name: "Average response", values: D.cmdMs.slice(-30), color: "#3987e5" }], area: true, height: 330, xfmt: fshort, fmt: (x) => Math.round(x) + " ms", yfmt: (x) => Math.round(x) + "ms", tipLabel: (i) => fdate(D.days[D.N - 30 + i]) }));
     chartOr($("#serc"), [D.cmds.slice(-30)], ...NO_BOT, () => C.bars($("#serc"), { labels: D.days.slice(-30).map(fshort), series: [{ name: "Failed commands", values: D.cmdErr.slice(-30), color: "#e66767" }], height: 220, tipLabel: (i) => fdate(D.days[D.N - 30 + i]) }));
     $("#ssv").innerHTML = svc.map(([n, d, a, lim, extra]) => { const s = a == null ? "" : a <= lim ? "good" : "crit"; return `<div class="svc"><span class="st ${s}"><i></i></span><div class="grow"><b>${esc(n)}</b><small>${esc(d)}</small></div><span class="ms">${esc(a == null ? "waiting" : a > lim ? "late: " + ago(new Date(Date.now() - a)) : extra || ago(new Date(Date.now() - a)))}</span></div>`; }).join("");
     const last = ev.slice().reverse().slice(0, 8);
@@ -1126,6 +1142,9 @@
     popToggle($("#mebtn"), $("#mepop"));
     $("#mout").addEventListener("click", async () => { await sb.auth.signOut(); location.href = "./"; });
     $("#mref").addEventListener("click", () => { $("#mepop").classList.remove("open"); refresh(true); });
+    $("#tref").addEventListener("click", () => refresh(true));
+    // charts take their colours when drawn, so redraw after the light/dark switch
+    new MutationObserver(() => { if (S.D && !$("#drawer").classList.contains("on")) go(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     document.addEventListener("click", (e) => { if (!e.target.closest(".pop")) $$(".pop.open").forEach((p) => p.classList.remove("open")); });
     const inp = $("#gs"), res = $("#gres");
     let act = 0, items = [];
@@ -1169,6 +1188,7 @@
   // ---------- login gate + loading ----------
   function gate(reason) {
     S.D = null;
+    document.body.classList.remove("booting");
     document.body.classList.add("gated");
     const g = $("#gate");
     g.hidden = false;
@@ -1188,6 +1208,10 @@
   }
   async function refresh(manual) {
     const t0 = performance.now();
+    if (refresh.busy) return;
+    refresh.busy = true;
+    $("#loadbar").classList.add("on");
+    $("#tref").classList.add("spin");
     if (manual) $$("#view .chart").forEach((c) => c.classList.add("busy"));
     try {
       const [ov, prof] = await Promise.all([rpc("admin_overview", { p_days: 400 }), rpc("admin_profiles")]);
@@ -1198,10 +1222,16 @@
       drawNotes();
       drawBotCard();
       $("#lastload").textContent = "Updated " + ftime(new Date());
+      $("#tref").title = "Refresh data (updated " + ftime(new Date()) + ")";
       if (manual) { toast("Up to date", "clock"); if (!$("#drawer").classList.contains("on")) go(); }
     } catch (e) {
       if (!S.D) gate(e.message);
       else toast("Couldn't refresh: " + e.message, "warning");
+    } finally {
+      refresh.busy = false;
+      $("#loadbar").classList.remove("on");
+      $("#tref").classList.remove("spin");
+      $$("#view .chart.busy").forEach((c) => c.classList.remove("busy"));
     }
   }
   async function boot() {
@@ -1225,7 +1255,7 @@
     if (!me || !me.ok) { gate((me && me.reason) || "not an owner"); return; }
     await refresh(false);
     if (!S.D) return;
-    document.body.classList.remove("gated");
+    document.body.classList.remove("gated", "booting");
     $("#gate").hidden = true;
     addEventListener("hashchange", go);
     go();

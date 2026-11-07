@@ -4,6 +4,10 @@
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
   const PAL = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"];
+  // Same eight hues stepped for the light theme (validated light palette). Pages pass the dark hex; tc() swaps it.
+  const LIGHT = { "#3987e5": "#2a78d6", "#d95926": "#eb6834", "#199e70": "#1baf7a", "#c98500": "#eda100", "#d55181": "#e87ba4", "#008300": "#008300", "#9085e9": "#6250d6", "#e66767": "#e34948", "#1b1e26": "#fffdf7" };
+  const isLight = () => document.documentElement.getAttribute("data-theme") === "light";
+  const tc = (c) => (c && isLight() ? LIGHT[String(c).toLowerCase()] || c : c);
 
   function s(tag, attrs, parent) {
     const el = document.createElementNS(NS, tag);
@@ -97,7 +101,7 @@
   // opts: labels[], series[{name,values,color}], area, stacked, height, fmt, tipLabel(i)
   function line(host, opts) {
     host.replaceChildren();
-    const series = opts.series.map((sr, i) => ({ ...sr, color: sr.color || PAL[i], on: true }));
+    const series = opts.series.map((sr, i) => ({ ...sr, color: tc(sr.color || PAL[i]), on: true }));
     if (series.length > 1 || opts.legend) legend(host, series, opts.area ? "area" : "line", (i, on) => { series[i].on = on; box._draw(); });
     const box = h("div", "chart");
     host.appendChild(box);
@@ -165,7 +169,7 @@
 
       // crosshair
       const hair = s("line", { class: "hair", visibility: "hidden", y1: pad.t, y2: pad.t + ih, x1: -10, x2: -10 }, svg);
-      const dots = vis.map((sr) => s("circle", { r: 4.5, class: "hdot", visibility: "hidden", fill: sr.color, stroke: "#1b1e26", "stroke-width": 2, cx: -10, cy: -10 }, svg));
+      const dots = vis.map((sr) => s("circle", { r: 4.5, class: "hdot", visibility: "hidden", fill: sr.color, stroke: tc("#1b1e26"), "stroke-width": 2, cx: -10, cy: -10 }, svg));
       const hit = s("rect", { x: pad.l, y: pad.t, width: iw, height: ih, fill: "transparent", tabindex: 0 }, svg);
       let cur = n - 1;
       const at = (i, cx, cy) => {
@@ -200,7 +204,7 @@
   // opts: labels[], series[{name,values,color}], stacked, horizontal, height, fmt, values (direct labels)
   function bars(host, opts) {
     host.replaceChildren();
-    const series = opts.series.map((sr, i) => ({ ...sr, color: sr.color || PAL[i], on: true }));
+    const series = opts.series.map((sr, i) => ({ ...sr, color: tc(sr.color || PAL[i]), on: true }));
     if (series.length > 1) legend(host, series, "bar", (i, on) => { series[i].on = on; box._draw(); });
     const box = h("div", "chart");
     host.appendChild(box);
@@ -323,7 +327,7 @@
     wrap.appendChild(box);
     const tot = opts.items.reduce((a, b) => a + b.value, 0);
     const fmt = opts.fmt || full;
-    const items = opts.items.map((it, i) => ({ ...it, color: it.color || PAL[i] }));
+    const items = opts.items.map((it, i) => ({ ...it, color: tc(it.color || PAL[i]) }));
     const S = 190, R = 88, r0 = 62, cx = S / 2;
     const svg = s("svg", { viewBox: `0 0 ${S} ${S}`, height: S, role: "img", "aria-label": opts.label || "Donut chart" }, box);
     let a0 = -Math.PI / 2;
@@ -373,6 +377,7 @@
 
   // ---------- sparkline ----------
   function spark(values, color) {
+    color = tc(color);
     const W = 200, H = 34;
     const max = Math.max(...values), min = Math.min(...values);
     const sp = max - min || 1;
@@ -404,14 +409,14 @@
       const bt = h("span", "bt");
       const bf = h("i", "bf");
       bf.style.width = ((it.value / max) * 100).toFixed(1) + "%";
-      bf.style.background = it.color || opts.color || PAL[0];
+      bf.style.background = tc(it.color || opts.color || PAL[0]);
       bt.appendChild(bf);
       const bv = h("span", "bv", opts.pct ? ((it.value / tot) * 100).toFixed(1) + "%" : compact(it.value));
       li.append(l, bt, bv);
       const show = (ev) => {
         let x0, y0;
         if (ev && ev.clientX != null) { x0 = ev.clientX; y0 = ev.clientY; } else { const r = li.getBoundingClientRect(); x0 = r.left + r.width / 2; y0 = r.top; }
-        showTip(x0, y0, it.name, [{ name: opts.unit || "", value: full(it.value) + " · " + ((it.value / tot) * 100).toFixed(1) + "%", color: it.color || opts.color || PAL[0] }]);
+        showTip(x0, y0, it.name, [{ name: opts.unit || "", value: full(it.value) + " · " + ((it.value / tot) * 100).toFixed(1) + "%", color: tc(it.color || opts.color || PAL[0]) }]);
       };
       li.addEventListener("pointermove", show);
       li.addEventListener("focus", () => show());

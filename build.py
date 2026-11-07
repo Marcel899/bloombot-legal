@@ -845,19 +845,20 @@ ADMIN_HTML = f"""<!doctype html>
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
+<script src="js/theme.js?v={THEMEVER}"></script>
 <link rel="stylesheet" href="fonts/fonts.css?v=1">
 <link rel="stylesheet" href="admin.css?v={ADMVER['css']}">
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/admin-charts.js?v={ADMVER['charts']}"></script>
 <script defer src="js/admin.js?v={ADMVER['app']}"></script>
 </head>
-<body class="gated">
+<body class="booting">
 <div class="gate" id="gate"><div class="gbox"><img class="gflower" src="img/flower.png" alt=""><h1 id="gtitle">Bloombot Admin</h1><p id="gtext">Checking your login…</p><div class="gload" id="gloading"><i></i><i></i><i></i></div><button class="brick" id="glogin" type="button" hidden>Log in with Discord</button><a class="gback" href="./">Back to the website</a></div></div>
 <div class="app">
 <aside class="side" aria-label="Admin menu">
 <a class="brand" href="#overview"><img class="flower" src="img/flower.png" alt=""><img class="word" src="img/logo.png" alt="Bloombot"><span class="tag weld g-red">Admin</span></a>
 <nav class="snav" id="snav"></nav>
-<div class="side-foot"><div class="botcard"><img src="img/favicon.png" alt=""><div><b>Bloombot</b><small><span class="st" id="bstat"><i></i>Loading…</span></small></div></div></div>
+<div class="side-foot"><a class="si back" href="./" title="Back to the website"><img src="img/flower.png" alt=""><span>Back to the website</span></a><div class="botcard"><img src="img/favicon.png" alt=""><div><b>Bloombot</b><small><span class="st" id="bstat"><i></i>Loading…</span></small></div></div></div>
 </aside>
 <div class="sideshade"></div>
 <div class="main">
@@ -866,11 +867,14 @@ ADMIN_HTML = f"""<!doctype html>
 <button class="ibtn collapse-btn" id="collapse" type="button" aria-label="Collapse menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM9 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></button>
 <div class="crumb" id="crumb"></div>
 <div class="gsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><label class="sr" for="gs">Search users, units, commands and pages</label><input id="gs" type="search" placeholder="Search users, units, pages…" autocomplete="off" role="combobox" aria-controls="gres" aria-expanded="false"><kbd>Ctrl K</kbd><div class="pop sres" id="gres" role="listbox"></div></div>
+<button class="ibtn" id="tref" type="button" aria-label="Refresh data" title="Refresh data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<button class="ibtn theme-b" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
 <div class="wrapr"><button class="ibtn" id="nbtn" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/></svg><span class="dot" id="ndot" hidden></span></button><div class="pop notes" id="npop"></div></div>
 <div class="wrapr"><button class="me" id="mebtn" type="button" aria-label="Account menu" aria-expanded="false"><img id="meav" src="img/task_user.png" alt="" referrerpolicy="no-referrer"><div><b id="mename">Owner</b><small>Owner</small></div></button>
-<div class="pop" id="mepop"><div class="ph"><b>Owner</b> <span class="pill purple">Owner</span></div><a class="pi" href="./"><img src="img/flower.png" alt="">Back to website</a><button class="pi" type="button" id="mref"><img src="img/clock.png" alt="">Refresh data</button><div class="lastload" id="lastload"></div><hr><button class="pi" type="button" id="mout"><img src="img/login.png" alt="">Log out</button></div></div>
+<div class="pop" id="mepop"><div class="ph"><b>Owner</b> <span class="pill purple">Owner</span></div><a class="pi" href="./"><img src="img/flower.png" alt="">Back to website</a><a class="pi" href="profile.html"><img src="img/task_user.png" alt="">My profile</a><a class="pi" href="giveaway-admin.html"><img src="img/gift.png" alt="">Giveaway manager</a><button class="pi" type="button" id="mref"><img src="img/clock.png" alt="">Refresh data</button><div class="lastload" id="lastload"></div><hr><button class="pi" type="button" id="mout"><img src="img/login.png" alt="">Log out</button></div></div>
 </header>
-<main class="content" id="main"><div id="view" class="view"></div></main>
+<div class="loadbar" id="loadbar" aria-hidden="true"></div>
+<main class="content" id="main"><div id="view" class="view"><div class="phead"><div><i class="skel sk-h"></i><i class="skel sk-p"></i></div></div><div class="kpis"><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div></div><div class="grid g-21 mt"><div class="card"><i class="skel sk-chart"></i></div><div class="card"><i class="skel sk-chart"></i></div></div></div></main>
 </div>
 </div>
 <div class="scrim" id="scrim"></div>
