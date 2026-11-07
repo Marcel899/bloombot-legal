@@ -12,18 +12,69 @@
     f();
   }
 
+  /* features.html: command search, group chips, click to copy. */
   const q = document.getElementById("cmdq"), none = document.getElementById("cmdnone");
-  if (q) q.addEventListener("input", () => {
-    const v = q.value.trim().toLowerCase();
-    let any = 0;
-    document.querySelectorAll(".cmd-group").forEach(g => {
-      let n = 0;
-      g.querySelectorAll(".cmd").forEach(li => { const ok = !v || li.dataset.q.includes(v); li.hidden = !ok; n += ok; });
-      g.hidden = !n;
-      any += n;
+  if (q) {
+    let grp = "all";
+    const mark = (span, text, v) => {
+      const i = v ? text.toLowerCase().indexOf(v) : -1;
+      if (i < 0) { span.textContent = text; return; }
+      const m = document.createElement("mark");
+      m.textContent = text.slice(i, i + v.length);
+      span.replaceChildren(text.slice(0, i), m, text.slice(i + v.length));
+    };
+    document.querySelectorAll(".cmd").forEach(li => {
+      li.querySelectorAll("code,span").forEach(n => { n.dataset.t = n.textContent; });
     });
-    none.hidden = !!any;
-  });
+    const filter = () => {
+      const v = q.value.trim().toLowerCase();
+      let any = 0;
+      const per = {};
+      document.querySelectorAll(".cmd-group").forEach(g => {
+        let n = 0;
+        g.querySelectorAll(".cmd").forEach(li => {
+          const hit = !v || li.dataset.q.includes(v);
+          li.hidden = !hit;
+          if (hit) { n++; li.querySelectorAll("code,span").forEach(x => mark(x, x.dataset.t, v)); }
+        });
+        per[g.dataset.cg] = n;
+        g.hidden = !n || (grp !== "all" && g.dataset.cg !== grp);
+        if (!g.hidden) any += n;
+      });
+      document.querySelectorAll(".cmd-chips .chip").forEach(c => {
+        const n = c.dataset.cg === "all" ? Object.values(per).reduce((x, y) => x + y, 0) : per[c.dataset.cg];
+        c.querySelector("i").textContent = n;
+        c.classList.toggle("zero", !n);
+      });
+      none.hidden = !!any;
+    };
+    q.addEventListener("input", filter);
+    document.querySelectorAll(".cmd-chips .chip").forEach(c => c.addEventListener("click", () => {
+      grp = c.dataset.cg;
+      document.querySelectorAll(".cmd-chips .chip").forEach(x => x.classList.toggle("on", x === c));
+      filter();
+    }));
+    const clr = document.getElementById("cmdclear");
+    if (clr) clr.onclick = () => {
+      q.value = ""; grp = "all";
+      document.querySelectorAll(".cmd-chips .chip").forEach(x => x.classList.toggle("on", x.dataset.cg === "all"));
+      filter(); q.focus();
+    };
+    document.querySelectorAll(".cmd-copy:not([disabled])").forEach(b => b.addEventListener("click", () => {
+      BB.copy(b.querySelector("code").dataset.t, "Copied " + b.querySelector("code").dataset.t);
+      b.classList.remove("done"); void b.offsetWidth; b.classList.add("done");
+    }));
+    /* the command chips on the feature tiles jump to that command */
+    document.querySelectorAll(".fcmd").forEach(a => a.addEventListener("click", e => {
+      e.preventDefault();
+      q.value = a.textContent;
+      grp = "all";
+      document.querySelectorAll(".cmd-chips .chip").forEach(x => x.classList.toggle("on", x.dataset.cg === "all"));
+      filter();
+      history.replaceState(null, "", "#cmd=" + encodeURIComponent(a.textContent));
+      document.getElementById("commands").scrollIntoView({ block: "start", behavior: "smooth" });
+    }));
+  }
 
   const links = [...document.querySelectorAll(".toc-box a")];
   if (links.length && "IntersectionObserver" in window) {

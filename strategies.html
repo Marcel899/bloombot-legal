@@ -25,11 +25,11 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=a292598d">
+<link rel="stylesheet" href="style.css?v=f8a14c39">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=d3f602ce"></script>
-<script defer src="js/site.js?v=4d400359"></script>
+<script defer src="js/site.js?v=eaa277cb"></script>
 <script defer src="js/giveaway.js?v=89fc0ac3"></script>
 </head>
 <body>
@@ -56,25 +56,32 @@
 </section>
 <main class="wrap strats" id="main">
 <section class="panel share" id="share">
-<div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in to share it with every Bloombot server.</span></div><button class="brick green" type="button" data-login>Log in to share</button></div>
+<div class="share-login"><img class="share-ico" src="img/bullseye.png" alt=""><div><strong>Got a good strategy?</strong><span id="shint">Log in to share it with every Bloombot server.</span></div>
+<button class="brick green" type="button" data-login id="slogbtn">Log in to share</button>
+<button class="brick green" type="button" id="sopen" aria-expanded="false" aria-controls="sform" hidden>Share a strategy</button></div>
 <form id="sform" hidden>
 <h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
 <div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
-<label>Details<textarea id="sd" rows="5" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea></label>
+<div class="sd-field"><div class="pe-lrow"><label for="sd">Details</label>
+<div class="sd-tools"><div class="md-tools" aria-label="Formatting"><button type="button" data-md="**" title="Bold"><b>B</b></button><button type="button" data-md="*" title="Italic"><i>I</i></button><button type="button" data-md="# " title="Heading">H</button><button type="button" data-md="- " title="List">&bull;</button></div>
+<div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="sdw" aria-selected="true">Write</button><button type="button" role="tab" id="sdp" aria-selected="false">Preview</button></div></div></div>
+<textarea id="sd" rows="6" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea>
+<div class="sd-prev md" id="sdprev" hidden></div></div>
 <div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Details <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). You need a linked account (<code>/link</code>).</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
 <p class="post-status" id="sstatus" hidden></p>
 </form>
 </section>
 <div class="board-bar">
 <input class="search" id="sq" type="search" placeholder="Search strategies…" aria-label="Search strategies">
-<div class="chips"><button class="chip on" type="button" data-scat="all">All</button><button class="chip" type="button" data-scat="meta-units">Meta units</button><button class="chip" type="button" data-scat="map-specific">Map-specific</button><button class="chip" type="button" data-scat="general">General</button></div>
+<div class="chips"><button class="chip on" type="button" data-scat="all">All<i></i></button><button class="chip" type="button" data-scat="meta-units">Meta units<i></i></button><button class="chip" type="button" data-scat="map-specific">Map-specific<i></i></button><button class="chip" type="button" data-scat="general">General<i></i></button><button class="chip" type="button" data-scat="mine" hidden>Mine<i></i></button></div>
+<select id="ssort" aria-label="Sort strategies"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
 <span class="count-pill" id="scount"></span>
 </div>
 <div class="skel-grid sk-strats" id="sloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="slist" id="slist"></div>
-<p class="empty" id="snone" hidden>No strategies match that.</p>
+<div class="empty" id="snone" hidden><p id="snonet">No strategies match that.</p><button class="brick sm" type="button" id="sclear">Show all strategies</button></div>
 </main>
-<script defer src="js/strategies.js?v=e16bdd48"></script>
+<script defer src="js/strategies.js?v=6d7d1478"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

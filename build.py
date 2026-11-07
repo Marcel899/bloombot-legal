@@ -244,18 +244,19 @@ open("index.html", "w").write(page("Bloombot · Garden Tower Defense Trading Bot
 
 # ── Features & commands ──────────────────────────────────────────────────
 ALL_FEATURES = [
-    ("trading", "Global trade ads", "Post one ad in your server's trade channel and it shows up in every server running Bloombot. Unit names turn into icons."),
-    ("dollar", "Live values", "Every unit and gamepass with its value, demand and a price chart, updated from the community value list."),
-    ("chart_up", "Value hub", "What's going up, what's going down, our guess for the next 30 days and the best cheap units for your budget."),
-    ("calculator", "Trade checker", "Type what you give and what you get and see if it's a win, fair or a loss, with a picture you can share."),
-    ("wish_star", "Wishlist", "Add the units you want. Bloombot DMs you the moment a new trade ad offers one."),
-    ("bell", "Value alerts", "Follow a unit and get a DM when its price moves 20% or more."),
-    ("lightning", "DPS ranking", "Every unit ranked by damage, refreshed each week, plus full unit and enemy stats."),
-    ("medal_gold", "Levels and ranks", "Earn XP for using Bloombot. Higher ranks keep their trade ads up longer and auto-bump them."),
-    ("gift", "Giveaways", "Run giveaways with entry rules like a role, a linked Roblox account, invites or a level."),
-    ("bullseye", "Team finder and strategies", "Find teammates across servers, plus meta loadouts and community guides."),
-    ("clock", "Weekly recap", "Every Sunday: the biggest value moves, new units and balance changes."),
-    ("shield", "Safe trading", "Ads are screened for scams, bad words and NSFW images, and anyone can report a user."),
+    # (icon, title, text, commands, (site link, label) or None)
+    ("trading", "Global trade ads", "Post one ad in your server's trade channel and it shows up in every server running Bloombot. Unit names turn into icons.", ["/trade ad", "/trade bump"], ("trades.html", "Trade ads")),
+    ("dollar", "Live values", "Every unit and gamepass with its value, demand and a price chart, updated from the community value list.", ["/value"], ("values.html", "Value list")),
+    ("chart_up", "Value hub", "What's going up, what's going down, our guess for the next 30 days and the best cheap units for your budget.", ["/value-hub"], None),
+    ("calculator", "Trade checker", "Type what you give and what you get and see if it's a win, fair or a loss, with a picture you can share.", ["/value-calculator"], ("calculator.html", "Calculator")),
+    ("wish_star", "Wishlist", "Add the units you want. Bloombot DMs you the moment a new trade ad offers one.", ["/wishlist"], None),
+    ("bell", "Value alerts", "Follow a unit and get a DM when its price moves 20% or more.", ["/value"], None),
+    ("lightning", "DPS ranking", "Every unit ranked by damage, refreshed each week, plus full unit and enemy stats.", ["/dps", "/search"], None),
+    ("medal_gold", "Levels and ranks", "Earn XP for using Bloombot. Higher ranks keep their trade ads up longer and auto-bump them.", ["/level", "/ranks"], ("levels.html", "Perks")),
+    ("gift", "Giveaways", "Run giveaways with entry rules like a role, a linked Roblox account, invites or a level.", ["/giveaway create"], None),
+    ("bullseye", "Team finder and strategies", "Find teammates across servers, plus meta loadouts and community guides.", ["/home"], ("strategies.html", "Strategies")),
+    ("clock", "Weekly recap", "Every Sunday: the biggest value moves, new units and balance changes.", ["/config"], None),
+    ("shield", "Safe trading", "Ads are screened for scams, bad words and NSFW images, and anyone can report a user.", ["Report user"], ("terms.html", "Rules")),
 ]
 F_COLORS = ["green", "blue", "yellow", "purple", "red", "orange"]
 
@@ -307,22 +308,32 @@ def _esc(t):
     return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-ftiles = "".join(
-    f'<div class="tile"><div class="weld g-{F_COLORS[n % len(F_COLORS)]}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div><p>{p}</p></div>'
-    for n, (i, h, p) in enumerate(ALL_FEATURES))
+def _ftile(n, i, h, p, cmds, link):
+    chips = "".join(f'<a class="fcmd" href="#cmd={_esc(c)}">{_esc(c)}</a>' for c in cmds)
+    more = f'<a class="fgo" href="{link[0]}">{link[1]} &rarr;</a>' if link else ""
+    return (f'<div class="tile ftile"><div class="weld g-{F_COLORS[n % len(F_COLORS)]}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div>'
+            f'<p>{p}</p><div class="ffoot">{chips}{more}</div></div>')
+
+
+ftiles = "".join(_ftile(n, *f) for n, f in enumerate(ALL_FEATURES))
 groups = ""
+gchips = '<button class="chip on" type="button" data-cg="all">All<i>%d</i></button>' % sum(len(c) for _, _, c in COMMANDS)
 for name, color, cmds in COMMANDS:
+    gid = name.lower().replace(" ", "-")
     rows = "".join(
-        f'<li class="cmd" data-q="{_esc((c + " " + d).lower())}"><code>{_esc(c)}</code><span>{_esc(d)}</span></li>'
+        f'<li class="cmd" data-q="{_esc((c + " " + d).lower())}"><button type="button" class="cmd-copy"{"" if c.startswith("/") else " disabled"} title="{"Copy" if c.startswith("/") else "Right-click menu in Discord"}"><code>{_esc(c)}</code></button><span>{_esc(d)}</span></li>'
         for c, d in cmds)
-    groups += f'<div class="cmd-group"><h3 class="weld g-{color}">{name}</h3><ul>{rows}</ul></div>'
+    groups += f'<div class="cmd-group" data-cg="{gid}"><h3 class="weld g-{color}">{name}</h3><ul>{rows}</ul></div>'
+    gchips += f'<button class="chip" type="button" data-cg="{gid}">{name}<i>{len(cmds)}</i></button>'
 features_body = hero("gem", "Features", "Everything Bloombot can do, and every command.", "t_features") + f"""<main class="wrap" id="main">
 <section class="tiles ftiles">{ftiles}</section>
 <section class="panel cmds" id="commands">
 <div class="cmds-head"><h2 class="sec weld g-yellow"><img src="img/bell.png" alt="">Commands</h2>
 <input class="search" id="cmdq" type="search" placeholder="Search commands…" aria-label="Search commands"></div>
+<div class="chips cmd-chips" role="group" aria-label="Command groups">{gchips}</div>
+<p class="hint cmd-hint">Click a command to copy it, then paste it in Discord.</p>
 <div class="cmd-grid">{groups}</div>
-<p class="empty" id="cmdnone" hidden>No command matches that.</p>
+<div class="empty" id="cmdnone" hidden><p>No command matches that.</p><button class="brick sm" type="button" id="cmdclear">Clear search</button></div>
 </section>
 <section class="cta-panel">
 <img src="img/gem.png" alt="">
@@ -540,23 +551,30 @@ open("crates.html", "w").write(page("Bloombot Crate Calculator · Garden Tower D
 # ── Strategies ───────────────────────────────────────────────────────────
 strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tower Defense. Share yours and it shows up in /home in Discord too.", "t_strategies") + f"""<main class="wrap strats" id="main">
 <section class="panel share" id="share">
-<div id="slogin" class="share-login"><div><strong>Got a good strategy?</strong><span>Log in to share it with every Bloombot server.</span></div><button class="brick green" type="button" data-login>Log in to share</button></div>
+<div class="share-login"><img class="share-ico" src="img/bullseye.png" alt=""><div><strong>Got a good strategy?</strong><span id="shint">Log in to share it with every Bloombot server.</span></div>
+<button class="brick green" type="button" data-login id="slogbtn">Log in to share</button>
+<button class="brick green" type="button" id="sopen" aria-expanded="false" aria-controls="sform" hidden>Share a strategy</button></div>
 <form id="sform" hidden>
 <h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
 <div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
-<label>Details<textarea id="sd" rows="5" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea></label>
+<div class="sd-field"><div class="pe-lrow"><label for="sd">Details</label>
+<div class="sd-tools"><div class="md-tools" aria-label="Formatting"><button type="button" data-md="**" title="Bold"><b>B</b></button><button type="button" data-md="*" title="Italic"><i>I</i></button><button type="button" data-md="# " title="Heading">H</button><button type="button" data-md="- " title="List">&bull;</button></div>
+<div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="sdw" aria-selected="true">Write</button><button type="button" role="tab" id="sdp" aria-selected="false">Preview</button></div></div></div>
+<textarea id="sd" rows="6" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea>
+<div class="sd-prev md" id="sdprev" hidden></div></div>
 <div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Details <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). You need a linked account (<code>/link</code>).</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
 <p class="post-status" id="sstatus" hidden></p>
 </form>
 </section>
 <div class="board-bar">
 <input class="search" id="sq" type="search" placeholder="Search strategies…" aria-label="Search strategies">
-<div class="chips"><button class="chip on" type="button" data-scat="all">All</button><button class="chip" type="button" data-scat="meta-units">Meta units</button><button class="chip" type="button" data-scat="map-specific">Map-specific</button><button class="chip" type="button" data-scat="general">General</button></div>
+<div class="chips"><button class="chip on" type="button" data-scat="all">All<i></i></button><button class="chip" type="button" data-scat="meta-units">Meta units<i></i></button><button class="chip" type="button" data-scat="map-specific">Map-specific<i></i></button><button class="chip" type="button" data-scat="general">General<i></i></button><button class="chip" type="button" data-scat="mine" hidden>Mine<i></i></button></div>
+<select id="ssort" aria-label="Sort strategies"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
 <span class="count-pill" id="scount"></span>
 </div>
 <div class="skel-grid sk-strats" id="sloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="slist" id="slist"></div>
-<p class="empty" id="snone" hidden>No strategies match that.</p>
+<div class="empty" id="snone" hidden><p id="snonet">No strategies match that.</p><button class="brick sm" type="button" id="sclear">Show all strategies</button></div>
 </main>
 <script defer src="js/strategies.js?v={JSVER['strategies']}"></script>
 """

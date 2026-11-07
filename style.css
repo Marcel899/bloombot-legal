@@ -2907,3 +2907,64 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 .gw-worth b{color:#5fe07f;font-weight:900}
 [data-theme=light] .gwa-ov,[data-theme=light] .gwa-sv em,[data-theme=light] .gw-worth b{color:#17762f}
 [data-theme=light] .gwa-val{color:#17762f}
+
+/* Strategies + features v2 (2026-11-07) */
+.share-login{justify-content:flex-start}
+.share-login>div{flex:1;min-width:200px}
+.share-ico{width:44px;height:44px;flex:none}
+#sform{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);animation:rise2 .25s ease-out}
+.sd-field{margin-bottom:10px}
+.sd-field .pe-lrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.sd-field .pe-lrow label{margin:0}
+.sd-tools{display:flex;gap:8px;align-items:center}
+.md-tools{display:flex;padding:3px;border-radius:10px;background:rgba(255,255,255,.05);transition:opacity .15s}
+.md-tools.off{opacity:.35;pointer-events:none}
+.md-tools button{min-width:30px;padding:4px 8px;border:0;border-radius:8px;background:none;color:var(--muted);font:800 .85rem Nunito,system-ui,sans-serif;cursor:pointer}
+.md-tools button:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.sd-field textarea{width:100%;padding:10px 14px}
+.sd-prev{min-height:150px;max-height:420px;overflow:auto;padding:12px 14px;border-radius:10px;border:2px dashed var(--border);color:var(--soft);line-height:1.55}
+.board-bar .chip i,.cmd-chips .chip i{font-style:normal;margin-left:6px;padding:0 6px;border-radius:999px;background:rgba(0,0,0,.25);font-size:.78rem}
+.chip i:empty{display:none}
+.chip.zero{opacity:.45}
+.slist{align-items:start}
+.strat{position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s;animation:rise2 .28s ease-out both}
+.strat::after{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:#28a828}
+.strat.c-l-meta-units::after{background:#a94fff}.strat.c-l-map-specific::after{background:#14aeea}
+.strat:hover{transform:translateY(-3px);box-shadow:0 14px 28px -18px rgba(0,0,0,.9)}
+.strat-top{flex-wrap:wrap;row-gap:4px}
+.strat-top .strat-date+.strat-date::before{content:"· ";}
+.strat-top .strat-date+.strat-date{margin-left:0}
+.strat-author{display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none}
+.strat-author:hover span{color:var(--text);text-decoration:underline}
+.empty .brick{margin-top:10px}
+.empty{text-align:center}
+.empty p{margin:0}
+/* features */
+.ftile{display:flex;flex-direction:column}
+.ftile p{flex:1}
+.ffoot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 4px 2px}
+.fcmd{padding:3px 9px;border-radius:7px;background:#2a2f3c;color:#fff;font:800 .8rem ui-monospace,SFMono-Regular,Menlo,monospace;text-decoration:none;transition:background .15s}
+.fcmd:hover{background:#3a4152}
+.fgo{margin-left:auto;color:#8dbbff;font-weight:800;font-size:.9rem;text-decoration:none}
+.fgo:hover{text-decoration:underline}
+.cmd-chips{margin:-6px 0 8px}
+.cmd-hint{margin:0 0 16px;font-size:.88rem}
+.cmd-copy{position:relative;flex:none;padding:0;border:0;background:none;cursor:pointer;border-radius:7px}
+.cmd-copy[disabled]{cursor:default}
+.cmd-copy code{display:block;transition:background .15s,transform .1s}
+.cmd-copy:not([disabled]):hover code{background:#3a4152}
+.cmd-copy:not([disabled]):active code{transform:scale(.96)}
+.cmd-copy.done code{animation:cmdok .9s ease-out}
+@keyframes cmdok{0%,40%{background:#28a828;color:#fff}}
+.cmd mark{background:rgba(245,200,60,.35);color:inherit;border-radius:3px;padding:0 1px}
+.cmd{align-items:center}
+[data-theme=light] .md-tools{background:#f3eddd}
+[data-theme=light] .md-tools button:hover{background:#fff}
+[data-theme=light] .fcmd{background:#f1ead7;color:var(--text)}
+[data-theme=light] .fcmd:hover,[data-theme=light] .cmd-copy:not([disabled]):hover code{background:#e6dcc0}
+[data-theme=light] .fgo{color:#2c7a1e}
+[data-theme=light] .board-bar .chip i,[data-theme=light] .cmd-chips .chip i{background:rgba(0,0,0,.08)}
+[data-theme=light] .chip.on i{background:rgba(255,255,255,.25)}
+[data-theme=light] .cmd mark{background:rgba(245,200,60,.5)}
+[data-theme=light] .strat:hover{box-shadow:0 14px 28px -18px rgba(90,70,20,.45)}
+@media (max-width:600px){.share-ico{display:none}.share-login .brick{width:100%}.sd-tools{width:100%;justify-content:space-between}.board-bar select,.board-bar .dd{flex:1}}
