@@ -1258,7 +1258,7 @@
 
     if (!p || (!p.roblox_name && !isMe)) body.append(el("p", "hint upop-note", "This player hasn't linked a Roblox account to Bloombot yet."));
     if (p && p.description) {
-      const d = el("div", "upop-sec");
+      const d = el("div", "upop-sec p-about");
       d.append(el("h3", "upop-h", "About me"), BB.md(p.description, { cls: "p-desc" }));
       body.append(d);
     }

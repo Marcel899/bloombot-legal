@@ -46,8 +46,14 @@
       bar.href = "levels.html";
       bar.style.setProperty("--rk", BB.rankFor(L.level).color);
       const tr = el("span", "p-xp-tr"), fill = el("i");
+      fill.append(el("span", "p-xp-sh"));
       tr.append(fill);
-      bar.append(el("span", "p-xp-l", "Level " + L.level), tr, el("span", "p-xp-n", L.into.toLocaleString() + " / " + L.need.toLocaleString() + " XP"));
+      const lvl = el("span", "p-xp-l");
+      lvl.append(el("em", null, "Lv"), el("b", null, String(L.level)));
+      const nums = el("span", "p-xp-n");
+      nums.append(el("strong", null, L.into.toLocaleString()), " / " + L.need.toLocaleString() + " XP");
+      bar.append(lvl, tr, nums);
+      if (L.into / L.need >= 0.9) bar.classList.add("close");
       c.append(bar);
       requestAnimationFrame(() => setTimeout(() => { fill.style.width = (100 * L.into / L.need).toFixed(1) + "%"; }, 60));
     }
@@ -65,8 +71,13 @@
     stats.append(stat(p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"), stat("…", "Trade ads", "g-blue", "swap", "pst-ads"), stat("…", "Strategies", "g-purple", "bullseye", "pst-strs"));
     c.append(stats);
     if (p && p.description) {
-      const d = el("div", "upop-sec");
+      const d = el("div", "upop-sec p-about");
       d.append(el("h3", "upop-h", "About me"), BB.md(p.description, { cls: "p-desc" }));
+      c.append(d);
+    } else if (isMe && p) {
+      const d = el("a", "upop-sec p-about empty");
+      d.href = "#edit";
+      d.append(el("h3", "upop-h", "About me"), el("p", "hint", "Tell other traders how you play, what you collect and when you're online. Add an About me →"));
       c.append(d);
     }
     const acc = el("div", "p-accs upop-accs");
