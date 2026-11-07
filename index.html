@@ -25,7 +25,7 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=94dc5324">
+<link rel="stylesheet" href="style.css?v=8c6624ba">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=ad57d41f"></script>
@@ -52,33 +52,45 @@
 <section class="hero big">
 <div class="wrap hero-in">
 <h1 class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.png" alt="Bloombot, the Garden Tower Defense trading bot"></h1>
-<p class="sub">The trading bot for Roblox Garden Tower Defense.</p>
+<p class="sub">The free trading bot for Roblox Garden Tower Defense.<br class="br-wide"> Trade ads, live values and trade checks in every server.</p>
 <div class="ctas">
 <a class="brick discord big-cta" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt="">Add to Discord</a>
 <a class="brick purple big-cta" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a>
 </div>
 <div class="hstats" id="stats">
-<span hidden><strong id="st-servers">–</strong> servers</span>
-<span hidden><strong id="st-users">–</strong> users</span>
-<span><strong id="st-ads">–</strong> live trade ads</span>
-<span><strong id="st-values">–</strong> units tracked</span>
-<span><strong id="st-strats">–</strong> strategies</span>
+<span hidden><img src="img/shield.png" alt=""><strong id="st-servers">–</strong> servers</span>
+<span hidden><img src="img/medal_gold.png" alt=""><strong id="st-users">–</strong> users</span>
+<span><i class="live" aria-hidden="true"></i><strong id="st-ads">–</strong> live trade ads</span>
+<span><img src="img/dollar.png" alt=""><strong id="st-values">–</strong> units tracked</span>
+<span><img src="img/bullseye.png" alt=""><strong id="st-strats">–</strong> strategies</span>
 </div>
 </div>
 </section>
 <main class="wrap home" id="main">
-<section class="tiles"><a class="tile tlink" href="trades.html"><div class="weld g-green"><img src="img/trading.png" alt=""><h3>Global trade ads</h3></div><p>Post once and your ad reaches every server running Bloombot. Browse them all here.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="values.html"><div class="weld g-blue"><img src="img/dollar.png" alt=""><h3>Live values</h3></div><p>Every unit's value, demand and 30-day trend, with price charts.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="calculator.html"><div class="weld g-yellow"><img src="img/calculator.png" alt=""><h3>Trade calculator</h3></div><p>See right away if a trade is a win, fair, or a loss.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="strategies.html"><div class="weld g-purple"><img src="img/bullseye.png" alt=""><h3>Strategies</h3></div><p>Loadouts and map guides from the community. Share your own.</p><span class="more">Open &rarr;</span></a></section>
+<section class="tiles six"><a class="tile tlink" href="trades.html"><div class="weld g-green"><img src="img/trading.png" alt=""><h3>Global trade ads</h3></div><p>Post once and your ad reaches every server running Bloombot.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="values.html"><div class="weld g-blue"><img src="img/dollar.png" alt=""><h3>Live values</h3></div><p>Every unit's value, demand and 30-day trend, with price charts.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="calculator.html"><div class="weld g-yellow"><img src="img/calculator.png" alt=""><h3>Trade calculator</h3></div><p>See right away if a trade is a win, fair, or a loss.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="crates.html"><div class="weld g-orange"><img src="img/crate.png" alt=""><h3>Crate calculator</h3></div><p>Your real chance per crate, and how much to save first.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="strategies.html"><div class="weld g-purple"><img src="img/bullseye.png" alt=""><h3>Strategies</h3></div><p>Loadouts and map guides from the community. Share your own.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="levels.html"><div class="weld g-red"><img src="img/medal_gold.png" alt=""><h3>Levels &amp; perks</h3></div><p>Earn XP for trading and helping out. Unlock ranks and banners.</p><span class="more">Open &rarr;</span></a></section>
 <section class="watch" id="watch" hidden>
 <div class="sec-head"><h2>Your watchlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
 <div class="panel wl" id="wl"></div>
 </section>
-<section class="movers" id="movers" hidden>
-<div class="sec-head"><h2>Biggest moves this month</h2><a href="values.html">All values &rarr;</a></div>
-<div class="mv-cols"><div class="panel mv-col"><h3><img src="img/rise.png" alt="">Going up</h3><div id="mv-up"></div></div><div class="panel mv-col"><h3><img src="img/fall.png" alt="">Going down</h3><div id="mv-down"></div></div></div>
+<section class="now" id="now" hidden>
+<div class="sec-head"><h2><i class="live" aria-hidden="true"></i>Happening now</h2><a href="trades.html">All trade ads &rarr;</a></div>
+<div class="now-grid">
+<div class="panel now-ads" id="hads-box" hidden><h3><img src="img/trading.png" alt="">Newest trade ads</h3><div id="hads"></div></div>
+<div class="panel mv-col" id="mv-box" hidden><div class="mv-head"><h3><img src="img/chart_up.png" alt="">Biggest moves</h3><div class="mv-tabs" role="tablist"><button type="button" class="on" data-m="up" aria-selected="true">Up</button><button type="button" data-m="down" aria-selected="false">Down</button></div></div><div id="mv-up"></div><div id="mv-down" hidden></div><a class="mv-all" href="values.html">All values &rarr;</a></div>
+</div>
 </section>
 <section class="hstrats" id="hstrats" hidden>
 <div class="sec-head"><h2>New strategies</h2><a href="strategies.html">All strategies &rarr;</a></div>
 <div class="hs-list" id="hs-list"></div>
+</section>
+<section class="demo">
+<div class="demo-text">
+<h2>Right inside your Discord</h2>
+<p>Bloombot does the busy work, so you can focus on the trade.</p>
+<div class="dtabs" role="tablist"><button type="button" role="tab" class="dtab on" data-d="post" aria-selected="true"><img src="img/trading.png" alt="">Post once</button><button type="button" role="tab" class="dtab" data-d="wish" aria-selected="false"><img src="img/wish_star.png" alt="">Wishlist DMs</button><button type="button" role="tab" class="dtab" data-d="check" aria-selected="false"><img src="img/scale.png" alt="">Trade checks</button></div>
+<p class="demo-hint" id="demo-hint">Your ad goes to every server running Bloombot, not just one.</p>
+</div>
+<div class="demo-shot" aria-label="Example Bloombot messages in Discord"><div class="dpane" data-d="post" role="tabpanel"><div class="dmsg"><img class="dav" src="img/flower.png" alt=""><div class="dbody"><div class="dname"><strong>Bloombot</strong><span class="dapp">APP</span><span class="dtime">Today at 16:58</span></div><div class="demb g-bar-purple"><p class="dtitle"><img src="img/trading.png" alt="">Trade Ad</p><p><span class="dunit"><img src="img/units/grim_gardener.webp" alt="">Grim Gardener</span> for <span class="dunit"><img src="img/units/coffinroot.webp" alt="">Coffinroot</span> + add</p><p class="dmeta"><b>Trader:</b> <span class="dping">@you</span><br><b>Roblox:</b> <span class="dlink">your_name</span></p></div><p class="dok"><img src="img/win.png" alt=""><span>Your trade ad was posted to <b>26 servers</b>.</span></p></div></div></div><div class="dpane" data-d="wish" role="tabpanel" hidden><div class="dmsg"><img class="dav" src="img/flower.png" alt=""><div class="dbody"><div class="dname"><strong>Bloombot</strong><span class="dapp">APP</span><span class="dtime">Today at 17:13</span></div><div class="demb g-bar-yellow"><p class="dtitle"><img src="img/wish_star.png" alt="">Wishlist match</p><p><span class="dunit"><img src="img/units/grim_gardener.webp" alt="">Grim Gardener</span> is offered in a new trade ad.</p><p class="dquote"><span class="dunit"><img src="img/units/witchleaf.webp" alt="">Witchleaf</span> and <span class="dunit"><img src="img/units/ghost_pepper.webp" alt="">Ghost Pepper</span> for offers</p><p class="dmeta"><b>Trader:</b> <span class="dping">@gardenpro</span></p><span class="dbtn"><img src="img/wish_star.png" alt="">Remove Grim Gardener</span></div></div></div></div><div class="dpane" data-d="check" role="tabpanel" hidden><div class="dmsg"><img class="dav" src="img/flower.png" alt=""><div class="dbody"><div class="dname"><strong>Bloombot</strong><span class="dapp">APP</span><span class="dtime">Today at 17:20</span></div><div class="demb g-bar-green"><p class="dtitle"><img src="img/scale.png" alt="">Trade check</p><div class="dsides"><div><em>You give</em><span class="dunit"><img src="img/units/witchleaf.webp" alt="">Witchleaf</span><span class="dunit"><img src="img/units/ghost_pepper.webp" alt="">Ghost Pepper</span></div><div><em>You get</em><span class="dunit"><img src="img/units/grim_gardener.webp" alt="">Grim Gardener</span></div></div><p class="dverdict"><img src="img/win.png" alt=""><b>Win</b> &middot; you get about 18% more value</p></div></div></div></div></div>
 </section>
 <section class="how">
 <div class="sec-head"><h2>How it works</h2><a href="features.html">All features &rarr;</a></div>
@@ -88,13 +100,17 @@
 <div class="step"><img src="img/num_3.png" alt="3"><div><h3>Get offers</h3><p>Traders DM you, and Bloombot DMs you when a unit on your wishlist is offered.</p></div></div>
 </div>
 </section>
-<section class="hcards">
-<a class="hcard" href="dashboard.html"><img src="img/shield.png" alt=""><div><h3>Run a Discord server?</h3><p>Set channels, pings and features from the server dashboard.</p></div><span class="more">Open &rarr;</span></a>
-<a class="hcard" href="crates.html"><img src="img/crate.png" alt=""><div><h3>Saving up for a unit?</h3><p>See your real chance per crate and how much to save first.</p></div><span class="more">Open &rarr;</span></a>
-<a class="hcard" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt=""><div><h3>Need help?</h3><p>Ask in the support server. Data requests are answered within 30 days.</p></div><span class="more">Join &rarr;</span></a>
+<section class="hband">
+<img class="hband-flower" src="img/flower.png" alt="">
+<div class="hband-text"><h2>Bring Bloombot to your server</h2><p>Free, set up in a minute. Pick your channels and pings from the dashboard.</p></div>
+<div class="hband-btns">
+<a class="brick discord" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt="">Add to Discord</a>
+<a class="brick dark" href="dashboard.html"><img src="img/gear.png" alt="">Dashboard</a>
+<a class="brick dark" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt="">Support</a>
+</div>
 </section>
 </main>
-<script defer src="js/home.js?v=f8fe9920"></script>
+<script defer src="js/home.js?v=7fd6a1ac"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

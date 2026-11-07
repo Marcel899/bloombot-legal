@@ -186,43 +186,88 @@ doc("intents", "gear", "How Bloombot uses intents", "How Bloombot uses the Messa
     "Bloombot Intent Use Cases", "Screenshots showing how Bloombot uses the Message Content and Server Members intents.", "", "t_intents")
 
 FEATURES = [
-    ("trading", "Global trade ads", "Post once and your ad reaches every server running Bloombot. Browse them all here.", "trades.html"),
-    ("dollar", "Live values", "Every unit's value, demand and 30-day trend, with price charts.", "values.html"),
-    ("calculator", "Trade calculator", "See right away if a trade is a win, fair, or a loss.", "calculator.html"),
-    ("bullseye", "Strategies", "Loadouts and map guides from the community. Share your own.", "strategies.html"),
+    ("trading", "Global trade ads", "Post once and your ad reaches every server running Bloombot.", "trades.html", "green"),
+    ("dollar", "Live values", "Every unit's value, demand and 30-day trend, with price charts.", "values.html", "blue"),
+    ("calculator", "Trade calculator", "See right away if a trade is a win, fair, or a loss.", "calculator.html", "yellow"),
+    ("crate", "Crate calculator", "Your real chance per crate, and how much to save first.", "crates.html", "orange"),
+    ("bullseye", "Strategies", "Loadouts and map guides from the community. Share your own.", "strategies.html", "purple"),
+    ("medal_gold", "Levels & perks", "Earn XP for trading and helping out. Unlock ranks and banners.", "levels.html", "red"),
 ]
-TILE_COLORS = ["green", "blue", "yellow", "purple"]
-tiles = "".join(f'<a class="tile tlink" href="{u}"><div class="weld g-{c}"><img src="img/{i}.png" alt=""><h3>{h}</h3></div><p>{p}</p><span class="more">Open &rarr;</span></a>' for (i, h, p, u), c in zip(FEATURES, TILE_COLORS))
+tiles = "".join(f'<a class="tile tlink" href="{u}"><div class="weld g-{c}"><img src="img/{i}.png" alt=""><h3>{h.replace("&", "&amp;")}</h3></div><p>{p}</p><span class="more">Open &rarr;</span></a>' for i, h, p, u, c in FEATURES)
+
+
+def dc_msg(body, time="Today at 17:13"):
+    return (f'<div class="dmsg"><img class="dav" src="img/flower.png" alt=""><div class="dbody">'
+            f'<div class="dname"><strong>Bloombot</strong><span class="dapp">APP</span><span class="dtime">{time}</span></div>{body}</div></div>')
+
+
+def unit(n, label):
+    return f'<span class="dunit"><img src="img/units/{n}.webp" alt="">{label}</span>'
+
+
+DEMOS = [
+    ("post", "Post once", "img/trading.png",
+     dc_msg('<div class="demb g-bar-purple"><p class="dtitle"><img src="img/trading.png" alt="">Trade Ad</p>'
+            f'<p>{unit("grim_gardener", "Grim Gardener")} for {unit("coffinroot", "Coffinroot")} + add</p>'
+            '<p class="dmeta"><b>Trader:</b> <span class="dping">@you</span><br><b>Roblox:</b> <span class="dlink">your_name</span></p></div>'
+            '<p class="dok"><img src="img/win.png" alt=""><span>Your trade ad was posted to <b>26 servers</b>.</span></p>', "Today at 16:58")),
+    ("wish", "Wishlist DMs", "img/wish_star.png",
+     dc_msg('<div class="demb g-bar-yellow"><p class="dtitle"><img src="img/wish_star.png" alt="">Wishlist match</p>'
+            f'<p>{unit("grim_gardener", "Grim Gardener")} is offered in a new trade ad.</p>'
+            f'<p class="dquote">{unit("witchleaf", "Witchleaf")} and {unit("ghost_pepper", "Ghost Pepper")} for offers</p>'
+            '<p class="dmeta"><b>Trader:</b> <span class="dping">@gardenpro</span></p>'
+            '<span class="dbtn"><img src="img/wish_star.png" alt="">Remove Grim Gardener</span></div>')),
+    ("check", "Trade checks", "img/scale.png",
+     dc_msg('<div class="demb g-bar-green"><p class="dtitle"><img src="img/scale.png" alt="">Trade check</p>'
+            f'<div class="dsides"><div><em>You give</em>{unit("witchleaf", "Witchleaf")}{unit("ghost_pepper", "Ghost Pepper")}</div>'
+            f'<div><em>You get</em>{unit("grim_gardener", "Grim Gardener")}</div></div>'
+            '<p class="dverdict"><img src="img/win.png" alt=""><b>Win</b> &middot; you get about 18% more value</p></div>', "Today at 17:20")),
+]
+demo_tabs = "".join(f'<button type="button" role="tab" class="dtab{" on" if i == 0 else ""}" data-d="{k}" aria-selected="{"true" if i == 0 else "false"}"><img src="{ic}" alt="">{t}</button>' for i, (k, t, ic, _) in enumerate(DEMOS))
+demo_panes = "".join(f'<div class="dpane" data-d="{k}" role="tabpanel"{"" if i == 0 else " hidden"}>{m}</div>' for i, (k, t, ic, m) in enumerate(DEMOS))
+
 home = f"""<section class="hero big">
 <div class="wrap hero-in">
 <h1 class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.png" alt="Bloombot, the Garden Tower Defense trading bot"></h1>
-<p class="sub">The trading bot for Roblox Garden Tower Defense.</p>
+<p class="sub">The free trading bot for Roblox Garden Tower Defense.<br class="br-wide"> Trade ads, live values and trade checks in every server.</p>
 <div class="ctas">
 <a class="brick discord big-cta" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
 <a class="brick purple big-cta" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a>
 </div>
 <div class="hstats" id="stats">
-<span hidden><strong id="st-servers">–</strong> servers</span>
-<span hidden><strong id="st-users">–</strong> users</span>
-<span><strong id="st-ads">–</strong> live trade ads</span>
-<span><strong id="st-values">–</strong> units tracked</span>
-<span><strong id="st-strats">–</strong> strategies</span>
+<span hidden><img src="img/shield.png" alt=""><strong id="st-servers">–</strong> servers</span>
+<span hidden><img src="img/medal_gold.png" alt=""><strong id="st-users">–</strong> users</span>
+<span><i class="live" aria-hidden="true"></i><strong id="st-ads">–</strong> live trade ads</span>
+<span><img src="img/dollar.png" alt=""><strong id="st-values">–</strong> units tracked</span>
+<span><img src="img/bullseye.png" alt=""><strong id="st-strats">–</strong> strategies</span>
 </div>
 </div>
 </section>
 <main class="wrap home" id="main">
-<section class="tiles">{tiles}</section>
+<section class="tiles six">{tiles}</section>
 <section class="watch" id="watch" hidden>
 <div class="sec-head"><h2>Your watchlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
 <div class="panel wl" id="wl"></div>
 </section>
-<section class="movers" id="movers" hidden>
-<div class="sec-head"><h2>Biggest moves this month</h2><a href="values.html">All values &rarr;</a></div>
-<div class="mv-cols"><div class="panel mv-col"><h3><img src="img/rise.png" alt="">Going up</h3><div id="mv-up"></div></div><div class="panel mv-col"><h3><img src="img/fall.png" alt="">Going down</h3><div id="mv-down"></div></div></div>
+<section class="now" id="now" hidden>
+<div class="sec-head"><h2><i class="live" aria-hidden="true"></i>Happening now</h2><a href="trades.html">All trade ads &rarr;</a></div>
+<div class="now-grid">
+<div class="panel now-ads" id="hads-box" hidden><h3><img src="img/trading.png" alt="">Newest trade ads</h3><div id="hads"></div></div>
+<div class="panel mv-col" id="mv-box" hidden><div class="mv-head"><h3><img src="img/chart_up.png" alt="">Biggest moves</h3><div class="mv-tabs" role="tablist"><button type="button" class="on" data-m="up" aria-selected="true">Up</button><button type="button" data-m="down" aria-selected="false">Down</button></div></div><div id="mv-up"></div><div id="mv-down" hidden></div><a class="mv-all" href="values.html">All values &rarr;</a></div>
+</div>
 </section>
 <section class="hstrats" id="hstrats" hidden>
 <div class="sec-head"><h2>New strategies</h2><a href="strategies.html">All strategies &rarr;</a></div>
 <div class="hs-list" id="hs-list"></div>
+</section>
+<section class="demo">
+<div class="demo-text">
+<h2>Right inside your Discord</h2>
+<p>Bloombot does the busy work, so you can focus on the trade.</p>
+<div class="dtabs" role="tablist">{demo_tabs}</div>
+<p class="demo-hint" id="demo-hint">Your ad goes to every server running Bloombot, not just one.</p>
+</div>
+<div class="demo-shot" aria-label="Example Bloombot messages in Discord">{demo_panes}</div>
 </section>
 <section class="how">
 <div class="sec-head"><h2>How it works</h2><a href="features.html">All features &rarr;</a></div>
@@ -232,10 +277,14 @@ home = f"""<section class="hero big">
 <div class="step"><img src="img/num_3.png" alt="3"><div><h3>Get offers</h3><p>Traders DM you, and Bloombot DMs you when a unit on your wishlist is offered.</p></div></div>
 </div>
 </section>
-<section class="hcards">
-<a class="hcard" href="dashboard.html"><img src="img/shield.png" alt=""><div><h3>Run a Discord server?</h3><p>Set channels, pings and features from the server dashboard.</p></div><span class="more">Open &rarr;</span></a>
-<a class="hcard" href="crates.html"><img src="img/crate.png" alt=""><div><h3>Saving up for a unit?</h3><p>See your real chance per crate and how much to save first.</p></div><span class="more">Open &rarr;</span></a>
-<a class="hcard" href="{SUPPORT}"><img src="img/envelope.png" alt=""><div><h3>Need help?</h3><p>Ask in the support server. Data requests are answered within 30 days.</p></div><span class="more">Join &rarr;</span></a>
+<section class="hband">
+<img class="hband-flower" src="img/flower.png" alt="">
+<div class="hband-text"><h2>Bring Bloombot to your server</h2><p>Free, set up in a minute. Pick your channels and pings from the dashboard.</p></div>
+<div class="hband-btns">
+<a class="brick discord" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
+<a class="brick dark" href="dashboard.html"><img src="img/gear.png" alt="">Dashboard</a>
+<a class="brick dark" href="{SUPPORT}"><img src="img/envelope.png" alt="">Support</a>
+</div>
 </section>
 </main>
 <script defer src="js/home.js?v={hashlib.md5(open('js/home.js', 'rb').read()).hexdigest()[:8]}"></script>
