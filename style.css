@@ -1704,12 +1704,12 @@ body:has(.gw) .totop{right:auto;left:20px}
 .su-art{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;aspect-ratio:1/1;overflow:hidden;border:3px solid var(--d);background:var(--a)}
 .su-img{position:absolute;inset:4% 6% 14%;width:88%;height:82%;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 .su-stars{position:absolute;top:2px;left:2px;z-index:3;display:flex}
-.su-stars img{width:clamp(11px,15cqw,30px);height:auto;margin-right:-3.4cqw;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
+.su-stars img{width:clamp(11px,3.4vw,22px);margin-right:-3px;width:clamp(11px,15cqw,30px);height:auto;margin-right:-3.4cqw;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
 .su-lim{position:absolute;top:0;right:0;z-index:2;width:74%;height:auto;pointer-events:none}
-.su-name{position:relative;z-index:2;max-width:100%;padding:0 3px 3px;font-size:clamp(9px,10.5cqw,21px);line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.su-name{position:relative;z-index:2;max-width:100%;padding:0 3px 3px;font-size:clamp(9px,2.5vw,15px);font-size:clamp(9px,10.5cqw,21px);line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip}
 .su-got{position:absolute;top:34%;left:4px;z-index:3;font-size:.9rem;color:#9cf27d}
-.su-pct{display:block;margin:0 -5px;padding:3px 0 4px;background:var(--st),var(--b);font-size:clamp(11px,13cqw,26px);line-height:1.15;text-align:center}
-.su-pity{display:block;margin-top:2px;font-size:clamp(10px,15cqw,28px);font-weight:600;line-height:1.15;text-align:center;color:#6cf08a;white-space:nowrap;overflow:hidden;letter-spacing:.03em}
+.su-pct{display:block;margin:0 -5px;padding:3px 0 4px;background:var(--st),var(--b);font-size:clamp(11px,3vw,18px);font-size:clamp(11px,13cqw,26px);line-height:1.15;text-align:center}
+.su-pity{display:block;margin-top:2px;font-size:clamp(10px,3.2vw,19px);font-size:clamp(10px,15cqw,28px);font-weight:600;line-height:1.15;text-align:center;color:#6cf08a;white-space:nowrap;overflow:hidden;letter-spacing:.03em}
 .su-pity.none{visibility:hidden}
 .su.s0{--a:#5c5c5c;--b:#8d8d8d;--d:#333}
 .su.s1{--a:#2c5b8c;--b:#4b93e0;--d:#18365a}
@@ -3093,3 +3093,6 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 [data-theme=light] .tile::before,[data-theme=light] .cta-panel::before,[data-theme=light] .toc-box::before,[data-theme=light] .panel::before,
 [data-theme=light] .step::before,[data-theme=light] .tcard::before{background-image:url(img/weld.png);opacity:.07}
 [data-theme=light] .nl.on::before{opacity:.18}
+/* crate calculator on phones */
+.kform,#kout{scroll-margin-top:-12px}
+@media (max-width:420px){.kluck{flex-wrap:wrap}}

@@ -297,7 +297,7 @@
       const n = SIM.got[name];
       if (n) art.append(el("span", "su-got", "x" + commas(n)));
       b.append(art, el("span", "su-pct", drop + "%"));
-      b.onclick = () => pickUnit(i);
+      b.onclick = () => { pickUnit(i); showAnswer(); };
       cell.append(b);
       if (tiers[stars]) cell.append(el("span", "su-pity", `PITY ${SIM.pity[stars] || 0}/${tiers[stars]}`));
       else if (Object.keys(tiers).length) cell.append(el("span", "su-pity none", "\u00a0"));
@@ -418,6 +418,16 @@
     pityFields();
   }
   function pickUnit(i) { S.unit = i; fillUnit(); drawUnits(); update(); }
+  // phones stack the steps, so the answer is far below the window: bring it into view after a tap
+  function showAnswer() {
+    if (!matchMedia("(max-width:1000px)").matches) return;
+    const t = $("kb").value.trim() ? $("kout") : document.querySelector(".kform");
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    if (r.top > 70 && r.top < innerHeight * 0.6) return;
+    const still = matchMedia("(prefers-reduced-motion:reduce)").matches;
+    setTimeout(() => t.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" }), 180);
+  }
 
   function pityFields() {
     $("kpity").hidden = !$("kpy").checked;
