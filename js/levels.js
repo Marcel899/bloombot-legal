@@ -9,8 +9,8 @@
   /* What each rank adds. Discord perks come from bot/leveling.py RANKS; website ones are checked by Supabase. */
   const PERKS = {
     1: [["web", "Rank badge on your profile"], ["dc", "Earn XP from commands and trade ads"]],
-    5: [["dc", "2s command cooldown (instead of 3s)"], ["web", "Aurora profile banner"]],
-    10: [["dc", "Trade ads stay up for 36h (instead of 24h)"], ["dc", "Your trade ad is bumped every 30 minutes"], ["web", "Share a strategy every 5 minutes (instead of 10)"], ["web", "Lava profile banner"]],
+    5: [["dc", "2s command cooldown (instead of 3s)"], ["dc", "2 trade ads up at once (instead of 1)"], ["web", "Aurora profile banner"]],
+    10: [["dc", "3 trade ads up at once"], ["dc", "Trade ads stay up for 36h (instead of 24h)"], ["dc", "Your trade ad is bumped every 30 minutes"], ["web", "Share a strategy every 5 minutes (instead of 10)"], ["web", "Lava profile banner"]],
     20: [["dc", "2x winning chance in Discord giveaways"], ["dc", "Auto-bump every 20 minutes"], ["web", "Glowing rank ring on your profile"], ["web", "Galaxy profile banner"]],
     35: [["dc", "1s command cooldown"], ["dc", "Trade ads stay up for 48h"], ["dc", "Auto-bump every 10 minutes"], ["web", "Share a strategy every 2 minutes"], ["web", "Royal profile banner"]],
     50: [["dc", "3x winning chance in Discord giveaways"], ["dc", "Auto-bump every 5 minutes"], ["web", "Golden shining name on your profile"], ["web", "Animated Ancient profile banner"]],
@@ -20,10 +20,10 @@
   /* One-time tasks. XP must match xp_task_amount() in Supabase and XP_TASKS in the bot. */
   const TASKS = [
     { k: "account", t: "Create your Bloombot account", d: "Pick your Roblox name once. Takes 10 seconds.", xp: 50, ic: "task_user", go: "profile.html#edit", gl: "Set up" },
-    { k: "roblox", t: "Verify your Roblox account", d: "Prove it's you with a short code in your Roblox About.", xp: 300, ic: "shield", go: "#verify", gl: "Verify" },
+    { k: "roblox", t: "Verify your Roblox account", d: "Prove it's you with a short code in your Roblox About.", xp: 750, ic: "shield", go: "#verify", gl: "Verify" },
     { k: "in_server", t: "Join the official Bloombot Discord", d: "Our own server: news, giveaways and other traders. Counts after about 2 minutes.", xp: 200, ic: "envelope", go: support, gl: "Join", ext: true },
     { k: "add_bot", t: "Add Bloombot to your server", d: "Any server you own or run. Shows up within 3 minutes.", xp: 300, ic: "task_addbot", go: invite, gl: "Add", ext: true },
-    { k: "google", t: "Connect a Google login", d: "Log in with Google next time. Handy on your phone.", xp: 150, ic: "task_google", run: () => BB.addGoogle(), gl: "Connect" },
+    { k: "google", t: "Connect a Google login", d: "Log in with Google next time. Handy on your phone.", xp: 400, ic: "task_google", run: () => BB.addGoogle(), gl: "Connect" },
     { k: "trade_ad", t: "Post a trade ad", d: "From the website or any Bloombot server.", xp: 150, ic: "trading", go: "trades.html#post", gl: "Post" },
     { k: "strategy", t: "Share a strategy", d: "Help other players beat a map.", xp: 200, ic: "bullseye", go: "strategies.html#share", gl: "Share" },
     { k: "server_link", t: "Add your private server link", d: "So traders can join you straight away.", xp: 100, ic: "task_link", go: "profile.html#edit", gl: "Add" },

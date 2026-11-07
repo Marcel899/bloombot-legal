@@ -2,7 +2,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const { el } = BB;
-  let ads = [], me = null, timer = null, units = [], shown = 24;
+  let ads = [], me = null, maxAds = 1, timer = null, units = [], shown = 24;
   const PAGE = 24;
 
   /* Unit names in the ad text get their icon, longest names first. */
@@ -242,14 +242,25 @@
   }
   $("adedit").onclick = () => editText($("adtext").hidden, true);
   $("adwrite").onclick = () => editText(true, true);
-  /* 3 live ads at once (trade_ads.MAX_ACTIVE_ADS in the bot). */
+  /* Live ads at once by level: 1, 2 at level 5, 3 at level 10 (Rank.max_trade_ads in the bot). */
+  const adsForLevel = lv => lv >= 10 ? 3 : lv >= 5 ? 2 : 1;
+  async function loadLimit() {
+    try {
+      const { data: p } = await BB.sb.from("profiles").select("level, xp").eq("discord_id", me).maybeSingle();
+      const lv = p ? Number(p.level) || (p.xp != null ? BB.levelFromXp(p.xp).level : 1) : 1;
+      maxAds = adsForLevel(lv);
+    } catch (_) { maxAds = 1; }
+    slots();
+  }
   function slots() {
     const now = Date.now();
     const n = ads.filter(a => a.discord_id === me && (!a.expires_at || new Date(a.expires_at) > now)).length;
     const s = $("slots");
-    s.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i < n));
-    s.querySelector("b").textContent = Math.min(n, 3) + "/3 live";
-    s.classList.toggle("full", n >= 3);
+    s.querySelectorAll("i").forEach((d, i) => { d.hidden = i >= maxAds; d.classList.toggle("on", i < n); });
+    s.querySelector("b").textContent = Math.min(n, maxAds) + "/" + maxAds + " live";
+    s.classList.toggle("full", n >= maxAds);
+    s.title = "You can have " + maxAds + " live trade ad" + (maxAds === 1 ? "" : "s") + " at once" +
+      (maxAds < 3 ? " (" + (maxAds + 1) + " at level " + (maxAds === 1 ? 5 : 10) + ")" : "") + ". Posting more replaces your oldest.";
   }
   const norm = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   function find(q) {
@@ -395,6 +406,7 @@
     if (location.hash.startsWith("#post")) setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("hq").focus(); }, 50);
     BB.loadValues().then(v => { prepUnits(v); render(); preview(); prefill(v); }).catch(() => {});
     load();
+    loadLimit();
     clearInterval(timer);
     timer = setInterval(load, 60000);
   }
