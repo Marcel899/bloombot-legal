@@ -25,7 +25,7 @@
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=2f21eeb5">
+<link rel="stylesheet" href="style.css?v=8602963b">
 <script src="js/theme.js?v=c66f3a41"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=ad57d41f"></script>
@@ -63,28 +63,32 @@
 <p class="err" id="loginerr" hidden></p>
 </section>
 <section id="board" hidden>
-<form class="panel post" id="postform">
-<div class="post-head"><img id="meav" alt=""><div><strong>Post a trade ad as <span id="mename"></span></strong><span>It goes to every server running Bloombot, just like posting in a trade ad channel.</span></div></div>
-<div class="composer" id="post">
-<div class="cmp-side have"><div class="cmp-top"><span class="cmp-label">I'm trading</span><span class="cmp-hint">pick units, set amounts or bulk</span></div>
-<div class="cmp-chips" id="hchips"></div>
-<div class="picker"><input class="search" id="hq" type="search" autocomplete="off" placeholder="Search a unit…" aria-label="Add a unit you're trading"><div class="sugs" id="hsug" hidden></div></div>
-<div class="cmp-tags"><button class="tagb" type="button" data-tag="have-small" data-group="have-add"><img src="img/tiny_add.png" alt="">+ small add</button><button class="tagb" type="button" data-tag="have-add" data-group="have-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="have-big" data-group="have-add"><img src="img/big_add.png" alt="">+ big add</button></div>
+<form class="panel post cz" id="postform">
+<div class="cz-head"><img id="meav" alt=""><div class="cz-who"><strong>New trade ad</strong><span>as <b id="mename"></b> · shows in every Bloombot server</span></div><span class="cz-slots" id="slots" title="You can have 3 live trade ads at once"><i></i><i></i><i></i><b>0/3 live</b></span></div>
+<div class="cz-grid" id="post">
+<section class="cz-side give" aria-label="You give">
+<div class="cz-band"><span class="cz-dot"></span><strong>You give</strong><em id="hworth"></em></div>
+<div class="cz-units" id="hchips"></div>
+<div class="picker cz-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15ZM16 16l5 5"/></svg><input id="hq" type="search" autocomplete="off" placeholder="Add a unit…" aria-label="Add a unit you give"><div class="sugs" id="hsug" hidden></div></div>
+<div class="cz-extras"><button class="tagb" type="button" data-tag="have-small" data-group="have-add"><img src="img/tiny_add.png" alt="">Small add</button><button class="tagb" type="button" data-tag="have-add" data-group="have-add"><img src="img/add.png" alt="">Add</button><button class="tagb" type="button" data-tag="have-big" data-group="have-add"><img src="img/big_add.png" alt="">Big add</button></div>
+</section>
+<div class="cz-swap" aria-hidden="true"><img src="img/trading.png" alt=""></div>
+<section class="cz-side get" aria-label="You want">
+<div class="cz-band"><span class="cz-dot"></span><strong>You want</strong><em id="wworth"></em></div>
+<div class="cz-units" id="wchips"></div>
+<div class="picker cz-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15ZM16 16l5 5"/></svg><input id="wq" type="search" autocomplete="off" placeholder="Add a unit…" aria-label="Add a unit you want"><div class="sugs" id="wsug" hidden></div></div>
+<div class="cz-extras"><button class="tagb" type="button" data-tag="want-offers" data-group="want-kind"><img src="img/offer.png" alt="">Offers</button><button class="tagb" type="button" data-tag="want-any" data-group="want-kind"><img src="img/any.png" alt="">Any</button><button class="tagb" type="button" data-tag="want-add"><img src="img/add.png" alt="">Add</button><button class="tagb" type="button" data-tag="want-overpay"><img src="img/win.png" alt="">Overpay</button></div>
+</section>
 </div>
-<div class="cmp-mid"><img src="img/trading.png" alt=""><span>for</span></div>
-<div class="cmp-side want"><div class="cmp-top"><span class="cmp-label">I want</span><span class="cmp-hint">or leave empty for offers</span></div>
-<div class="cmp-chips" id="wchips"></div>
-<div class="picker"><input class="search" id="wq" type="search" autocomplete="off" placeholder="Search a unit…" aria-label="Add a unit you want"><div class="sugs" id="wsug" hidden></div></div>
-<div class="cmp-tags"><button class="tagb" type="button" data-tag="want-offers" data-group="want-kind"><img src="img/offer.png" alt="">Offers</button><button class="tagb" type="button" data-tag="want-any" data-group="want-kind"><img src="img/any.png" alt="">Any</button><button class="tagb" type="button" data-tag="want-add"><img src="img/add.png" alt="">+ add</button><button class="tagb" type="button" data-tag="want-overpay"><img src="img/win.png" alt="">Overpay</button></div>
+<div class="cz-out">
+<div class="cz-out-top"><strong>Your ad</strong><button class="cz-edit" id="adedit" type="button" aria-expanded="false">Edit text</button><span id="adcount" class="count">0/200</span></div>
+<div class="cz-prev" id="adprev"><div id="adprevbody"></div><p class="cz-empty" id="adempty">Add units above, or <button type="button" id="adwrite">write it yourself</button>.</p></div>
+<textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad" hidden></textarea>
 </div>
-</div>
-<label class="cmp-text-label" for="adtext">Your trade ad <span>Built from your picks. You can also type it yourself.</span></label>
-<div class="post-row">
-<textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad"></textarea>
-</div>
-<div class="cmp-preview" id="adprev" hidden><span class="pv-label">Preview</span><div id="adprevbody"></div></div>
-<div class="post-foot"><span class="hint">7 to 200 characters, no links, one ad every 5 minutes. You need a linked account (<code>/link</code> in Discord). Press Enter to post.</span><span id="adcount" class="count">0/200</span></div>
+<div class="cz-foot">
+<p class="cz-rules">7 to 200 characters · no links · 1 ad per 5 min · needs <code>/link</code></p>
 <div class="post-actions"><button class="brick dark sm" id="adclear" type="button">Clear</button><button class="brick green" id="postbtn" type="submit"><img src="img/plus.png" alt="">Post trade ad</button></div>
+</div>
 <p class="post-status" id="poststatus" hidden></p>
 </form>
 <div class="board-bar">
@@ -100,7 +104,7 @@
 </section>
 <div class="skel-grid sk-ads" id="loading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 </main>
-<script defer src="js/trades.js?v=dc45638c"></script>
+<script defer src="js/trades.js?v=528d60ca"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

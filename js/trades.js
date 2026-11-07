@@ -121,6 +121,7 @@
     $("tnone").hidden = list.length > 0;
     $("tnone").textContent = mine ? "You have no live trade ads. Post one above!" : ads.length ? "No trade ad matches that." : "No trade ads right now.";
     $("count").textContent = list.length + " live trade ad" + (list.length === 1 ? "" : "s");
+    slots();
   }
 
   async function load() {
@@ -140,13 +141,16 @@
     const n = $("adtext").value.trim().length;
     $("adcount").textContent = `${n}/${MAX}`;
     $("adcount").classList.toggle("bad", n > MAX || (n > 0 && n < MIN));
-    $("postbtn").disabled = busy || n < MIN || n > MAX;
+    $("postbtn").disabled = busy;
+    $("postbtn").classList.toggle("ready", n >= MIN && n <= MAX);
     preview();
   }
   function preview() {
     const t = $("adtext").value.trim();
-    $("adprev").hidden = !t;
+    $("adempty").hidden = !!t;
+    $("adprevbody").hidden = !t;
     if (t) $("adprevbody").replaceChildren(adText(t));
+    else $("adprevbody").replaceChildren();
   }
   function status(kind, text) {
     const s = $("poststatus");
@@ -180,13 +184,29 @@
     $("adtext").value = text;
     counter();
   }
+  /* Picked units as tiles: picture, name, amount stepper, bulk toggle. */
+  const EMPTY = { have: "Search a unit below to add it.", want: "Leave empty to ask for offers." };
   function drawChips() {
-    for (const [key, box] of [["have", "hchips"], ["want", "wchips"]]) {
-      $(box).replaceChildren(...pick[key].map(r => {
-        const c = el("div", "pchip" + (r.bulk ? " bulk" : ""));
-        c.append(BB.itemImg(r.item, "pimg"), el("span", "pname", r.item.name));
+    for (const [key, box, worth] of [["have", "hchips", "hworth"], ["want", "wchips", "wworth"]]) {
+      const list = pick[key];
+      let total = 0;
+      for (const r of list) if (!r.bulk && r.item.est > 0) total += r.item.est * r.qty;
+      $(worth).textContent = total > 0 ? "\u2248 " + BB.fmt(total) : "";
+      if (!list.length) { $(box).replaceChildren(el("p", "cz-none", EMPTY[key])); continue; }
+      $(box).replaceChildren(...list.map(r => {
+        const c = el("div", "pchip" + (r.bulk ? " bulk" : "") + (r.fresh ? " fresh" : ""));
+        r.fresh = false;
+        c.title = r.item.est > 0 ? r.item.name + " \u00b7 " + BB.fmt(r.item.est) + " each" : r.item.name;
+        const x = el("button", "px", "\u00d7");
+        x.type = "button";
+        x.setAttribute("aria-label", "Remove " + r.item.name);
+        x.onclick = () => { list.splice(list.indexOf(r), 1); drawChips(); compose(); };
+        const pic = el("div", "pic");
+        pic.append(BB.itemImg(r.item, "pimg"));
+        if (r.bulk || r.qty > 1) pic.append(el("b", "pbadge", r.bulk ? "BULK" : "\u00d7" + r.qty));
+        c.append(x, pic, el("span", "pname", r.item.name));
         const amt = el("div", "pamt");
-        const minus = el("button", "pq", "−"), plus = el("button", "pq", "+");
+        const minus = el("button", "pq", "\u2212"), plus = el("button", "pq", "+");
         minus.type = plus.type = "button";
         minus.setAttribute("aria-label", "One less");
         plus.setAttribute("aria-label", "One more");
@@ -194,28 +214,42 @@
         n.type = "number"; n.min = "1"; n.max = "999"; n.inputMode = "numeric";
         n.value = r.qty;
         n.setAttribute("aria-label", "Amount of " + r.item.name);
-        n.disabled = !!r.bulk;
-        const set = v => { r.qty = Math.max(1, Math.min(999, Math.round(v) || 1)); n.value = r.qty; compose(); };
-        minus.onclick = () => set(r.qty - 1);
-        plus.onclick = () => set(r.qty + 1);
+        n.disabled = minus.disabled = plus.disabled = !!r.bulk;
+        const set = (v, redraw) => { r.qty = Math.max(1, Math.min(999, Math.round(v) || 1)); n.value = r.qty; if (redraw) drawChips(); compose(); };
+        minus.onclick = () => set(r.qty - 1, true);
+        plus.onclick = () => set(r.qty + 1, true);
         n.oninput = () => { if (n.value !== "") set(+n.value); };
-        n.onblur = () => set(+n.value);
-        minus.disabled = plus.disabled = !!r.bulk;
+        n.onchange = n.onblur = () => set(+n.value, true);
         amt.append(minus, n, plus);
         const bulk = el("button", "pbulk" + (r.bulk ? " on" : ""));
         bulk.type = "button";
+        bulk.setAttribute("aria-pressed", r.bulk ? "true" : "false");
         const bi = el("img"); bi.src = "img/bulk.png"; bi.alt = "";
         bulk.append(bi, "Bulk");
         bulk.title = "Trading or wanting lots of this unit";
         bulk.onclick = () => { r.bulk = !r.bulk; drawChips(); compose(); };
-        const x = el("button", "px", "×");
-        x.type = "button";
-        x.setAttribute("aria-label", "Remove " + r.item.name);
-        x.onclick = () => { pick[key].splice(pick[key].indexOf(r), 1); drawChips(); compose(); };
-        c.append(amt, bulk, x);
+        c.append(amt, bulk);
         return c;
       }));
     }
+  }
+  /* "Edit text": the ad writes itself, but you can open the box and change it. */
+  function editText(open, focus) {
+    $("adtext").hidden = !open;
+    $("adedit").setAttribute("aria-expanded", open ? "true" : "false");
+    $("adedit").textContent = open ? "Done" : "Edit text";
+    if (open && focus) { const t = $("adtext"); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+  }
+  $("adedit").onclick = () => editText($("adtext").hidden, true);
+  $("adwrite").onclick = () => editText(true, true);
+  /* 3 live ads at once (trade_ads.MAX_ACTIVE_ADS in the bot). */
+  function slots() {
+    const now = Date.now();
+    const n = ads.filter(a => a.discord_id === me && (!a.expires_at || new Date(a.expires_at) > now)).length;
+    const s = $("slots");
+    s.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i < n));
+    s.querySelector("b").textContent = Math.min(n, 3) + "/3 live";
+    s.classList.toggle("full", n >= 3);
   }
   const norm = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   function find(q) {
@@ -241,7 +275,7 @@
     const choose = it => {
       const have = pick[key].find(r => r.item.name === it.name);
       if (have) have.qty = Math.min(999, have.qty + 1);
-      else if (pick[key].length < 15) pick[key].push({ item: it, qty: 1, bulk: false });
+      else if (pick[key].length < 15) pick[key].push({ item: it, qty: 1, bulk: false, fresh: true });
       else BB.toast("Keep it to 15 per side.", "info", { title: "That\u2019s a lot of units" });
       if (key === "want") { pick.tags.delete("want-offers"); pick.tags.delete("want-any"); syncTags(); }
       input.value = ""; opts = []; draw(); drawChips(); compose(); input.focus();
@@ -282,6 +316,7 @@
     pick.have = []; pick.want = []; pick.tags.clear();
     syncTags(); drawChips();
     $("adtext").value = "";
+    editText(false);
     counter();
   }
 
@@ -357,7 +392,7 @@
     $("mename").textContent = u.name;
     $("login").hidden = true; $("board").hidden = false;
     if (new URLSearchParams(location.search).get("mine")) $("mine").checked = true;
-    if (location.hash.startsWith("#post")) setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("adtext").focus(); }, 50);
+    if (location.hash.startsWith("#post")) setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("hq").focus(); }, 50);
     BB.loadValues().then(v => { prepUnits(v); render(); preview(); prefill(v); }).catch(() => {});
     load();
     clearInterval(timer);
@@ -376,6 +411,7 @@
   $("adclear").onclick = () => { clearComposer(); status("", ""); };
   picker("have", "hq", "hsug");
   picker("want", "wq", "wsug");
+  drawChips();
   counter();
   BB.onAuth(show);
 })();
