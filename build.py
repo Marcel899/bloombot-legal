@@ -758,7 +758,10 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 <a class="brick discord" href="{INVITE}">{DISCORD_SVG}Add Bloombot to a server</a>
 </section>
 <div class="dgrid" id="dmain" hidden>
-<section class="dbar" aria-label="Your servers"><div class="dbar-head"><h3>Your servers</h3><input class="search dgq" id="dgq" placeholder="Find a server…" hidden aria-label="Find a server"><a class="dadd" href="{INVITE}">+ Add server</a></div><div id="dglist"></div></section>
+<section class="dbar" aria-label="Your servers"><div class="dbar-row">
+<button type="button" class="dcur" id="dcur" aria-haspopup="listbox" aria-expanded="false" aria-controls="dpop"><span class="dcur-ic" id="dcur-ic"></span><span class="dg-t"><small>Managing</small><strong id="dcur-n">Pick a server</strong><em id="dcur-s"></em></span><span class="dcur-r"><i id="dcount"></i><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg></span></button>
+<a class="brick dark sm dadd" href="{INVITE}" aria-label="Add Bloombot to another server"><b>+</b><span>Add server</span></a></div>
+<div class="dpop" id="dpop" hidden><div class="dpop-q"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="dgq" id="dgq" placeholder="Find a server…" autocomplete="off" spellcheck="false" aria-label="Find a server" aria-controls="dglist"></div><div id="dglist" role="listbox" aria-label="Your servers"></div><p class="dnone" id="dnone" hidden>No server matches that.</p></div></section>
 <p class="panel dpick" id="dpick" hidden>Pick a server above to change its settings.</p><section class="panel dpanel" id="dpanel" hidden></section>
 </div>
 </main>

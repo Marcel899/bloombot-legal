@@ -23,20 +23,87 @@
   }
 
   let filter = "";
+  const sub = g => g.setup_complete ? (g.member_count || 0).toLocaleString() + " members" : "Needs /setup";
+  const isOpen = () => !$("dpop").hidden;
+  function openPop(focus) {
+    if (isOpen()) return;
+    $("dpop").hidden = false;
+    $("dcur").setAttribute("aria-expanded", "true");
+    $("dcur").closest(".dbar").classList.add("open");
+    if (focus !== false) {
+      const q = $("dgq");
+      if (matchMedia("(pointer:fine)").matches) q.focus({ preventScroll: true });
+      else { const on = $("dglist").querySelector(".dg.on") || $("dglist").querySelector(".dg"); if (on) on.focus({ preventScroll: true }); }
+    }
+  }
+  function closePop(back) {
+    if (!isOpen()) return;
+    $("dpop").hidden = true;
+    $("dcur").setAttribute("aria-expanded", "false");
+    $("dcur").closest(".dbar").classList.remove("open");
+    if (back) $("dcur").focus();
+  }
+  function choose(g) {
+    closePop(false);
+    $("dgq").value = ""; filter = "";
+    if (location.hash !== "#g=" + g.guild_id) location.hash = "g=" + g.guild_id; else pick();
+  }
+  function current() {
+    const ic = $("dcur-ic");
+    ic.replaceChildren(cur ? icon(cur, "dg-ic") : Object.assign(el("img", "dg-ic"), { src: "img/shield.png", alt: "" }));
+    $("dcur-n").textContent = cur ? cur.name : "Pick a server";
+    const s = $("dcur-s");
+    s.textContent = cur ? sub(cur) : guilds.length + " servers you can manage";
+    s.className = cur && !cur.setup_complete ? "warn" : "";
+    $("dcount").textContent = guilds.length > 1 ? guilds.length : "";
+    $("dcur").disabled = guilds.length < 2 && !!cur;
+    $("dcur").closest(".dbar").classList.toggle("solo", guilds.length < 2 && !!cur);
+  }
   function list() {
     const box = $("dglist");
     const q = $("dgq");
-    if (q) { q.hidden = guilds.length < 6; q.oninput = () => { filter = q.value.trim().toLowerCase(); list(); }; }
-    box.replaceChildren(...guilds.filter(g => !filter || g.name.toLowerCase().includes(filter)).map(g => {
-      const b = el("button", "dg" + (cur && cur.guild_id === g.guild_id ? " on" : ""));
+    q.closest(".dpop-q").hidden = guilds.length < 5;
+    const shown = guilds.filter(g => !filter || g.name.toLowerCase().includes(filter));
+    $("dnone").hidden = !!shown.length;
+    box.replaceChildren(...shown.map(g => {
+      const on = !!cur && cur.guild_id === g.guild_id;
+      const b = el("button", "dg" + (on ? " on" : ""));
       b.type = "button";
+      b.setAttribute("role", "option");
+      b.setAttribute("aria-selected", String(on));
       const t = el("span", "dg-t");
-      t.append(el("strong", null, g.name), el("em", null, g.setup_complete ? (g.member_count || 0).toLocaleString() + " members" : "Needs /setup"));
-      b.append(icon(g, "dg-ic"), t);
-      b.onclick = () => { location.hash = "g=" + g.guild_id; };
+      t.append(el("strong", null, g.name), el("em", g.setup_complete ? null : "warn", sub(g)));
+      b.append(icon(g, "dg-ic"), t, el("span", "dg-ok", on ? "✓" : ""));
+      b.onclick = () => choose(g);
       return b;
     }));
+    current();
   }
+  $("dcur").onclick = () => { if (isOpen()) closePop(); else openPop(); };
+  $("dgq").oninput = () => { filter = $("dgq").value.trim().toLowerCase(); list(); };
+  $("dgq").onkeydown = e => {
+    const first = $("dglist").querySelector(".dg");
+    if (e.key === "ArrowDown" && first) { e.preventDefault(); first.focus(); }
+    else if (e.key === "Enter" && first) { e.preventDefault(); first.click(); }
+  };
+  $("dpop").addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.preventDefault(); closePop(true); return; }
+    if (!e.target.classList.contains("dg")) return;
+    const all = [...$("dglist").querySelectorAll(".dg")], i = all.indexOf(e.target);
+    const cols = Math.max(1, Math.round($("dglist").clientWidth / (e.target.offsetWidth || 1)));
+    let n = -1;
+    if (e.key === "ArrowDown") n = Math.min(all.length - 1, i + cols);
+    else if (e.key === "ArrowUp") n = i - cols < 0 ? -2 : i - cols;
+    else if (e.key === "ArrowRight") n = Math.min(all.length - 1, i + 1);
+    else if (e.key === "ArrowLeft") n = Math.max(0, i - 1);
+    else if (e.key === "Home") n = 0;
+    else if (e.key === "End") n = all.length - 1;
+    else return;
+    e.preventDefault();
+    if (n === -2) { const q = $("dgq"); if (!q.closest(".dpop-q").hidden) q.focus(); return; }
+    all[n].focus();
+  });
+  document.addEventListener("pointerdown", e => { if (isOpen() && !e.target.closest(".dbar")) closePop(); });
 
   function status(text, kind) {
     const s = $("dstatus");
@@ -224,12 +291,11 @@
     const m = /g=(\d+)/.exec(location.hash);
     cur = (m && guilds.find(g => g.guild_id === m[1])) || (guilds.length === 1 ? guilds[0] : null);
     list();
-    const on = document.querySelector("#dglist .dg.on");
-    if (on) { const b = $("dglist"), l = on.offsetLeft - b.offsetLeft; if (l < b.scrollLeft || l + on.offsetWidth > b.scrollLeft + b.clientWidth) b.scrollLeft = l - 12; }
     const keep = $("dstatus") && !$("dstatus").hidden ? [$("dstatus").textContent, $("dstatus").className.split(" ").pop()] : null;
     panel();
     if (keep) status(keep[0], keep[1]);
     $("dpick").hidden = !!cur || !guilds.length;
+    if (!cur && guilds.length) openPop(false);
   }
 
   async function reload() {
