@@ -557,12 +557,43 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <form id="sform" hidden>
 <h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
 <div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
-<div class="sd-field"><div class="pe-lrow"><label for="sd">Details</label>
-<div class="sd-tools"><div class="md-tools" aria-label="Formatting"><button type="button" data-md="**" title="Bold"><b>B</b></button><button type="button" data-md="*" title="Italic"><i>I</i></button><button type="button" data-md="# " title="Heading">H</button><button type="button" data-md="- " title="List">&bull;</button></div>
-<div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="sdw" aria-selected="true">Write</button><button type="button" role="tab" id="sdp" aria-selected="false">Preview</button></div></div></div>
-<textarea id="sd" rows="6" maxlength="1500" placeholder="Units you need, where to place them, upgrade order and tips…"></textarea>
-<div class="sd-prev md" id="sdprev" hidden></div></div>
-<div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Details <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). You need a linked account (<code>/link</code>).</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
+<div class="sd-tabs"><span class="hint">Fill in what you know. Only the description is needed.</span><div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="sdw" aria-selected="true">Write</button><button type="button" role="tab" id="sdp" aria-selected="false">Preview</button></div></div>
+<div id="sfields">
+<fieldset class="sf"><legend><img src="img/gear.png" alt="">Information</legend>
+<div class="sf-grid">
+<label>Gamemode<select id="f-mode"><option value="">Any</option><option>Story</option><option>Hard Mode</option><option>Endless</option><option>Survival</option><option>PvP</option><option>Event</option><option>Raid</option><option>Challenge</option></select></label>
+<label>Team size<select id="f-team"><option value="">Any</option><option>1 player</option><option>2 players</option><option>3 players</option><option>4 players</option></select></label>
+<label>Difficulty<select id="f-diff"><option value="">Pick one</option><option>Easy</option><option>Medium</option><option>Hard</option><option>Extreme</option></select></label>
+<label>Map or level<input class="search" id="f-map" maxlength="40" placeholder="e.g. Volcano level 5"></label>
+</div>
+<label>Short summary<input class="search" id="f-tag" maxlength="100" placeholder="e.g. A stall focused loadout"></label>
+</fieldset>
+<fieldset class="sf"><legend><img src="img/flower.png" alt="">Required units <em id="f-ucount">0/10</em></legend>
+<div class="picker"><input class="search" id="f-uq" type="search" autocomplete="off" placeholder="Search a unit and press Enter…" aria-label="Add a required unit"><div class="sugs" id="f-usug" hidden></div></div>
+<div class="f-units" id="f-units"></div>
+<label><span>Alternatives <em>one per line</em></span><textarea id="f-alt" rows="2" maxlength="300" placeholder="Glowthorn → Blinkbloom"></textarea></label>
+</fieldset>
+<fieldset class="sf"><legend><img src="img/envelope.png" alt="">Description <em>needed</em></legend>
+<div class="md-tools" aria-label="Formatting"><button type="button" data-md="**" title="Bold"><b>B</b></button><button type="button" data-md="*" title="Italic"><i>I</i></button><button type="button" data-md="- " title="List">&bull;</button></div>
+<textarea id="sd" rows="4" maxlength="1000" placeholder="What the strategy does and why it works…"></textarea>
+</fieldset>
+<fieldset class="sf"><legend><img src="img/clock.png" alt="">Game plan <em>one step per line</em></legend>
+<div class="sf-phases">
+<label>Early game<textarea id="f-early" rows="3" maxlength="500" placeholder="Place Glowthorn at the back arch"></textarea></label>
+<label>Mid game<textarea id="f-mid" rows="3" maxlength="500" placeholder="Max 2 Shockolateflora at the front"></textarea></label>
+<label>Late game<textarea id="f-late" rows="3" maxlength="500" placeholder="Place Sundial Stalk near spawn"></textarea></label>
+</div>
+<label>Tips<textarea id="f-tips" rows="2" maxlength="500" placeholder="Use Reverse Time when the first boss reaches the corner"></textarea></label>
+</fieldset>
+<fieldset class="sf"><legend><img src="img/chart_up.png" alt="">Performance</legend>
+<div class="sf-grid">
+<label>Cost<select id="f-cost"><option value="">Pick one</option><option>Cheap</option><option>Medium</option><option>Expensive</option></select></label>
+<label>Clear speed<select id="f-speed"><option value="">Pick one</option><option>Slow</option><option>Medium</option><option>Fast</option></select></label>
+</div>
+</fieldset>
+</div>
+<div class="sd-prev" id="sdprev" hidden></div>
+<div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Total <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). You need a linked account (<code>/link</code>). Ctrl+Enter shares.</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
 <p class="post-status" id="sstatus" hidden></p>
 </form>
 </section>

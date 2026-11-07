@@ -11,6 +11,81 @@
   if (["meta-units", "map-specific", "general", "mine"].includes(qs.get("cat"))) cat = qs.get("cat");
   if (["old", "az", "long"].includes(qs.get("sort"))) sort = qs.get("sort");
 
+  /* Strategies made with the form (or the bot's template) have "## Heading" sections.
+     Information/Performance become pills, units get their pictures, the rest stays text. */
+  const unitsP = BB.loadValues().then(v => new Map(v.map(i => [i.name.toLowerCase(), i]))).catch(() => new Map());
+  const KV = /^\*\*(.+?):\*\*\s*`?([^`]*?)`?\s*$/;
+  function unitChip(name) {
+    const chip = el("span", "uchip");
+    const img = el("img", "uimg");
+    img.alt = ""; img.src = "img/flower.png";
+    chip.append(img, document.createTextNode(name));
+    unitsP.then(m => {
+      const it = m.get(name.toLowerCase());
+      if (!it) return;
+      img.replaceWith(BB.itemImg(it, "uimg"));
+      if (it.value > 0) chip.title = `${it.name} · ${BB.fmt(it.value)}`;
+    });
+    return chip;
+  }
+  const items = lines => lines.map(l => l.replace(/^\s*(?:[-*•]|\d+\.)\s*/, "").trim()).filter(Boolean);
+  function sections(text) {
+    const parts = [{ name: "", lines: [] }];
+    for (const l of text.split("\n")) {
+      const m = l.match(/^##\s+(.+)$/);
+      if (m) parts.push({ name: m[1], key: BB.plain(m[1]).toLowerCase().trim(), lines: [] });
+      else parts[parts.length - 1].lines.push(l);
+    }
+    if (parts.length === 1) return { head: [], body: BB.md(text, { cls: "strat-body" }) };
+    const head = [], body = el("div", "strat-body strat-secs");
+    const intro = parts[0].lines.join("\n").trim();
+    if (intro) {
+      const tag = intro.match(/^>\s*(.+)$/);
+      if (tag && !intro.includes("\n")) { const p = el("p", "strat-tag"); BB.mdInline(p, tag[1]); head.push(p); }
+      else body.append(BB.md(intro));
+    }
+    const pills = el("div", "sinfo-row");
+    for (const p of parts.slice(1)) {
+      const raw = p.lines.join("\n").trim();
+      if (!raw) continue;
+      if (p.key === "information" || p.key === "performance") {
+        const rest = [];
+        for (const l of p.lines) {
+          const kv = l.trim().match(KV);
+          if (!kv) { if (l.trim()) rest.push(l); continue; }
+          if (/^created by$/i.test(kv[1].trim())) continue;
+          const pill = el("span", "sinfo");
+          pill.append(el("span", null, kv[1].trim()), el("b", null, kv[2].trim()));
+          pills.append(pill);
+        }
+        if (rest.length) body.append(BB.md(rest.join("\n")));
+        continue;
+      }
+      if (p.key === "required units" || p.key === "units") {
+        const box = el("div", "strat-units");
+        items(p.lines).forEach(n => box.append(unitChip(n)));
+        head.push(box);
+        continue;
+      }
+      const sec = el("section", "ssec");
+      const h4 = el("h4");
+      BB.mdInline(h4, p.name);
+      if (p.key === "alternatives") {
+        const box = el("div", "strat-alts");
+        items(p.lines).forEach(a => {
+          const [x, y] = a.split(/\s*(?:→|->|=>)\s*/);
+          const row = el("span", "salt");
+          if (y) row.append(unitChip(x), el("i", null, "→"), unitChip(y)); else row.append(a);
+          box.append(row);
+        });
+        sec.append(h4, box);
+      } else sec.append(h4, BB.md(raw.replace(/^-(?=[^\s-])/gm, "- ")));
+      body.append(sec);
+    }
+    if (pills.childElementCount) head.splice(head[0] && head[0].classList.contains("strat-tag") ? 1 : 0, 0, pills);
+    return { head, body };
+  }
+
   function card(s) {
     const c = el("article", "strat c-l-" + s.category);
     c.id = "s-" + s.id;
@@ -40,9 +115,9 @@
     const text = first && norm(first[1]) === norm(s.title) ? lines.slice(1).join("\n").replace(/^\s*\n/, "") : s.description;
     const h = el("h3");
     BB.mdInline(h, text === s.description ? s.title.replace(/^#{1,3} /, "") : first[1]);
-    const body = BB.md(text, { cls: "strat-body" });
-    c.append(top, h, body);
-    if (BB.plain(s.description).length > 320 || s.description.split("\n").filter(l => l.trim()).length > 9) {
+    const { head, body } = sections(text);
+    c.append(top, h, ...head, body);
+    if (BB.plain(body.textContent).length > 320 || body.querySelectorAll("li,p,.md-h").length > 9) {
       body.classList.add("clamp");
       const more = el("button", "more-btn", "Read more");
       more.type = "button";
@@ -116,15 +191,109 @@
   }
   addEventListener("hashchange", () => { if (list.length) focusHash(); });
 
-  /* sharing */
-  function counters() {
-    const t = $("st").value.trim().length, d = $("sd").value.trim().length;
-    $("stc").textContent = `${t}/80`;
-    $("sdc").textContent = `${d}/1500`;
-    $("stc").classList.toggle("bad", t > 0 && (t < 5 || t > 80));
-    $("sdc").classList.toggle("bad", d > 0 && (d < 20 || d > 1500));
-    $("sbtn").disabled = t < 5 || t > 80 || d < 20 || d > 1500;
+  /* sharing: the form fields are written into the same "## Section" layout the bot uses */
+  const E = {
+    title: "<:Clue:1510667485743943760>", info: "<:Casual:1510667491020374067>", units: "<:Sunflower:1510667399668437062>",
+    alt: "<:Refresh:1510667407390146570>", desc: "<:Pencil:1510667414289780866>", early: "<:Seeds:1510667402478616577>",
+    mid: "<:Damage:1510667457805684856>", late: "<:VIP:1510667379913527377>", tips: "<:Clue:1510667485743943760>", perf: "<:Stats:1510667394765553815>",
+  };
+  const MAX = 1500;
+  let picked = [];
+  const val = id => $(id).value.trim();
+  const bullets = t => t.split("\n").map(l => l.trim()).filter(Boolean).map(l => /^(?:[-*•]|\d+\.)\s/.test(l) ? l.replace(/^[*•]\s/, "- ") : "- " + l.replace(/^-(?=\S)/, "")).join("\n");
+  function compose(emoji = true) {
+    const h = (k, name) => "## " + (emoji ? E[k] + " " : "") + name;
+    const kv = pairs => pairs.filter(p => p[1]).map(([k, v]) => `**${k}:** \`${v}\``).join("  \n");
+    const out = [];
+    if (val("f-tag")) out.push("> " + val("f-tag").replace(/\n/g, " "));
+    const info = kv([["Gamemode", val("f-mode")], ["Team Size", val("f-team")], ["Difficulty", val("f-diff")], ["Map", val("f-map")]]);
+    if (info) out.push(h("info", "Information") + "\n" + info);
+    if (picked.length) out.push(h("units", "Required Units") + "\n" + picked.map(u => "- " + u).join("\n"));
+    if (val("f-alt")) out.push(h("alt", "Alternatives") + "\n" + bullets(val("f-alt").replace(/\s*(?:->|=>)\s*/g, " → ")));
+    if (val("sd")) out.push(h("desc", "Description") + "\n" + val("sd"));
+    for (const [k, id, name] of [["early", "f-early", "Early Game"], ["mid", "f-mid", "Mid Game"], ["late", "f-late", "Late Game"], ["tips", "f-tips", "Tips"]])
+      if (val(id)) out.push(h(k, name) + "\n" + bullets(val(id)));
+    const perf = kv([["Cost", val("f-cost")], ["Clear Speed", val("f-speed")]]);
+    if (perf) out.push(h("perf", "Performance") + "\n" + perf);
+    const text = out.join("\n\n");
+    return emoji && text.length > MAX ? compose(false) : text;
   }
+  function counters() {
+    const t = val("st").length, d = compose().length, desc = val("sd").length;
+    $("stc").textContent = `${t}/80`;
+    $("sdc").textContent = `${d}/${MAX}`;
+    $("stc").classList.toggle("bad", t > 0 && (t < 5 || t > 80));
+    $("sdc").classList.toggle("bad", d > MAX);
+    $("sd").classList.toggle("need", desc > 0 && desc < 10);
+    $("sbtn").disabled = t < 5 || t > 80 || desc < 10 || d > MAX;
+    $("f-ucount").textContent = `${picked.length}/10`;
+    saveDraft();
+  }
+  /* the form is kept in this browser until it's shared */
+  const FIELDS = ["st", "sc", "f-mode", "f-team", "f-diff", "f-map", "f-tag", "f-alt", "sd", "f-early", "f-mid", "f-late", "f-tips", "f-cost", "f-speed"];
+  let draftReady = false;
+  function saveDraft() {
+    if (!draftReady) return;
+    try { localStorage.setItem("bb_strat_draft", JSON.stringify({ f: Object.fromEntries(FIELDS.map(id => [id, $(id).value])), u: picked })); } catch (e) { /* blocked */ }
+  }
+  function loadDraft() {
+    try {
+      const d = JSON.parse(localStorage.getItem("bb_strat_draft") || "null");
+      if (d && d.f) { FIELDS.forEach(id => { if (typeof d.f[id] === "string") $(id).value = d.f[id].slice(0, 1000); }); picked = (d.u || []).filter(x => typeof x === "string").slice(0, 10); }
+    } catch (e) { /* ignore */ }
+    draftReady = true;
+  }
+  function clearForm() {
+    FIELDS.forEach(id => { $(id).value = id === "sc" ? "general" : ""; });
+    picked = [];
+    drawUnits();
+    try { localStorage.removeItem("bb_strat_draft"); } catch (e) { /* blocked */ }
+  }
+  function drawUnits() {
+    $("f-units").replaceChildren(...picked.map((n, i) => {
+      const chip = unitChip(n);
+      const x = el("button", "f-x", "×");
+      x.type = "button"; x.title = "Remove " + n;
+      x.onclick = () => { picked.splice(i, 1); drawUnits(); counters(); };
+      chip.append(x);
+      return chip;
+    }));
+  }
+  (async () => {
+    const m = await unitsP;
+    const all = [...m.values()].filter(i => i.name && i.category !== "gamepass");
+    const input = $("f-uq"), box = $("f-usug");
+    const k = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    let opts = [], idx = 0;
+    const draw = () => {
+      box.replaceChildren(...opts.map((it, i) => {
+        const o = el("button", "sug" + (i === idx ? " on" : ""));
+        o.type = "button";
+        o.append(BB.itemImg(it, "sug-img"), el("span", null, it.name));
+        o.onmousedown = e => { e.preventDefault(); choose(it.name); };
+        return o;
+      }));
+      box.hidden = !opts.length;
+    };
+    const choose = name => {
+      if (picked.length >= 10) BB.toast("Keep it to 10 units.", "info", { title: "That's a lot of units" });
+      else if (!picked.includes(name)) picked.push(name);
+      input.value = ""; opts = []; draw(); drawUnits(); counters(); input.focus();
+    };
+    input.oninput = () => {
+      const q = k(input.value);
+      const starts = [], has = [];
+      if (q) for (const it of all) { const n = k(it.name); if (n.startsWith(q)) starts.push(it); else if (n.includes(q)) has.push(it); }
+      opts = starts.concat(has).slice(0, 8); idx = 0; draw();
+    };
+    input.onkeydown = e => {
+      if (e.key === "ArrowDown") { idx = Math.min(idx + 1, opts.length - 1); draw(); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { idx = Math.max(idx - 1, 0); draw(); e.preventDefault(); }
+      else if (e.key === "Enter") { e.preventDefault(); if (opts[idx]) choose(opts[idx].name); else if (input.value.trim().length > 1) choose(input.value.trim().slice(0, 40)); }
+      else if (e.key === "Escape") { opts = []; draw(); }
+    };
+    input.onblur = () => setTimeout(() => { opts = []; draw(); }, 120);
+  })();
   function status(kind, text) {
     const s = $("sstatus");
     s.hidden = !text;
@@ -137,7 +306,7 @@
     $("sbtn").disabled = true;
     status("wait", "Sending your strategy to Bloombot…");
     const tt = BB.toast("Bloombot is checking it…", "wait", { title: "Sharing your strategy" });
-    const row = { title: $("st").value.trim(), description: $("sd").value.trim(), category: $("sc").value };
+    const row = { title: val("st"), description: compose(), category: $("sc").value };
     const { data, error } = await BB.sb.from("strategy_submissions").insert(row).select("id").single();
     if (error) {
       const why = /row-level security/i.test(error.message) ? "Your last strategy is still being checked. Give it a few seconds." : "Couldn't send it: " + error.message;
@@ -152,7 +321,7 @@
       if (r && r.status === "posted") {
         status("ok", "Shared! It's on the list below and in /home → Strategies in Discord.");
         tt.update("It's on the list and in /home → Strategies in Discord.", "ok", { title: "Strategy shared!" });
-        $("st").value = ""; $("sd").value = "";
+        clearForm();
         preview(false);
         counters();
         setTimeout(load, 1500);
@@ -168,13 +337,14 @@
   function preview(on) {
     $("sdw").classList.toggle("on", !on); $("sdw").setAttribute("aria-selected", String(!on));
     $("sdp").classList.toggle("on", on); $("sdp").setAttribute("aria-selected", String(on));
-    $("sd").hidden = on;
+    $("sfields").hidden = on;
     $("sdprev").hidden = !on;
-    document.querySelector(".md-tools").classList.toggle("off", on);
     if (on) {
-      const v = $("sd").value.trim();
-      $("sdprev").replaceChildren(v ? BB.md(v) : el("p", "hint", "Nothing to preview yet."));
-    } else $("sd").focus();
+      const d = compose();
+      $("sdprev").replaceChildren(d ? card({ id: 0, title: val("st") || "Your strategy", description: d, category: $("sc").value, created_at: new Date().toISOString(), author_name: $("sname").textContent || "You" }) : el("p", "hint", "Nothing to preview yet."));
+      const m = $("sdprev").querySelector(".more-btn"); if (m) m.click();
+      $("sdprev").querySelectorAll(".strat-link,.del-btn").forEach(x => x.remove());
+    }
   }
   $("sdw").onclick = () => preview(false);
   $("sdp").onclick = () => preview(true);
@@ -207,11 +377,13 @@
   $("ssort").addEventListener("change", () => { sort = $("ssort").value; render(); });
   $("sclear").onclick = () => { cat = "all"; $("sq").value = ""; render(); $("sq").focus(); };
   $("sq").oninput = render;
-  $("st").oninput = counters;
-  $("sd").oninput = counters;
+  $("sform").addEventListener("input", e => { if (e.target.id !== "f-uq") counters(); });
+  $("sform").addEventListener("change", counters);
   /* Ctrl+Enter shares from the form */
   $("sform").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !$("sbtn").disabled) $("sform").requestSubmit(); });
   $("sform").onsubmit = submit;
+  loadDraft();
+  drawUnits();
   counters();
 
   let started = false, loaded = false;
