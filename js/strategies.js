@@ -44,7 +44,7 @@
       if (tag && !intro.includes("\n")) { const p = el("p", "strat-tag"); BB.mdInline(p, tag[1]); head.push(p); }
       else body.append(BB.md(intro));
     }
-    const pills = el("div", "sinfo-row");
+    const meta = [];
     for (const p of parts.slice(1)) {
       const raw = p.lines.join("\n").trim();
       if (!raw) continue;
@@ -53,10 +53,9 @@
         for (const l of p.lines) {
           const kv = l.trim().match(KV);
           if (!kv) { if (l.trim()) rest.push(l); continue; }
-          if (/^created by$/i.test(kv[1].trim())) continue;
-          const pill = el("span", "sinfo");
-          pill.append(el("span", null, kv[1].trim()), el("b", null, kv[2].trim()));
-          pills.append(pill);
+          const k = kv[1].trim().toLowerCase(), v = kv[2].trim();
+          if (!v || k === "created by" || k === "last updated") continue;
+          meta.push(k === "cost" ? v + " cost" : k === "clear speed" ? v + " clear" : v);
         }
         if (rest.length) body.append(BB.md(rest.join("\n")));
         continue;
@@ -64,6 +63,7 @@
       if (p.key === "required units" || p.key === "units") {
         const box = el("div", "strat-units");
         items(p.lines).forEach(n => box.append(unitChip(n)));
+        if (!box.childElementCount) continue;
         head.push(box);
         continue;
       }
@@ -82,7 +82,11 @@
       } else sec.append(h4, BB.md(raw.replace(/^-(?=[^\s-])/gm, "- ")));
       body.append(sec);
     }
-    if (pills.childElementCount) head.splice(head[0] && head[0].classList.contains("strat-tag") ? 1 : 0, 0, pills);
+    if (meta.length) {
+      const row = el("div", "smeta");
+      meta.forEach(m => row.append(el("span", null, m)));
+      head.splice(head[0] && head[0].classList.contains("strat-tag") ? 1 : 0, 0, row);
+    }
     return { head, body };
   }
 
@@ -191,14 +195,14 @@
   }
   addEventListener("hashchange", () => { if (list.length) focusHash(); });
 
-  /* sharing: the form fields are written into the same "## Section" layout the bot uses */
+  /* sharing: a 4-step form, written into the same "## Section" layout the bot uses */
   const E = {
-    title: "<:Clue:1510667485743943760>", info: "<:Casual:1510667491020374067>", units: "<:Sunflower:1510667399668437062>",
+    info: "<:Casual:1510667491020374067>", units: "<:Sunflower:1510667399668437062>",
     alt: "<:Refresh:1510667407390146570>", desc: "<:Pencil:1510667414289780866>", early: "<:Seeds:1510667402478616577>",
     mid: "<:Damage:1510667457805684856>", late: "<:VIP:1510667379913527377>", tips: "<:Clue:1510667485743943760>", perf: "<:Stats:1510667394765553815>",
   };
   const MAX = 1500;
-  let picked = [];
+  let picked = [], alts = [], step = 0, seen = 0;
   const val = id => $(id).value.trim();
   const bullets = t => t.split("\n").map(l => l.trim()).filter(Boolean).map(l => /^(?:[-*•]|\d+\.)\s/.test(l) ? l.replace(/^[*•]\s/, "- ") : "- " + l.replace(/^-(?=\S)/, "")).join("\n");
   function compose(emoji = true) {
@@ -209,7 +213,7 @@
     const info = kv([["Gamemode", val("f-mode")], ["Team Size", val("f-team")], ["Difficulty", val("f-diff")], ["Map", val("f-map")]]);
     if (info) out.push(h("info", "Information") + "\n" + info);
     if (picked.length) out.push(h("units", "Required Units") + "\n" + picked.map(u => "- " + u).join("\n"));
-    if (val("f-alt")) out.push(h("alt", "Alternatives") + "\n" + bullets(val("f-alt").replace(/\s*(?:->|=>)\s*/g, " → ")));
+    if (alts.length) out.push(h("alt", "Alternatives") + "\n" + alts.map(([x, y]) => `- ${x} → ${y}`).join("\n"));
     if (val("sd")) out.push(h("desc", "Description") + "\n" + val("sd"));
     for (const [k, id, name] of [["early", "f-early", "Early Game"], ["mid", "f-mid", "Mid Game"], ["late", "f-late", "Late Game"], ["tips", "f-tips", "Tips"]])
       if (val(id)) out.push(h(k, name) + "\n" + bullets(val(id)));
@@ -218,82 +222,158 @@
     const text = out.join("\n\n");
     return emoji && text.length > MAX ? compose(false) : text;
   }
+  const okTitle = () => val("st").length >= 5 && val("st").length <= 80;
+  const okDesc = () => val("sd").length >= 10;
   function counters() {
-    const t = val("st").length, d = compose().length, desc = val("sd").length;
-    $("stc").textContent = `${t}/80`;
-    $("sdc").textContent = `${d}/${MAX}`;
-    $("stc").classList.toggle("bad", t > 0 && (t < 5 || t > 80));
+    const d = compose().length;
+    $("sdc").textContent = d > MAX * 0.8 ? `${d}/${MAX} characters` : "";
     $("sdc").classList.toggle("bad", d > MAX);
-    $("sd").classList.toggle("need", desc > 0 && desc < 10);
-    $("sbtn").disabled = t < 5 || t > 80 || desc < 10 || d > MAX;
-    $("f-ucount").textContent = `${picked.length}/10`;
+    $("f-ucount").textContent = picked.length ? `${picked.length}/10` : "";
+    $("sbtn").disabled = !okTitle() || !okDesc() || d > MAX;
+    if (okTitle()) $("st-err").hidden = true;
+    if (okDesc()) $("sd-err").hidden = true;
+    if (step === 3) drawPreview();
     saveDraft();
   }
+
+  /* steps */
+  function go(n) {
+    if (n > step) {
+      if (step === 0 && !okTitle()) { $("st-err").hidden = false; $("st").focus(); return; }
+      if (n >= 3 && !okDesc()) { if (step !== 2) go(2); $("sd-err").hidden = false; $("sd").focus(); return; }
+    }
+    step = n; seen = Math.max(seen, n);
+    document.querySelectorAll(".spane").forEach(p => { p.hidden = +p.dataset.step !== n; });
+    document.querySelectorAll("#ssteps li").forEach(li => {
+      const i = +li.dataset.step;
+      li.className = i === n ? "on" : i < n || i <= seen ? "done" : "";
+      li.querySelector("button").disabled = i > seen;
+    });
+    $("sback").style.visibility = n ? "visible" : "hidden";
+    $("snext").hidden = n === 3;
+    $("sbtn").hidden = n !== 3;
+    if (n === 3) drawPreview();
+    const top = $("ssteps").getBoundingClientRect().top;
+    if (top < 80) scrollBy({ top: top - 100, behavior: "smooth" });
+    const first = document.querySelector(`.spane[data-step="${n}"] input:not([type=hidden]),.spane[data-step="${n}"] textarea`);
+    if (first && document.activeElement && $("sform").contains(document.activeElement)) first.focus({ preventScroll: true });
+  }
+  $("snext").onclick = () => go(step + 1);
+  $("sback").onclick = () => go(Math.max(0, step - 1));
+  document.querySelectorAll("#ssteps li").forEach(li => { li.querySelector("button").onclick = () => go(+li.dataset.step); });
+  function drawPreview() {
+    const d = compose();
+    $("sdprev").replaceChildren(card({ id: 0, title: val("st") || "Your strategy", description: d || "…", category: $("sc").value, created_at: new Date().toISOString(), author_name: $("sname").textContent || "You" }));
+    const m = $("sdprev").querySelector(".more-btn"); if (m) m.click();
+    $("sdprev").querySelectorAll(".strat-link,.del-btn,.more-btn").forEach(x => x.remove());
+    $("sdprev").querySelector(".strat").removeAttribute("id");
+  }
+
+  /* button groups (category, players, difficulty, cost, speed) write into a hidden input */
+  function syncSegs() {
+    document.querySelectorAll(".seg").forEach(g => {
+      const v = $(g.dataset.for).value;
+      g.querySelectorAll("button").forEach(b => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); b.setAttribute("role", "radio"); });
+    });
+  }
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => {
+    const inp = $(b.parentElement.dataset.for);
+    /* optional groups: click the chosen one again to clear it */
+    inp.value = inp.value === b.dataset.v && inp.id !== "sc" ? "" : b.dataset.v;
+    syncSegs(); counters();
+  });
+
   /* the form is kept in this browser until it's shared */
-  const FIELDS = ["st", "sc", "f-mode", "f-team", "f-diff", "f-map", "f-tag", "f-alt", "sd", "f-early", "f-mid", "f-late", "f-tips", "f-cost", "f-speed"];
+  const FIELDS = ["st", "sc", "f-mode", "f-team", "f-diff", "f-map", "f-tag", "sd", "f-early", "f-mid", "f-late", "f-tips", "f-cost", "f-speed"];
   let draftReady = false;
   function saveDraft() {
     if (!draftReady) return;
-    try { localStorage.setItem("bb_strat_draft", JSON.stringify({ f: Object.fromEntries(FIELDS.map(id => [id, $(id).value])), u: picked })); } catch (e) { /* blocked */ }
+    try { localStorage.setItem("bb_strat_draft", JSON.stringify({ f: Object.fromEntries(FIELDS.map(id => [id, $(id).value])), u: picked, a: alts })); } catch (e) { /* blocked */ }
   }
   function loadDraft() {
     try {
       const d = JSON.parse(localStorage.getItem("bb_strat_draft") || "null");
-      if (d && d.f) { FIELDS.forEach(id => { if (typeof d.f[id] === "string") $(id).value = d.f[id].slice(0, 1000); }); picked = (d.u || []).filter(x => typeof x === "string").slice(0, 10); }
+      if (d && d.f) {
+        FIELDS.forEach(id => { if (typeof d.f[id] === "string") $(id).value = d.f[id].slice(0, 1000); });
+        if (!["general", "meta-units", "map-specific"].includes($("sc").value)) $("sc").value = "general";
+        picked = (d.u || []).filter(x => typeof x === "string").slice(0, 10);
+        alts = (d.a || []).filter(x => Array.isArray(x) && x.length === 2 && x.every(y => typeof y === "string")).slice(0, 6);
+      }
     } catch (e) { /* ignore */ }
     draftReady = true;
   }
   function clearForm() {
     FIELDS.forEach(id => { $(id).value = id === "sc" ? "general" : ""; });
-    picked = [];
-    drawUnits();
+    picked = []; alts = []; seen = 0;
+    drawUnits(); drawAlts(); syncSegs();
     try { localStorage.removeItem("bb_strat_draft"); } catch (e) { /* blocked */ }
   }
+  const removable = (chip, label, onX) => {
+    const x = el("button", "f-x", "×");
+    x.type = "button"; x.title = "Remove " + label; x.setAttribute("aria-label", "Remove " + label);
+    x.onclick = onX;
+    chip.append(x);
+    return chip;
+  };
   function drawUnits() {
-    $("f-units").replaceChildren(...picked.map((n, i) => {
-      const chip = unitChip(n);
-      const x = el("button", "f-x", "×");
-      x.type = "button"; x.title = "Remove " + n;
-      x.onclick = () => { picked.splice(i, 1); drawUnits(); counters(); };
-      chip.append(x);
-      return chip;
+    const box = $("f-units");
+    if (!picked.length) { box.replaceChildren(el("p", "hint f-empty", "No units yet. Type a name above and press Enter.")); return; }
+    box.replaceChildren(...picked.map((n, i) => removable(unitChip(n), n, () => { picked.splice(i, 1); drawUnits(); counters(); })));
+  }
+  function drawAlts() {
+    $("f-alts").replaceChildren(...alts.map(([x, y], i) => {
+      const row = el("div", "salt");
+      row.append(unitChip(x), el("i", null, "→"), unitChip(y));
+      return removable(row, x + " → " + y, () => { alts.splice(i, 1); drawAlts(); counters(); });
     }));
   }
-  (async () => {
-    const m = await unitsP;
-    const all = [...m.values()].filter(i => i.name && i.category !== "gamepass");
-    const input = $("f-uq"), box = $("f-usug");
-    const k = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-    let opts = [], idx = 0;
+
+  /* unit search boxes */
+  const kk = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  function picker(input, box, onPick, allowFree) {
+    let opts = [], idx = 0, all = [];
+    unitsP.then(m => { all = [...m.values()].filter(i => i.name && i.category !== "gamepass"); });
     const draw = () => {
       box.replaceChildren(...opts.map((it, i) => {
         const o = el("button", "sug" + (i === idx ? " on" : ""));
         o.type = "button";
         o.append(BB.itemImg(it, "sug-img"), el("span", null, it.name));
-        o.onmousedown = e => { e.preventDefault(); choose(it.name); };
+        o.onmousedown = e => { e.preventDefault(); pick(it.name); };
         return o;
       }));
       box.hidden = !opts.length;
     };
-    const choose = name => {
-      if (picked.length >= 10) BB.toast("Keep it to 10 units.", "info", { title: "That's a lot of units" });
-      else if (!picked.includes(name)) picked.push(name);
-      input.value = ""; opts = []; draw(); drawUnits(); counters(); input.focus();
-    };
+    const pick = name => { opts = []; draw(); onPick(name); };
     input.oninput = () => {
-      const q = k(input.value);
-      const starts = [], has = [];
-      if (q) for (const it of all) { const n = k(it.name); if (n.startsWith(q)) starts.push(it); else if (n.includes(q)) has.push(it); }
+      const q = kk(input.value), starts = [], has = [];
+      if (q) for (const it of all) { const n = kk(it.name); if (n.startsWith(q)) starts.push(it); else if (n.includes(q)) has.push(it); }
       opts = starts.concat(has).slice(0, 8); idx = 0; draw();
     };
     input.onkeydown = e => {
       if (e.key === "ArrowDown") { idx = Math.min(idx + 1, opts.length - 1); draw(); e.preventDefault(); }
       else if (e.key === "ArrowUp") { idx = Math.max(idx - 1, 0); draw(); e.preventDefault(); }
-      else if (e.key === "Enter") { e.preventDefault(); if (opts[idx]) choose(opts[idx].name); else if (input.value.trim().length > 1) choose(input.value.trim().slice(0, 40)); }
+      else if (e.key === "Enter") { e.preventDefault(); if (opts[idx]) pick(opts[idx].name); else if (allowFree && input.value.trim().length > 1) pick(input.value.trim().slice(0, 40)); }
       else if (e.key === "Escape") { opts = []; draw(); }
     };
     input.onblur = () => setTimeout(() => { opts = []; draw(); }, 120);
-  })();
+  }
+  picker($("f-uq"), $("f-usug"), name => {
+    if (picked.length >= 10) BB.toast("Keep it to 10 units.", "info", { title: "That's a lot of units" });
+    else if (!picked.includes(name)) picked.push(name);
+    $("f-uq").value = ""; drawUnits(); counters(); $("f-uq").focus();
+  }, true);
+  picker($("f-aq1"), $("f-asug1"), name => { $("f-aq1").value = name; $("f-aq2").focus(); }, false);
+  picker($("f-aq2"), $("f-asug2"), name => { $("f-aq2").value = name; addAlt(); }, false);
+  function addAlt() {
+    const x = val("f-aq1").slice(0, 40), y = val("f-aq2").slice(0, 40);
+    if (!x || !y) { (x ? $("f-aq2") : $("f-aq1")).focus(); return; }
+    if (alts.length >= 6) { BB.toast("Keep it to 6 swaps.", "info", { title: "That's a lot of swaps" }); return; }
+    alts.push([x, y]);
+    $("f-aq1").value = ""; $("f-aq2").value = "";
+    drawAlts(); counters(); $("f-aq1").focus();
+  }
+  $("f-aadd").onclick = addAlt;
+
   function status(kind, text) {
     const s = $("sstatus");
     s.hidden = !text;
@@ -322,7 +402,7 @@
         status("ok", "Shared! It's on the list below and in /home → Strategies in Discord.");
         tt.update("It's on the list and in /home → Strategies in Discord.", "ok", { title: "Strategy shared!" });
         clearForm();
-        preview(false);
+        go(0);
         counters();
         setTimeout(load, 1500);
         return;
@@ -334,41 +414,13 @@
     setTimeout(poll, 1500);
   }
 
-  function preview(on) {
-    $("sdw").classList.toggle("on", !on); $("sdw").setAttribute("aria-selected", String(!on));
-    $("sdp").classList.toggle("on", on); $("sdp").setAttribute("aria-selected", String(on));
-    $("sfields").hidden = on;
-    $("sdprev").hidden = !on;
-    if (on) {
-      const d = compose();
-      $("sdprev").replaceChildren(d ? card({ id: 0, title: val("st") || "Your strategy", description: d, category: $("sc").value, created_at: new Date().toISOString(), author_name: $("sname").textContent || "You" }) : el("p", "hint", "Nothing to preview yet."));
-      const m = $("sdprev").querySelector(".more-btn"); if (m) m.click();
-      $("sdprev").querySelectorAll(".strat-link,.del-btn").forEach(x => x.remove());
-    }
-  }
-  $("sdw").onclick = () => preview(false);
-  $("sdp").onclick = () => preview(true);
-  /* formatting buttons: wrap the selection, or start the line with "# " / "- " */
-  document.querySelectorAll(".md-tools [data-md]").forEach(b => b.onclick = () => {
-    const t = $("sd"), m = b.dataset.md, a = t.selectionStart, z = t.selectionEnd, v = t.value;
-    if (m.endsWith(" ")) {
-      const ls = v.lastIndexOf("\n", a - 1) + 1;
-      t.setRangeText(m, ls, ls, "end");
-    } else {
-      const sel = v.slice(a, z) || "text";
-      t.setRangeText(m + sel + m, a, z, "select");
-      t.setSelectionRange(a + m.length, a + m.length + sel.length);
-    }
-    t.focus();
-    counters();
-  });
   $("sopen").onclick = () => {
     const open = $("sform").hidden;
     $("sform").hidden = !open;
     $("sopen").setAttribute("aria-expanded", String(open));
     $("sopen").textContent = open ? "Close" : "Share a strategy";
     $("sopen").classList.toggle("green", !open);
-    if (open) $("st").focus();
+    if (open) { go(0); $("st").focus(); }
   };
   if (location.hash === "#share") setTimeout(() => { if (!$("sopen").hidden && $("sform").hidden) $("sopen").click(); }, 400);
 
@@ -377,13 +429,18 @@
   $("ssort").addEventListener("change", () => { sort = $("ssort").value; render(); });
   $("sclear").onclick = () => { cat = "all"; $("sq").value = ""; render(); $("sq").focus(); };
   $("sq").oninput = render;
-  $("sform").addEventListener("input", e => { if (e.target.id !== "f-uq") counters(); });
-  $("sform").addEventListener("change", counters);
-  /* Ctrl+Enter shares from the form */
-  $("sform").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !$("sbtn").disabled) $("sform").requestSubmit(); });
-  $("sform").onsubmit = submit;
+  $("sform").addEventListener("input", e => { if (!/^f-(uq|aq)/.test(e.target.id)) counters(); });
+  $("sform").addEventListener("change", e => { if (!/^f-(uq|aq)/.test(e.target.id)) counters(); });
+  /* Enter in a one-line box goes to the next step; Ctrl+Enter shares */
+  $("sform").addEventListener("keydown", e => {
+    if (e.key !== "Enter" || e.defaultPrevented) return;
+    if (e.ctrlKey || e.metaKey) { e.preventDefault(); if (!$("sbtn").disabled) $("sform").requestSubmit(); else go(3); return; }
+    if (e.target.tagName === "INPUT" && !/^f-(uq|aq)/.test(e.target.id)) { e.preventDefault(); if (step < 3) go(step + 1); }
+  });
+  $("sform").onsubmit = e => { if (step !== 3) { e.preventDefault(); go(step + 1); return; } submit(e); };
   loadDraft();
-  drawUnits();
+  drawUnits(); drawAlts(); syncSegs();
+  go(0);
   counters();
 
   let started = false, loaded = false;

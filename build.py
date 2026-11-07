@@ -554,46 +554,52 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <div class="share-login"><img class="share-ico" src="img/bullseye.png" alt=""><div><strong>Got a good strategy?</strong><span id="shint">Log in to share it with every Bloombot server.</span></div>
 <button class="brick green" type="button" data-login id="slogbtn">Log in to share</button>
 <button class="brick green" type="button" id="sopen" aria-expanded="false" aria-controls="sform" hidden>Share a strategy</button></div>
-<form id="sform" hidden>
-<h2 class="share-title">Share a strategy as <span id="sname"></span></h2>
-<div class="srow"><label>Title<input class="search" id="st" maxlength="80" placeholder="e.g. Solo Hard Mode with Cactus"></label><label>Category<select id="sc"><option value="general">General</option><option value="meta-units">Meta units</option><option value="map-specific">Map-specific</option></select></label></div>
-<div class="sd-tabs"><span class="hint">Fill in what you know. Only the description is needed.</span><div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="sdw" aria-selected="true">Write</button><button type="button" role="tab" id="sdp" aria-selected="false">Preview</button></div></div>
-<div id="sfields">
-<fieldset class="sf"><legend><img src="img/gear.png" alt="">Information</legend>
+<form id="sform" hidden novalidate><span id="sname" hidden></span>
+<ol class="ssteps" id="ssteps"><li data-step="0"><button type="button"><b>1</b><span>Basics</span></button></li><li data-step="1"><button type="button"><b>2</b><span>Units</span></button></li><li data-step="2"><button type="button"><b>3</b><span>How to play</span></button></li><li data-step="3"><button type="button"><b>4</b><span>Share</span></button></li></ol>
+
+<div class="spane" data-step="0">
+<label class="sfl"><span>Title</span><input class="search" id="st" maxlength="80" placeholder="e.g. Solo Volcano level 5"><small class="serr" id="st-err" hidden>Give it a title (5 to 80 characters).</small></label>
+<div class="sfl"><span>Type</span><input type="hidden" id="sc" value="general"><div class="seg" data-for="sc" role="radiogroup"><button type="button" data-v="general">General</button><button type="button" data-v="meta-units">Meta units</button><button type="button" data-v="map-specific">Map-specific</button></div></div>
 <div class="sf-grid">
-<label>Gamemode<select id="f-mode"><option value="">Any</option><option>Story</option><option>Hard Mode</option><option>Endless</option><option>Survival</option><option>PvP</option><option>Event</option><option>Raid</option><option>Challenge</option></select></label>
-<label>Team size<select id="f-team"><option value="">Any</option><option>1 player</option><option>2 players</option><option>3 players</option><option>4 players</option></select></label>
-<label>Difficulty<select id="f-diff"><option value="">Pick one</option><option>Easy</option><option>Medium</option><option>Hard</option><option>Extreme</option></select></label>
-<label>Map or level<input class="search" id="f-map" maxlength="40" placeholder="e.g. Volcano level 5"></label>
+<label class="sfl"><span>Gamemode <em>optional</em></span><select id="f-mode"><option value="">Any</option><option>Story</option><option>Hard Mode</option><option>Endless</option><option>Survival</option><option>PvP</option><option>Event</option><option>Raid</option><option>Challenge</option></select></label>
+<label class="sfl"><span>Map or level <em>optional</em></span><input class="search" id="f-map" maxlength="40" placeholder="e.g. Volcano 5"></label>
 </div>
-<label>Short summary<input class="search" id="f-tag" maxlength="100" placeholder="e.g. A stall focused loadout"></label>
-</fieldset>
-<fieldset class="sf"><legend><img src="img/flower.png" alt="">Required units <em id="f-ucount">0/10</em></legend>
-<div class="picker"><input class="search" id="f-uq" type="search" autocomplete="off" placeholder="Search a unit and press Enter…" aria-label="Add a required unit"><div class="sugs" id="f-usug" hidden></div></div>
-<div class="f-units" id="f-units"></div>
-<label><span>Alternatives <em>one per line</em></span><textarea id="f-alt" rows="2" maxlength="300" placeholder="Glowthorn → Blinkbloom"></textarea></label>
-</fieldset>
-<fieldset class="sf"><legend><img src="img/envelope.png" alt="">Description <em>needed</em></legend>
-<div class="md-tools" aria-label="Formatting"><button type="button" data-md="**" title="Bold"><b>B</b></button><button type="button" data-md="*" title="Italic"><i>I</i></button><button type="button" data-md="- " title="List">&bull;</button></div>
-<textarea id="sd" rows="4" maxlength="1000" placeholder="What the strategy does and why it works…"></textarea>
-</fieldset>
-<fieldset class="sf"><legend><img src="img/clock.png" alt="">Game plan <em>one step per line</em></legend>
+<div class="sfl"><span>Players <em>optional</em></span><input type="hidden" id="f-team" value=""><div class="seg" data-for="f-team" role="radiogroup"><button type="button" data-v="1 player">Solo</button><button type="button" data-v="2 players">2</button><button type="button" data-v="3 players">3</button><button type="button" data-v="4 players">4</button></div></div>
+<div class="sfl"><span>Difficulty <em>optional</em></span><input type="hidden" id="f-diff" value=""><div class="seg" data-for="f-diff" role="radiogroup"><button type="button" data-v="Easy">Easy</button><button type="button" data-v="Medium">Medium</button><button type="button" data-v="Hard">Hard</button><button type="button" data-v="Extreme">Extreme</button></div></div>
+</div>
+
+<div class="spane" data-step="1" hidden>
+<div class="sfl"><span>Units you need <em id="f-ucount">0/10</em></span>
+<div class="picker"><input class="search" id="f-uq" type="search" autocomplete="off" placeholder="Type a unit name…" aria-label="Add a unit"><div class="sugs" id="f-usug" hidden></div></div>
+<div class="f-units" id="f-units"><p class="hint f-empty">No units yet. Search above and press Enter.</p></div></div>
+<div class="sfl"><span>Swaps <em>optional · for players who don't have a unit</em></span>
+<div class="f-swap"><div class="picker"><input class="search" id="f-aq1" type="search" autocomplete="off" placeholder="Instead of…" aria-label="Unit to replace"><div class="sugs" id="f-asug1" hidden></div></div><span class="f-arrow">→</span><div class="picker"><input class="search" id="f-aq2" type="search" autocomplete="off" placeholder="use…" aria-label="Replacement unit"><div class="sugs" id="f-asug2" hidden></div></div><button class="brick dark" type="button" id="f-aadd">Add</button></div>
+<div class="f-alts" id="f-alts"></div></div>
+</div>
+
+<div class="spane" data-step="2" hidden>
+<label class="sfl"><span>How does it work?</span><textarea id="sd" rows="3" maxlength="1000" placeholder="e.g. Stall the first waves, then burst the boss with Glowthorn."></textarea><small class="serr" id="sd-err" hidden>Write at least a sentence here.</small></label>
+<div class="sfl"><span>Steps <em>optional · one step per line</em></span>
 <div class="sf-phases">
-<label>Early game<textarea id="f-early" rows="3" maxlength="500" placeholder="Place Glowthorn at the back arch"></textarea></label>
-<label>Mid game<textarea id="f-mid" rows="3" maxlength="500" placeholder="Max 2 Shockolateflora at the front"></textarea></label>
-<label>Late game<textarea id="f-late" rows="3" maxlength="500" placeholder="Place Sundial Stalk near spawn"></textarea></label>
+<label><i>Start</i><textarea id="f-early" rows="3" maxlength="500" placeholder="Place Glowthorn at the back"></textarea></label>
+<label><i>Middle</i><textarea id="f-mid" rows="3" maxlength="500" placeholder="Max 2 Shockolateflora"></textarea></label>
+<label><i>End</i><textarea id="f-late" rows="3" maxlength="500" placeholder="Use Reverse Time on the boss"></textarea></label>
+</div></div>
+<label class="sfl"><span>Tips <em>optional</em></span><textarea id="f-tips" rows="2" maxlength="500" placeholder="One tip per line"></textarea></label>
 </div>
-<label>Tips<textarea id="f-tips" rows="2" maxlength="500" placeholder="Use Reverse Time when the first boss reaches the corner"></textarea></label>
-</fieldset>
-<fieldset class="sf"><legend><img src="img/chart_up.png" alt="">Performance</legend>
+
+<div class="spane" data-step="3" hidden>
+<label class="sfl"><span>One-line summary <em>optional</em></span><input class="search" id="f-tag" maxlength="100" placeholder="e.g. Cheap stall loadout for PvP"></label>
 <div class="sf-grid">
-<label>Cost<select id="f-cost"><option value="">Pick one</option><option>Cheap</option><option>Medium</option><option>Expensive</option></select></label>
-<label>Clear speed<select id="f-speed"><option value="">Pick one</option><option>Slow</option><option>Medium</option><option>Fast</option></select></label>
+<div class="sfl"><span>Cost <em>optional</em></span><input type="hidden" id="f-cost" value=""><div class="seg" data-for="f-cost" role="radiogroup"><button type="button" data-v="Cheap">Cheap</button><button type="button" data-v="Medium">Medium</button><button type="button" data-v="Expensive">Expensive</button></div></div>
+<div class="sfl"><span>Speed <em>optional</em></span><input type="hidden" id="f-speed" value=""><div class="seg" data-for="f-speed" role="radiogroup"><button type="button" data-v="Slow">Slow</button><button type="button" data-v="Medium">Medium</button><button type="button" data-v="Fast">Fast</button></div></div>
 </div>
-</fieldset>
+<p class="sfl-h">This is how it will look</p>
+<div class="sd-prev" id="sdprev"></div>
 </div>
-<div class="sd-prev" id="sdprev" hidden></div>
-<div class="post-foot"><span class="hint">Title <span id="stc" class="count">0/80</span> · Total <span id="sdc" class="count">0/1500</span> · No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). You need a linked account (<code>/link</code>). Ctrl+Enter shares.</span><button class="brick green" id="sbtn" type="submit">Share strategy</button></div>
+
+<div class="snav"><button class="brick dark" type="button" id="sback">Back</button><span class="hint" id="sinfo"><span id="stc" hidden></span><span id="sdc">0/1500</span></span><button class="brick green" type="button" id="snext">Next</button><button class="brick green" id="sbtn" type="submit" hidden>Share strategy</button></div>
+<p class="hint snote">No links. One strategy every 10 minutes (<a href="levels.html">faster at higher levels</a>). Needs a linked account (<code>/link</code>).</p>
 <p class="post-status" id="sstatus" hidden></p>
 </form>
 </section>
