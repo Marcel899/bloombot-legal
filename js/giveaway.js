@@ -37,7 +37,14 @@
     return it ? it.value_text || (it.est > 0 ? BB.fmt(it.est) : "") : "";
   }
   let list = [], cur = 0, mine = new Set(), totals = {}, root = null, timer = null, busy = false;
-  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); if (window.BB_CONSENT && !BB_CONSENT.optional()) return null; localStorage.setItem(k, v); } catch (e) { return null; } };
+  /* Open/closed state lives in memory for this page view, so the popup still opens and closes
+     when storage is blocked or only essential cookies are allowed; it is saved only with consent. */
+  const mem = {};
+  const store = (k, v) => {
+    if (v === undefined) { if (k in mem) return mem[k]; try { return localStorage.getItem(k); } catch (e) { return null; } }
+    mem[k] = v;
+    try { if (window.BB_CONSENT && !BB_CONSENT.optional()) return null; localStorage.setItem(k, v); } catch (e) { return null; }
+  };
   const el = (...a) => BB.el(...a);
 
   /* full-page confetti burst */
