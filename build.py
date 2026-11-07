@@ -27,13 +27,14 @@ PAGE_KW = {
     "values.html": "GTD value list, Garden Tower Defense value list, unit values, gamepass values, demand, value trends",
     "calculator.html": "GTD trade calculator, Garden Tower Defense trade calculator, win or loss, WFL, fair trade",
     "levels.html": "Bloombot levels, GTD Discord bot XP, rank perks, XP tasks, Garden Tower Defense trading rank",
+    "farm.html": "GTD seeds per hour, Garden Tower Defense fertilizer per hour, farm calculator, best farming, seeds calculator, fertilizer calculator, grind time",
     "crates.html": "GTD crate calculator, Garden Tower Defense summon calculator, drop chance, summon odds, pity, luck, how many summons, Skull Summon, Classic Summon",
     "trades.html": "GTD trade ads, Garden Tower Defense trading server, trade ads, LF NLF",
     "strategies.html": "GTD strategies, Garden Tower Defense strategy, best units, meta units, loadouts, map guides",
     "features.html": "Discord trading bot, Roblox trading bot, slash commands, wishlist, trade check",
 }
 # Pages Google should list (profile, dashboard and 404 are noindex).
-SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "levels.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
+SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "farm.html", "levels.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<img class="dc" src="img/discord_stud_white.png" alt="">'
 
 HEAD = """<!doctype html>
@@ -97,7 +98,7 @@ FOOT = """<footer>
 <div class="foot-cta"><a class="brick discord sm" href="{invite}">{dsvg}Add to Discord</a><a class="brick dark sm" href="{support}"><img src="img/envelope.png" alt="">Support</a></div>
 </div>
 <nav class="foot-cols" aria-label="Footer">
-<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
+<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="farm.html">Farm calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
 <div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
 <div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
 </nav>
@@ -484,7 +485,7 @@ def side(key, title, color):
 
 
 def calc_tabs(cur):
-    tabs = [("trade", "calculator.html", "calculator", "Trade", "Win, fair or loss"), ("crate", "crates.html", "crate", "Crate", "Summon odds")]
+    tabs = [("trade", "calculator.html", "calculator", "Trade", "Win, fair or loss"), ("crate", "crates.html", "crate", "Crate", "Summon odds"), ("farm", "farm.html", "seeds", "Farm", "Seeds per hour")]
     i = [k for k, *_ in tabs].index(cur)
     return f'<nav class="ctabs" aria-label="Calculators" data-tab="{i}"><span class="ctab-ind weld" aria-hidden="true"></span>' + "".join(
         f'<a class="ctab{" on" if k == cur else ""}" href="{h}" data-i="{n}"{" aria-current=\"page\"" if k == cur else ""}><img src="img/{ic}.png" alt=""><span class="ct-t"><b>{t}<span class="ct-l"> calculator</span></b><small>{sub}</small></span></a>'
@@ -601,6 +602,74 @@ crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit
 <script defer src="js/crates.js?v={JSVER['crates']}"></script>
 """
 open("crates.html", "w").write(page("Bloombot Crate Calculator · Garden Tower Defense Summon Odds", "GTD crate calculator: your real chance to pull a Garden Tower Defense unit, average summons, currency needed, luck and pity.", crates_body, "c", "crates.html"))
+
+
+# ── Farm calculator ──────────────────────────────────────────────────────
+JSVER["farm"] = hashlib.md5(open("js/farm.js", "rb").read()).hexdigest()[:8]
+farm_body = hero("seeds", "Farm calculator", "How many Seeds and Fertilizer you really earn per hour, and how long until your goal.", "t_farm") + f"""
+<main class="wrap calc crates farm" id="main">
+{calc_tabs("farm")}
+<div class="kgrid">
+<section class="panel kform">
+<h2 class="weld g-orange kh"><img src="img/num_1.png" alt="1">Your run</h2>
+<label class="kf kmain">Run time <span>From the start to the win screen. 12:30, 12m 30s and 12 all work.</span>
+<span class="kin"><img src="img/clock.png" alt=""><input class="search" id="ft" inputmode="text" autocomplete="off" placeholder="12:00"><b>min:sec</b></span></label>
+<label class="kf">Seeds per run <span>What the win screen shows. 70.9k works too.</span>
+<span class="kin"><img src="img/cur/seeds.webp" alt=""><input class="search" id="fs" inputmode="decimal" autocomplete="off" placeholder="70950"><b>Seeds</b></span></label>
+<label class="kf">Fertilizer per run
+<span class="kin"><img src="img/cur/fertilizer.webp" alt=""><input class="search" id="ff" inputmode="decimal" autocomplete="off" placeholder="38"><b>Fertilizer</b></span></label>
+<div class="kf">Time between runs <span>Loading, voting and the lobby. Most calculators forget this.</span>
+<div class="kluck fgap"><button class="chip" type="button" data-gap="0">None</button><button class="chip" type="button" data-gap="10">10s</button><button class="chip" type="button" data-gap="30">30s</button><button class="chip" type="button" data-gap="60">1 min</button><span class="kin sm"><input class="search" id="fg" inputmode="text" autocomplete="off" aria-label="Seconds between runs"><b>s</b></span></div></div>
+<details class="kmore"><summary>Try a x2 gamepass</summary>
+<div class="kmore-in">
+<p class="khint">Only turn these on if the numbers above are <b>without</b> the gamepass. It shows what you'd earn with it.</p>
+<label class="ktog-line"><span class="ktog"><input type="checkbox" id="fx2s"><i></i></span><span><strong>x2 Seeds</strong><span>Doubles the Seeds you typed.</span></span></label>
+<label class="ktog-line"><span class="ktog"><input type="checkbox" id="fx2f"><i></i></span><span><strong>x2 Fertilizer</strong><span>Doubles the Fertilizer you typed.</span></span></label>
+</div>
+</details>
+</section>
+<section class="kout" id="fout">
+<h2 class="weld g-green kh kout-h"><img src="img/num_2.png" alt="2">Your farming rate</h2>
+<p class="kerr" id="ferr" hidden></p>
+<div class="kres">
+<p class="fex" id="fex" hidden>Example numbers. Type your own run on the left.</p>
+<div class="fstats" id="fstats"></div>
+<p class="kr-line" id="fline"></p>
+</div>
+<section class="panel kneed">
+<h3>How long do you play?</h3>
+<div class="kluck fplay"><button class="chip" type="button" data-play="1800">30 min</button><button class="chip" type="button" data-play="3600">1h</button><button class="chip" type="button" data-play="7200">2h</button><button class="chip" type="button" data-play="18000">5h</button><span class="kin sm"><input class="search" id="fp" inputmode="text" autocomplete="off" placeholder="1h" aria-label="Play time"></span></div>
+<div class="kn-cards" id="fplay"></div>
+<p class="kr-note">Rewards come at the end of a run, so we only count runs you finish.</p>
+</section>
+<section class="panel kneed">
+<h3>Saving up for something?</h3>
+<div class="kf fgoal"><span class="kin"><input class="search" id="fgoal" inputmode="decimal" autocomplete="off" placeholder="Like 500k" aria-label="Goal amount"><select id="fgc" aria-label="Currency"><option value="s">Seeds</option><option value="f">Fertilizer</option></select></span></div>
+<div class="kn-cards" id="fgoalout"></div>
+<button class="kshow" id="fshow" type="button" aria-expanded="false" aria-controls="fextra"><span>Show more</span><i></i></button>
+<div class="kextra" id="fextra" hidden>
+<div class="kx-stats"><div><span>One run gives</span><strong id="fx1"></strong></div><div><span>Farming 24 hours</span><strong id="fx2"></strong></div><div><span>Time spent waiting</span><strong id="fx3"></strong></div></div>
+<h4>If your runs were faster</h4>
+<div class="fx-table" id="fxfast"></div>
+</div>
+</section>
+</section>
+</div>
+<section class="panel khow">
+<h2 class="weld g-green kh"><img src="img/bell.png" alt="">How it works</h2>
+<div class="khow-grid">
+<div><h3>Waiting counts too</h3><p>A 12 minute run with 10 seconds of loading is really 12:10. We add the time between runs, so <b>3600 ÷ 730 = 4.9 runs</b> an hour, not 5.</p></div>
+<div><h3>No rounding</h3><p>Per hour is the real average, so 12:30 runs give 4.8 runs an hour instead of being rounded down to 4.</p></div>
+<div><h3>Only finished runs pay</h3><p>For your play time and goals we count whole runs, because you get nothing for a run you stop halfway.</p></div>
+<div><h3>Find your best farm</h3><p>Try your different maps and modes. A shorter run with fewer Seeds can still win per hour. Copy link saves your numbers.</p></div>
+</div>
+</section>
+<div class="cbtns kbtns"><button class="brick blue sm" id="fcopy" type="button">Copy link</button><button class="brick dark sm" id="freset" type="button">Reset</button></div>
+<p class="note">Rewards change with the map, mode and difficulty, so time a few of your own runs for the best answer.</p>
+</main>
+<script defer src="js/farm.js?v={JSVER['farm']}"></script>
+"""
+open("farm.html", "w").write(page("Bloombot Farm Calculator · Garden Tower Defense Seeds per Hour", "GTD farm calculator: Garden Tower Defense Seeds and Fertilizer per hour, play time totals and how long until your goal.", farm_body, "c", "farm.html"))
 
 
 # ── Strategies ───────────────────────────────────────────────────────────

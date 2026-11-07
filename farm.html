@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloombot Farm Calculator · Garden Tower Defense Seeds per Hour</title>
+<meta name="description" content="GTD farm calculator: Garden Tower Defense Seeds and Fertilizer per hour, play time totals and how long until your goal.">
+<meta property="og:title" content="Bloombot Farm Calculator · Garden Tower Defense Seeds per Hour">
+<meta property="og:description" content="GTD farm calculator: Garden Tower Defense Seeds and Fertilizer per hour, play time totals and how long until your goal.">
+<meta property="og:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
+<meta property="og:url" content="https://bloombot-gtd.vercel.app/farm.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bloombot">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://bloombot-gtd.vercel.app/farm.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="keywords" content="GTD seeds per hour, Garden Tower Defense fertilizer per hour, farm calculator, best farming, seeds calculator, fertilizer calculator, grind time, Garden Tower Defense, GTD, Roblox, Discord bot, GTD Discord, Garden Tower Defense Discord, GTD values, Garden Tower Defense values, GTD trading, GTD trade ads, value list, Bloombot">
+<meta name="google-site-verification" content="wgEfTTw4ymFeGxytFVhbK6OwL639P6QfcPRBa0BeqMo">
+<meta name="theme-color" content="#13151b">
+<meta name="color-scheme" content="dark">
+<meta name="darkreader-lock">
+<link rel="icon" href="img/favicon.png">
+<link rel="stylesheet" href="style.css?v=612e4335">
+<script src="js/theme.js?v=9fa9b3c2"></script>
+<script defer src="js/supabase.js?v=2.45.4"></script>
+<script defer src="js/app.js?v=fbfc330d"></script>
+<script defer src="js/site.js?v=804e5d0d"></script>
+<script defer src="js/giveaway.js?v=40b663f8"></script>
+<script defer src="js/consent.js?v=650a8387"></script>
+<script defer src="js/track.js?v=0580d865"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+<header class="topbar">
+<div class="wrap bar">
+<a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl on g-green" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a></nav>
+<div class="right">
+<button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
+<button class="theme-btn" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
+<a class="brick nb discord add" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt=""><span>Add<span class="wide"> to Discord</span></span></a>
+<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login><img class="dc" src="img/login.png" alt=""><span>Log in</span></button></div>
+<button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div>
+</div>
+</header>
+<section class="hero">
+<div class="wrap hero-in">
+<h1 class="stud-title"><img class="hero-icon" src="img/seeds.png" alt=""><img class="title-art" src="img/t_farm.png" alt="Farm calculator"></h1>
+<p class="sub">How many Seeds and Fertilizer you really earn per hour, and how long until your goal.</p>
+</div>
+</section>
+
+<main class="wrap calc crates farm" id="main">
+<nav class="ctabs" aria-label="Calculators" data-tab="2"><span class="ctab-ind weld" aria-hidden="true"></span><a class="ctab" href="calculator.html" data-i="0"><img src="img/calculator.png" alt=""><span class="ct-t"><b>Trade<span class="ct-l"> calculator</span></b><small>Win, fair or loss</small></span></a><a class="ctab" href="crates.html" data-i="1"><img src="img/crate.png" alt=""><span class="ct-t"><b>Crate<span class="ct-l"> calculator</span></b><small>Summon odds</small></span></a><a class="ctab on" href="farm.html" data-i="2" aria-current="page"><img src="img/seeds.png" alt=""><span class="ct-t"><b>Farm<span class="ct-l"> calculator</span></b><small>Seeds per hour</small></span></a></nav>
+
+<div class="kgrid">
+<section class="panel kform">
+<h2 class="weld g-orange kh"><img src="img/num_1.png" alt="1">Your run</h2>
+<label class="kf kmain">Run time <span>From the start to the win screen. 12:30, 12m 30s and 12 all work.</span>
+<span class="kin"><img src="img/clock.png" alt=""><input class="search" id="ft" inputmode="text" autocomplete="off" placeholder="12:00"><b>min:sec</b></span></label>
+<label class="kf">Seeds per run <span>What the win screen shows. 70.9k works too.</span>
+<span class="kin"><img src="img/cur/seeds.webp" alt=""><input class="search" id="fs" inputmode="decimal" autocomplete="off" placeholder="70950"><b>Seeds</b></span></label>
+<label class="kf">Fertilizer per run
+<span class="kin"><img src="img/cur/fertilizer.webp" alt=""><input class="search" id="ff" inputmode="decimal" autocomplete="off" placeholder="38"><b>Fertilizer</b></span></label>
+<div class="kf">Time between runs <span>Loading, voting and the lobby. Most calculators forget this.</span>
+<div class="kluck fgap"><button class="chip" type="button" data-gap="0">None</button><button class="chip" type="button" data-gap="10">10s</button><button class="chip" type="button" data-gap="30">30s</button><button class="chip" type="button" data-gap="60">1 min</button><span class="kin sm"><input class="search" id="fg" inputmode="text" autocomplete="off" aria-label="Seconds between runs"><b>s</b></span></div></div>
+<details class="kmore"><summary>Try a x2 gamepass</summary>
+<div class="kmore-in">
+<p class="khint">Only turn these on if the numbers above are <b>without</b> the gamepass. It shows what you'd earn with it.</p>
+<label class="ktog-line"><span class="ktog"><input type="checkbox" id="fx2s"><i></i></span><span><strong>x2 Seeds</strong><span>Doubles the Seeds you typed.</span></span></label>
+<label class="ktog-line"><span class="ktog"><input type="checkbox" id="fx2f"><i></i></span><span><strong>x2 Fertilizer</strong><span>Doubles the Fertilizer you typed.</span></span></label>
+</div>
+</details>
+</section>
+<section class="kout" id="fout">
+<h2 class="weld g-green kh kout-h"><img src="img/num_2.png" alt="2">Your farming rate</h2>
+<p class="kerr" id="ferr" hidden></p>
+<div class="kres">
+<p class="fex" id="fex" hidden>Example numbers. Type your own run on the left.</p>
+<div class="fstats" id="fstats"></div>
+<p class="kr-line" id="fline"></p>
+</div>
+<section class="panel kneed">
+<h3>How long do you play?</h3>
+<div class="kluck fplay"><button class="chip" type="button" data-play="1800">30 min</button><button class="chip" type="button" data-play="3600">1h</button><button class="chip" type="button" data-play="7200">2h</button><button class="chip" type="button" data-play="18000">5h</button><span class="kin sm"><input class="search" id="fp" inputmode="text" autocomplete="off" placeholder="1h" aria-label="Play time"></span></div>
+<div class="kn-cards" id="fplay"></div>
+<p class="kr-note">Rewards come at the end of a run, so we only count runs you finish.</p>
+</section>
+<section class="panel kneed">
+<h3>Saving up for something?</h3>
+<div class="kf fgoal"><span class="kin"><input class="search" id="fgoal" inputmode="decimal" autocomplete="off" placeholder="Like 500k" aria-label="Goal amount"><select id="fgc" aria-label="Currency"><option value="s">Seeds</option><option value="f">Fertilizer</option></select></span></div>
+<div class="kn-cards" id="fgoalout"></div>
+<button class="kshow" id="fshow" type="button" aria-expanded="false" aria-controls="fextra"><span>Show more</span><i></i></button>
+<div class="kextra" id="fextra" hidden>
+<div class="kx-stats"><div><span>One run gives</span><strong id="fx1"></strong></div><div><span>Farming 24 hours</span><strong id="fx2"></strong></div><div><span>Time spent waiting</span><strong id="fx3"></strong></div></div>
+<h4>If your runs were faster</h4>
+<div class="fx-table" id="fxfast"></div>
+</div>
+</section>
+</section>
+</div>
+<section class="panel khow">
+<h2 class="weld g-green kh"><img src="img/bell.png" alt="">How it works</h2>
+<div class="khow-grid">
+<div><h3>Waiting counts too</h3><p>A 12 minute run with 10 seconds of loading is really 12:10. We add the time between runs, so <b>3600 ÷ 730 = 4.9 runs</b> an hour, not 5.</p></div>
+<div><h3>No rounding</h3><p>Per hour is the real average, so 12:30 runs give 4.8 runs an hour instead of being rounded down to 4.</p></div>
+<div><h3>Only finished runs pay</h3><p>For your play time and goals we count whole runs, because you get nothing for a run you stop halfway.</p></div>
+<div><h3>Find your best farm</h3><p>Try your different maps and modes. A shorter run with fewer Seeds can still win per hour. Copy link saves your numbers.</p></div>
+</div>
+</section>
+<div class="cbtns kbtns"><button class="brick blue sm" id="fcopy" type="button">Copy link</button><button class="brick dark sm" id="freset" type="button">Reset</button></div>
+<p class="note">Rewards change with the map, mode and difficulty, so time a few of your own runs for the best answer.</p>
+</main>
+<script defer src="js/farm.js?v=4ec352dd"></script>
+<footer>
+<div class="wrap foot">
+<div class="foot-top">
+<div class="foot-brand">
+<a class="foot-mark" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<p>The trading bot for Roblox Garden Tower Defense. Trade ads, live values, calculators and strategies, free in every server.</p>
+<div class="foot-cta"><a class="brick discord sm" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt="">Add to Discord</a><a class="brick dark sm" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt="">Support</a></div>
+</div>
+<nav class="foot-cols" aria-label="Footer">
+<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="farm.html">Farm calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
+<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands">Add to Discord</a><a href="https://discord.gg/tGuXfcJxwf">Support server</a></div>
+<div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
+</nav>
+</div>
+<div class="foot-bottom">
+<p>Unit values come from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>. Thanks to its team!</p>
+<p>&copy; 2026 Bloombot. A fan-made bot, not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
+</div>
+</div>
+</footer>
+<a class="totop brick dark" href="#" aria-label="Back to top"><img src="img/up.png" alt=""></a>
+</body>
+</html>

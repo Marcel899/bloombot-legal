@@ -3379,3 +3379,65 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 @media (max-width:520px){.ck{left:8px;right:8px;bottom:8px;width:auto;max-width:none;padding:14px}.ck-ico{width:40px;height:40px}}
 @media (prefers-reduced-motion:reduce){.ck,.ck.out{animation:none;transition:none}}
 [data-theme=light] .ck{background:linear-gradient(180deg,rgba(40,168,40,.1),#fff 120px),#fff;border-color:rgba(40,168,40,.35);box-shadow:0 24px 50px -16px rgba(20,40,70,.45)}
+
+/* ── Calculator switcher: three tabs ───────── */
+.ctabs{grid-template-columns:repeat(3,1fr);width:min(720px,100%)}
+.ctab-ind{width:calc((100% - 24px) / 3)}
+.ctabs[data-tab="2"] .ctab-ind{transform:translateX(calc(200% + 12px));--bg:#a94fff;--bd:#553078;--gl:169,79,255}
+@media (max-width:700px){.ct-l{display:none}}
+
+/* ── Farm calculator ───────── */
+.fex{margin:0;padding:8px 12px;border-radius:10px;background:rgba(245,200,60,.12);border:1px dashed rgba(245,200,60,.5);color:#ffd84a;font-weight:800;font-size:.9rem}
+.fstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fstat{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:14px;background:rgba(0,0,0,.22);border:2px solid var(--border);min-width:0}
+.fstat span{display:flex;align-items:center;gap:7px;color:var(--soft);font-weight:800;font-size:.9rem}
+.fstat span img{width:24px;height:24px;object-fit:contain}
+.fstat strong{font-size:clamp(1.6rem,3.2vw,2.3rem);font-weight:900;line-height:1.1;overflow-wrap:anywhere}
+.fstat small{color:var(--muted);font-weight:700;font-size:.8rem}
+.fstat.seeds{border-color:rgba(63,209,63,.55);background:rgba(40,168,40,.1)}
+.fstat.seeds strong{color:#6fe36f}
+.fstat.fert{border-color:rgba(169,79,255,.5);background:rgba(169,79,255,.08)}
+.fstat.fert strong{color:#c58cff}
+.fstat.runs span img{filter:none}
+.farm .kneed .kluck{flex-wrap:wrap;margin-bottom:12px}
+.farm .kneed .kn-cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.farm .kn-card strong{font-size:1.3rem;white-space:normal;overflow-wrap:anywhere}
+.farm .kn-card strong img{width:22px;height:22px;object-fit:contain}
+.fgap .kin.sm,.fplay .kin.sm{max-width:96px}
+.fgoal{margin-bottom:12px}
+.fgoal .kin input{font-size:1.15rem;font-weight:900}
+.fgoal .kin select,.fgoal .kin .dd{flex:0 0 150px;width:150px}
+.farm .kmore-in .ktog-line strong{font-weight:900}
+.fx-table{display:flex;flex-direction:column;gap:4px}
+.fx-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);font-weight:800}
+.fx-row em{font-style:normal;color:var(--muted);font-size:.85rem}
+.fx-row b{text-align:right;color:#6fe36f}
+.fx-row b+b{color:#c58cff}
+.fx-row.fx-h{background:none;color:var(--muted);font-size:.8rem;padding:2px 12px}
+.fx-row.fx-h b{color:var(--muted);display:flex;align-items:center;justify-content:flex-end;gap:5px}
+.fx-row.fx-h img{width:16px;height:16px}
+@media (max-width:620px){
+  .fstats{grid-template-columns:minmax(0,1fr)}
+  .fstat{flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:12px}
+  .fstat span{flex:1 1 100%}
+  .farm .kn-cards{grid-template-columns:minmax(0,1fr)}
+  .fgoal .kin select,.fgoal .kin .dd{flex-basis:120px;width:120px}
+  .fx-row{padding:8px 10px;gap:6px}
+}
+[data-theme=light] .fex{background:#fff6d6;border-color:#e2c25a;color:#7a5500}
+[data-theme=light] .fstat{background:#f8f4e8;border-color:var(--line)}
+[data-theme=light] .fstat.seeds{background:#eaf5dc;border-color:#9fd18f}
+[data-theme=light] .fstat.seeds strong{color:#24731a}
+[data-theme=light] .fstat.fert{background:#f3e9ff;border-color:#c9a6f0}
+[data-theme=light] .fstat.fert strong{color:#7b34c9}
+[data-theme=light] .fx-row{background:#f8f4e8}
+[data-theme=light] .fx-row.fx-h{background:none}
+[data-theme=light] .fx-row b{color:#24731a}
+[data-theme=light] .fx-row b+b{color:#7b34c9}
+.farm .kform .kin:not(.sm) b{min-width:78px}
+@media (max-width:620px){
+  .farm .kneed .kn-cards{grid-template-columns:minmax(0,1fr)}
+  .fx-row em{display:block}
+  .farm .kform .kin:not(.sm) b{min-width:0}
+}
+@media (max-width:600px){.ctabs .ct-t small{display:none}.ctabs .ctab{padding:9px 6px;gap:6px}.ctabs .ctab img{width:22px;height:22px}}
