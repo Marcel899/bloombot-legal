@@ -649,7 +649,7 @@
       const b = BB.el("button", "brick nb dark login-btn");
       b.type = "button";
       b.dataset.login = "";
-      b.innerHTML = '<img class="dc" src="img/door.png" alt="">';
+      b.innerHTML = '<img class="dc" src="img/login.png" alt="">';
       b.append(BB.el("span", null, "Log in"));
       box.append(b);
       return;

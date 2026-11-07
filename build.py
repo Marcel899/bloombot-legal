@@ -80,7 +80,7 @@ HEAD = """<!doctype html>
 <button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
 <button class="theme-btn" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
 <a class="brick nb discord add" href="{invite}">{dsvg}<span>Add<span class="wide"> to Discord</span></span></a>
-<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login><img class="dc" src="img/door.png" alt=""><span>Log in</span></button></div>
+<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login><img class="dc" src="img/login.png" alt=""><span>Log in</span></button></div>
 <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </div>
 </div>
