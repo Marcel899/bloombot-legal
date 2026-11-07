@@ -126,6 +126,14 @@
   ],
   "rewrites": [
     {
+      "source": "/gtd/units.json",
+      "destination": "https://andero2003.github.io/GTDCDN/units.json"
+    },
+    {
+      "source": "/gtd/img/:id",
+      "destination": "https://andero2003.github.io/GTDCDN/images/:id"
+    },
+    {
       "source": "/img/trading.png",
       "destination": "https://cdn.discordapp.com/emojis/1510667373663883476.png?size=128&quality=lossless"
     }

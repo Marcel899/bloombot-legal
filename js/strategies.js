@@ -13,7 +13,7 @@
 
   /* Strategies made with the form (or the bot's template) have "## Heading" sections.
      Information/Performance become pills, units get their pictures, the rest stays text. */
-  const unitsP = BB.loadValues().then(v => new Map(v.map(i => [i.name.toLowerCase(), i]))).catch(() => new Map());
+  const unitsP = BB.loadUnits().then(v => new Map(v.map(i => [i.name.toLowerCase(), i]))).catch(() => new Map());
   const KV = /^\*\*(.+?):\*\*\s*`?([^`]*?)`?\s*$/;
   function unitChip(name) {
     const chip = el("span", "uchip");

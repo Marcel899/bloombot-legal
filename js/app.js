@@ -420,6 +420,44 @@
     return list;
   }
 
+  /* ── every unit in the game (not just the value list) ────────
+     GTDCDN's units.json, proxied through /gtd (vercel.json) so visitors
+     only talk to this site. Value-list items are merged in and keep their
+     own icons; if the CDN is down this is just the value list. */
+  const UKEY = "bb-units-v1";
+  const ukey = t => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  async function cdnUnits() {
+    try {
+      const c = JSON.parse(localStorage.getItem(UKEY) || "null");
+      if (c && Date.now() - c.t < 864e5 && c.d.length) return c.d;
+    } catch (e) { /* ignore */ }
+    const r = await fetch("/gtd/units.json");
+    if (!r.ok) throw new Error("units " + r.status);
+    const raw = await r.json();
+    const d = (Array.isArray(raw) ? raw : Object.values(raw || {}))
+      .map(u => [String((u && u.Name) || "").trim(), String((u && u.ID) || "")])
+      .filter(([n, id]) => n && n.length <= 40 && /^[A-Za-z0-9_]{2,40}$/.test(id));
+    try { localStorage.setItem(UKEY, JSON.stringify({ t: Date.now(), d })); } catch (e) { /* full or blocked */ }
+    return d;
+  }
+  BB.loadUnits = async () => {
+    const [vals, cdn] = await Promise.all([
+      BB.loadValues().catch(() => []),
+      cdnUnits().catch(() => []),
+    ]);
+    const out = new Map();
+    for (const it of vals) if (it.name && it.category !== "gamepass") out.set(ukey(it.name), it);
+    for (const [name, id] of cdn) {
+      const k = ukey(name);
+      if (!k) continue;
+      const icon = location.origin + "/gtd/img/" + id + ".png";
+      const have = out.get(k);
+      if (!have) out.set(k, { name, icon_url: icon, category: "unit", value: 0 });
+      else if (!have.icon_url && !have.image_url) have.image_url = icon;
+    }
+    return [...out.values()];
+  };
+
   /* ── account ─────────────────────────────────────────────── */
   BB.user = s => {
     const u = (s && s.user) || {};
