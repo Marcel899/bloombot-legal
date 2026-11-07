@@ -830,6 +830,25 @@ notfound = hero("warning", "Page not found", "That page doesn't exist. It may ha
 open("404.html", "w").write(re.sub(r'href="([a-z]+\.html)"', r'href="/\1"', page("Page not found · Bloombot", "This page does not exist.", index=False, body=notfound.replace('href="./"', 'href="/"')).replace('src="img/', 'src="/img/').replace('src="js/', 'src="/js/').replace('href="style.css', 'href="/style.css').replace('href="img/', 'href="/img/').replace('<a class="mini" href="./">', '<a class="mini" href="/">').replace('<a href="./">Home</a>', '<a href="/">Home</a>').replace('<a class="foot-mark" href="./">', '<a class="foot-mark" href="/">')))
 
 open("robots.txt", "w").write(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}sitemap.xml\n")
-open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                               + "".join(f"<url><loc>{BASE}{u}</loc><priority>{'1.0' if not u else '0.8'}</priority></url>\n" for u in SITEMAP)
-                               + "</urlset>\n")
+# Sitemap: every page whose robots meta says "index" (noindex pages such as the
+# dashboard, profile and admin pages stay out on their own). A page's lastmod only
+# moves when its HTML changed since the last commit, so Google sees real updates.
+def _sitemap():
+    import datetime, glob, subprocess
+    today = datetime.date.today().isoformat()
+    old = dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>", open("sitemap.xml").read())) if os.path.exists("sitemap.xml") else {}
+    pages = [f for f in glob.glob("*.html") if re.search(r'<meta name="robots" content="index', open(f).read())]
+    order = {u or "index.html": i for i, u in enumerate(SITEMAP)}
+    pages.sort(key=lambda f: (order.get(f, len(order)), f))
+    rows = []
+    for f in pages:
+        loc = BASE + ("" if f == "index.html" else f)
+        try:
+            changed = subprocess.run(["git", "status", "--porcelain", "--", f], capture_output=True, text=True, check=True).stdout.strip()
+        except Exception:
+            changed = "?"
+        mod = today if changed or loc not in old else old[loc]
+        pri = "1.0" if f == "index.html" else "0.8"
+        rows.append(f"<url><loc>{loc}</loc><lastmod>{mod}</lastmod><priority>{pri}</priority></url>\n")
+    open("sitemap.xml", "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(rows) + "</urlset>\n")
+_sitemap()

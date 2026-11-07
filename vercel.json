@@ -113,6 +113,15 @@
           "value": "public, max-age=60, stale-while-revalidate=86400"
         }
       ]
+    },
+    {
+      "source": "/(dashboard|profile|giveaway-admin|gsi|404|admin[^/]*)(\\.html)?",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
     }
   ],
   "rewrites": [
