@@ -17,10 +17,10 @@
       b.setAttribute("aria-pressed", t === "light" ? "true" : "false");
     }
   }
-  /* load the web font without blocking the first paint */
+  /* load the self-hosted web font without blocking the first paint (no Google request) */
   var f = document.createElement("link");
   f.rel = "stylesheet";
-  f.href = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap";
+  f.href = "/fonts/fonts.css?v=1";
   document.head.appendChild(f);
   apply(saved() === "light" ? "light" : "dark");
   document.addEventListener("DOMContentLoaded", function () {

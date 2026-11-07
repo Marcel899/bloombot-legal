@@ -61,8 +61,6 @@ HEAD = """<!doctype html>
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="style.css?v={ver}">
 <script src="js/theme.js?v={themever}"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
@@ -516,7 +514,7 @@ open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tow
 # ── Crate calculator ─────────────────────────────────────────────────────
 JSVER["crates"] = hashlib.md5(open("js/crates.js", "rb").read()).hexdigest()[:8]
 CRATESVER = hashlib.md5(open("data/crates.json", "rb").read()).hexdigest()[:8]
-crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&amp;display=swap">
+crates_body = hero("crate", "Crate calculator", "Your real chance to pull a unit, and how much to save before you spend.", "t_crates") + f"""
 <main class="wrap calc crates" id="main" data-crates="data/crates.json?v={CRATESVER}">
 {calc_tabs("crate")}
 <section class="panel kpick">
