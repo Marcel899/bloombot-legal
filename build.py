@@ -847,50 +847,22 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 """
 open("dashboard.html", "w").write(page("Bloombot Server Dashboard", "Change Bloombot's channels, pings and features for your Discord server from the website.", dash_body, "", "dashboard.html", index=False))
 
-# ── Giveaway manager (site owner only, checked by Supabase) ─────────────
-JSVER["gwadmin"] = hashlib.md5(open("js/gwadmin.js", "rb").read()).hexdigest()[:8]
-gwa_body = f"""<main class="wrap gwa" id="main">
-<div class="gwa-top"><span class="pe-ico"><img src="img/gift.png" alt=""></span><div><h1>Giveaways</h1><p class="hint">Create and run the giveaways shown in the website popup. Only you can see this page.</p></div></div>
-<section class="panel login" id="glogin" hidden>
-<img class="login-icon" src="img/shield.png" alt="">
-<h2>Log in to manage giveaways</h2>
-<p>This page is only for the Bloombot owner.</p>
-<button class="brick green" type="button" data-login>Log in</button>
-</section>
-<section class="panel login" id="gnope" hidden>
-<img class="login-icon" src="img/warning.png" alt="">
-<h2>Owner only</h2>
-<p>Your account can't manage giveaways.</p>
-<a class="brick dark" href="./">Back home</a>
-</section>
-<div class="skel-grid sk-prof" id="gloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
-<div class="gwa-grid" id="gmain" hidden>
-<div class="ptabs" role="tablist" aria-label="Giveaway manager" id="gtabs"><button type="button" role="tab" id="gtab-list" data-tab="list" aria-selected="true">Giveaways<i id="gcnt"></i></button><button type="button" role="tab" id="gtab-form" data-tab="form" aria-selected="false"><span id="gtab-ft">New giveaway</span></button><button type="button" role="tab" id="gtab-blocks" data-tab="blocks" aria-selected="false">Blocked<i id="gbcnt"></i></button></div>
-<section class="gwa-list" data-pane="list" role="tabpanel" aria-labelledby="gtab-list"><div id="glist"></div></section>
-<form class="panel pedit gwa-form" id="gform" data-pane="form" role="tabpanel" aria-labelledby="gtab-form" hidden novalidate>
-<div class="pe-head"><div><h2 id="gform-h">New giveaway</h2><p class="hint" id="gform-sub">It shows up in the popup on every page as soon as you save.</p></div></div>
-<div class="gwa-cols"><div class="gwa-col"><div class="pe-field gwa-ac"><label for="gt">Prize</label><div class="pe-in"><input id="gt" maxlength="80" autocomplete="off" spellcheck="false" placeholder="Type a unit or item…" required role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="gtl"></div><div class="gwa-sug" id="gtl" role="listbox" hidden></div>
-<p class="pe-msg" id="gtm">Pick a unit or item to use its picture and value, or type any prize.</p>
-<label class="gwa-chk gwa-sv" id="gsvw" hidden><input type="checkbox" id="gsv"><span>Show the item's value <em id="gsvn"></em></span></label></div>
-<div class="pe-field"><label for="gs">Subtitle <em>optional</em></label><div class="pe-in"><input id="gs" maxlength="160" autocomplete="off" placeholder="Winner gets it traded in game"></div></div>
-<div class="pe-field"><label for="gi">Picture link <em>optional</em></label><div class="pe-in"><input id="gi" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…png"></div><p class="pe-msg">Right-click a picture in Discord → Copy Link. Leave empty for the gift icon.</p></div>
-<div class="pe-field"><label for="ge">Ends</label><div class="pe-in"><input id="ge" type="datetime-local" required></div>
-<div class="gwa-quick" id="gquick"><button type="button" data-h="24">1 day</button><button type="button" data-h="72">3 days</button><button type="button" data-h="168">1 week</button><button type="button" data-h="336">2 weeks</button></div></div>
-<div class="gwa-prev"><span class="hint">Preview</span><div class="gwa-pv"><img id="gpi" src="img/gift.png" alt=""><div><strong id="gpt">Prize</strong><small id="gps"></small><span class="gw-chip gwa-val" id="gpv" hidden></span><em id="gpe"></em></div></div></div>
-</div><div class="gwa-col"><fieldset class="gwa-set"><legend>Entries per task</legend><p class="pe-msg">How many entries each task gives. 0 turns a task off.</p><div class="gwa-pts" id="gpts"></div></fieldset>
-<fieldset class="gwa-set"><legend>Needed to join</legend><p class="pe-msg">Checked again when the winner is picked, so leaving the server or deleting an ad loses the prize.</p>
-<div class="gwa-req" id="greq"></div></fieldset>
-</div></div>
-<div class="pe-bar"><span class="pe-sp"></span><button class="brick dark sm" type="button" id="gcancel" hidden>Cancel edit</button><button class="brick green" id="gsave" type="submit">Start giveaway</button></div>
-</form>
-<section class="gwa-list gwa-blk" data-pane="blocks" role="tabpanel" aria-labelledby="gtab-blocks" hidden><p class="hint gwa-bh">Blocked people can't join any giveaway and lose their entries in running ones.</p>
-<form class="panel gwa-bform" id="gbform"><div class="pe-in"><input id="gbid" inputmode="numeric" maxlength="21" autocomplete="off" placeholder="Discord user ID" aria-label="Discord user ID"></div><div class="pe-in"><input id="gbwhy" maxlength="200" autocomplete="off" placeholder="Reason (only you see it)" aria-label="Reason"></div><button class="brick red sm" type="submit">Block</button></form>
-<div id="gblocks"></div></section>
-</div>
-</main>
-<script defer src="js/gwadmin.js?v={JSVER['gwadmin']}"></script>
-"""
-open("giveaway-admin.html", "w").write(page("Bloombot Giveaways", "Manage Bloombot website giveaways.", gwa_body, "", "giveaway-admin.html", index=False))
+# ── Giveaway manager moved into the admin panel (admin.html#giveaways); old links still work ──
+open("giveaway-admin.html", "w").write("""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giveaways · Bloombot Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="0; url=admin.html#giveaways">
+<link rel="icon" href="img/favicon.png">
+</head>
+<body>
+<p><a href="admin.html#giveaways">The giveaway manager is in the admin panel now.</a></p>
+</body>
+</html>
+""")
 
 notfound = hero("warning", "Page not found", "That page doesn't exist. It may have moved.", "t_404") + """<main class="wrap" id="main"><section class="cta-panel nf">
 <img src="img/trading.png" alt="">
@@ -940,7 +912,7 @@ ADMIN_HTML = f"""<!doctype html>
 <button class="ibtn theme-b" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
 <div class="wrapr"><button class="ibtn" id="nbtn" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/></svg><span class="dot" id="ndot" hidden></span></button><div class="pop notes" id="npop"></div></div>
 <div class="wrapr"><button class="me" id="mebtn" type="button" aria-label="Account menu" aria-expanded="false"><img id="meav" src="img/task_user.png" alt="" referrerpolicy="no-referrer"><div><b id="mename">Owner</b><small>Owner</small></div></button>
-<div class="pop" id="mepop"><div class="ph"><b>Owner</b> <span class="pill purple">Owner</span></div><a class="pi" href="./"><img src="img/flower.png" alt="">Back to website</a><a class="pi" href="profile.html"><img src="img/task_user.png" alt="">My profile</a><a class="pi" href="giveaway-admin.html"><img src="img/gift.png" alt="">Giveaway manager</a><button class="pi" type="button" id="mref"><img src="img/clock.png" alt="">Refresh data</button><div class="lastload" id="lastload"></div><hr><button class="pi" type="button" id="mout"><img src="img/login.png" alt="">Log out</button></div></div>
+<div class="pop" id="mepop"><div class="ph"><b>Owner</b> <span class="pill purple">Owner</span></div><a class="pi" href="./"><img src="img/flower.png" alt="">Back to website</a><a class="pi" href="profile.html"><img src="img/task_user.png" alt="">My profile</a><a class="pi" href="#giveaways"><img src="img/gift.png" alt="">Giveaway manager</a><button class="pi" type="button" id="mref"><img src="img/clock.png" alt="">Refresh data</button><div class="lastload" id="lastload"></div><hr><button class="pi" type="button" id="mout"><img src="img/login.png" alt="">Log out</button></div></div>
 </header>
 <div class="loadbar" id="loadbar" aria-hidden="true"></div>
 <main class="content" id="main"><div id="view" class="view"><div class="phead"><div><i class="skel sk-h"></i><i class="skel sk-p"></i></div></div><div class="kpis"><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div><div class="kpi"><i class="skel"></i><i class="skel sk-big"></i><i class="skel"></i></div></div><div class="grid g-21 mt"><div class="card"><i class="skel sk-chart"></i></div><div class="card"><i class="skel sk-chart"></i></div></div></div></main>

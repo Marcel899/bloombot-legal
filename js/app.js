@@ -781,7 +781,7 @@
       sep(), out);
     /* owner-only link; Supabase also checks on every giveaway call */
     BB.sb.rpc("is_site_owner").then(({ data }) => {
-      if (data === true) out.before(link("admin.html", "gem", "Admin dashboard"), link("giveaway-admin.html", "gift", "Manage giveaways"), sep());
+      if (data === true) out.before(link("admin.html", "gem", "Admin dashboard"), link("admin.html#giveaways", "gift", "Manage giveaways"), sep());
     }, () => {});
 
     const items = () => [...menu.querySelectorAll("[role=menuitem]")];

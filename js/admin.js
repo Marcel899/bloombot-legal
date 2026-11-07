@@ -319,7 +319,7 @@
     ["Dashboard", [["overview", "Overview", "gem"], ["analytics", "Analytics", "chart_up"], ["users", "Users", "task_user"]]],
     ["Bot", [["ads", "Trade ads", "swap"], ["commands", "Commands", "lightning"], ["moderation", "Moderation", "shield"], ["servers", "Servers", "discord_stud_white"], ["values", "Values & demand", "dollar"], ["giveaways", "Giveaways", "gift"]]],
     ["Site & system", [["website", "Website", "task_about"], ["logs", "Activity log", "task_addbot"], ["system", "System health", "lightning"], ["reports", "Reports", "calculator"]]],
-    ["Open on the website", [["x-values", "Value list", "dollar", "values.html"], ["x-trades", "Trade ads", "swap", "trades.html"], ["x-strat", "Strategies", "bullseye", "strategies.html"], ["x-dash", "Server dashboard", "gear", "dashboard.html"], ["x-gw", "Giveaway manager", "gift", "giveaway-admin.html"]]],
+    ["Open on the website", [["x-values", "Value list", "dollar", "values.html"], ["x-trades", "Trade ads", "swap", "trades.html"], ["x-strat", "Strategies", "bullseye", "strategies.html"], ["x-dash", "Server dashboard", "gear", "dashboard.html"]]],
   ];
   const PAGES = {};
   NAV.forEach(([g, items]) => items.forEach(([id, label, icon, href]) => { if (!href) PAGES[id] = { id, label, icon, group: g }; }));
@@ -890,29 +890,311 @@
     $("#vtr").addEventListener("change", (e) => { tr = e.target.value; t.reset(); });
   };
 
-  // GIVEAWAYS
+  // GIVEAWAYS (the full giveaway manager; every gw_admin_* call is checked against site_owners in Supabase)
+  const GW_PTS = [
+    ["join", "Join", "gift", 1], ["trade_ad", "Live trade ad", "swap", 4], ["strategy", "Share a strategy", "bullseye", 3],
+    ["server_link", "Private server link", "gear", 1], ["in_server", "Join the Bloombot Discord", "envelope", 0], ["roblox", "Verify Roblox", "shield", 0],
+  ];
+  const GW_BOX = [["in_server", "Be in the Bloombot Discord server"], ["roblox", "Have a verified Roblox account"], ["trade_ad", "Have a live trade ad"]];
+  const GW_NUM = [["min_level", "Bloombot level at least", 200], ["discord_days", "Discord account age (days)", 3650], ["bloombot_days", "Bloombot account age (days)", 3650]];
+  const GW_DEF = { entries: Object.fromEntries(GW_PTS.map((p) => [p[0], p[3]])), req: { in_server: false, roblox: false, trade_ad: false, min_level: 0, discord_days: 0, bloombot_days: 0 } };
+  const GW = { tab: "list", editing: null, rows: null, blocks: null, busy: false };
+  const httpsUrl = (u) => { try { const x = new URL(String(u || "").trim()); return x.protocol === "https:" ? x.href : ""; } catch (e) { return ""; } };
+  async function gwrpc(fn, args) {
+    const { data, error } = await sb.rpc(fn, args || {});
+    if (error) throw new Error(/not allowed/.test(error.message || "") ? "Only site owners can do that." : error.message || "Request failed");
+    return data;
+  }
+  async function gwValues() {
+    if (S.values) return S.values;
+    const { data, error } = await sb.from("item_values").select("name,category,value,value_text,demand,status,rarity,icon_url,image_url,change_30d,updated_at").order("value", { ascending: false }).limit(3000);
+    if (error) throw error;
+    return (S.values = data || []);
+  }
+  const gwNorm = (t) => String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const gwItem = (n) => (S.values || []).find((i) => gwNorm(i.name) === gwNorm(n));
+  const gwVal = (it) => (it && (it.value_text || (it.value > 0 ? full(it.value) : ""))) || "";
+  const gwPic = (it) => httpsUrl(it && it.image_url) || httpsUrl(it && it.icon_url) || "";
+  const gwState = (g) => (g.winner_id ? ["won", "Winner picked", "purple"] : toDate(g.ends_at) > Date.now() ? ["live", "Live", "green"] : ["ended", "Ended, no winner yet", "yellow"]);
+  function gwLeft(t) {
+    const s = Math.floor((toDate(t) - Date.now()) / 1000);
+    if (s <= 0) return "Ended";
+    const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+    return "Ends in " + (d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`);
+  }
+  function gwRuleText(r) {
+    const e = { ...GW_DEF.entries, ...((r && r.entries) || {}) }, q = { ...GW_DEF.req, ...((r && r.req) || {}) };
+    const req = [];
+    GW_BOX.forEach(([k, label]) => { if (q[k]) req.push(label.replace(/^Be in the |^Have /, "")); });
+    if (q.min_level) req.push("Level " + q.min_level + "+");
+    if (q.discord_days) req.push("Discord " + q.discord_days + "d+");
+    if (q.bloombot_days) req.push("Bloombot " + q.bloombot_days + "d+");
+    return { req, tasks: GW_PTS.filter(([k]) => e[k] > 0).map(([k, label]) => `${label} +${e[k]}`) };
+  }
+  const gwLoad = async () => { GW.rows = (await gwrpc("gw_admin_list")) || []; S.gw = GW.rows; return GW.rows; };
+  const gwLoadBlocks = async () => { GW.blocks = (await gwrpc("gw_admin_blocks")) || []; return GW.blocks; };
+  const onGw = () => location.hash === "#giveaways";
+
   R.giveaways = async (v) => {
-    v.innerHTML = `<div class="phead"><div><h1>Giveaways</h1><p>Website giveaways. Create, end and draw them in the giveaway manager.</p></div><div class="acts"><a class="btn g-purple" href="giveaway-admin.html"><img src="img/gift.png" alt="">Open giveaway manager</a></div></div><div id="gk"></div><div id="gl" class="mt">${skel(4)}</div>`;
-    try { S.gw = S.gw || (await (async () => { const { data, error } = await sb.rpc("gw_admin_list"); if (error) throw error; return data || []; })()); } catch (e) { empty($("#gl"), "Couldn't load giveaways", e.message || ""); return; }
-    if (location.hash !== "#giveaways") return;
-    const g = S.gw.map((x) => ({ ...x, ends: toDate(x.ends_at), state: x.winner_id ? "Won" : toDate(x.ends_at) > Date.now() ? "Live" : "Ended" }));
-    renderKpis($("#gk"), [
-      kpi("Live now", "gift", full(g.filter((x) => x.state === "Live").length), null, null, null, null, ""),
-      kpi("Entrants, live", "task_user", full(sum(g.filter((x) => x.state === "Live").map((x) => +x.entrants))), null, null, null, null, ""),
-      kpi("All giveaways", "medal_gold", full(g.length), null, null, null, null, full(sum(g.map((x) => +x.entrants))) + " entrants total"),
-    ]);
-    table($("#gl"), {
-      rows: () => g, sort: "ends", dir: -1, empty: "No giveaways yet.",
-      cols: [
-        { key: "title", label: "Prize", render: () => '<b class="gt"></b>' },
-        { key: "state", label: "Status", render: (x) => statusPill(x.state) },
-        { key: "ends", label: "Ends", render: (x) => fdate(x.ends) + " " + (x.ends ? ftime(x.ends) : "") },
-        { key: "entrants", label: "Entrants", n: true, render: (x) => full(+x.entrants) },
-        { key: "entries", label: "Entries", n: true, render: (x) => full(+x.entries), hide: true },
-        { key: "winner_name", label: "Winner", render: () => '<span class="gw"></span>', hide: true },
-      ],
-      after: (h, sl) => { $$(".gt", h).forEach((b, i) => { b.textContent = sl[i].title; }); $$(".gw", h).forEach((b, i) => { b.textContent = sl[i].winner_name || (sl[i].winner_id ? sl[i].winner_id : "–"); }); },
-    });
+    v.innerHTML = `<div class="phead"><div><h1>Giveaways</h1><p>The giveaways in the popup on every website page. Start, edit, end and draw them here.</p></div><div class="acts"><button class="btn g-green" type="button" id="gnew"><img src="img/plus.png" alt="">New giveaway</button></div></div>
+      <div id="gk"></div><div class="tabs mt" id="gtabs" role="tablist" aria-label="Giveaway manager"></div><div id="gbody">${skel(4)}</div>`;
+    $("#gnew").addEventListener("click", () => { GW.editing = null; GW.tab = "form"; draw(); });
+    gwValues().catch(() => {});
+    try { await Promise.all([GW.rows ? null : gwLoad(), GW.blocks ? null : gwLoadBlocks()]); } catch (e) { empty($("#gbody"), "Couldn't load giveaways", e.message || ""); return; }
+    if (!onGw()) return;
+    draw();
+
+    function kpis() {
+      const g = GW.rows, live = g.filter((x) => gwState(x)[0] === "live");
+      renderKpis($("#gk"), [
+        kpi("Live now", "gift", full(live.length), null, null, null, null, live.length ? gwLeft(live.map((x) => x.ends_at).sort()[0]).toLowerCase().replace("ends in", "next ends in") : "nothing running"),
+        kpi("Joined, live", "task_user", full(sum(live.map((x) => +x.entrants))), null, null, null, null, full(sum(live.map((x) => +x.entries))) + " entries"),
+        kpi("Waiting for a winner", "medal_gold", full(g.filter((x) => gwState(x)[0] === "ended" && +x.entrants).length), null, null, null, null, "ended with entrants"),
+        kpi("Blocked people", "shield", full(GW.blocks.length), null, null, null, null, "can't join"),
+      ]);
+    }
+    function tabs() {
+      const ed = GW.editing && GW.rows.find((x) => x.id === GW.editing);
+      const list = [["list", "Giveaways", GW.rows.length], ["form", ed ? "Editing: " + (ed.title.length > 22 ? ed.title.slice(0, 21) + "…" : ed.title) : "New giveaway", 0], ["blocks", "Blocked", GW.blocks.length]];
+      $("#gtabs").innerHTML = list.map(([k, , n]) => `<button type="button" role="tab" data-t="${k}" aria-selected="${GW.tab === k}" class="${GW.tab === k ? "on" : ""}"><span></span>${n ? ` <em class="tcnt">${n}</em>` : ""}</button>`).join("");
+      $$("#gtabs button").forEach((b, i) => { b.querySelector("span").textContent = list[i][1]; b.addEventListener("click", () => { if (GW.tab === b.dataset.t) return; GW.tab = b.dataset.t; draw(); }); });
+    }
+    function draw() {
+      if (!onGw()) return;
+      kpis(); tabs();
+      ({ list: drawList, form: drawForm, blocks: drawBlocks })[GW.tab]($("#gbody"));
+    }
+    async function act(btn, ask, fn) {
+      if (GW.busy) return;
+      if (ask && !(await confirmBox(ask))) return;
+      GW.busy = true; btn.disabled = true;
+      try { toast(await fn(), "verified_stud"); await gwLoad(); draw(); } catch (e) { toast(e.message, "warning"); btn.disabled = false; }
+      GW.busy = false;
+    }
+    async function block(did, name, why) {
+      if (!(await confirmBox({ title: "Block " + (name || did) + "?", text: "They can't join any giveaway and lose their entries in running ones.", ok: "Block", danger: true }))) return false;
+      try { await gwrpc("gw_admin_block", { did, why: why || "" }); } catch (e) { toast(e.message, "warning"); return false; }
+      toast((name || did) + " is blocked.", "shield");
+      await Promise.all([gwLoad(), gwLoadBlocks()]).catch(() => {});
+      draw();
+      return true;
+    }
+
+    function drawList(host) {
+      if (!GW.rows.length) { host.innerHTML = '<div class="card"><div class="empty"><img src="img/gift.png" alt=""><b>No giveaways yet</b><span>Start one with New giveaway. It shows up in the website popup right away.</span></div></div>'; return; }
+      const order = { live: 0, ended: 1, won: 2 };
+      const rows = GW.rows.slice().sort((a, b) => order[gwState(a)[0]] - order[gwState(b)[0]] || (gwState(a)[0] === "live" ? toDate(a.ends_at) - toDate(b.ends_at) : toDate(b.ends_at) - toDate(a.ends_at)));
+      host.innerHTML = `<div class="gwl">${rows.map((g, i) => {
+        const [cls, label, pill] = gwState(g);
+        return `<article class="card gwc ${cls}" data-i="${i}"><img class="gwp" alt="" referrerpolicy="no-referrer"><div class="gwb">
+          <div class="gwh"><b class="gwt"></b><span class="pill ${pill}">${label}</span></div><p class="gws muted"></p>
+          <div class="gwm"><span><img src="img/clock.png" alt="">${esc(cls === "live" ? gwLeft(g.ends_at) : "Ended " + fdate(toDate(g.ends_at)) + " " + ftime(toDate(g.ends_at)))}</span><span><img src="img/task_user.png" alt="">${full(+g.entrants)} joined</span><span><img src="img/medal_gold.png" alt="">${full(+g.entries)} entries</span><span class="gwi" hidden></span></div>
+          <div class="chips gwr"></div>
+          <div class="gww" hidden><span class="muted">Winner</span> <button type="button" class="linkbtn gwwn"></button> <button type="button" class="mini-btn gwcp">Copy ID</button></div>
+          <div class="gwa"></div><div class="gwe" hidden></div></div></article>`;
+      }).join("")}</div>`;
+      $$(".gwc", host).forEach((card) => {
+        const g = rows[+card.dataset.i], cls = gwState(g)[0];
+        const p = $(".gwp", card); p.src = httpsUrl(g.image_url) || "img/gift.png"; p.addEventListener("error", () => { p.src = "img/gift.png"; }, { once: true });
+        $(".gwt", card).textContent = g.title;
+        const sub = $(".gws", card); if (g.subtitle) sub.textContent = g.subtitle; else sub.remove();
+        if (g.rules && g.rules.item) { const it = gwItem(g.rules.item), val = it && g.rules.show_value ? gwVal(it) : ""; const s = $(".gwi", card); s.hidden = false; s.textContent = "Item: " + g.rules.item + (val ? " · worth " + val : g.rules.show_value ? "" : " · value hidden"); }
+        const rt = gwRuleText(g.rules), ch = $(".gwr", card);
+        rt.req.forEach((t) => { const s = document.createElement("span"); s.className = "pill yellow"; s.textContent = t; ch.append(s); });
+        rt.tasks.forEach((t) => { const s = document.createElement("span"); s.className = "pill gray"; s.textContent = t; ch.append(s); });
+        if (g.winner_id) {
+          const w = $(".gww", card); w.hidden = false;
+          const wn = $(".gwwn", w); wn.textContent = g.winner_name || g.winner_id;
+          wn.addEventListener("click", () => { const u = S.byId.get(String(g.winner_id)); if (u) openUser(u); else location.href = "profile.html?id=" + encodeURIComponent(g.winner_id); });
+          $(".gwcp", w).addEventListener("click", () => { navigator.clipboard.writeText(String(g.winner_id)).then(() => toast("Winner ID copied", "verified_stud"), () => toast("Couldn't copy", "warning")); });
+        }
+        const bar = $(".gwa", card), ent = $(".gwe", card);
+        const b = (text, cls2, fn) => { const x = document.createElement("button"); x.type = "button"; x.className = "btn sm " + cls2; x.textContent = text; x.addEventListener("click", () => fn(x)); bar.append(x); return x; };
+        if (+g.entrants) b("Entrants", "g-dark", (x) => entrants(g, ent, x));
+        b("Edit", "g-dark", () => { GW.editing = g.id; GW.tab = "form"; draw(); scrollTo({ top: 0, behavior: "smooth" }); });
+        if (cls === "live") b("End now", "g-dark", (x) => act(x, { title: "End this giveaway?", text: `"${g.title}" stops taking entries now. You can pick a winner after.`, ok: "End now" }, async () => { await gwrpc("gw_admin_end", { gid: g.id }); return "Giveaway ended."; }));
+        if (+g.entrants) b(g.winner_id ? "Reroll" : "Pick winner", g.winner_id ? "g-dark" : "g-green", (x) => act(x, { title: g.winner_id ? "Pick a new winner?" : "Pick a winner?", text: (cls === "live" ? "This ends the giveaway. " : "") + "More entries means a better chance.", ok: g.winner_id ? "Reroll" : "Pick winner" }, async () => {
+          const d = await gwrpc("gw_admin_draw", { gid: g.id });
+          const r = (await gwLoad()).find((o) => o.id === g.id);
+          return "Winner: " + ((r && r.winner_name) || d);
+        }));
+        b("Delete", "g-red", (x) => act(x, { title: "Delete giveaway?", text: `"${g.title}" and all its entries are removed. This can't be undone.`, ok: "Delete", danger: true, typed: "delete" }, async () => { await gwrpc("gw_admin_delete", { gid: g.id }); if (GW.editing === g.id) GW.editing = null; return "Giveaway deleted."; }));
+      });
+    }
+
+    async function entrants(g, box, btn) {
+      if (!box.hidden) { box.hidden = true; btn.textContent = "Entrants"; return; }
+      btn.disabled = true;
+      let data;
+      try { data = (await gwrpc("gw_admin_entrants", { gid: g.id })) || []; } catch (e) { btn.disabled = false; toast(e.message, "warning"); return; }
+      btn.disabled = false; btn.textContent = "Hide entrants"; box.hidden = false;
+      const tot = sum(data.map((r) => +r.entries)) || 1;
+      table(box, {
+        rows: () => data, sort: "entries", dir: -1, per: 10, empty: "Nobody joined yet.",
+        cols: [
+          { key: "name", label: "Who", render: () => '<button type="button" class="linkbtn en"></button>' },
+          { key: "entries", label: "Entries", n: true, render: (r) => full(+r.entries) + ` <span class="faint">${((r.entries / tot) * 100).toFixed(1)}%</span>` },
+          { key: "discord_created", label: "Discord age", sort: (r) => -toDate(r.discord_created), hide: true, render: (r) => { const age = Math.floor((Date.now() - toDate(r.discord_created)) / DAY); return `<span class="${age < 30 ? "pill red" : ""}">${age < 30 ? age + " days" : Math.floor(age / 30) + " months"}</span>`; } },
+          { key: "blocked", label: "", nosort: true, render: (r) => (r.blocked ? '<span class="pill red">Blocked</span>' : '<button type="button" class="mini-btn danger bk">Block</button>') },
+        ],
+        after: (h, sl) => {
+          $$(".en", h).forEach((x, i) => { const r = sl[i]; x.textContent = r.name || r.discord_id; x.addEventListener("click", () => { const u = S.byId.get(String(r.discord_id)); if (u) openUser(u); else location.href = "profile.html?id=" + encodeURIComponent(r.discord_id); }); });
+          $$("tbody tr", h).forEach((tr, i) => { const k = $(".bk", tr); if (k) k.addEventListener("click", () => block(sl[i].discord_id, sl[i].name, "")); });
+        },
+      });
+    }
+
+    function drawForm(host) {
+      const g = GW.editing && GW.rows.find((x) => x.id === GW.editing);
+      let item = null, sug = [], si = -1;
+      const pad = (n) => String(n).padStart(2, "0");
+      const local = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      host.innerHTML = `<form class="grid g-21" id="gform" novalidate><section class="card"><div class="ch"><div class="hl"><h2><img src="img/gift.png" alt=""><span id="gfh"></span></h2><p id="gfs"></p></div></div>
+          <div class="field gac"><label for="gt">Prize</label><input class="inp" id="gt" maxlength="80" autocomplete="off" spellcheck="false" placeholder="Type a unit or item…" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="gtl"><div class="pop sres gsug" id="gtl" role="listbox"></div><small id="gtm"></small>
+            <label class="gchk" id="gsvw" hidden><input type="checkbox" id="gsv" class="check"><span>Show the item's value <em id="gsvn"></em></span></label></div>
+          <div class="field"><label for="gsub">Subtitle <span class="faint">optional</span></label><input class="inp" id="gsub" maxlength="160" autocomplete="off" placeholder="Winner gets it traded in game"></div>
+          <div class="field"><label for="gi">Picture link <span class="faint">optional</span></label><input class="inp" id="gi" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…png"><small>Right-click a picture in Discord, then Copy Link. Leave empty for the gift icon.</small></div>
+          <div class="field"><label for="ge">Ends</label><div class="row gend"><input class="inp date-in" id="ge" type="datetime-local"><div class="seg" id="gq"><button type="button" data-h="24">1 day</button><button type="button" data-h="72">3 days</button><button type="button" data-h="168">1 week</button><button type="button" data-h="336">2 weeks</button></div></div></div>
+          <div class="ch mt"><div class="hl"><h2><img src="img/plus.png" alt="">Entries per task</h2><p>How many entries each task gives. 0 turns a task off.</p></div></div><div class="gpts">${GW_PTS.map(([k, label, icon]) => `<label class="gpt"><img src="${ic(icon)}" alt=""><span>${esc(label)}</span><input class="inp" type="number" id="gp_${k}" min="${k === "join" ? 1 : 0}" max="25" step="1" inputmode="numeric"></label>`).join("")}</div>
+          <div class="ch mt"><div class="hl"><h2><img src="img/shield.png" alt="">Needed to join</h2><p>Checked again when the winner is picked, so leaving the server or deleting an ad loses the prize.</p></div></div>
+          <div class="greq">${GW_BOX.map(([k, label]) => `<label class="gchk"><input type="checkbox" class="check" id="gr_${k}"><span>${esc(label)}</span></label>`).join("")}<div class="gpts">${GW_NUM.map(([k, label, max]) => `<label class="gpt"><span>${esc(label)}</span><input class="inp" type="number" id="gr_${k}" min="0" max="${max}" step="1" inputmode="numeric" placeholder="0"></label>`).join("")}</div></div>
+        </section>
+        <aside class="gside"><section class="card gprev"><div class="ch"><h2><img src="img/task_about.png" alt="">Popup preview</h2></div><div class="gpv"><img id="gpi" src="img/gift.png" alt="" referrerpolicy="no-referrer"><div><b id="gpt"></b><small id="gps"></small><span class="pill green" id="gpval" hidden></span><em id="gpe"></em></div></div><div class="gpvr chips mt" id="gpr"></div></section>
+          <div class="gbar"><button class="btn g-dark" type="button" id="gcancel">Cancel</button><button class="btn g-green" type="submit" id="gsave"></button></div></aside></form>`;
+      $("#gfh").textContent = g ? "Edit giveaway" : "New giveaway";
+      $("#gfs").textContent = g ? "Changes show up in the popup right away." : "It shows up in the popup on every page as soon as you save.";
+      $("#gsave").textContent = g ? "Save changes" : "Start giveaway";
+      $("#gpi").addEventListener("error", () => { $("#gpi").src = "img/gift.png"; });
+      const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, Math.round(Number(x) || 0)));
+      const readRules = () => {
+        const entries = {}, req = {};
+        GW_PTS.forEach(([k]) => { entries[k] = clamp($("#gp_" + k).value, k === "join" ? 1 : 0, 25); });
+        GW_BOX.forEach(([k]) => { req[k] = $("#gr_" + k).checked; });
+        GW_NUM.forEach(([k, , max]) => { req[k] = clamp($("#gr_" + k).value, 0, max); });
+        const out = { entries, req };
+        if (item) { out.item = item.name; out.show_value = $("#gsv").checked; }
+        return out;
+      };
+      const preview = () => {
+        $("#gpt").textContent = $("#gt").value.trim() || "Prize";
+        $("#gps").textContent = $("#gsub").value.trim();
+        $("#gpi").src = httpsUrl($("#gi").value) || "img/gift.png";
+        $("#gpe").textContent = $("#ge").value ? gwLeft(new Date($("#ge").value).toISOString()) : "";
+        const val = item && $("#gsv").checked ? gwVal(item) : "";
+        $("#gpval").hidden = !val; $("#gpval").textContent = val ? "Worth " + val : "";
+        const rt = gwRuleText(readRules()), box = $("#gpr");
+        box.textContent = "";
+        [...rt.req.map((t) => ["yellow", t]), ...rt.tasks.map((t) => ["gray", t])].forEach(([c, t]) => { const s = document.createElement("span"); s.className = "pill " + c; s.textContent = t; box.append(s); });
+      };
+      const pickItem = (it, setFields) => {
+        item = it;
+        $("#gsvw").hidden = !it;
+        $("#gsvn").textContent = it && gwVal(it) ? "(" + gwVal(it) + ")" : "";
+        $("#gtm").textContent = it ? `Linked to ${it.name}${it.category ? " · " + it.category : ""}.` : "Pick a unit or item to use its picture and value, or type any prize.";
+        if (it && setFields) { $("#gt").value = it.name; const u = gwPic(it); if (u) $("#gi").value = u; $("#gsv").checked = true; }
+        preview();
+      };
+      const closeSug = () => { $("#gtl").classList.remove("open"); $("#gt").setAttribute("aria-expanded", "false"); si = -1; };
+      const hil = (i) => { si = i; $$("#gtl .pi").forEach((x, j) => x.classList.toggle("act", j === i)); };
+      const showSug = () => {
+        const q = gwNorm($("#gt").value), items = S.values || [];
+        if (!q || !items.length) { closeSug(); return; }
+        sug = items.map((i) => { const n = gwNorm(i.name); return [i, n === q ? 0 : n.startsWith(q) ? 1 : n.includes(q) ? 2 : 9]; }).filter((x) => x[1] < 9).sort((a, b) => a[1] - b[1] || (b[0].value || 0) - (a[0].value || 0)).slice(0, 8).map((x) => x[0]);
+        if (!sug.length) { closeSug(); return; }
+        $("#gtl").innerHTML = sug.map((it, i) => `<button type="button" class="pi" role="option" data-i="${i}"><img alt="" referrerpolicy="no-referrer"><span><span></span><small></small></span><span class="k"></span></button>`).join("");
+        $$("#gtl .pi").forEach((x, i) => {
+          const it = sug[i], im = x.querySelector("img");
+          im.src = httpsUrl(it.icon_url) || httpsUrl(it.image_url) || "img/gift.png";
+          im.addEventListener("error", () => { im.src = "img/gift.png"; }, { once: true });
+          x.querySelector("span>span").textContent = it.name;
+          x.querySelector("small").textContent = [it.category, it.rarity].filter(Boolean).join(" · ");
+          x.querySelector(".k").textContent = gwVal(it);
+          x.addEventListener("mousedown", (e) => { e.preventDefault(); pickItem(it, true); closeSug(); });
+        });
+        $("#gtl").classList.add("open"); $("#gt").setAttribute("aria-expanded", "true"); hil(-1);
+      };
+      // fill
+      const r = g ? g.rules : null;
+      const e0 = { ...GW_DEF.entries, ...((r && r.entries) || {}) }, q0 = { ...GW_DEF.req, ...((r && r.req) || {}) };
+      $("#gt").value = g ? g.title : ""; $("#gsub").value = g ? g.subtitle || "" : ""; $("#gi").value = g ? g.image_url || "" : "";
+      $("#ge").value = local(g ? toDate(g.ends_at) : new Date(Date.now() + 7 * DAY));
+      GW_PTS.forEach(([k]) => { $("#gp_" + k).value = e0[k]; });
+      GW_BOX.forEach(([k]) => { $("#gr_" + k).checked = !!q0[k]; });
+      GW_NUM.forEach(([k]) => { $("#gr_" + k).value = q0[k] || ""; });
+      $("#gsv").checked = !!(r && r.show_value);
+      pickItem(r && r.item ? gwItem(r.item) || { name: r.item } : null, false);
+      if (!S.values) gwValues().then(() => { if (item && !item.category) pickItem(gwItem(item.name) || item, false); }).catch(() => {});
+      // events
+      $("#gt").addEventListener("input", () => {
+        if (item && gwNorm($("#gt").value) !== gwNorm(item.name)) pickItem(null, false);
+        else if (!item) { const m = gwItem($("#gt").value); if (m) pickItem(m, false); }
+        showSug();
+      });
+      $("#gt").addEventListener("keydown", (e) => {
+        if (!$("#gtl").classList.contains("open")) return;
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hil((si + (e.key === "ArrowDown" ? 1 : -1) + sug.length) % sug.length); }
+        else if (e.key === "Enter" && si >= 0) { e.preventDefault(); pickItem(sug[si], true); closeSug(); }
+        else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeSug(); }
+      });
+      $("#gt").addEventListener("blur", () => setTimeout(closeSug, 120));
+      $("#gform").addEventListener("input", preview);
+      $("#gform").addEventListener("change", preview);
+      $("#gq").addEventListener("click", (e) => { const h = e.target.closest("button[data-h]"); if (h) { $("#ge").value = local(new Date(Date.now() + h.dataset.h * 36e5)); preview(); } });
+      $("#gcancel").addEventListener("click", () => { GW.editing = null; GW.tab = "list"; draw(); });
+      $("#gform").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (GW.busy) return;
+        const title = $("#gt").value.trim(), ends = $("#ge").value ? new Date($("#ge").value) : null, img = $("#gi").value.trim();
+        if (!title) { toast("Give the prize a name.", "warning"); $("#gt").focus(); return; }
+        if (!ends || isNaN(ends)) { toast("Pick when it ends.", "warning"); $("#ge").focus(); return; }
+        if (!GW.editing && ends <= Date.now()) { toast("The end time is in the past.", "warning"); $("#ge").focus(); return; }
+        if (img && !httpsUrl(img)) { toast("The picture link must start with https://", "warning"); $("#gi").focus(); return; }
+        GW.busy = true; $("#gsave").disabled = true;
+        try {
+          await gwrpc("gw_admin_save", { gid: GW.editing, p_title: title, p_subtitle: $("#gsub").value.trim(), p_image_url: img, p_ends_at: ends.toISOString(), p_rules: readRules() });
+          toast(GW.editing ? "Changes are live." : "It's live in the popup now.", "gift");
+          GW.editing = null; GW.tab = "list";
+          await gwLoad();
+          draw();
+        } catch (er) { toast(er.message, "warning"); $("#gsave").disabled = false; }
+        GW.busy = false;
+      });
+      preview();
+      const tick = setInterval(() => { if (!document.body.contains($("#gpe") || document.createElement("i"))) clearInterval(tick); else preview(); }, 30000);
+    }
+
+    function drawBlocks(host) {
+      host.innerHTML = `<div class="grid g-12"><section class="card"><div class="ch"><div class="hl"><h2><img src="img/shield.png" alt="">Block someone</h2><p>Blocked people can't join any giveaway and lose their entries in running ones.</p></div></div>
+        <form id="gbform" novalidate><div class="field"><label for="gbid">Discord user ID</label><input class="inp" id="gbid" inputmode="numeric" maxlength="21" autocomplete="off" placeholder="123456789012345678"></div><div class="field"><label for="gbwhy">Reason <span class="faint">only you see it</span></label><input class="inp" id="gbwhy" maxlength="200" autocomplete="off"></div><button class="btn g-red" type="submit">Block</button></form></section><div id="gbl"></div></div>`;
+      $("#gbform").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const did = $("#gbid").value.trim();
+        if (!/^\d{15,21}$/.test(did)) { toast("Paste a Discord user ID (only numbers).", "warning"); $("#gbid").focus(); return; }
+        await block(did, S.byId.get(did) ? S.byId.get(did).name : null, $("#gbwhy").value.trim());
+      });
+      table($("#gbl"), {
+        rows: () => GW.blocks, sort: "name", dir: 1, per: 15, empty: "Nobody is blocked.",
+        cols: [
+          { key: "name", label: "Who", render: () => '<button type="button" class="linkbtn bn"></button><small class="faint bid"></small>' },
+          { key: "reason", label: "Reason", render: () => '<span class="br"></span>' },
+          { key: "x", label: "", nosort: true, render: () => '<button type="button" class="mini-btn ub">Unblock</button>' },
+        ],
+        after: (h, sl) => $$("tbody tr", h).forEach((tr, i) => {
+          const r = sl[i]; if (!r) return;
+          $(".bn", tr).textContent = r.name || r.discord_id;
+          $(".bn", tr).addEventListener("click", () => { const u = S.byId.get(String(r.discord_id)); if (u) openUser(u); else location.href = "profile.html?id=" + encodeURIComponent(r.discord_id); });
+          $(".bid", tr).textContent = " " + r.discord_id;
+          $(".br", tr).textContent = r.reason || "No reason";
+          $(".ub", tr).addEventListener("click", async (ev) => {
+            ev.target.disabled = true;
+            try { await gwrpc("gw_admin_unblock", { did: r.discord_id }); } catch (er) { ev.target.disabled = false; toast(er.message, "warning"); return; }
+            toast((r.name || r.discord_id) + " can join giveaways again.", "verified_stud");
+            await gwLoadBlocks().catch(() => {});
+            draw();
+          });
+        }),
+      });
+    }
   };
 
   // WEBSITE
@@ -1218,6 +1500,7 @@
       S.ov = ov; S.profiles = Array.isArray(prof) ? prof : [];
       S.loadMs = Math.round(performance.now() - t0);
       S.trade = S.logs = S.gw = null;
+      GW.rows = GW.blocks = null;
       build();
       drawNotes();
       drawBotCard();
