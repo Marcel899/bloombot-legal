@@ -3082,3 +3082,14 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 [data-theme=light] .ssteps li.on b,[data-theme=light] .ssteps li.done b{background:#3aa52c}
 [data-theme=light] .serr{color:#c62828}
 @media (max-width:640px){.ssteps span{display:none}.ssteps li.on span{display:inline}.ssteps button{justify-content:center}.sf-grid,.sf-phases{grid-template-columns:1fr}.f-swap{grid-template-columns:1fr auto 1fr}.f-swap .brick{grid-column:1/-1}.seg{width:100%}.seg button{flex:1;padding:7px 8px}}
+
+/* light mode: visible studs + welds */
+[data-theme=light] body{background:
+  radial-gradient(900px 500px at 15% 0,rgba(126,200,80,.14),transparent 70%),
+  radial-gradient(900px 500px at 85% 10%,rgba(80,170,230,.12),transparent 70%),
+  linear-gradient(rgba(244,241,230,.45),rgba(244,241,230,.45)),
+  url(img/studs-bg-light.png) 0 0/128px 128px,var(--bg);
+  background-attachment:scroll,scroll,fixed,scroll,fixed}
+[data-theme=light] .tile::before,[data-theme=light] .cta-panel::before,[data-theme=light] .toc-box::before,[data-theme=light] .panel::before,
+[data-theme=light] .step::before,[data-theme=light] .tcard::before{background-image:url(img/weld.png);opacity:.07}
+[data-theme=light] .nl.on::before{opacity:.18}
