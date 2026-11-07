@@ -3046,3 +3046,11 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 .salt i{font-style:normal;color:var(--muted);font-weight:900}
 [data-theme=light] .sinfo,[data-theme=light] .f-x{background:#f1ead7}
 @media (max-width:900px){.sf-grid{grid-template-columns:1fr 1fr}.sf-phases{grid-template-columns:1fr}}
+
+/* stud account icons + verified badge */
+.pacc .pacc-ic.st-ic,.pacc .rv-row .pacc-ic.st-ic{background:transparent;box-shadow:none;width:40px;height:40px}
+.pacc .pacc-ic.st-ic img,.pacc .rv-row .pacc-ic.st-ic img{width:38px;height:38px}
+.vbadge{display:inline-block;width:1.05em;height:1.05em;margin-left:.3em;vertical-align:-.12em;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.p-tag.vf{display:inline-flex;align-items:center;gap:5px}
+.p-tag.vf::before{content:none}
+.p-tag .vbadge{width:16px;height:16px;margin:0}

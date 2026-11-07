@@ -950,8 +950,17 @@
     BB.verifyRoblox();
   });
 
+  BB.verifiedBadge = () => {
+    const i = BB.el("img", "vbadge");
+    i.src = "img/verified_stud.png";
+    i.alt = "Verified";
+    i.title = "Verified Roblox account";
+    return i;
+  };
   BB.robloxTag = p => {
-    const t = BB.el("span", "p-tag ok" + (p.roblox_verified ? " vf" : ""), p.roblox_verified ? "Roblox verified" : "Roblox linked");
+    const t = BB.el("span", "p-tag ok" + (p.roblox_verified ? " vf" : ""));
+    if (p.roblox_verified) t.append(BB.verifiedBadge());
+    t.append(p.roblox_verified ? "Roblox verified" : "Roblox linked");
     t.title = p.roblox_verified ? "Proved they own this Roblox account" : "Not verified yet";
     return t;
   };
@@ -1247,6 +1256,7 @@
     if (p && p.roblox_name) tags.append(BB.robloxTag(p));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
     if (p && p.level >= 50) name.classList.add("ancient-name");
+    if (p && p.roblox_name && p.roblox_verified) name.append(BB.verifiedBadge());
     if (p && p.level >= 20) box.classList.add("rk-ring");
     if (p && p.level) box.style.setProperty("--rk", BB.rankFor(p.level).color);
     if (isMe) {

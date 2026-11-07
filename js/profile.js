@@ -28,6 +28,7 @@
     if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "p-rav"));
     const who = el("div", "p-who");
     who.append(el("h1", null, (p && p.discord_name) || fallbackName || "Bloombot player"));
+    if (p && p.roblox_name && p.roblox_verified) who.firstChild.append(BB.verifiedBadge());
     const tags = el("div", "p-tags");
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + since(p.registered_at)));
     if (p && p.level) tags.append(BB.rankTag(p.level));
