@@ -3096,3 +3096,8 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
 /* crate calculator on phones */
 .kform,#kout{scroll-margin-top:-12px}
 @media (max-width:420px){.kluck{flex-wrap:wrap}}
+
+/* stud account icons in account pills + Discord buttons */
+.acc{display:flex;align-items:center;gap:8px}
+.acc .acc-ic{width:26px;height:26px;flex:none}
+img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}

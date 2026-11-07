@@ -84,6 +84,13 @@
     const acc = el("div", "p-accs upop-accs");
     const pill = (kind, label, name, href) => {
       const a = el(href ? "a" : "span", "acc " + kind);
+      const icons = { discord: "discord_stud_white", roblox: "rbx_stud", google: "google_stud" };
+      if (icons[kind]) {
+        const aic = el("img", "acc-ic");
+        aic.alt = "";
+        aic.src = "img/" + icons[kind] + ".png";
+        a.append(aic);
+      }
       if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener nofollow"; }
       const t = el("span", "acc-t");
       t.append(el("em", null, label), el("strong", null, name));
