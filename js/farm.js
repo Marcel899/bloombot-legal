@@ -74,8 +74,8 @@
     $("fout").classList.toggle("dim", !!msg);
   }
 
-  function card(cls, icon, label, big, small) {
-    return `<div class="fstat ${cls}"><span><img src="${icon}" alt="">${label}</span><strong>${big}</strong><small>${small}</small></div>`;
+  function card(cls, g, icon, label, big, small) {
+    return `<div class="fstat ${cls}"><div class="fs-head weld ${g}">${label}</div><div class="fs-body"><span class="fs-ico"><img src="${icon}" alt=""></span><div class="fs-num"><strong>${big}</strong><small>${small}</small></div></div></div>`;
   }
   function mini(icon, label, big, small, k) {
     return `<div class="kn-card" style="--k:${k}"><span class="kn-t">${label}</span><strong>${icon ? `<img src="${icon}" alt="">` : ""}${big}</strong><small>${small}</small></div>`;
@@ -95,12 +95,13 @@
     const cycle = v.t + v.g, perH = 3600 / cycle;
     const sH = v.s * perH, fH = v.f * perH;
     $("fstats").innerHTML =
-      card("seeds", SEED, "Seeds / hour", commas(sH), `${short(v.s / cycle * 60)} a minute`) +
-      card("fert", FERT, "Fertilizer / hour", commas(fH), `${one(v.f / cycle * 60)} a minute`) +
-      card("runs", CLOCK, "Runs / hour", one(perH), `One every ${clock(cycle)}`);
-    $("fline").innerHTML = v.g
-      ? `A run takes <b>${clock(v.t)}</b>, plus <b>${dur(v.g)}</b> before the next one starts. That's <b>${one(perH)} runs</b> an hour.`
-      : `A run takes <b>${clock(v.t)}</b> and the next one starts right away. That's <b>${one(perH)} runs</b> an hour.`;
+      card("seeds", "g-green", SEED, "Seeds per hour", commas(sH), `${short(v.s / cycle * 60)} a minute`) +
+      card("fert", "g-purple", FERT, "Fertilizer per hour", commas(fH), `${one(v.f / cycle * 60)} a minute`) +
+      card("runs", "g-blue", CLOCK, "Runs per hour", one(perH), `One every ${clock(cycle)}`);
+    $("fline").innerHTML =
+      `<div class="fc-bar"><span class="fc-run" style="flex-grow:${v.t}"><img src="${CLOCK}" alt="">Run ${clock(v.t)}</span>` +
+      (v.g ? `<span class="fc-gap" style="flex-grow:${v.g}">+${dur(v.g)}</span>` : "") + `</div>` +
+      `<p>${v.g ? `${clock(v.t)} run + ${dur(v.g)} waiting = <b>${clock(cycle)}</b> each` : `No waiting, so one run every <b>${clock(cycle)}</b>`}. That's <b>${one(perH)} runs</b> an hour.</p>`;
 
     // play session: only finished runs pay, and the last run needs no break after it
     if (!(v.p > 0)) { $("fplay").innerHTML = `<p class="kr-note">Type how long you play, like 2h or 90m.</p>`; }

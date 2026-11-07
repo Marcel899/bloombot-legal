@@ -634,7 +634,7 @@ farm_body = hero("seeds", "Farm calculator", "How many Seeds and Fertilizer you 
 <div class="kres">
 <p class="fex" id="fex" hidden>Example numbers. Type your own run on the left.</p>
 <div class="fstats" id="fstats"></div>
-<p class="kr-line" id="fline"></p>
+<div class="fcycle" id="fline"></div>
 </div>
 <section class="panel kneed">
 <h3>How long do you play?</h3>

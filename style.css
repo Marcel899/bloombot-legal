@@ -3441,3 +3441,53 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
   .farm .kform .kin:not(.sm) b{min-width:0}
 }
 @media (max-width:600px){.ctabs .ct-t small{display:none}.ctabs .ctab{padding:9px 6px;gap:6px}.ctabs .ctab img{width:22px;height:22px}}
+
+/* ── Farm result box v2 ───────── */
+.farm .fstats{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"s s" "f r";gap:12px}
+.farm .fstat{--c:63,209,63;position:relative;padding:0;gap:0;overflow:hidden;border-radius:14px;border:3px solid #0c0e12;background:linear-gradient(180deg,rgba(var(--c),.14),rgba(var(--c),.04) 70%),#161a22;box-shadow:0 10px 22px -16px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.05)}
+.farm .fstat.seeds{grid-area:s}.farm .fstat.fert{grid-area:f;--c:169,79,255}.farm .fstat.runs{grid-area:r;--c:20,174,234}
+.fs-head{position:relative;z-index:0;border:0!important;border-bottom:3px solid var(--bd)!important;border-radius:0!important;padding:6px 14px;font-size:.92rem;letter-spacing:.02em;box-shadow:inset 0 3px 0 rgba(255,255,255,.25)!important}
+.fs-head::before{border-radius:0!important}
+.fs-body{display:flex;align-items:center;gap:14px;padding:14px 16px 16px;min-width:0}
+.fs-ico{flex:none;display:grid;place-items:center;width:62px;height:62px;border-radius:14px;background:url(img/studs-50.png) 0 0/25px 25px,rgba(var(--c),.16);border:2px solid rgba(var(--c),.45);box-shadow:inset 0 2px 0 rgba(255,255,255,.08),0 0 14px -4px rgba(var(--c),.6)}
+.fs-ico img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.fs-num{display:flex;flex-direction:column;gap:3px;min-width:0}
+.farm .fstat strong{font-size:clamp(1.7rem,3vw,2.3rem);line-height:1;color:rgb(var(--c));text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.farm .fstat.runs strong{color:#fff}
+.farm .fstat small{display:inline-block;width:fit-content;padding:2px 9px;border-radius:999px;background:rgba(0,0,0,.28);color:var(--soft);font-weight:800;font-size:.78rem}
+.farm .fstat.seeds .fs-ico{width:78px;height:78px;border-radius:16px}
+.farm .fstat.seeds .fs-ico img{width:54px;height:54px}
+.farm .fstat.seeds strong{font-size:clamp(2.3rem,5vw,3.3rem);color:#6fe36f}
+.farm .fstat.fert strong{color:#c58cff}
+.fcycle{display:flex;flex-direction:column;gap:8px}
+.fc-bar{display:flex;gap:4px;height:34px}
+.fc-bar span{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;border-radius:9px;border:2px solid #0c0e12;font-weight:900;font-size:.85rem;white-space:nowrap;overflow:hidden}
+.fc-run{flex-basis:0;background:linear-gradient(180deg,#34c034,#239423);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
+.fc-run img{width:18px;height:18px}
+.fc-gap{flex-basis:0;min-width:52px!important;background:repeating-linear-gradient(45deg,#2a2f3b 0 6px,#232733 6px 12px);color:var(--soft)}
+.fcycle p{margin:0;color:var(--soft);font-weight:700;font-size:.98rem}
+.fcycle p b{color:var(--text)}
+@media (max-width:620px){
+  .farm .fstats{grid-template-columns:minmax(0,1fr);grid-template-areas:"s" "f" "r"}
+  .farm .fstat{flex-direction:column}
+  .fs-body{padding:12px 14px}
+  .fs-ico{width:52px;height:52px}.fs-ico img{width:36px;height:36px}
+  .farm .fstat.seeds .fs-ico{width:62px;height:62px}.farm .fstat.seeds .fs-ico img{width:44px;height:44px}
+}
+[data-theme=light] .farm .fstat{background:linear-gradient(180deg,rgba(var(--c),.16),rgba(var(--c),.04) 70%),#fffdf7;border-color:#d9cba6;box-shadow:0 2px 0 #eadfc5,0 12px 24px -18px rgba(90,70,20,.4)}
+[data-theme=light] .fs-ico{background:url(img/studs-bg-light.png) 0 0/25px 25px,rgba(var(--c),.14)}
+[data-theme=light] .farm .fstat.seeds strong{color:#24731a}
+[data-theme=light] .farm .fstat.fert strong{color:#7b34c9}
+[data-theme=light] .farm .fstat.runs strong{color:#0f6f99}
+[data-theme=light] .farm .fstat strong{text-shadow:none}
+[data-theme=light] .farm .fstat small{background:rgba(90,70,20,.08)}
+[data-theme=light] .fc-bar span{border-color:#d9cba6}
+[data-theme=light] .fc-gap{background:repeating-linear-gradient(45deg,#efe7d2 0 6px,#e6dcc2 6px 12px)}
+.farm .fstat .fs-ico{display:grid;flex:none}
+.farm .fs-ico img{width:42px;height:42px}
+.farm .fstat .fs-num strong{white-space:nowrap}
+@media (max-width:620px){
+  .farm .fstat{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:stretch}
+  .farm .fs-ico img{width:36px;height:36px}
+  .farm .fstat .fs-num small{white-space:nowrap}
+}
