@@ -5,7 +5,7 @@ import re
 VER = hashlib.md5(open("style.css", "rb").read()).hexdigest()[:8]
 SUPPORT = "https://discord.gg/tGuXfcJxwf"
 BASE = "https://bloombot-gtd.vercel.app/"
-UPDATED = "3 November 2026"
+UPDATED = "7 November 2026"
 CLIENT_ID = "1510660385517211820"
 # Bot permissions: view/send/history, embeds, files, reactions, external emojis, manage messages,
 # manage webhooks (trade ads), manage server (invite tracking), threads, timeout members.
@@ -69,6 +69,7 @@ HEAD = """<!doctype html>
 <script defer src="js/app.js?v={appver}"></script>
 <script defer src="js/site.js?v={sitever}"></script>
 <script defer src="js/giveaway.js?v={gwver}"></script>
+<script defer src="js/consent.js?v={ckver}"></script>
 {ld}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -99,7 +100,7 @@ FOOT = """<footer>
 <nav class="foot-cols" aria-label="Footer">
 <div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
 <div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
-<div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a></div>
+<div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="intents.html">How we use intents</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
 </nav>
 </div>
 <div class="foot-bottom">
@@ -125,6 +126,7 @@ APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
 SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
 THEMEVER = hashlib.md5(open("js/theme.js", "rb").read()).hexdigest()[:8]
 GWVER = hashlib.md5(open("js/giveaway.js", "rb").read()).hexdigest()[:8]
+CKVER = hashlib.md5(open("js/consent.js", "rb").read()).hexdigest()[:8]
 
 
 def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
@@ -134,7 +136,7 @@ def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
     kw = kw or PAGE_KW.get(path, "")
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
                         invite=INVITE, dsvg=DISCORD_SVG, nav=nav, sburl=SUPABASE_URL, sbkey=SUPABASE_KEY,
-                        appver=APPVER, themever=THEMEVER, sitever=SITEVER, gwver=GWVER,
+                        appver=APPVER, themever=THEMEVER, sitever=SITEVER, gwver=GWVER, ckver=CKVER,
                         robots="index, follow, max-image-preview:large" if index else "noindex, follow",
                         ld=ld, keywords=(kw + ", " if kw else "") + KEYWORDS)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE).replace("{dsvg}", DISCORD_SVG))

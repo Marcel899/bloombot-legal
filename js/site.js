@@ -121,6 +121,7 @@
   const RKEY = "bb_qs_recent";
   const recent = () => { try { return JSON.parse(localStorage.getItem(RKEY) || "[]").slice(0, 5); } catch (e) { return []; } };
   const remember = it => {
+    if (window.BB_CONSENT && !BB_CONSENT.optional()) return;
     try {
       const r = recent().filter(x => x.href !== it.href);
       r.unshift({ title: it.title, sub: it.sub || "", href: it.href, icon: it.icon || "", val: it.img ? it.img.name : "" });

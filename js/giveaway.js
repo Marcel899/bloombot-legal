@@ -37,7 +37,7 @@
     return it ? it.value_text || (it.est > 0 ? BB.fmt(it.est) : "") : "";
   }
   let list = [], cur = 0, mine = new Set(), totals = {}, root = null, timer = null, busy = false;
-  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); if (window.BB_CONSENT && !BB_CONSENT.optional()) return null; localStorage.setItem(k, v); } catch (e) { return null; } };
   const el = (...a) => BB.el(...a);
 
   /* full-page confetti burst */
