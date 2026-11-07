@@ -33,7 +33,7 @@
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-label", "Cookies");
     const icon = document.createElement("img");
-    icon.src = "/img/cookie.png"; icon.alt = ""; icon.className = "ck-ico";
+    icon.src = "/img/cookie.png?v=2"; icon.alt = ""; icon.className = "ck-ico";
     const txt = document.createElement("div");
     txt.className = "ck-txt";
     const h = document.createElement("h2"); h.textContent = "We use cookies";
