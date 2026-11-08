@@ -73,12 +73,25 @@
     started = true;
     BB.sb.rpc("site_stats").then(({ data }) => {
       if (!data) return;
-      $("st-ads").textContent = data.ads;
-      $("st-values").textContent = data.values;
-      $("st-strats").textContent = data.strategies;
+      /* numbers count up once, quickly; straight to the value with reduced motion or in a background tab */
       const big = n => Number(n).toLocaleString("en-US");
+      const count = (node, n) => {
+        n = Number(n) || 0;
+        if (n < 10 || document.hidden || matchMedia("(prefers-reduced-motion: reduce)").matches) { node.textContent = big(n); return; }
+        const t0 = performance.now(), dur = 900;
+        const step = t => {
+          const k = Math.min(1, (t - t0) / dur);
+          node.textContent = big(Math.round(n * (1 - Math.pow(1 - k, 3))));
+          if (k < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+        setTimeout(() => { node.textContent = big(n); }, dur + 300); // lands even if frames are paused
+      };
+      count($("st-ads"), data.ads);
+      count($("st-values"), data.values);
+      count($("st-strats"), data.strategies);
       for (const k of ["servers", "users"]) {
-        if (data[k] > 0) { $("st-" + k).textContent = big(data[k]); $("st-" + k).parentElement.hidden = false; }
+        if (data[k] > 0) { count($("st-" + k), data[k]); $("st-" + k).parentElement.hidden = false; }
       }
       $("stats").classList.add("ready");
     });

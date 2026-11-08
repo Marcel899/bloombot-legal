@@ -89,6 +89,36 @@
   }
   const d = document.querySelector(".mtoc");
   if (d) d.querySelectorAll("a").forEach(a => a.addEventListener("click", () => { d.open = false; }));
+
+  /* Sections below the fold ease in as they scroll into view. Only static page parts:
+     lists drawn from data have their own entrance. Nothing is hidden without JS or with reduced motion. */
+  if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const sel = ".home .sec-head,.step,.demo,.hband,.ftiles .tile,.cmds,main>.cta-panel,.lv-sec";
+    const low = [...document.querySelectorAll(sel)].filter(e => {
+      const r = e.getBoundingClientRect();
+      return r.height > 0 && r.top > innerHeight - 40;
+    });
+    if (low.length) {
+      const io = new IntersectionObserver(es => {
+        let n = 0;
+        for (const e of es) {
+          if (!e.isIntersecting) continue;
+          const t = e.target;
+          io.unobserve(t);
+          t.style.setProperty("--rd", Math.min(n++, 4) * 70 + "ms");
+          t.classList.add("in");
+          const done = ev => {
+            if (ev.target !== t || ev.propertyName !== "translate") return;
+            t.removeEventListener("transitionend", done);
+            t.classList.remove("rv", "in");
+            t.style.removeProperty("--rd");
+          };
+          t.addEventListener("transitionend", done);
+        }
+      }, { rootMargin: "0px 0px -8% 0px" });
+      low.forEach(e => { e.classList.add("rv"); io.observe(e); });
+    }
+  }
 })();
 
 /* Quick search (Ctrl+K or /): pages, values, strategies and commands in one box. */

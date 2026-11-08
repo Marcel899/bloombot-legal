@@ -193,6 +193,9 @@
       return;
     }
     $("vloading").hidden = true;
+    /* charts draw in on the first render only, not on every search keystroke */
+    $("vgrid").classList.add("intro");
+    setTimeout(() => $("vgrid").classList.remove("intro"), 1200);
     const rars = [...new Set(items.map(i => (i.rarity || "").toLowerCase()).filter(Boolean))]
       .sort((a, b) => (RARITY_ORDER.indexOf(a) + 99) % 99 - (RARITY_ORDER.indexOf(b) + 99) % 99);
     rars.forEach(r => { const o = el("option", null, cap(r)); o.value = r; o.dataset.count = items.filter(i => (i.rarity || "").toLowerCase() === r).length; $("vrar").append(o); });

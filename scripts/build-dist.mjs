@@ -2,12 +2,13 @@
 // The repo keeps the readable source; visitors only get minified + obfuscated files.
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { minify as terser } from "terser";
 import JavaScriptObfuscator from "javascript-obfuscator";
 import CleanCSS from "clean-css";
 import { minify as minifyHtml } from "html-minifier-terser";
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."); // works on Windows too
 const OUT = path.join(ROOT, "dist");
 
 // Never shipped to visitors.
