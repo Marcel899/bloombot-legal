@@ -78,7 +78,7 @@
     return `<div class="fstat ${cls}"><div class="fs-head weld ${g}">${label}</div><div class="fs-body"><span class="fs-ico"><img src="${icon}" alt=""></span><div class="fs-num"><strong>${big}</strong><small>${small}</small></div></div></div>`;
   }
   function mini(icon, label, big, small, k) {
-    return `<div class="kn-card" style="--k:${k}"><span class="kn-t">${label}</span><strong>${icon ? `<img src="${icon}" alt="">` : ""}${big}</strong><small>${small}</small></div>`;
+    return `<div class="kn-card" data-k="${k}"><span class="kn-t">${label}</span><strong>${icon ? `<img src="${icon}" alt="">` : ""}${big}</strong><small>${small}</small></div>`;
   }
   const SEED = "img/cur/seeds.webp", FERT = "img/cur/fertilizer.webp", CLOCK = "img/clock.png";
 
@@ -99,8 +99,8 @@
       card("fert", "g-purple", FERT, "Fertilizer per hour", commas(fH), `${one(v.f / cycle * 60)} a minute`) +
       card("runs", "g-blue", CLOCK, "Runs per hour", one(perH), `One every ${clock(cycle)}`);
     $("fline").innerHTML =
-      `<div class="fc-bar"><span class="fc-run" style="flex-grow:${v.t}"><img src="${CLOCK}" alt="">Run ${clock(v.t)}</span>` +
-      (v.g ? `<span class="fc-gap" style="flex-grow:${v.g}">+${dur(v.g)}</span>` : "") + `</div>` +
+      `<div class="fc-bar"><span class="fc-run" data-grow="${v.t}"><img src="${CLOCK}" alt="">Run ${clock(v.t)}</span>` +
+      (v.g ? `<span class="fc-gap" data-grow="${v.g}">+${dur(v.g)}</span>` : "") + `</div>` +
       `<p>${v.g ? `${clock(v.t)} run + ${dur(v.g)} waiting = <b>${clock(cycle)}</b> each` : `No waiting, so one run every <b>${clock(cycle)}</b>`}. That's <b>${one(perH)} runs</b> an hour.</p>`;
 
     // play session: only finished runs pay, and the last run needs no break after it
@@ -142,6 +142,9 @@
     $("fx2").textContent = `${short(sH * 24)} · ${commas(fH * 24)}`;
     $("fx3").textContent = v.g ? Math.round(v.g / cycle * 100) + "%" : "0%";
 
+    /* the site's security policy blocks style="" in HTML, so colours and bar sizes are set here */
+    document.querySelectorAll(".farm [data-k]").forEach(e => e.style.setProperty("--k", e.dataset.k));
+    document.querySelectorAll(".farm [data-grow]").forEach(e => { e.style.flexGrow = e.dataset.grow; });
     save();
   }
 
