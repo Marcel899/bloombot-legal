@@ -126,6 +126,10 @@
   ],
   "rewrites": [
     {
+      "source": "/giveaway",
+      "destination": "/giveaway.html"
+    },
+    {
       "source": "/gtd/units.json",
       "destination": "https://andero2003.github.io/GTDCDN/units.json"
     },

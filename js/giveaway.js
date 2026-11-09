@@ -37,6 +37,9 @@
     return it ? it.value_text || (it.est > 0 ? BB.fmt(it.est) : "") : "";
   }
   let list = [], cur = 0, mine = new Set(), totals = {}, root = null, timer = null, busy = false;
+  /* on giveaway.html the giveaway is drawn into the page instead of the corner popup */
+  const host = document.getElementById("gwpage");
+  let picked = false;
   /* Open/closed state lives in memory for this page view, so the popup still opens and closes
      when storage is blocked or only essential cookies are allowed; it is saved only with consent. */
   const mem = {};
@@ -114,7 +117,14 @@
     let { data, error } = await q("id,title,subtitle,image_url,ends_at,rules");
     if (error) ({ data } = await q("id,title,subtitle,image_url,ends_at"));  /* before the rules SQL has run */
     list = data || [];
-    if (!list.length) { if (root) root.remove(); root = null; return; }
+    if (!list.length) { if (root) root.remove(); root = null; if (host) empty(); return; }
+    if (host && !picked) {
+      /* giveaway.html#g=<id> opens that giveaway */
+      picked = true;
+      const want = (location.hash.match(/g=([\w-]+)/) || [])[1];
+      const i = list.findIndex(g => String(g.id) === want);
+      if (i >= 0) cur = i;
+    }
     cur = Math.min(cur, list.length - 1);
     await Promise.all(list.map(async g => {
       const { data: n } = await BB.sb.rpc("giveaway_total", { gid: g.id });
@@ -165,18 +175,32 @@
     load();
   }
 
+  /* giveaway page: no live giveaway right now */
+  function empty(title = "No giveaway right now", text = "The next one is announced in the Bloombot Discord.") {
+    host.removeAttribute("aria-busy");
+    const box = el("div", "gw-empty panel");
+    const i = el("img"); i.src = "img/gift.png"; i.alt = "";
+    const a = el("a", "brick purple", "Join the Discord");
+    a.href = "https://discord.gg/tGuXfcJxwf"; a.target = "_blank"; a.rel = "noopener";
+    box.append(i, el("h2", null, title), el("p", null, text), a);
+    host.replaceChildren(box);
+    const sh = document.querySelector(".gwp-share");
+    if (sh) sh.hidden = true;
+  }
+
   function render() {
     if (!root) {
-      root = el("aside", "gw");
+      root = el(host ? "section" : "aside", "gw");
       root.setAttribute("aria-label", "Giveaway");
-      document.body.append(root);
+      if (host) { host.removeAttribute("aria-busy"); host.replaceChildren(root); const sh = document.querySelector(".gwp-share"); if (sh) sh.hidden = false; } else document.body.append(root);
     }
     const g = list[cur];
-    const saved = store("bb_gw_min_" + g.id);
+    if (host && location.hash !== "#g=" + g.id) history.replaceState(null, "", "#g=" + g.id);
+    const saved = host ? "0" : store("bb_gw_min_" + g.id);
     const min = saved === "1" || (saved === null && matchMedia("(max-width:600px)").matches);
     const how = calm() ? "" : anim;
     anim = "";
-    root.className = "gw" + (min ? " min" : "") + (how === "open" && !min ? " opening" : "");
+    root.className = "gw" + (host ? " gw-page" : "") + (min ? " min" : "") + (how === "open" && !min ? " opening" : "");
     root.replaceChildren();
     if (min) {
       const b = el("button", "brick purple gw-pill");
@@ -198,7 +222,7 @@
     x.type = "button"; x.setAttribute("aria-label", "Minimize giveaway"); x.title = "Minimize";
     x.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     x.onclick = () => shrink(g);
-    top.append(x);
+    if (!host) top.append(x);
     const head = el("div", "gw-head");
     const pic = el("img", "gw-pic"); pic.alt = ""; pic.src = BB.safeUrl(g.image_url) || "img/gift.png";
     pic.onerror = () => { pic.src = "img/gift.png"; };
@@ -321,6 +345,13 @@
     const id = s ? BB.user(s).id : null;
     if (last === id) return;
     last = id;
-    load().catch(() => {});
+    load().catch(() => { if (host && !root) empty("Couldn't load the giveaway", "Check your connection and try again."); });
   });
+
+  /* giveaway page: copy a link to the giveaway that is open */
+  const share = document.getElementById("gwshare");
+  if (share) share.onclick = async () => {
+    try { await navigator.clipboard.writeText(location.href); BB.toast("Paste it anywhere to share.", "ok", { title: "Link copied" }); }
+    catch (e) { BB.toast("Copy the address from your browser bar.", "info", { title: "Couldn't copy" }); }
+  };
 })();

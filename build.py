@@ -847,6 +847,14 @@ dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for you
 """
 open("dashboard.html", "w").write(page("Bloombot Server Dashboard", "Change Bloombot's channels, pings and features for your Discord server from the website.", dash_body, "", "dashboard.html", index=False))
 
+# ── Giveaway page: a link to share. Not in the menu, footer, search or sitemap on purpose ──
+giveaway_body = hero("gift", "Giveaway", "Join in one click. Tasks give you extra entries.", "t_giveaway") + """<main class="wrap gwp" id="main">
+<div id="gwpage" aria-busy="true" aria-label="Loading"><div class="skel-grid sk-prof"><div class="skel"><i></i><i></i><i></i></div></div></div>
+<div class="gwp-share"><button class="brick blue sm" type="button" id="gwshare">Copy link</button></div>
+</main>
+"""
+open("giveaway.html", "w").write(page("Bloombot Giveaway · Garden Tower Defense", "Join the live Bloombot giveaway for Garden Tower Defense. Do tasks for extra entries.", giveaway_body, "", "giveaway.html", index=False))
+
 # ── Giveaway manager moved into the admin panel (admin.html#giveaways); old links still work ──
 open("giveaway-admin.html", "w").write("""<!doctype html>
 <html lang="en">
