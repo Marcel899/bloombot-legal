@@ -3540,3 +3540,13 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 .gw-empty h2{margin:6px 0 0;font-size:1.4rem}
 .gw-empty p{margin:0 0 12px;color:var(--muted)}
 @media (max-width:520px){.gw.gw-page{padding:16px 14px}.gw.gw-page .gw-pic{width:64px;height:64px}}
+
+/* light mode: rank colours and calculator labels that were too pale on light cards */
+[data-theme=light] .lv-rank-n,[data-theme=light] .pk-head strong,[data-theme=light] .rd-node.got strong,[data-theme=light] .lv-up span{color:color-mix(in srgb,var(--rk) 58%,#000);text-shadow:none}
+[data-theme=light] .lv-fill{background:linear-gradient(90deg,color-mix(in srgb,var(--rk) 45%,#000),color-mix(in srgb,var(--rk) 72%,#000))}
+[data-theme=light] .kn-t{color:color-mix(in srgb,var(--k) 62%,#000)}
+/* home: new strategies show their category */
+.hs .stag{align-self:flex-start;margin-bottom:4px;color:#fff;font-size:.72rem}
+.hs strong{line-height:1.3}
+/* phones: keep the last footer lines clear of the back-to-top button and giveaway pill */
+@media (max-width:600px){.foot-bottom{padding-bottom:72px}}

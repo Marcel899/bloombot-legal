@@ -126,10 +126,12 @@
     if (strats && strats.length) {
       $("hs-list").replaceChildren(...strats.map(s => {
         const a = el("a", "hs");
-        a.href = "strategies.html";
+        a.href = "strategies.html#s-" + s.id;
         const t = el("strong");
         BB.mdInline(t, s.title.replace(/^#{1,3} /, ""));
-        a.append(t, el("span", null, (s.author_name || "Bloombot player")));
+        const CATS = { "meta-units": "Meta units", "map-specific": "Map-specific", "general": "General" };
+        if (CATS[s.category]) a.append(el("span", "stag c-" + s.category, CATS[s.category]));
+        a.append(t, el("span", "hs-by", (s.author_name || "Bloombot player")));
         return a;
       }));
       $("hstrats").hidden = false;
