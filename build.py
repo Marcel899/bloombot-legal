@@ -115,6 +115,52 @@ FOOT = """<footer>
 """
 
 
+# Text Google can read without running the page's JS: the lists on these pages load
+# from the database (or need a login), so without this they look nearly empty.
+GUIDES = {
+    "values": ("About the GTD value list", [
+        ("What is the GTD value list?", "It says what each Garden Tower Defense unit and gamepass is worth in trades. Bloombot copies the official Garden TD value list and adds demand, status and a 30-day trend chart to every unit."),
+        ("How often do values change?", "The value list team updates it about every 2 days. Bloombot checks for changes every few minutes, so new prices show up here soon after."),
+        ("What do demand and status mean?", "Demand, out of 10, is how much traders want a unit. Status says whether its value is rising, falling or stable."),
+        ("Can I check values in Discord?", "Yes. Add Bloombot to your server and use /value with a unit name to see its price, demand and chart."),
+    ]),
+    "calculator": ("How the trade calculator works", [
+        ("How do I check a trade?", "Add units to You give and You get. The calculator adds up both sides with live values from the official Garden TD value list."),
+        ("When is a trade fair?", "When both sides are within 5% of each other. A bigger gap makes it a win or a loss for you."),
+        ("Can I type a value instead of a unit?", "Yes. Type a number like 4k or 1.5m and it counts as that much value."),
+        ("Can I share a trade?", "Copy link saves the exact trade in a link. Copy for Discord gives you text to paste in chat. In Discord, /value-calculator does the same check."),
+    ]),
+    "trades": ("About Bloombot trade ads", [
+        ("What are Bloombot trade ads?", "Garden Tower Defense trade ads posted in any server running Bloombot. Each ad shows up in every other Bloombot server and on this page."),
+        ("Why do I need to log in?", "Trade ads are only shown to logged-in users, so traders can see who they are dealing with and reach them."),
+        ("How do I post a trade ad?", "Log in and press New trade ad, or use /trade ad in a server with Bloombot. Unit names turn into icons."),
+        ("What do LF and NLF mean?", "LF means looking for: the units someone wants. NLF means not looking for: units they will not take."),
+    ]),
+    "strategies": ("About GTD strategies", [
+        ("What strategies are here?", "Garden Tower Defense loadouts, map guides and tips written by players, sorted into meta units, map-specific and general."),
+        ("How do I share a strategy?", "Log in, press Share a strategy and fill in four short steps: basics, units, how to play, then share."),
+    ]),
+    "levels": ("About Bloombot levels", [
+        ("How do I earn XP?", "Use any Bloombot command (+15 XP, once every 30 seconds), post trade ads (+50 XP for your first 3 each day) and finish the one-time tasks on this page."),
+        ("What do ranks unlock?", "Each rank adds perks in Discord and on this website. You keep every perk from the ranks below yours."),
+    ]),
+}
+
+
+def guide(key):
+    title, qs = GUIDES[key]
+    items = "".join(f'<div class="guide-q"><h3>{q}</h3><p>{a}</p></div>' for q, a in qs)
+    return f'<section class="panel guide" aria-labelledby="guide-h"><h2 id="guide-h">{title}</h2><div class="guide-list">{items}</div></section>\n'
+
+
+def faq_ld(key):
+    return '<script type="application/ld+json">' + _json.dumps({
+        "@context": "https://schema.org", "@type": "FAQPage",
+        "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                       for q, a in GUIDES[key][1]],
+    }).replace("<", "\\u003c") + "</script>\n"
+
+
 NAV = [
     ("v", "values.html", "dollar", "Values", "blue"),
     ("c", "calculator.html", "calculator", "Calculator", "green"),
@@ -447,10 +493,10 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 <div class="more-wrap"><button class="brick dark" id="more" type="button" hidden>Show more</button></div>
 </section>
 <div class="skel-grid sk-ads" id="loading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
-</main>
+{guide('trades')}</main>
 <script defer src="js/trades.js?v={JSVER['trades']}"></script>
 """
-open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense", "Browse and post Garden Tower Defense trade ads from every Bloombot server. Log in with Discord or Google.", trades_body, "a", "trades.html"))
+open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense", "Browse and post Garden Tower Defense trade ads from every Bloombot server. Log in with Discord or Google.", trades_body, "a", "trades.html", ld=faq_ld("trades")))
 
 # ── Values ───────────────────────────────────────────────────────────────
 values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and gamepass, with demand and 30-day trends.", "t_values") + f"""<main class="wrap vals" id="main">
@@ -468,11 +514,11 @@ values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and game
 <button class="brick dark more-btn" type="button" id="vmore" hidden>Show more</button>
 <p class="empty" id="vnone" hidden>No unit matches that.</p>
 <p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
-</main>
+{guide('values')}</main>
 <div class="modal" id="vmodal" hidden><div class="modal-box panel" role="dialog" aria-modal="true"><button class="modal-x" id="vmclose" type="button" aria-label="Close">×</button><div id="vmbody"></div></div></div>
 <script defer src="js/values.js?v={JSVER['values']}"></script>
 """
-open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "GTD value list: live Garden Tower Defense unit and gamepass values with demand, status and 30-day trends.", values_body, "v", "values.html"))
+open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "GTD value list: live Garden Tower Defense unit and gamepass values with demand, status and 30-day trends.", values_body, "v", "values.html", ld=faq_ld("values")))
 
 # ── Trade calculator ─────────────────────────────────────────────────────
 def side(key, title, color):
@@ -507,10 +553,10 @@ calc_body = hero("calculator", "Trade calculator", "Is it a win, fair or a loss?
 {side("get", "You get", "green")}
 </div>
 <p class="note">Fair means both sides are within 5%, the same rule as Bloombot's <code>/value-calculator</code>. Use Copy link to share this exact trade. Values from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>.</p>
-</main>
+{guide('calculator')}</main>
 <script defer src="js/calc.js?v={JSVER['calc']}"></script>
 """
-open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "GTD trade calculator: check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html"))
+open("calculator.html", "w").write(page("Bloombot Trade Calculator · Garden Tower Defense", "GTD trade calculator: check if a Garden Tower Defense trade is a win, fair or a loss with live values.", calc_body, "c", "calculator.html", ld=faq_ld("calculator")))
 
 
 
@@ -736,10 +782,10 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <div class="skel-grid sk-strats" id="sloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 <div class="slist" id="slist"></div>
 <div class="empty" id="snone" hidden><p id="snonet">No strategies match that.</p><button class="brick sm" type="button" id="sclear">Show all strategies</button></div>
-</main>
+{guide('strategies')}</main>
 <script defer src="js/strategies.js?v={JSVER['strategies']}"></script>
 """
-open("strategies.html", "w").write(page("Bloombot Strategies · Garden Tower Defense", "Community Garden Tower Defense strategies: meta units, map-specific guides and general tips.", strat_body, "s", "strategies.html"))
+open("strategies.html", "w").write(page("Bloombot Strategies · Garden Tower Defense", "Community Garden Tower Defense strategies: meta units, map-specific guides and general tips.", strat_body, "s", "strategies.html", ld=faq_ld("strategies")))
 
 # ── Levels & perks ───────────────────────────────────────────────────────
 JSVER["levels"] = hashlib.md5(open("js/levels.js", "rb").read()).hexdigest()[:8]
@@ -765,10 +811,10 @@ levels_body = hero("medal_gold", "Levels", "Earn XP in Discord and on the websit
 <p class="hint lv-sub">Perks stack: you keep everything from the ranks below yours. <span class="pk-where pk-k">Discord</span> perks work in every server, <span class="pk-where pk-k web">Website</span> perks work here.</p>
 <div class="lv-perks" id="lvperks"></div>
 </section>
-</main>
+{guide('levels')}</main>
 <script defer src="js/levels.js?v={JSVER['levels']}"></script>
 """
-open("levels.html", "w").write(page("Bloombot Levels & Perks · Garden Tower Defense", "Your Bloombot level, every rank perk in Discord and on the website, and one-time tasks for bonus XP.", levels_body, "", "levels.html"))
+open("levels.html", "w").write(page("Bloombot Levels & Perks · Garden Tower Defense", "Your Bloombot level, every rank perk in Discord and on the website, and one-time tasks for bonus XP.", levels_body, "", "levels.html", ld=faq_ld("levels")))
 
 # ── Profiles ─────────────────────────────────────────────────────────────
 JSVER["profile"] = hashlib.md5(open("js/profile.js", "rb").read()).hexdigest()[:8]

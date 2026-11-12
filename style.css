@@ -3550,3 +3550,5 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 .hs strong{line-height:1.3}
 /* phones: keep the last footer lines clear of the back-to-top button and giveaway pill */
 @media (max-width:600px){.foot-bottom{padding-bottom:72px}}
+/* Crawlable how-it-works blocks under the JS-loaded tools */
+.guide{margin-top:36px}.guide h2{font-size:1.25rem;margin:0 0 18px}.guide-list{display:grid;gap:20px 32px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.guide h3{font-size:1rem;margin:0 0 6px}.guide p{margin:0;color:var(--muted);line-height:1.55}@media (max-width:640px){.guide{padding:24px 20px}}

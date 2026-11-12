@@ -23,7 +23,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="style.css?v=a3063094">
+<link rel="stylesheet" href="style.css?v=efe222d7">
 <script src="js/theme.js?v=9fa9b3c2"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=753e4048"></script>
@@ -31,6 +31,7 @@
 <script defer src="js/giveaway.js?v=2bd59658"></script>
 <script defer src="js/consent.js?v=650a8387"></script>
 <script defer src="js/track.js?v=0580d865"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the GTD value list?", "acceptedAnswer": {"@type": "Answer", "text": "It says what each Garden Tower Defense unit and gamepass is worth in trades. Bloombot copies the official Garden TD value list and adds demand, status and a 30-day trend chart to every unit."}}, {"@type": "Question", "name": "How often do values change?", "acceptedAnswer": {"@type": "Answer", "text": "The value list team updates it about every 2 days. Bloombot checks for changes every few minutes, so new prices show up here soon after."}}, {"@type": "Question", "name": "What do demand and status mean?", "acceptedAnswer": {"@type": "Answer", "text": "Demand, out of 10, is how much traders want a unit. Status says whether its value is rising, falling or stable."}}, {"@type": "Question", "name": "Can I check values in Discord?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Add Bloombot to your server and use /value with a unit name to see its price, demand and chart."}}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -69,6 +70,7 @@
 <button class="brick dark more-btn" type="button" id="vmore" hidden>Show more</button>
 <p class="empty" id="vnone" hidden>No unit matches that.</p>
 <p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
+<section class="panel guide" aria-labelledby="guide-h"><h2 id="guide-h">About the GTD value list</h2><div class="guide-list"><div class="guide-q"><h3>What is the GTD value list?</h3><p>It says what each Garden Tower Defense unit and gamepass is worth in trades. Bloombot copies the official Garden TD value list and adds demand, status and a 30-day trend chart to every unit.</p></div><div class="guide-q"><h3>How often do values change?</h3><p>The value list team updates it about every 2 days. Bloombot checks for changes every few minutes, so new prices show up here soon after.</p></div><div class="guide-q"><h3>What do demand and status mean?</h3><p>Demand, out of 10, is how much traders want a unit. Status says whether its value is rising, falling or stable.</p></div><div class="guide-q"><h3>Can I check values in Discord?</h3><p>Yes. Add Bloombot to your server and use /value with a unit name to see its price, demand and chart.</p></div></div></section>
 </main>
 <div class="modal" id="vmodal" hidden><div class="modal-box panel" role="dialog" aria-modal="true"><button class="modal-x" id="vmclose" type="button" aria-label="Close">×</button><div id="vmbody"></div></div></div>
 <script defer src="js/values.js?v=554ed7dc"></script>

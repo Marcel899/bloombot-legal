@@ -141,5 +141,17 @@
       "source": "/img/trading.png",
       "destination": "https://cdn.discordapp.com/emojis/1510667373663883476.png?size=128&quality=lossless"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/:page(features|trades|values|calculator|crates|farm|levels|strategies|privacy|terms|intents|profile|dashboard)",
+      "destination": "/:page.html",
+      "permanent": true
+    }
   ]
 }
