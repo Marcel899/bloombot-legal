@@ -690,7 +690,7 @@
         if (!error && BB.setDmUnread) BB.setDmUnread(data || 0);
       } catch (e) { /* not set up yet */ }
     }
-    dmTimer = setTimeout(checkDms, 60000);
+    dmTimer = setTimeout(checkDms, 30000);
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden && BB.session) checkDms(); });
 
@@ -795,8 +795,15 @@
     dmLink.append(dmBadge);
     BB.setDmUnread = n => {
       n = Math.max(0, n | 0);
+      const was = BB.dmUnread || 0;
+      BB.dmUnread = n;
       dmBadge.hidden = dot.hidden = !n;
       dmBadge.textContent = n > 99 ? "99+" : String(n);
+      dot.textContent = n > 9 ? "9+" : String(n);
+      if (n > was) { dot.classList.remove("bump"); void dot.offsetWidth; dot.classList.add("bump"); }
+      /* any other spot that shows the count, like the button on your own profile */
+      document.querySelectorAll("[data-dm-unread]").forEach(b => { b.hidden = !n; b.textContent = dmBadge.textContent; });
+      document.title = (n ? "(" + (n > 99 ? "99+" : n) + ") " : "") + document.title.replace(/^\(\d+\+?\) /, "");
       btn.setAttribute("aria-label", "Account menu for " + u.name + (n ? ", " + n + " unread message" + (n === 1 ? "" : "s") : ""));
     };
     if (u.hasDiscord) checkDms();
@@ -814,7 +821,16 @@
       sep(), out);
     /* owner-only link; Supabase also checks on every giveaway call */
     BB.sb.rpc("is_site_owner").then(({ data }) => {
-      if (data === true) out.before(link("admin.html", "admin_panel", "Admin panel"), sep());
+      if (data !== true) return;
+      const adm = link("admin.html", "admin_panel", "Admin panel");
+      out.before(adm, sep());
+      /* open message reports waiting for review */
+      BB.sb.rpc("dm_admin_open_count").then(({ data: n }) => {
+        if (!(n > 0)) return;
+        adm.href = "admin.html#dms";
+        adm.append(BB.el("span", "me-badge", n > 99 ? "99+" : String(n)));
+        adm.title = n + " message report" + (n === 1 ? "" : "s") + " to review";
+      }, () => {});
     }, () => {});
 
     const items = () => [...menu.querySelectorAll("[role=menuitem]")];

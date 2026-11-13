@@ -861,45 +861,127 @@
     back.onclick = e => { if (e.target === back) close(); };
     return { box, close };
   }
+  /* Sheet header shared by settings and report: icon tile, title, one line, close X. */
+  function sheetHead(icon, title, sub, id, close, tone) {
+    const head = el("div", "dms-head");
+    const hi = el("span", "dms-hi" + (tone ? " " + tone : ""));
+    hi.append(emojiImg(bbSrc(icon), icon, "dms-hi-i"));
+    const ht = el("div", "dms-ht");
+    const h = el("h2", null, title); h.id = id;
+    ht.append(h, el("p", null, sub));
+    const x = el("button", "dms-x");
+    x.type = "button";
+    x.setAttribute("aria-label", "Close");
+    x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg>';
+    x.onclick = close;
+    head.append(hi, ht, x);
+    return head;
+  }
+
+  const reported = new Set();   // message ids reported this visit
+  const theirLatest = () => msgs.filter(x => !x.from_me && !x.unsent && x.id).reduce((a, b) => (!a || b.id > a.id ? b : a), null);
   function report(m) {
-    const { box, close } = dialog("cf dm-rep", "rp-h");
-    const h = el("h2", null, "Report message"); h.id = "rp-h";
-    const opts = el("div", "dm-reasons");
-    ["Scam or fake trade", "Harassment", "Spam", "Inappropriate picture", "Something else"].forEach((r, i) => {
-      const l = el("label", "dm-reason");
+    if (!m) { BB.toast("There's no message from them to report.", "info"); return; }
+    if (reported.has(m.id)) { BB.toast("You already reported this message.", "info"); return; }
+    const who = nameOf(curInfo);
+    const { box, close } = dialog("dm-set dm-rep", "rp-h");
+    const head = sheetHead("warning", "Report message", "Only the Bloombot team sees reports.", "rp-h", close, "dmr-hi");
+
+    /* the message being reported, so it's clear what gets sent */
+    const quote = el("div", "dmr-quote");
+    const qa = el("img", "dmr-av");
+    qa.alt = "";
+    qa.src = (curInfo && curInfo.avatar) || "img/flower.png";
+    qa.onerror = () => { qa.src = "img/flower.png"; };
+    const qt = el("div", "dmr-qt");
+    qt.append(el("strong", null, who));
+    if (m.body) qt.append(el("span", "dmr-body", m.body));
+    if (m.image_path) {
+      const pic = el("span", "dmr-pic");
+      pic.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="2" fill="currentColor"/><path d="m4 18 5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+      pic.append("Picture");
+      qt.append(pic);
+    }
+    quote.append(qa, qt);
+
+    const sec = (title, extra) => {
+      const s = el("section", "dms-sec");
+      const t = el("h3", "dms-h", title);
+      if (extra) t.append(extra);
+      s.append(t);
+      return s;
+    };
+    const reasons = ["Scam or fake trade", "Harassment or hate", "Spam or ads",
+      m.image_path ? "Inappropriate picture" : "Inappropriate message", "Something else"];
+    const list = el("div", "dmr-chips");
+    list.setAttribute("role", "radiogroup");
+    list.setAttribute("aria-label", "What's wrong?");
+    reasons.forEach((r, i) => {
+      const l = el("label", "dmr-chip");
       const inp = el("input"); inp.type = "radio"; inp.name = "why"; inp.value = r; if (!i) inp.checked = true;
       l.append(inp, el("span", null, r));
-      opts.append(l);
+      list.append(l);
     });
-    const blk = el("label", "dm-reason dm-also");
-    const bi = el("input"); bi.type = "checkbox"; bi.checked = true;
-    blk.append(bi, el("span", null, "Also block " + nameOf(curInfo)));
-    const no = el("button", "brick dark sm", "Cancel"); no.type = "button";
-    const yes = el("button", "brick red", "Report"); yes.type = "submit";
-    const acts = el("div", "post-actions"); acts.append(no, yes);
-    box.append(h, el("p", "hint", "The Bloombot team sees this message and who sent it."), opts, blk, acts);
+    const why = sec("What's wrong?");
+    why.append(list);
+
+    const count = el("span", "dmr-n", "0/500");
+    const more = sec("Details", count);
+    const note = el("textarea", "dmr-note");
+    note.maxLength = 500;
+    note.rows = 2;
+    note.placeholder = "Anything that helps us check (optional)";
+    note.setAttribute("aria-label", "Details");
+    note.oninput = () => { count.textContent = note.value.length + "/500"; };
+    more.append(note);
+    list.addEventListener("change", () => {
+      const other = list.querySelector("input:checked").value === "Something else";
+      note.placeholder = other ? "What happened?" : "Anything that helps us check (optional)";
+      if (other) note.focus();
+    });
+
+    const blk = el("label", "dms-row dmr-block");
+    const bic = el("span", "dms-ic");
+    bic.append(emojiImg(bbSrc("door"), "door", "dms-ic-i"));
+    const bt = el("span", "dms-t");
+    bt.append(el("strong", null, "Also block " + who), el("span", "dms-hint", "They can't message you again."));
+    const sw = el("span", "ktog");
+    const bi = el("input"); bi.type = "checkbox"; bi.checked = !(curInfo && curInfo.blocked);
+    sw.append(bi, el("i"));
+    blk.append(bic, bt, sw);
+    const bcard = el("div", "dms-card");
+    bcard.append(blk);
+    if (curInfo && curInfo.blocked) bcard.hidden = true;
+
+    const no = el("button", "brick dark", "Cancel"); no.type = "button";
+    const yes = el("button", "brick red", "Send report"); yes.type = "submit";
+    const acts = el("div", "dmr-acts"); acts.append(no, yes);
+    box.append(head, quote, why, more, bcard, acts);
     no.onclick = close;
     box.onsubmit = async e => {
       e.preventDefault();
+      const r = list.querySelector("input:checked").value;
+      if (r === "Something else" && !note.value.trim()) { note.focus(); BB.toast("Add a few words about what happened.", "info"); return; }
       yes.disabled = true;
       try {
-        await rpc("dm_report", { p_id: m.id, p_reason: box.querySelector("input[name=why]:checked").value });
+        await rpc("dm_report", { p_id: m.id, p_reason: r, p_note: note.value.trim() || null });
+        reported.add(m.id);
         close();
-        if (bi.checked) await block(true, true);
-        BB.toast("Thanks, we'll take a look.", "ok", { title: "Reported" });
+        if (bi.checked && !bcard.hidden) await block(true, true);
+        BB.toast(bi.checked && !bcard.hidden ? "We'll take a look. " + who + " is blocked." : "Thanks, we'll take a look.", "ok", { title: "Reported" });
       } catch (err) { yes.disabled = false; BB.toast(errText(err), "bad"); }
     };
-    setTimeout(() => opts.querySelector("input").focus(), 50);
+    setTimeout(() => list.querySelector("input").focus(), 50);
   }
 
   function chatMenu() {
     const c = inbox.find(x => x.other === cur) || curInfo || {};
     const blocked = c.blocked || canSend === "you_blocked";
-    popMenu($("dmore"), [
-      ["View profile", () => BB.openProfile(cur, { name: c.name, avatar: c.avatar })],
-      [blocked ? "Unblock" : "Block", () => block(!blocked), !blocked],
-      ["Delete chat", deleteChat, true],
-    ]);
+    const items = [["View profile", () => BB.openProfile(cur, { name: c.name, avatar: c.avatar })]];
+    const last = theirLatest();
+    if (last) items.push(["Report", () => report(last), true]);
+    items.push([blocked ? "Unblock" : "Block", () => block(!blocked), !blocked], ["Delete chat", deleteChat, true]);
+    popMenu($("dmore"), items);
   }
   async function block(on, quiet) {
     if (on && !quiet && !(await BB.confirm({ title: "Block " + nameOf(curInfo) + "?", text: "They can't message you, and you won't see new messages from them.", ok: "Block" }))) return;
@@ -938,67 +1020,104 @@
     let s;
     try { s = await rpc("dm_get_settings"); } catch (e) { BB.toast(errText(e), "bad"); return; }
     const { box, close } = dialog("dm-set", "ds-h");
-    const h = el("h2", null, "Message settings"); h.id = "ds-h";
-    const tog = el("label", "ktog-line pe-tog");
-    const sw = el("span", "ktog");
-    const inp = el("input"); inp.type = "checkbox"; inp.checked = !!s.allow_new;
-    sw.append(inp, el("i"));
-    const t = el("span");
-    t.append(el("strong", null, "Let new people message me"), el("span", null, "When off, only people you already talk to can message you."));
-    tog.append(sw, t);
-    inp.onchange = async () => {
-      inp.disabled = true;
-      try { await rpc("dm_set_allow", { p_allow: inp.checked }); BB.toast("Saved", "ok"); }
-      catch (e) { inp.checked = !inp.checked; BB.toast(errText(e), "bad"); }
-      inp.disabled = false;
+    box.onsubmit = e => e.preventDefault();
+
+    const head = sheetHead("envelope", "Message settings", "Who can reach you, and how you hear about it.", "ds-h", close);
+
+    const section = (title, extra) => {
+      const sec = el("section", "dms-sec");
+      const t = el("h3", "dms-h", title);
+      if (extra) t.append(extra);
+      sec.append(t);
+      return sec;
     };
-    /* Email alerts: the address itself never reaches the page, only whether there is one. */
-    const mail = el("label", "ktog-line pe-tog");
-    const msw = el("span", "ktog");
-    const minp = el("input"); minp.type = "checkbox"; minp.checked = s.email_notify !== false;
-    msw.append(minp, el("i"));
-    const mt = el("span");
-    mt.append(el("strong", null, "Email me about new messages"),
-      el("span", null, s.has_email ? "Sent to your login email when a message waits 2 minutes. One per chat every 30 minutes." : "Your login has no email address, so there's nothing to send to."));
-    mail.append(msw, mt);
-    if (!s.has_email) { minp.checked = false; minp.disabled = true; mail.classList.add("off"); }
-    minp.onchange = async () => {
-      minp.disabled = true;
-      try { await rpc("dm_set_email", { p_on: minp.checked }); BB.toast(minp.checked ? "Email alerts on" : "Email alerts off", "ok"); }
-      catch (e) { minp.checked = !minp.checked; BB.toast(errText(e), "bad"); }
-      minp.disabled = false;
+    /* A switch row: icon, label and hint, then the switch. Saves on change. */
+    const row = (icon, title, hint, on, save, okText) => {
+      const r = el("label", "dms-row");
+      const ic = el("span", "dms-ic");
+      ic.append(emojiImg(bbSrc(icon), icon, "dms-ic-i"));
+      const t = el("span", "dms-t");
+      const hn = el("span", "dms-hint", hint);
+      t.append(el("strong", null, title), hn);
+      const sw = el("span", "ktog");
+      const inp = el("input"); inp.type = "checkbox"; inp.checked = on;
+      sw.append(inp, el("i"));
+      r.append(ic, t, sw);
+      inp.onchange = async () => {
+        inp.disabled = true;
+        r.classList.add("saving");
+        try { await save(inp.checked); BB.toast(okText(inp.checked), "ok"); }
+        catch (e) { inp.checked = !inp.checked; BB.toast(errText(e), "bad"); }
+        inp.disabled = false;
+        r.classList.remove("saving");
+      };
+      return { r, inp, hn };
     };
-    const rules = el("div", "dm-rules");
-    rules.append(el("h3", "upop-h", "Chat rules"));
-    const ul = el("ul");
-    ["No bad words or slurs", "No links except Bloombot's", "Pictures unlock once someone replies", "Never share your password"].forEach(r => ul.append(el("li", null, r)));
-    rules.append(ul);
-    const bl = el("div", "dm-bl");
-    bl.append(el("h3", "upop-h", "Blocked"));
+
+    const priv = section("Privacy");
+    const card = el("div", "dms-card");
+    const a = row("door", "Let new people message me", "When off, only people you already talk to can message you.",
+      !!s.allow_new, v => rpc("dm_set_allow", { p_allow: v }), v => v ? "Anyone can message you" : "Only people you talk to can message you");
+    /* The address itself never reaches the page, only whether there is one. */
+    const m = row("bell", "Email me about new messages",
+      s.has_email ? "When a message waits 2 minutes. One email per chat every 30 minutes." : "Your login has no email address, so there's nowhere to send them.",
+      !!s.has_email && s.email_notify !== false, v => rpc("dm_set_email", { p_on: v }), v => v ? "Email alerts on" : "Email alerts off");
+    if (!s.has_email) { m.inp.disabled = true; m.r.classList.add("off"); }
+    card.append(a.r, el("div", "dms-sep"), m.r);
+    priv.append(card);
+
+    const rules = section("Chat rules");
+    const rl = el("ul", "dms-rules");
+    [["warning", "No bad words or slurs", "They're blocked before they send."],
+      ["bloombot", "Only Bloombot links", "Other links can't be sent."],
+      ["envelope", "Pictures after a reply", "Strangers can't send you pictures."],
+      ["shield", "Never share your password", "Staff will never ask for it."]].forEach(([ic, t, d]) => {
+      const li = el("li");
+      li.append(emojiImg(bbSrc(ic), ic, "dms-ri"));
+      const tx = el("span");
+      tx.append(el("strong", null, t), el("span", null, d));
+      li.append(tx);
+      rl.append(li);
+    });
+    rules.append(rl);
+
     const list = s.blocked || [];
-    if (!list.length) bl.append(el("p", "hint", "You haven't blocked anyone."));
+    const count = el("span", "dms-count", String(list.length));
+    count.hidden = !list.length;
+    const blk = section("Blocked", count);
+    const bcard = el("div", "dms-card dms-blocked");
+    const empty = () => {
+      const e = el("div", "dms-empty");
+      e.append(emojiImg(bbSrc("thanks"), "thanks", "dms-ei"), el("span", null, "You haven't blocked anyone."));
+      return e;
+    };
+    if (!list.length) bcard.append(empty());
     list.forEach(u => {
       const r = el("div", "dm-blr");
-      const b = el("button", "brick dark sm", "Unblock"); b.type = "button";
+      const b = el("button", "dms-unblock", "Unblock"); b.type = "button";
       b.onclick = async () => {
         b.disabled = true;
         try {
           await rpc("dm_block", { p_other: u.id, p_on: false });
           r.remove();
-          const c = inbox.find(x => x.other === u.id); if (c) c.blocked = false;
+          const left = bcard.querySelectorAll(".dm-blr").length;
+          count.textContent = String(left);
+          count.hidden = !left;
+          if (!left) bcard.append(empty());
+          const c = inbox.find(y => y.other === u.id); if (c) c.blocked = false;
           if (cur === u.id) setCan(await rpc("dm_can_message", { p_other: cur }).catch(() => "ok"));
           renderInbox();
         } catch (e) { b.disabled = false; BB.toast(errText(e), "bad"); }
       };
       r.append(avatar(u.avatar, "dm-cav sm"), el("strong", null, BB.plain(u.name || "") || "Trader"), b);
-      bl.append(r);
+      bcard.append(r);
     });
-    const done = el("button", "brick green sm", "Done"); done.type = "button";
-    const acts = el("div", "post-actions"); acts.append(done);
-    box.append(h, tog, mail, rules, bl, acts);
-    box.onsubmit = e => e.preventDefault();
+    blk.append(bcard);
+
+    const done = el("button", "brick green dms-done", "Done"); done.type = "button";
     done.onclick = close;
-    setTimeout(() => inp.focus(), 50);
+    box.append(head, priv, rules, blk, done);
+    setTimeout(() => a.inp.focus(), 50);
   }
 
   /* ── start ───────────────────────────────────────────────── */

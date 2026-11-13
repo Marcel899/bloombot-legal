@@ -318,7 +318,7 @@
   const NAV = [
     ["Dashboard", [["overview", "Overview", "gem"], ["analytics", "Analytics", "chart_up"], ["users", "Users", "task_user"]]],
     ["Bot", [["ads", "Trade ads", "swap"], ["commands", "Commands", "lightning"], ["moderation", "Moderation", "shield"], ["servers", "Servers", "discord_stud_white"], ["values", "Values & demand", "dollar"], ["giveaways", "Giveaways", "gift"]]],
-    ["Site & system", [["website", "Website", "task_about"], ["logs", "Activity log", "task_addbot"], ["system", "System health", "lightning"], ["reports", "Reports", "calculator"]]],
+    ["Site & system", [["website", "Website", "task_about"], ["logs", "Activity log", "task_addbot"], ["system", "System health", "lightning"], ["dms", "Message reports", "envelope"], ["reports", "Reports", "calculator"]]],
     ["Open on the website", [["x-values", "Value list", "dollar", "values.html"], ["x-trades", "Trade ads", "swap", "trades.html"], ["x-strat", "Strategies", "bullseye", "strategies.html"], ["x-dash", "Server dashboard", "gear", "dashboard.html"]]],
   ];
   const PAGES = {};
@@ -818,6 +818,123 @@
       m.querySelector("[data-no]").addEventListener("click", closeModal);
       m.querySelector("[data-yes]").addEventListener("click", () => { const id = m.querySelector("#bid").value.trim(); if (!isId(id)) { toast("That isn't a Discord user ID.", "warning"); return; } closeModal(); setTimeout(() => doAction("ban_user", id, id), 50); });
     });
+  };
+
+  // MESSAGE REPORTS (website messages; sql/dm-messages.sql)
+  async function dmPics(rows) {
+    const paths = [...new Set(rows.map((r) => r.image_path).filter(Boolean))];
+    const out = {};
+    if (!paths.length) return out;
+    try {
+      const { data } = await sb.storage.from("dm-images").createSignedUrls(paths, 900);
+      (data || []).forEach((d) => { if (d.signedUrl) out[d.path] = d.signedUrl; });
+    } catch (e) { /* pictures just show as gone */ }
+    return out;
+  }
+  R.dms = async (v) => {
+    v.innerHTML = `<div class="phead"><div><h1>Message reports</h1><p>Website messages people reported. A reported picture stays saved as evidence.</p></div><div class="acts"><button class="btn g-dark" type="button" id="dmref"><img src="img/clock.png" alt="">Refresh</button></div></div><div id="dmk"></div><div class="mt" id="dmtabs"></div><div class="filters"><label class="srch"><span class="sr">Search message reports</span>${SRCH}<input class="inp" id="dmq" placeholder="Text, user or reason"></label></div><div id="dmt">${skel(6)}</div>`;
+    $("#dmref").addEventListener("click", () => { S.dm = null; R.dms(v); });
+    let data;
+    try {
+      data = S.dm || await Promise.all([rpc("dm_admin_reports", { p_status: "open" }), rpc("dm_admin_reports", { p_status: "done" }), rpc("dm_admin_bans"), rpc("dm_admin_filtered")]);
+    } catch (e) {
+      empty($("#dmt"), "Couldn't load message reports", /function|schema/i.test(e.message) ? "Run the latest sql/dm-messages.sql in Supabase." : e.message);
+      return;
+    }
+    if (location.hash !== "#dms") return;
+    S.dm = data;
+    const [open, done, bans, filtered] = data.map((x) => x || []);
+    S.dmRep = open;
+    setCount("dms", open.length, true);
+    const pics = await dmPics(open.concat(done));
+    if (location.hash !== "#dms") return;
+    renderKpis($("#dmk"), [
+      kpi("Open reports", "warning", full(open.length), null, null, null, null, open.length ? "oldest " + ago(toDate(open[open.length - 1].created_at)) : "all clear"),
+      kpi("Handled", "shield", full(done.length), null, null, null, null, done.filter((r) => r.status === "actioned").length + " led to a ban"),
+      kpi("Can't message", "lose", full(bans.length), null, null, null, null, "banned from messages"),
+      kpi("Stopped by filter", "envelope", full(filtered.length), null, null, null, null, filtered.filter((f) => Date.now() - toDate(f.created_at) < DAY).length + " today"),
+    ]);
+    let tab = S.dmTab || "open", q = "";
+    const has = (...xs) => !q || xs.some((x) => String(x || "").toLowerCase().includes(q));
+    const person = (id, name, av) => userCell({ id, name: name || id, avatar: /^https:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(av || "") ? av : "" });
+    const rowOf = (el, sl) => sl[+el.closest("tr").dataset.i];
+    const msgCell = (r) => `<div class="rep-msg">${r.body ? '<span class="rep-txt"></span>' : ""}${r.image_path ? (pics[r.image_path] ? `<button class="rep-pic" type="button" data-pic="${esc(r.image_path)}" aria-label="View the reported picture"><img src="${esc(pics[r.image_path])}" alt=""></button>` : '<span class="pill gray">Picture gone</span>') : ""}</div>`;
+    const reasonCell = (r) => `<span class="pill ${/Scam/.test(r.reason) ? "red" : /Harass/.test(r.reason) ? "purple" : /Spam/.test(r.reason) ? "yellow" : "blue"}">${esc(r.reason)}</span>${r.note ? '<small class="rep-note"></small>' : ""}`;
+    const act = async (r, action) => {
+      if (!r) return;
+      if (action === "ban" && !(await confirmBox({ title: "Ban " + (r.sender_name || r.sender) + " from messages?", text: "They can't send website messages anymore, and every open report about them closes.", ok: "Ban from messages", danger: true }))) return;
+      try {
+        await rpc("dm_admin_resolve", { p_id: r.id, p_action: action });
+        toast({ ban: "Banned from messages", dismiss: "Report dismissed", reopen: "Report reopened" }[action], action === "ban" ? "lose" : "shield");
+        S.dm = null;
+        R.dms(v);
+      } catch (e) { toast("Couldn't update the report: " + e.message, "warning"); }
+    };
+    const draw = () => {
+      S.dmTab = tab;
+      if (tab === "open" || tab === "done") {
+        const rows = tab === "open" ? open : done;
+        table($("#dmt"), {
+          rows: () => rows.filter((r) => has(r.body, r.reason, r.note, r.sender, r.sender_name, r.reporter_name)),
+          sort: "created_at", dir: -1, per: 15, empty: tab === "open" ? (open.length ? "No reports match." : "No reports waiting.") : "Nothing handled yet.",
+          cols: [
+            { key: "created_at", label: "When", sort: (r) => toDate(r.created_at), render: (r) => ago(toDate(r.created_at)) },
+            { key: "sender_name", label: "Reported", render: (r) => person(r.sender, r.sender_name, r.sender_avatar) + (r.sender_reports > 1 || r.sender_banned ? `<div class="rep-tags">${r.sender_reports > 1 ? `<span class="pill yellow">${r.sender_reports} reports</span>` : ""}${r.sender_banned ? '<span class="pill red">Banned</span>' : ""}</div>` : "") },
+            { key: "body", label: "Message", cls: "msg", nosort: true, render: msgCell },
+            { key: "reason", label: "Reason", render: reasonCell },
+            { key: "reporter_name", label: "By", render: (r) => esc(r.reporter_name || r.reporter), hide: true },
+            { key: "x", label: "", nosort: true, render: (r) => (tab === "open"
+              ? `<div class="acts"><button class="mini-btn" data-a="dismiss" data-id="${esc(r.id)}" type="button">Dismiss</button>${r.sender_banned ? "" : `<button class="mini-btn danger" data-a="ban" data-id="${esc(r.id)}" type="button">Ban</button>`}</div>`
+              : `<div class="acts">${statusPill(r.status === "actioned" ? "Banned" : "Dismissed")}<button class="mini-btn" data-a="reopen" data-id="${esc(r.id)}" type="button">Reopen</button></div>`) },
+          ],
+          after: (host, sl) => {
+            $$(".rep-txt", host).forEach((s) => { s.textContent = rowOf(s, sl).body; });
+            $$(".rep-note", host).forEach((s) => { s.textContent = rowOf(s, sl).note; });
+            $$("[data-a]", host).forEach((b) => b.addEventListener("click", () => act(rows.find((r) => String(r.id) === b.dataset.id), b.dataset.a)));
+            $$("[data-pic]", host).forEach((b) => b.addEventListener("click", () => {
+              const m = openModal('<div class="rep-big"><img alt="Reported picture"></div><div class="mf"><button class="btn g-dark" data-no type="button">Close</button></div>');
+              m.querySelector("img").src = pics[b.dataset.pic];
+              m._close = closeModal;
+              m.querySelector("[data-no]").addEventListener("click", closeModal);
+            }));
+          },
+        });
+      } else if (tab === "bans") {
+        table($("#dmt"), {
+          rows: () => bans.filter((b) => has(b.discord_id, b.name, b.reason)), sort: "created_at", dir: -1, empty: "Nobody is banned from messages.",
+          cols: [
+            { key: "name", label: "User", render: (b) => person(b.discord_id, b.name, b.avatar) },
+            { key: "reason", label: "Reason", cls: "msg" },
+            { key: "created_at", label: "Since", sort: (b) => toDate(b.created_at), render: (b) => fdate(toDate(b.created_at)), hide: true },
+            { key: "x", label: "", nosort: true, render: (b) => `<div class="acts"><button class="mini-btn" data-un="${esc(b.discord_id)}" type="button">Unban</button></div>` },
+          ],
+          after: (h) => $$("[data-un]", h).forEach((b) => b.addEventListener("click", async () => {
+            try {
+              await rpc("dm_admin_ban", { p_user: b.dataset.un, p_on: false, p_reason: null });
+              toast("They can send messages again", "shield");
+              S.dm = null;
+              R.dms(v);
+            } catch (e) { toast("Couldn't unban: " + e.message, "warning"); }
+          })),
+        });
+      } else {
+        table($("#dmt"), {
+          rows: () => filtered.filter((f) => has(f.body, f.sender, f.sender_name, f.recipient_name, f.reason)), sort: "created_at", dir: -1, per: 15, empty: "The filter hasn't stopped anything.",
+          cols: [
+            { key: "created_at", label: "When", sort: (f) => toDate(f.created_at), render: (f) => ago(toDate(f.created_at)) },
+            { key: "sender_name", label: "From", render: (f) => esc(f.sender_name || f.sender) },
+            { key: "recipient_name", label: "To", render: (f) => esc(f.recipient_name || f.recipient), hide: true },
+            { key: "reason", label: "Stopped for", render: (f) => `<span class="pill ${f.reason === "link" ? "blue" : "red"}">${f.reason === "link" ? "Link" : f.reason === "bad_word" ? "Bad word" : esc(f.reason)}</span>` },
+            { key: "body", label: "Text", cls: "msg", nosort: true, render: () => '<span class="rep-txt"></span>' },
+          ],
+          after: (host, sl) => $$(".rep-txt", host).forEach((s) => { s.textContent = rowOf(s, sl).body; }),
+        });
+      }
+    };
+    if (!["open", "done", "bans", "filtered"].includes(tab)) tab = "open";
+    tabs($("#dmtabs"), [["open", "Open (" + open.length + ")"], ["done", "Handled"], ["bans", "Banned (" + bans.length + ")"], ["filtered", "Filtered (" + filtered.length + ")"]], tab, (x) => { tab = x; draw(); });
+    $("#dmq").addEventListener("input", (e) => { q = e.target.value.trim().toLowerCase(); draw(); });
+    draw();
   };
 
   // SERVERS
@@ -1375,6 +1492,8 @@
     if (errs.length) out.push({ t: errs.length + " bot error" + (errs.length > 1 ? "s" : "") + " in the last 24h", s: errs[errs.length - 1].title, go: "system", icon: "warning", at: toDate(errs[errs.length - 1].at).getTime() });
     const reps = (stats().reports || []).filter((r) => Date.now() - toDate(r[4]) < DAY);
     if (reps.length) out.push({ t: reps.length + " new user report" + (reps.length > 1 ? "s" : ""), s: "Moderation", go: "moderation", icon: "envelope", at: toDate(reps[0][4]).getTime() });
+    const dmr = S.dmRep || [];
+    if (dmr.length) out.push({ t: dmr.length + " message report" + (dmr.length > 1 ? "s" : "") + " to review", s: "Website messages", go: "dms", icon: "warning", at: toDate(dmr[0].created_at).getTime() });
     if (D.regs[D.N - 1]) out.push({ t: D.regs[D.N - 1] + " new user" + (D.regs[D.N - 1] > 1 ? "s" : "") + " today", s: "Users", go: "users", icon: "task_user", at: new Date().setHours(0, 0, 0, 0) });
     if (!D.hasTraffic) out.push({ t: "Visit counting hasn't started", s: "It starts with the first visit after this update", go: "website", icon: "chart_up", at: 0 });
     return out.sort((a, b) => b.at - a.at);
@@ -1499,10 +1618,12 @@
       const [ov, prof] = await Promise.all([rpc("admin_overview", { p_days: 400 }), rpc("admin_profiles")]);
       S.ov = ov; S.profiles = Array.isArray(prof) ? prof : [];
       S.loadMs = Math.round(performance.now() - t0);
-      S.trade = S.logs = S.gw = null;
+      S.trade = S.logs = S.gw = S.dm = null;
       GW.rows = GW.blocks = null;
       build();
       drawNotes();
+      // open message reports: nav count + notification (quiet until the SQL is run)
+      rpc("dm_admin_reports", { p_status: "open" }).then((r) => { S.dmRep = r || []; setCount("dms", S.dmRep.length, true); drawNotes(); }, () => {});
       drawBotCard();
       $("#lastload").textContent = "Updated " + ftime(new Date());
       $("#tref").title = "Refresh data (updated " + ftime(new Date()) + ")";

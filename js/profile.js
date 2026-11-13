@@ -112,6 +112,17 @@
       e.type = "button";
       e.onclick = () => openEdit();
       acts.append(e);
+      if (p) {
+        /* your inbox, with the unread count app.js keeps up to date */
+        const mb = el("a", "brick green sm", "Messages");
+        mb.href = "messages.html";
+        const n = BB.dmUnread || 0;
+        const badge = el("span", "me-badge", n > 99 ? "99+" : String(n));
+        badge.setAttribute("data-dm-unread", "");
+        badge.hidden = !n;
+        mb.append(badge);
+        acts.append(mb);
+      }
     }
     if (did && !isMe && p) {
       const m = el("a", "brick green sm", "Message");
@@ -483,6 +494,7 @@
     if (isMe && !p) openEdit();
     else if (isMe && location.hash === "#edit") openEdit();
     document.title = ((p && p.discord_name) || fallback || "Player") + " · Bloombot";
+    if (BB.dmUnread && BB.setDmUnread) BB.setDmUnread(BB.dmUnread);   // keep the "(3)" unread prefix
     lists(did);
   }
 

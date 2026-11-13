@@ -64,6 +64,18 @@ create table if not exists public.dm_reports (
   image_path  text,
   unique (reporter, message_id)
 );
+-- Added with the owner's report queue. Safe to run again.
+alter table public.dm_reports add column if not exists note text;
+alter table public.dm_reports add column if not exists status text not null default 'open';
+alter table public.dm_reports add column if not exists handled_at timestamptz;
+do $$ begin
+  alter table public.dm_reports add constraint dm_reports_status check (status in ('open', 'dismissed', 'actioned'));
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.dm_reports add constraint dm_reports_note check (note is null or char_length(note) <= 500);
+exception when duplicate_object then null; end $$;
+create index if not exists dm_reports_status_idx on public.dm_reports (status, id desc);
+create index if not exists dm_reports_image_idx on public.dm_reports (image_path) where image_path is not null;
 
 -- Messages the filter stopped (bad words or links), for the owner to review.
 create table if not exists public.dm_filtered (
@@ -161,6 +173,14 @@ returns boolean language sql stable security definer set search_path = '' as $$
       or exists (select 1 from public.dm_messages m
                  where m.image_path = p_name and not m.unsent
                    and (m.sender = public.dm_me() or m.recipient = public.dm_me()))
+      or (exists (select 1 from public.dm_reports r where r.image_path = p_name)
+          and coalesce(public.is_site_owner(), false))
+$$;
+
+-- A reported picture is kept as evidence, even if the sender unsends it.
+create or replace function public.dm_image_kept(p_name text)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.dm_reports r where r.image_path = p_name)
 $$;
 
 -- ── Sending ───────────────────────────────────────────────────────────
@@ -324,6 +344,7 @@ begin
   select image_path into img from public.dm_messages where id = p_id and sender = me and not unsent for update;
   if not found then raise exception 'dm:not_found'; end if;
   update public.dm_messages set unsent = true, body = '', image_path = null where id = p_id;
+  if public.dm_image_kept(img) then return null; end if;
   return img;
 end $$;
 
@@ -355,16 +376,21 @@ begin
   return p_on;
 end $$;
 
-create or replace function public.dm_report(p_id bigint, p_reason text)
+drop function if exists public.dm_report(bigint, text);
+create or replace function public.dm_report(p_id bigint, p_reason text, p_note text default null)
 returns boolean language plpgsql volatile security definer set search_path = '' as $$
-declare me text := public.dm_require(); why text := left(public.dm_clean(p_reason), 300); m public.dm_messages;
+declare
+  me text := public.dm_require();
+  why text := left(public.dm_clean(p_reason), 300);
+  extra text := nullif(left(public.dm_clean(coalesce(p_note, '')), 500), '');
+  m public.dm_messages;
 begin
   if char_length(why) = 0 then raise exception 'dm:empty'; end if;
-  select * into m from public.dm_messages where id = p_id and recipient = me;
+  select * into m from public.dm_messages where id = p_id and recipient = me and not unsent;
   if not found then raise exception 'dm:not_found'; end if;
   if (select count(*) from public.dm_reports where reporter = me and created_at > now() - interval '1 day') >= 10 then raise exception 'dm:slow'; end if;
-  insert into public.dm_reports (reporter, message_id, reason, sender, body, image_path)
-  values (me, p_id, why, m.sender, m.body, m.image_path)
+  insert into public.dm_reports (reporter, message_id, reason, note, sender, body, image_path)
+  values (me, p_id, why, extra, m.sender, m.body, m.image_path)
   on conflict (reporter, message_id) do nothing;
   return true;
 end $$;
@@ -472,22 +498,79 @@ begin
 end $$;
 
 -- ── Owner tools (checked with the existing is_site_owner()) ───────────
-create or replace function public.dm_admin_reports()
-returns table (id bigint, reporter text, sender text, body text, image_path text, reason text, created_at timestamptz)
+drop function if exists public.dm_admin_reports();
+create or replace function public.dm_admin_reports(p_status text default 'open')
+returns table (id bigint, message_id bigint, reporter text, reporter_name text, sender text, sender_name text,
+               sender_avatar text, body text, image_path text, reason text, note text, status text,
+               created_at timestamptz, handled_at timestamptz, sender_reports integer, sender_banned boolean)
 language plpgsql stable security definer set search_path = '' as $$
 begin
   if not coalesce(public.is_site_owner(), false) then raise exception 'dm:forbidden'; end if;
-  return query select r.id, r.reporter, r.sender, r.body, r.image_path, r.reason, r.created_at
-               from public.dm_reports r order by r.id desc limit 200;
+  return query
+    select r.id, r.message_id, r.reporter, rp.discord_name::text, r.sender, sp.discord_name::text, sp.discord_avatar::text,
+           r.body, r.image_path, r.reason, r.note, r.status, r.created_at, r.handled_at,
+           (select count(*)::integer from public.dm_reports x where x.sender = r.sender),
+           exists (select 1 from public.dm_bans b where b.discord_id = r.sender)
+      from public.dm_reports r
+      left join public.profiles rp on rp.discord_id::text = r.reporter
+      left join public.profiles sp on sp.discord_id::text = r.sender
+     where case when p_status = 'open' then r.status = 'open' else r.status <> 'open' end
+     order by r.id desc limit 200;
 end $$;
 
+create or replace function public.dm_admin_open_count()
+returns integer language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not coalesce(public.is_site_owner(), false) then raise exception 'dm:forbidden'; end if;
+  return (select count(*)::integer from public.dm_reports r where r.status = 'open');
+end $$;
+
+-- dismiss | reopen | ban (stops the sender messaging and closes every open report about them)
+create or replace function public.dm_admin_resolve(p_id bigint, p_action text)
+returns integer language plpgsql volatile security definer set search_path = '' as $$
+declare rep public.dm_reports; n integer;
+begin
+  if not coalesce(public.is_site_owner(), false) then raise exception 'dm:forbidden'; end if;
+  select * into rep from public.dm_reports r where r.id = p_id for update;
+  if not found then raise exception 'dm:not_found'; end if;
+  if p_action = 'dismiss' then
+    update public.dm_reports r set status = 'dismissed', handled_at = now() where r.id = p_id;
+  elsif p_action = 'reopen' then
+    update public.dm_reports r set status = 'open', handled_at = null where r.id = p_id;
+  elsif p_action = 'ban' then
+    insert into public.dm_bans (discord_id, reason)
+    values (rep.sender, left('Report #' || rep.id || ': ' || rep.reason, 300))
+    on conflict (discord_id) do nothing;
+    update public.dm_reports r set status = 'actioned', handled_at = now()
+     where r.sender = rep.sender and (r.status = 'open' or r.id = p_id);
+  else
+    raise exception 'dm:bad_action';
+  end if;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
+drop function if exists public.dm_admin_filtered();
 create or replace function public.dm_admin_filtered()
-returns table (id bigint, sender text, recipient text, reason text, body text, created_at timestamptz)
+returns table (id bigint, sender text, sender_name text, recipient text, recipient_name text, reason text, body text, created_at timestamptz)
 language plpgsql stable security definer set search_path = '' as $$
 begin
   if not coalesce(public.is_site_owner(), false) then raise exception 'dm:forbidden'; end if;
-  return query select f.id, f.sender, f.recipient, f.reason, f.body, f.created_at
-               from public.dm_filtered f order by f.id desc limit 200;
+  return query select f.id, f.sender, sp.discord_name::text, f.recipient, rp.discord_name::text, f.reason, f.body, f.created_at
+                 from public.dm_filtered f
+                 left join public.profiles sp on sp.discord_id::text = f.sender
+                 left join public.profiles rp on rp.discord_id::text = f.recipient
+                order by f.id desc limit 200;
+end $$;
+
+create or replace function public.dm_admin_bans()
+returns table (discord_id text, name text, avatar text, reason text, created_at timestamptz)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not coalesce(public.is_site_owner(), false) then raise exception 'dm:forbidden'; end if;
+  return query select b.discord_id, p.discord_name::text, p.discord_avatar::text, b.reason, b.created_at
+                 from public.dm_bans b left join public.profiles p on p.discord_id::text = b.discord_id
+                order by b.created_at desc;
 end $$;
 
 create or replace function public.dm_admin_ban(p_user text, p_on boolean, p_reason text default null)
@@ -511,9 +594,10 @@ begin
     'dm_me()', 'dm_require()', 'dm_clean(text)', 'dm_upload_ok()', 'dm_can_see_image(text)',
     'dm_send(text,text,text)', 'dm_inbox()', 'dm_thread(text,bigint,integer)', 'dm_poll(text,bigint)',
     'dm_read(text)', 'dm_unread()', 'dm_unsend(bigint)', 'dm_hide(bigint,text)', 'dm_block(text,boolean)',
-    'dm_report(bigint,text)', 'dm_get_settings()', 'dm_set_allow(boolean)', 'dm_can_message(text)',
-    'dm_admin_reports()', 'dm_admin_filtered()', 'dm_admin_ban(text,boolean,text)', 'dm_has_link(text)',
-    'dm_set_email(boolean)']
+    'dm_report(bigint,text,text)', 'dm_get_settings()', 'dm_set_allow(boolean)', 'dm_can_message(text)',
+    'dm_admin_reports(text)', 'dm_admin_filtered()', 'dm_admin_ban(text,boolean,text)', 'dm_has_link(text)',
+    'dm_set_email(boolean)', 'dm_image_kept(text)', 'dm_admin_open_count()', 'dm_admin_resolve(bigint,text)',
+    'dm_admin_bans()']
   loop
     execute format('revoke all on function public.%s from public, anon', f);
     execute format('grant execute on function public.%s to authenticated', f);
@@ -548,5 +632,6 @@ create policy "dm images: read own chats" on storage.objects for select to authe
 using (bucket_id = 'dm-images' and public.dm_can_see_image(name));
 
 create policy "dm images: delete own" on storage.objects for delete to authenticated
-using (bucket_id = 'dm-images' and (storage.foldername(name))[1] = public.dm_me());
+using (bucket_id = 'dm-images' and (storage.foldername(name))[1] = public.dm_me()
+       and not public.dm_image_kept(name));
 -- No update policy: files can't be swapped after a message is sent.

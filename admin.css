@@ -691,3 +691,14 @@ body.booting .snav,body.booting .botcard small{opacity:.55}
   .gwp{width:56px;height:56px}
   .gpts{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Message reports */
+.rep-msg{display:flex;flex-direction:column;gap:6px;min-width:220px;max-width:420px;white-space:normal}
+.rep-txt{white-space:pre-wrap;overflow-wrap:anywhere}
+.rep-pic{width:64px;height:64px;padding:0;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--card-3);cursor:zoom-in}
+.rep-pic img{display:block;width:100%;height:100%;object-fit:cover}
+.rep-pic:focus-visible{outline:2px solid #7c86ff;outline-offset:2px}
+.rep-note{display:block;min-width:160px;max-width:260px;white-space:normal;margin-top:5px;color:var(--muted);font-size:.78rem;line-height:1.35;overflow-wrap:anywhere}
+.rep-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.rep-big{display:grid;place-items:center;margin-bottom:12px}
+.rep-big img{max-width:100%;max-height:70vh;border-radius:12px}
