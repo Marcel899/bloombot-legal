@@ -76,6 +76,19 @@ create table if not exists public.dm_filtered (
 );
 create index if not exists dm_filtered_sender_idx on public.dm_filtered (sender, created_at desc);
 
+-- Email alerts: on unless turned off in Message settings.
+alter table public.dm_settings add column if not exists email_notify boolean not null default true;
+
+-- Which unread messages someone was already emailed about.
+create table if not exists public.dm_email_log (
+  id         bigint generated always as identity primary key,
+  recipient  text not null,
+  sender     text not null,
+  last_id    bigint not null,
+  sent_at    timestamptz not null default now()
+);
+create index if not exists dm_email_log_pair_idx on public.dm_email_log (recipient, sender, sent_at desc);
+
 create table if not exists public.dm_bans (
   discord_id text primary key,
   reason     text,
@@ -88,7 +101,8 @@ alter table public.dm_settings enable row level security;
 alter table public.dm_reports  enable row level security;
 alter table public.dm_bans     enable row level security;
 alter table public.dm_filtered enable row level security;
-revoke all on public.dm_messages, public.dm_blocks, public.dm_settings, public.dm_reports, public.dm_bans, public.dm_filtered from anon, authenticated, public;
+alter table public.dm_email_log enable row level security;
+revoke all on public.dm_messages, public.dm_blocks, public.dm_settings, public.dm_reports, public.dm_bans, public.dm_filtered, public.dm_email_log from anon, authenticated, public;
 
 -- ── Helpers ───────────────────────────────────────────────────────────
 -- The caller's Discord ID, after checking they may use messages at all.
@@ -361,6 +375,8 @@ declare me text := public.dm_require();
 begin
   return json_build_object(
     'allow_new', coalesce((select allow_new from public.dm_settings where discord_id = me), true),
+    'email_notify', coalesce((select email_notify from public.dm_settings where discord_id = me), true),
+    'has_email', public.dm_email_of(me) is not null,
     'blocked', coalesce((select json_agg(json_build_object('id', k.blocked, 'name', p.discord_name, 'avatar', p.discord_avatar) order by k.created_at desc)
                          from public.dm_blocks k left join public.profiles p on p.discord_id::text = k.blocked
                          where k.blocker = me), '[]'::json));
@@ -374,6 +390,66 @@ begin
   on conflict (discord_id) do update set allow_new = excluded.allow_new, updated_at = now();
   return coalesce(p_allow, true);
 end $$;
+
+create or replace function public.dm_set_email(p_on boolean)
+returns boolean language plpgsql volatile security definer set search_path = '' as $$
+declare me text := public.dm_require();
+begin
+  insert into public.dm_settings (discord_id, email_notify, updated_at) values (me, coalesce(p_on, true), now())
+  on conflict (discord_id) do update set email_notify = excluded.email_notify, updated_at = now();
+  return coalesce(p_on, true);
+end $$;
+
+-- ── Email alerts (sent by the bot with the service key) ──────────────
+-- The address of a Discord user's website login, or null.
+create or replace function public.dm_email_of(p_user text)
+returns text language sql stable security definer set search_path = '' as $$
+  select u.email::text
+  from auth.identities i join auth.users u on u.id = i.user_id
+  where i.provider = 'discord' and i.provider_id = p_user
+    and u.email is not null and u.email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'
+  order by u.created_at
+  limit 1
+$$;
+
+-- Who should get an email now: messages unread for 2+ minutes, at most one
+-- email per chat every 30 minutes and 10 a day per person, never for people
+-- they blocked, and only when they left email alerts on.
+create or replace function public.dm_email_queue(p_limit integer default 50)
+returns table (recipient text, email text, sender text, sender_name text, sender_avatar text,
+               sender_roblox text, sender_verified boolean, messages integer, last_id bigint)
+language sql stable security definer set search_path = '' as $$
+  with waiting as (
+    select m.recipient as r, m.sender as s, count(*)::int as n, max(m.id) as top
+    from public.dm_messages m
+    where m.read_at is null and not m.unsent and not m.hidden_recipient
+      and m.created_at < now() - interval '2 minutes'
+      and m.created_at > now() - interval '1 day'
+      and m.id > coalesce((select max(l.last_id) from public.dm_email_log l
+                           where l.recipient = m.recipient and l.sender = m.sender), 0)
+    group by m.recipient, m.sender
+  )
+  select w.r, public.dm_email_of(w.r), w.s, p.discord_name::text, p.discord_avatar::text,
+         p.roblox_name::text, coalesce(p.roblox_verified, false)::boolean, w.n, w.top
+  from waiting w
+  left join public.profiles p on p.discord_id::text = w.s
+  where coalesce((select st.email_notify from public.dm_settings st where st.discord_id = w.r), true)
+    and public.dm_email_of(w.r) is not null
+    and not exists (select 1 from public.dm_blocks k where k.blocker = w.r and k.blocked = w.s)
+    and not exists (select 1 from public.dm_bans b where b.discord_id = w.s)
+    and not exists (select 1 from public.dm_email_log l where l.recipient = w.r and l.sender = w.s
+                    and l.sent_at > now() - interval '30 minutes')
+    and (select count(*) from public.dm_email_log l where l.recipient = w.r
+         and l.sent_at > now() - interval '1 day') < 10
+  order by w.top
+  limit greatest(1, least(coalesce(p_limit, 50), 200))
+$$;
+
+create or replace function public.dm_email_sent(p_recipient text, p_sender text, p_last_id bigint)
+returns void language sql volatile security definer set search_path = '' as $$
+  delete from public.dm_email_log where sent_at < now() - interval '30 days';
+  insert into public.dm_email_log (recipient, sender, last_id) values (p_recipient, p_sender, p_last_id);
+$$;
 
 -- Can I message this person right now? Used to show the right note before typing.
 create or replace function public.dm_can_message(p_other text)
@@ -436,10 +512,17 @@ begin
     'dm_send(text,text,text)', 'dm_inbox()', 'dm_thread(text,bigint,integer)', 'dm_poll(text,bigint)',
     'dm_read(text)', 'dm_unread()', 'dm_unsend(bigint)', 'dm_hide(bigint,text)', 'dm_block(text,boolean)',
     'dm_report(bigint,text)', 'dm_get_settings()', 'dm_set_allow(boolean)', 'dm_can_message(text)',
-    'dm_admin_reports()', 'dm_admin_filtered()', 'dm_admin_ban(text,boolean,text)', 'dm_has_link(text)']
+    'dm_admin_reports()', 'dm_admin_filtered()', 'dm_admin_ban(text,boolean,text)', 'dm_has_link(text)',
+    'dm_set_email(boolean)']
   loop
     execute format('revoke all on function public.%s from public, anon', f);
     execute format('grant execute on function public.%s to authenticated', f);
+  end loop;
+  -- Email addresses never reach the browser: only the bot's service key can call these.
+  foreach f in array array['dm_email_of(text)', 'dm_email_queue(integer)', 'dm_email_sent(text,text,bigint)']
+  loop
+    execute format('revoke all on function public.%s from public, anon, authenticated', f);
+    execute format('grant execute on function public.%s to service_role', f);
   end loop;
 end $$;
 

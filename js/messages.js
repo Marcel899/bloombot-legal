@@ -952,6 +952,22 @@
       catch (e) { inp.checked = !inp.checked; BB.toast(errText(e), "bad"); }
       inp.disabled = false;
     };
+    /* Email alerts: the address itself never reaches the page, only whether there is one. */
+    const mail = el("label", "ktog-line pe-tog");
+    const msw = el("span", "ktog");
+    const minp = el("input"); minp.type = "checkbox"; minp.checked = s.email_notify !== false;
+    msw.append(minp, el("i"));
+    const mt = el("span");
+    mt.append(el("strong", null, "Email me about new messages"),
+      el("span", null, s.has_email ? "Sent to your login email when a message waits 2 minutes. One per chat every 30 minutes." : "Your login has no email address, so there's nothing to send to."));
+    mail.append(msw, mt);
+    if (!s.has_email) { minp.checked = false; minp.disabled = true; mail.classList.add("off"); }
+    minp.onchange = async () => {
+      minp.disabled = true;
+      try { await rpc("dm_set_email", { p_on: minp.checked }); BB.toast(minp.checked ? "Email alerts on" : "Email alerts off", "ok"); }
+      catch (e) { minp.checked = !minp.checked; BB.toast(errText(e), "bad"); }
+      minp.disabled = false;
+    };
     const rules = el("div", "dm-rules");
     rules.append(el("h3", "upop-h", "Chat rules"));
     const ul = el("ul");
@@ -979,7 +995,7 @@
     });
     const done = el("button", "brick green sm", "Done"); done.type = "button";
     const acts = el("div", "post-actions"); acts.append(done);
-    box.append(h, tog, rules, bl, acts);
+    box.append(h, tog, mail, rules, bl, acts);
     box.onsubmit = e => e.preventDefault();
     done.onclick = close;
     setTimeout(() => inp.focus(), 50);
@@ -1039,5 +1055,7 @@
     await loadInbox();
     const to = new URLSearchParams(location.search).get("to");
     if (BB.isId(to) && to !== me) open(to, { keepUrl: true });
+    /* The "Message settings" link in emails. */
+    if (location.hash === "#settings") { history.replaceState(null, "", location.pathname + location.search); settings(); }
   });
 })();
