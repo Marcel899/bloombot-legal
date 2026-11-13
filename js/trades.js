@@ -112,6 +112,16 @@
     const r = BB.safeUrl(a.roblox_url);
     if (a.roblox_name || r) users.append(account("roblox", a.roblox_name || "Profile", r));
     else users.append(account("roblox", "Not linked", null));
+    if (did && !own) {
+      const m = el("a", "acc bloombot");
+      m.href = "messages.html?to=" + encodeURIComponent(did);
+      m.title = "Message " + (a.discord_name || "this trader") + " on Bloombot";
+      const i = el("img", "acc-ic"); i.src = "img/flower.png"; i.alt = "";
+      const t = el("span", "acc-t");
+      t.append(el("em", null, "Bloombot"), el("strong", null, "Message"));
+      m.append(i, t);
+      users.append(m);
+    }
     c.append(users);
     return c;
   }

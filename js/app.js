@@ -679,6 +679,21 @@
     googleButton(slot, "link", say, close);
   }
 
+  /* Unread direct messages, shown on the account button. */
+  let dmTimer = null;
+  async function checkDms() {
+    clearTimeout(dmTimer);
+    if (!BB.session || !BB.user(BB.session).id) return;
+    if (!document.hidden && !/\/messages(\.html)?$/.test(location.pathname)) {
+      try {
+        const { data, error } = await BB.sb.rpc("dm_unread");
+        if (!error && BB.setDmUnread) BB.setDmUnread(data || 0);
+      } catch (e) { /* not set up yet */ }
+    }
+    dmTimer = setTimeout(checkDms, 60000);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && BB.session) checkDms(); });
+
   function renderAcct() {
     const box = document.getElementById("acct");
     if (!box) return;
@@ -705,6 +720,12 @@
     const caret = BB.el("span", "caret");
     caret.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>';
     btn.append(av, BB.el("span", "me-name", u.name), caret);
+    const dot = BB.el("span", "me-dot");
+    dot.hidden = true;
+    dot.setAttribute("aria-hidden", "true");
+    const avWrap = BB.el("span", "me-avw");
+    av.replaceWith(avWrap);
+    avWrap.append(av, dot);
     const menu = BB.el("div", "me-menu");
     menu.setAttribute("role", "menu");
     menu.id = "me-menu";
@@ -768,9 +789,21 @@
       b.onclick = () => { box.classList.remove("open"); run(); };
       return b;
     };
+    const dmLink = link("messages.html", "envelope", "Messages");
+    const dmBadge = BB.el("span", "me-badge");
+    dmBadge.hidden = true;
+    dmLink.append(dmBadge);
+    BB.setDmUnread = n => {
+      n = Math.max(0, n | 0);
+      dmBadge.hidden = dot.hidden = !n;
+      dmBadge.textContent = n > 99 ? "99+" : String(n);
+      btn.setAttribute("aria-label", "Account menu for " + u.name + (n ? ", " + n + " unread message" + (n === 1 ? "" : "s") : ""));
+    };
+    if (u.hasDiscord) checkDms();
     const extra = [];
     if (!u.hasDiscord) extra.push(act("plus", "Connect Discord", () => connectDialog(true)), sep());
     menu.append(head, sep(), ...extra,
+      dmLink,
       link("profile.html#edit", "gear", "Edit profile"),
       link("levels.html", "medal_gold", "Levels & perks"),
       link("values.html#watchlist", "wish_star", "My watchlist"),
@@ -1370,7 +1403,7 @@
       a.append(t);
       return a;
     };
-    if (!isMe) accs.append(pill("discord", "Discord", "Message", "https://discord.com/users/" + id));
+    if (!isMe) accs.append(pill("discord", "Discord", "Open profile", "https://discord.com/users/" + id));
     accs.append(p && p.roblox_name ? pill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url)) : pill("roblox", "Roblox", "Not linked", null));
     body.append(accs);
 
@@ -1404,6 +1437,12 @@
     }
 
     const acts = el("div", "upop-acts");
+    if (!isMe && p && BB.user(BB.session).id) {
+      const m = el("a", "brick green sm", "Message");
+      m.href = "messages.html?to=" + encodeURIComponent(id);
+      m.onclick = () => close(true);
+      acts.append(m);
+    }
     if (isMe) {
       const e = el("a", "brick blue sm", "Edit profile"); e.href = "profile.html#edit";
       acts.append(e);

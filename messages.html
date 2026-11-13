@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloombot Messages</title>
+<meta name="description" content="Private messages between Bloombot traders.">
+<meta property="og:title" content="Bloombot Messages">
+<meta property="og:description" content="Private messages between Bloombot traders.">
+<meta property="og:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
+<meta property="og:url" content="https://bloombot-gtd.vercel.app/messages.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bloombot">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://bloombot-gtd.vercel.app/messages.html">
+<meta name="robots" content="noindex, follow">
+<meta name="keywords" content="Garden Tower Defense, GTD, Roblox, Discord bot, GTD Discord, Garden Tower Defense Discord, GTD values, Garden Tower Defense values, GTD trading, GTD trade ads, value list, Bloombot">
+<meta name="google-site-verification" content="wgEfTTw4ymFeGxytFVhbK6OwL639P6QfcPRBa0BeqMo">
+<meta name="theme-color" content="#13151b">
+<meta name="color-scheme" content="dark">
+<meta name="darkreader-lock">
+<link rel="icon" href="img/favicon.png">
+<link rel="stylesheet" href="style.css?v=93d75040">
+<script src="js/theme.js?v=9fa9b3c2"></script>
+<script defer src="js/supabase.js?v=2.45.4"></script>
+<script defer src="js/app.js?v=7f4bcebf"></script>
+<script defer src="js/site.js?v=185021a6"></script>
+<script defer src="js/giveaway.js?v=2bd59658"></script>
+<script defer src="js/consent.js?v=650a8387"></script>
+<script defer src="js/track.js?v=0580d865"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+<header class="topbar">
+<div class="wrap bar">
+<a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a></nav>
+<div class="right">
+<button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
+<button class="theme-btn" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
+<a class="brick nb discord add" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt=""><span>Add<span class="wide"> to Discord</span></span></a>
+<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login><img class="dc" src="img/login.png" alt=""><span>Log in</span></button></div>
+<button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div>
+</div>
+</header>
+<main class="wrap dmw" id="main">
+<section class="panel login" id="dlogin" hidden>
+<img class="login-icon" src="img/envelope.png" alt="">
+<h2>Log in to see your messages</h2>
+<p>Message other traders right here on Bloombot.</p>
+<button class="brick green" type="button" data-login>Log in</button>
+</section>
+<div class="dm" id="dm" hidden>
+<aside class="dm-side" aria-label="Conversations">
+<div class="dm-sh"><h1><img src="img/envelope.png" alt="">Messages</h1><button class="dm-ib" type="button" id="dset" aria-label="Message settings" title="Settings"><img src="img/gear.png" alt=""></button></div>
+<div class="dm-search"><input id="dq" type="search" placeholder="Search chats" aria-label="Search chats" maxlength="40" autocomplete="off"></div>
+<div class="dm-list" id="dlist" role="list"></div>
+<div class="dm-none" id="dnone" hidden><img src="img/envelope.png" alt=""><strong>No messages yet</strong><span>Open a trader's profile and press Message.</span></div>
+</aside>
+<section class="dm-main" id="dmain" aria-live="off">
+<div class="dm-empty" id="dempty"><img src="img/envelope.png" alt=""><h2>Your messages</h2><p>Pick a chat, or press <b>Message</b> on any trader's profile or trade ad.</p><a class="brick purple sm" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a></div>
+<div class="dm-chat" id="dchat" hidden>
+<header class="dm-head">
+<button class="dm-ib dm-back" type="button" id="dback" aria-label="Back to chats"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></svg></button>
+<a class="dm-who" id="dwho" href="#"><img class="dm-hav" id="dhav" alt=""><span class="dm-hn"><strong id="dname"></strong><span id="dsub"></span></span></a>
+<button class="dm-ib" type="button" id="dmore" aria-label="Chat options" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg></button>
+</header>
+<div class="dm-body">
+<div class="dm-msgs" id="dmsgs" role="log" aria-label="Messages" tabindex="0"></div>
+<button class="dm-jump" type="button" id="djump" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg><span id="djumpn"></span></button>
+</div>
+<p class="dm-note" id="dnote" hidden></p>
+<form class="dm-comp" id="dform" autocomplete="off">
+<div class="dm-att" id="datt" hidden><img id="dattimg" alt="Picture to send"><button type="button" class="dm-attx" id="dattx" aria-label="Remove picture">&times;</button><span class="dm-attp" id="dattp"></span></div>
+<p class="dm-warn" id="dwarn" hidden role="status">Only Bloombot links can be sent.</p>
+<div class="dm-row">
+<label class="dm-ib dm-clip" id="dclip" title="Add a picture"><input type="file" id="dfile" accept="image/png,image/jpeg,image/webp,image/gif" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 16.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7.5M4 16.5 8.5 12l3.5 3.5 2.5-2.5L20 18.5M4 16.5V20h3.5"/><circle cx="15.5" cy="8.5" r="1.6" fill="currentColor"/></svg><span class="sr">Add a picture</span></label>
+<textarea id="dtext" rows="1" maxlength="2000" placeholder="Message" aria-label="Message"></textarea>
+<button class="dm-ib dm-emo" type="button" id="demo" aria-label="Emojis" aria-haspopup="dialog" aria-expanded="false" title="Emojis"><img src="img/e/bloombot.webp" alt=""></button>
+<button class="dm-send" type="submit" id="dsend" aria-label="Send" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button>
+</div>
+<div class="dm-foot"><span>Enter to send · Shift+Enter for a new line</span><span class="count" id="dcount" hidden></span></div>
+</form>
+</div>
+</section>
+</div>
+</main>
+<script defer src="js/messages.js?v=81d731c2"></script>
+<footer>
+<div class="wrap foot">
+<div class="foot-top">
+<div class="foot-brand">
+<a class="foot-mark" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<p>The trading bot for Roblox Garden Tower Defense. Trade ads, live values, calculators and strategies, free in every server.</p>
+<div class="foot-cta"><a class="brick discord sm" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt="">Add to Discord</a><a class="brick dark sm" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt="">Support</a></div>
+</div>
+<nav class="foot-cols" aria-label="Footer">
+<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="farm.html">Farm calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
+<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands">Add to Discord</a><a href="https://discord.gg/tGuXfcJxwf">Support server</a></div>
+<div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
+</nav>
+</div>
+<div class="foot-bottom">
+<p>Unit values come from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>. Thanks to its team!</p>
+<p>&copy; 2026 Bloombot. A fan-made bot, not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
+</div>
+</div>
+</footer>
+<a class="totop brick dark" href="#" aria-label="Back to top"><img src="img/up.png" alt=""></a>
+</body>
+</html>

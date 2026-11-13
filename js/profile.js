@@ -99,7 +99,7 @@
       return a;
     };
     const did = p ? p.discord_id : want;
-    if (did && !isMe) acc.append(pill("discord", "Discord", "Message", "https://discord.com/users/" + did));
+    if (did && !isMe) acc.append(pill("discord", "Discord", "Open profile", "https://discord.com/users/" + did));
     acc.append(p && p.roblox_name ? pill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url)) : pill("roblox", "Roblox", "Not linked", null));
     if (isMe) {
       const has = priv && priv.server_link;
@@ -112,6 +112,11 @@
       e.type = "button";
       e.onclick = () => openEdit();
       acts.append(e);
+    }
+    if (did && !isMe && p) {
+      const m = el("a", "brick green sm", "Message");
+      m.href = "messages.html?to=" + encodeURIComponent(did);
+      acts.append(m);
     }
     const share = el("button", "brick dark sm", "Copy link");
     share.type = "button";

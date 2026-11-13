@@ -14,7 +14,7 @@ const OUT = path.join(ROOT, "dist");
 // Never shipped to visitors.
 const SKIP = new Set([
   ".git", ".github", ".gitignore", ".vercel", ".vercelignore", ".nojekyll", "node_modules",
-  "dist", "scripts", "src", "build.py", "package.json", "package-lock.json", "vercel.json",
+  "dist", "scripts", "src", "sql", "build.py", "package.json", "package-lock.json", "vercel.json",
 ]);
 // Already-minified third-party bundles: copied as they are.
 const VENDOR = new Set(["js/supabase.js", "js/591.supabase.js"]);

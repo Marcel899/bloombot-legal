@@ -865,6 +865,58 @@ profile_body = f"""<main class="wrap prof" id="main">
 """
 open("profile.html", "w").write(page("Bloombot Profile", "A Bloombot trader's profile: Roblox account, live trade ads and strategies.", profile_body, "", "profile.html", index=False))
 
+# ── Messages ─────────────────────────────────────────────────────────────
+JSVER["messages"] = hashlib.md5(open("js/messages.js", "rb").read()).hexdigest()[:8]
+SEND_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg>'
+CLIP_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M4 16.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7.5M4 16.5 8.5 12l3.5 3.5 2.5-2.5L20 18.5M4 16.5V20h3.5"/><circle cx="15.5" cy="8.5" r="1.6" fill="currentColor"/></svg>'
+BACK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></svg>'
+DOTS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>'
+messages_body = f"""<main class="wrap dmw" id="main">
+<section class="panel login" id="dlogin" hidden>
+<img class="login-icon" src="img/envelope.png" alt="">
+<h2>Log in to see your messages</h2>
+<p>Message other traders right here on Bloombot.</p>
+<button class="brick green" type="button" data-login>Log in</button>
+</section>
+<div class="dm" id="dm" hidden>
+<aside class="dm-side" aria-label="Conversations">
+<div class="dm-sh"><h1><img src="img/envelope.png" alt="">Messages</h1><button class="dm-ib" type="button" id="dset" aria-label="Message settings" title="Settings"><img src="img/gear.png" alt=""></button></div>
+<div class="dm-search"><input id="dq" type="search" placeholder="Search chats" aria-label="Search chats" maxlength="40" autocomplete="off"></div>
+<div class="dm-list" id="dlist" role="list"></div>
+<div class="dm-none" id="dnone" hidden><img src="img/envelope.png" alt=""><strong>No messages yet</strong><span>Open a trader's profile and press Message.</span></div>
+</aside>
+<section class="dm-main" id="dmain" aria-live="off">
+<div class="dm-empty" id="dempty"><img src="img/envelope.png" alt=""><h2>Your messages</h2><p>Pick a chat, or press <b>Message</b> on any trader's profile or trade ad.</p><a class="brick purple sm" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a></div>
+<div class="dm-chat" id="dchat" hidden>
+<header class="dm-head">
+<button class="dm-ib dm-back" type="button" id="dback" aria-label="Back to chats">{BACK_SVG}</button>
+<a class="dm-who" id="dwho" href="#"><img class="dm-hav" id="dhav" alt=""><span class="dm-hn"><strong id="dname"></strong><span id="dsub"></span></span></a>
+<button class="dm-ib" type="button" id="dmore" aria-label="Chat options" aria-haspopup="menu" aria-expanded="false">{DOTS_SVG}</button>
+</header>
+<div class="dm-body">
+<div class="dm-msgs" id="dmsgs" role="log" aria-label="Messages" tabindex="0"></div>
+<button class="dm-jump" type="button" id="djump" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg><span id="djumpn"></span></button>
+</div>
+<p class="dm-note" id="dnote" hidden></p>
+<form class="dm-comp" id="dform" autocomplete="off">
+<div class="dm-att" id="datt" hidden><img id="dattimg" alt="Picture to send"><button type="button" class="dm-attx" id="dattx" aria-label="Remove picture">&times;</button><span class="dm-attp" id="dattp"></span></div>
+<p class="dm-warn" id="dwarn" hidden role="status">Only Bloombot links can be sent.</p>
+<div class="dm-row">
+<label class="dm-ib dm-clip" id="dclip" title="Add a picture"><input type="file" id="dfile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>{CLIP_SVG}<span class="sr">Add a picture</span></label>
+<textarea id="dtext" rows="1" maxlength="2000" placeholder="Message" aria-label="Message"></textarea>
+<button class="dm-ib dm-emo" type="button" id="demo" aria-label="Emojis" aria-haspopup="dialog" aria-expanded="false" title="Emojis"><img src="img/e/bloombot.webp" alt=""></button>
+<button class="dm-send" type="submit" id="dsend" aria-label="Send" disabled>{SEND_SVG}</button>
+</div>
+<div class="dm-foot"><span>Enter to send · Shift+Enter for a new line</span><span class="count" id="dcount" hidden></span></div>
+</form>
+</div>
+</section>
+</div>
+</main>
+<script defer src="js/messages.js?v={JSVER['messages']}"></script>
+"""
+open("messages.html", "w").write(page("Bloombot Messages", "Private messages between Bloombot traders.", messages_body, "", "messages.html", index=False))
+
 # ── Server dashboard ─────────────────────────────────────────────────────
 JSVER["dashboard"] = hashlib.md5(open("js/dashboard.js", "rb").read()).hexdigest()[:8]
 dash_body = hero("gear", "Server dashboard", "Change Bloombot's settings for your server without typing a command. For server owners and administrators.", "t_dash") + f"""<main class="wrap dash" id="main">
