@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>https://bloombot-gtd.vercel.app/</loc><lastmod>2026-11-13</lastmod><priority>1.0</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/features.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
-<url><loc>https://bloombot-gtd.vercel.app/trades.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+<url><loc>https://bloombot-gtd.vercel.app/trades.html</loc><lastmod>2026-11-16</lastmod><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/values.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/calculator.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
 <url><loc>https://bloombot-gtd.vercel.app/crates.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>

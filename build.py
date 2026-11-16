@@ -476,7 +476,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 <textarea id="adtext" rows="2" maxlength="220" placeholder="e.g. tesla + 2x peashooter for beehive" aria-label="Your trade ad" hidden></textarea>
 </div>
 <div class="cz-foot">
-<p class="cz-rules">7 to 200 characters · no links · 1 ad per 5 min · needs <code>/link</code></p>
+<p class="cz-rules">7 to 200 characters · no links · no selling for Robux or money · 1 ad per 5 min · needs <code>/link</code></p>
 <div class="post-actions"><button class="brick dark sm" id="adclear" type="button">Clear</button><button class="brick green" id="postbtn" type="submit"><img src="img/plus.png" alt="">Post trade ad</button></div>
 </div>
 <p class="post-status" id="poststatus" hidden></p>

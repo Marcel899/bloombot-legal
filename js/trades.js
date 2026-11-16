@@ -349,6 +349,10 @@
     counter();
   }
 
+  // Same no-money rule as the bot (bot/trade_ads.py find_money_trade), which checks again.
+  const MONEY = /(?<![a-z0-9])(?:r[o0]bux|robuxs|robucks|rbx|r\$|bobux|usd|eur|gbp|cad|aud|dollars?|euros?|bucks|quid|cents?|money(?![\s_-]*trees?)|cash|irl[\s_-]*money|real[\s_-]*money|pay[\s_-]*pal|cash[\s_-]*app|venmo|zelle|revolut|stripe|gift[\s_-]*cards?|giftcards?|g[\s_-]*cards?|amazon[\s_-]*cards?|steam[\s_-]*cards?|nitro|crypto|bitcoin|btc|eth|ethereum|ltc|litecoin|usdt|sol)(?![a-z0-9])/i;
+  const PRICE = /[$€£]\s*\d|\d\s*[$€£]/;
+
   let busy = false;
   async function post(e) {
     if (e) e.preventDefault();
@@ -356,6 +360,10 @@
     if (busy) return;
     if (content.length < MIN || content.length > MAX) {
       status("bad", content.length < MIN ? "Your ad is too short. Add a unit or write a bit more." : "Your ad is too long (200 characters max).");
+      return;
+    }
+    if (MONEY.test(content) || PRICE.test(content)) {
+      status("bad", "Trade ads can't sell or buy units for Robux, real money, gift cards, Nitro or crypto. Only trade units for other units.");
       return;
     }
     if (!BB.sb || !BB.session) { status("bad", "You're logged out. Log in again and retry."); return; }

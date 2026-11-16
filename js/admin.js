@@ -651,7 +651,11 @@
             `<p class="muted"><small>${full(u.ads)} trade ads in total (Discord + website).</small></p>`;
           const ps = $$(".ann p", body);
           [...live, ...subs].forEach((a, i) => { if (ps[i]) ps[i].textContent = a.content; });
-          $$("[data-rm]", body).forEach((b) => b.addEventListener("click", () => doAction("remove_ad", b.dataset.rm, "#" + b.dataset.rm)));
+          $$("[data-rm]", body).forEach((b) => b.addEventListener("click", () => doAction("remove_ad", b.dataset.rm, "#" + b.dataset.rm, () => {
+            const item = b.closest(".ann");
+            if (item) item.hidden = true;
+            S.trade = null;
+          })));
         } else if (tab === "mod") {
           const items = [
             ...mod.map((m) => ({ c: /BLOCK|BAN/.test(m[1]) && !/UN/.test(m[1]) ? "b" : m[1] === "WARN" ? "w" : "", t: m[1].replace(/_/g, " ").toLowerCase(), s: (m[4] || "") + " · by " + nameOf(m[3]) + " · " + fdate(toDate(m[5])), at: toDate(m[5]) })),
@@ -705,7 +709,12 @@
           ],
           after: (host, sl) => {
             $$(".adtxt", host).forEach((s, i) => { s.textContent = sl[i].content; });
-            $$("[data-x]", host).forEach((b) => b.addEventListener("click", () => doAction("remove_ad", b.dataset.x, "#" + b.dataset.x, () => { S.trade = null; })));
+            $$("[data-x]", host).forEach((b) => b.addEventListener("click", () => doAction("remove_ad", b.dataset.x, "#" + b.dataset.x, () => {
+              // Take it out of the list straight away so the next ad can be removed.
+              const i = live.findIndex((a) => String(a.id) === b.dataset.x);
+              if (i >= 0) live.splice(i, 1);
+              if (location.hash === "#ads") draw();
+            })));
             $$("[data-u]", host).forEach((b) => b.addEventListener("click", () => openUser(S.byId.get(b.dataset.u) || { id: b.dataset.u, name: b.textContent, cmds: 0, ads: 0, warns: 0 })));
           },
         });
