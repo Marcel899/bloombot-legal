@@ -1121,9 +1121,9 @@ open("alerts.html", "w").write(page("Price alerts · Bloombot", "Get a Discord D
 # ── Advent calendar (design only: no doors open yet, nothing to claim) ───
 def _advent():
     order = [7, 15, 2, 20, 11, 4, 18, 9, 24, 1, 13, 22, 6, 16, 3, 10, 19, 5, 12, 23, 8, 14, 21, 17]
-    looks = [("red", "ribbon"), ("green", "cane"), ("gold", "dots"), ("snow", "ribbon"), ("ice", "studs"),
+    looks = [("red", "ribbon"), ("green", "cane"), ("gold", "stars"), ("snow", "ribbon"), ("ice", "flakes"),
              ("green", "ribbon"), ("red", "dots"), ("snow", "cane"), ("gold", "studs"), ("ice", "ribbon"),
-             ("red", "cane"), ("green", "dots")]
+             ("red", "flakes"), ("green", "stars")]
     peeks = ["units/christmas_tree", "gift", "units/snowballer", "candy", "units/rolling_wreath", "cookie",
              "units/snowblossom", "bell", "units/subzero_stem", "wish_star", "units/frozen_vinejaw", "units/snowspore"]
     cells = []
