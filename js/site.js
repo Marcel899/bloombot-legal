@@ -131,7 +131,7 @@
     ["Home", "./", "flower"], ["Values", "values.html", "dollar"], ["Trade calculator", "calculator.html", "calculator"], ["Crate calculator", "crates.html", "crate"],
     ["Trade ads", "trades.html", "trading"], ["Post a trade ad", "trades.html#post", "plus"], ["Strategies", "strategies.html", "bullseye"],
     ["Share a strategy", "strategies.html#share", "bullseye"], ["Features and commands", "features.html", "gem"],
-    ["My watchlist", "values.html#watchlist", "wish_star"], ["My collection", "collection.html", "gem"], ["My profile", "profile.html", "medal_gold"], ["Profile settings", "profile.html#edit", "gear"], ["Server dashboard", "dashboard.html", "shield"], ["Levels and perks", "levels.html", "medal_gold"], ["Add Bloombot to Discord", invite, "envelope"],
+    ["My watchlist", "values.html#watchlist", "wish_star"], ["My collection", "collection.html", "gem"], ["Price alerts", "alerts.html", "bell"], ["My profile", "profile.html", "medal_gold"], ["Profile settings", "profile.html#edit", "gear"], ["Server dashboard", "dashboard.html", "shield"], ["Levels and perks", "levels.html", "medal_gold"], ["Add Bloombot to Discord", invite, "envelope"],
     ["Privacy Policy", "privacy.html", "shield"], ["Terms of Service", "terms.html", "scale"],
   ];
   let box, input, list, tabs, count, clear, opts = [], idx = 0, data = null, tab = "all";

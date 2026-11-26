@@ -4307,3 +4307,59 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 [data-theme=light] .pcol{background:#fff;border-color:var(--line)}
 [data-theme=light] .pcol-i,[data-theme=light] .pcol-more{background:#f6f2e6}
 [data-theme=light] .pcol-go{color:#2c7a1e}
+
+/* ── price alerts ── */
+.al-btn img{width:18px;height:18px;margin-right:5px;vertical-align:-3px}
+.al-dlg{max-width:460px;gap:12px;padding:20px 22px}
+.al-head{display:flex;align-items:center;gap:12px}
+.al-head>div{flex:1;min-width:0}
+.al-head h2{margin:0;text-align:left;font-size:1.2rem}
+.al-head p{margin:2px 0 0;color:var(--muted);font-weight:700;font-size:.9rem}
+.al-img{width:48px;height:48px;flex:none;object-fit:contain;border-radius:12px;background:var(--card-2);padding:4px;box-sizing:border-box}
+.al-label{color:var(--muted);font-size:.74rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.al-kinds,.al-via{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.al-via>span{color:var(--muted);font-size:.84rem;font-weight:800;margin-right:4px}
+.al-kind{padding:7px 14px;border:2px solid transparent;border-radius:999px;background:var(--card-2);color:var(--soft);font:800 .9rem "Nunito",sans-serif;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.al-kind:hover:not(:disabled){background:#2e3442;color:var(--text)}
+.al-kind[aria-checked=true]{border-color:#14aeea;background:rgba(20,174,234,.14);color:var(--text)}
+.al-kind:disabled{opacity:.45;cursor:not-allowed}
+.wm .al-row{flex-direction:row;align-items:center;gap:10px}
+.al-row[hidden]{display:none!important}
+.al-row>span{color:var(--muted);font-size:.84rem}
+.al-price{flex:1;height:46px;padding:0 14px;border-radius:12px;border:2px solid rgba(255,255,255,.1);background:var(--card-2);color:var(--text);font:900 1.2rem "Nunito",sans-serif;outline:none}
+.al-price:focus{border-color:#14aeea;box-shadow:0 0 0 4px rgba(20,174,234,.18)}
+.al-hint{margin:-4px 0 0;color:var(--muted);font-size:.82rem;font-weight:700}
+.al-have{display:flex;flex-direction:column;gap:6px}
+.al-have:empty{display:none}
+.al-have-h{color:var(--muted);font-size:.74rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.al-have-r{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border-radius:10px;background:var(--card-2);font-size:.86rem;font-weight:700}
+.al-del{padding:3px 8px;border:0;border-radius:7px;background:none;color:#ff8a8d;font:800 .8rem "Nunito",sans-serif;cursor:pointer}
+.al-del:hover{background:rgba(239,75,79,.14)}
+.al-ico{background:rgba(245,197,66,.16)}
+.al-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--card-2);border:2px solid transparent}
+.al-item:hover{border-color:rgba(255,255,255,.08)}
+.al-cond{flex:none;padding:3px 10px;border-radius:999px;font-size:.84rem;font-weight:900;background:rgba(255,255,255,.07)}
+.al-cond.above{color:#5be08b;background:rgba(51,196,106,.14)}
+.al-cond.below{color:#ff8a8d;background:rgba(239,75,79,.14)}
+.al-cond.change{color:#7cc4ff;background:rgba(20,174,234,.14)}
+.al-viac{flex:none;color:var(--muted);font-size:.8rem;font-weight:800;min-width:76px;text-align:right}
+@media (max-width:600px){
+  .al-item{flex-wrap:wrap}
+  .al-item .col-unit{flex:1 1 calc(100% - 40px)}
+  .al-viac{min-width:0;flex:1;text-align:left}
+}
+[data-theme=light] .al-kind{background:#f6f2e6}
+[data-theme=light] .al-kind:hover:not(:disabled){background:#efe8d6}
+[data-theme=light] .al-kind[aria-checked=true]{background:#e3f4fc}
+[data-theme=light] .al-price{background:#fff;border-color:var(--line)}
+[data-theme=light] .al-price:focus{border-color:#3aa52c;box-shadow:0 0 0 4px rgba(58,165,44,.16)}
+[data-theme=light] .al-have-r,[data-theme=light] .al-img{background:#f6f2e6}
+[data-theme=light] .al-item{background:#fff;border-color:var(--line)}
+[data-theme=light] .al-cond.above{color:#24731a;background:#e3f4da}
+[data-theme=light] .al-cond.below{color:#b42323;background:#fde4e4}
+[data-theme=light] .al-cond.change{color:#0f6f99;background:#e0f2fb}
+.col-head .col-add{flex:none}
+.al-row>span{flex:none}
+.wm .al-price{width:100%;min-width:0;max-width:none}
+.al-dlg .al-head h2{display:block;margin:0;padding:0;text-align:left!important;font-size:1.2rem;background:none;border:0;box-shadow:none}
+.al-dlg .al-head h2::before,.al-dlg .al-head h2::after{content:none}

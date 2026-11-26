@@ -497,9 +497,10 @@
     loadLimit();
     try { goLive(); } catch (e) { /* live updates are optional */ }
     clearInterval(timer);
-    /* Without live updates, reload every minute; with them, only every 5 minutes as a safety net. */
+    /* Without live updates, reload every minute; with them, every 2 minutes as a safety net
+       (Realtime reports "connected" even before sql/live-trade-ads.sql has been run). */
     let ticks = 0;
-    timer = setInterval(() => { if (!liveOn || ++ticks % 5 === 0) load(); }, 60000);
+    timer = setInterval(() => { if (!liveOn || ++ticks % 2 === 0) load(); }, 60000);
   }
 
   const reset = () => { shown = PAGE; render(); };

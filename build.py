@@ -443,7 +443,7 @@ features_body = hero("gem", "Features", "Everything Bloombot can do, and every c
 open("features.html", "w").write(page("Bloombot Features and Commands · Garden Tower Defense Discord Bot", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
-JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home", "profile")}
+JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home", "profile", "alerts")}
 trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from every server. Post your own right here.", "t_trades") + f"""<main class="wrap trades" id="main">
 <section class="panel login" id="login" hidden>
 <img class="login-icon" src="img/trading.png" alt="">
@@ -517,6 +517,7 @@ values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and game
 {guide('values')}</main>
 <div class="modal" id="vmodal" hidden><div class="modal-box panel" role="dialog" aria-modal="true"><button class="modal-x" id="vmclose" type="button" aria-label="Close">×</button><div id="vmbody"></div></div></div>
 <script defer src="js/values.js?v={JSVER['values']}"></script>
+<script defer src="js/alerts.js?v={JSVER['alerts']}"></script>
 """
 open("values.html", "w").write(page("Bloombot Values · Garden Tower Defense", "GTD value list: live Garden Tower Defense unit and gamepass values with demand, status and 30-day trends.", values_body, "v", "values.html", ld=faq_ld("values")))
 
@@ -1054,6 +1055,7 @@ unit_body = f"""<main class="wrap unitp" id="main">
 <p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
 </main>
 <script defer src="js/unit.js?v={JSVER['unit']}"></script>
+<script defer src="js/alerts.js?v={JSVER['alerts']}"></script>
 """
 open("unit.html", "w").write(page("Unit value · Garden Tower Defense · Bloombot", "Garden Tower Defense unit value, demand and 30-day trend on Bloombot.", unit_body, "v", "unit.html", index=False)
                               .replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="/">\n', 1))
@@ -1094,6 +1096,27 @@ collection_body = f"""<main class="wrap colp" id="main">
 <script defer src="js/collection.js?v={JSVER['collection']}"></script>
 """
 open("collection.html", "w").write(page("My collection · Bloombot", "Track the Garden Tower Defense units you own and what they're worth together.", collection_body, "", "collection.html", index=False))
+
+# ── Price alerts ─────────────────────────────────────────────────────────
+alerts_body = f"""<main class="wrap colp" id="main">
+<section class="panel login" id="alogin" hidden>
+<img class="login-icon" src="img/bell.png" alt="">
+<h2>Log in to set price alerts</h2>
+<p>Get a Discord DM or an email when a unit's value goes above or below a price you pick.</p>
+<button class="brick green" type="button" data-login>Log in</button>
+</section>
+<div class="col-wrap" id="amain" hidden>
+<section class="panel col-head">
+<div class="col-ht"><span class="col-ico al-ico"><img src="img/bell.png" alt=""></span><div><h1>Price alerts</h1><p class="hint">Bloombot tells you by Discord DM or email when a value crosses your price.</p></div><span class="count-pill" id="acount"></span></div>
+<div class="picker col-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="aq" type="search" placeholder="Add an alert for a unit…" aria-label="Add an alert for a unit" autocomplete="off"><div class="sugs" id="asug" hidden></div></div>
+</section>
+<section class="panel col-body"><div class="col-list" id="alist"><p class="hint">Loading…</p></div></section>
+<p class="note">Values come from the community value list, which updates about every 2 days, so alerts arrive when it does.</p>
+</div>
+</main>
+<script defer src="js/alerts.js?v={JSVER['alerts']}"></script>
+"""
+open("alerts.html", "w").write(page("Price alerts · Bloombot", "Get a Discord DM or email when a Garden Tower Defense unit's value crosses your price.", alerts_body, "", "alerts.html", index=False))
 
 def _sitemap():
     import datetime, glob, subprocess

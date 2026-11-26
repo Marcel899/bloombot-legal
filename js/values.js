@@ -151,7 +151,9 @@
     const full = el("a", "brick blue sm", "Full page");
     full.href = BB.unitUrl(it.name);
     full.title = "Price history, live trade ads and similar units";
-    acts.append(full, add, star, share);
+    acts.append(full, add, star);
+    if (BB.alertButton) acts.append(BB.alertButton(it));
+    acts.append(share);
     body.append(head, stats, ch, changes, acts);
     m.hidden = false;
     document.body.classList.add("noscroll");
