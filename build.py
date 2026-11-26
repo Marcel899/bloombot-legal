@@ -1118,6 +1118,50 @@ alerts_body = f"""<main class="wrap colp" id="main">
 """
 open("alerts.html", "w").write(page("Price alerts · Bloombot", "Get a Discord DM or email when a Garden Tower Defense unit's value crosses your price.", alerts_body, "", "alerts.html", index=False))
 
+# ── Advent calendar (design only: no doors open yet, nothing to claim) ───
+def _advent():
+    order = [7, 15, 2, 20, 11, 4, 18, 9, 24, 1, 13, 22, 6, 16, 3, 10, 19, 5, 12, 23, 8, 14, 21, 17]
+    looks = [("red", "ribbon"), ("green", "cane"), ("gold", "dots"), ("snow", "ribbon"), ("ice", "studs"),
+             ("green", "ribbon"), ("red", "dots"), ("snow", "cane"), ("gold", "studs"), ("ice", "ribbon"),
+             ("red", "cane"), ("green", "dots")]
+    peeks = ["units/christmas_tree", "gift", "units/snowballer", "candy", "units/rolling_wreath", "cookie",
+             "units/snowblossom", "bell", "units/subzero_stem", "wish_star", "units/frozen_vinejaw", "units/snowspore"]
+    cells = []
+    for i, d in enumerate(order):
+        if d == 24:
+            cells.append('<li class="xm-cell big" aria-label="December 24"><span class="xm-in"><img src="img/units/christmas_tree.webp" alt=""></span>'
+                         '<span class="xm-door c-gold p-ribbon snowy"><img class="xm-star" src="img/wish_star.png" alt=""><span class="xm-tag">24</span><em>Christmas Eve</em></span></li>')
+            continue
+        col, pat = looks[(d * 5) % len(looks)]
+        peek = peeks[d % len(peeks)]
+        ext = "webp" if peek.startswith("units/") else "png"
+        wide = " w" + (" w2" if d in (13, 19) else "") if d in (6, 13, 19) else ""   # w2: normal width on tablets, so 4 columns fill evenly
+        snowy = " snowy" if d % 3 == 0 else ""
+        cells.append(f'<li class="xm-cell{wide}" aria-label="December {d}"><span class="xm-in"><img src="img/{peek}.{ext}" alt=""></span>'
+                     f'<span class="xm-door c-{col} p-{pat}{snowy}"><span class="xm-tag">{d}</span></span></li>')
+    lights = "".join("<i></i>" for _ in range(32))
+    flakes = "".join("<i></i>" for _ in range(36))
+    return f"""<section class="xm-hero">
+<div class="xm-lights" aria-hidden="true">{lights}</div>
+<div class="xm-snow" aria-hidden="true">{flakes}</div>
+<div class="wrap xm-hero-in">
+<img class="xm-hero-gift" src="img/gift.png" alt="">
+<h1 class="xm-title"><span>Advent</span> <span>Calendar</span></h1>
+<p class="sub">24 doors of Garden Tower Defense surprises. A new one opens every day until Christmas.</p>
+<div class="xm-chips"><span><img src="img/bell.png" alt="">1 – 24 December</span><span><img src="img/gift.png" alt="">One door a day</span></div>
+</div>
+</section>
+<main class="wrap xm" id="main">
+<section class="xm-board" aria-label="Advent calendar">
+<div class="xm-banner"><span>Bloombot Advent 2026</span></div>
+<ol class="xm-grid">{"".join(cells)}</ol>
+<div class="xm-gifts" aria-hidden="true"><img src="img/cur/presents-2.webp" alt=""><img src="img/units/christmas_tree.webp" alt=""><img src="img/cur/candy-2.webp" alt=""><img src="img/units/rolling_wreath.webp" alt=""><img src="img/cur/presents-2.webp" alt=""></div>
+</section>
+<p class="xm-foot"><img src="img/wish_star.png" alt="">Doors open from 1 December. Come back every day.</p>
+</main>
+"""
+open("advent.html", "w").write(page("Advent calendar · Bloombot", "The Bloombot advent calendar: 24 doors of Garden Tower Defense surprises in December.", _advent(), "", "advent.html", index=False))
+
 def _sitemap():
     import datetime, glob, subprocess
     today = datetime.date.today().isoformat()
