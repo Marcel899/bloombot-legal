@@ -3768,6 +3768,11 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 .dm-note-i{width:20px;height:20px}
 .dm-warn{margin:0 0 8px;padding:7px 12px;border-radius:10px;background:rgba(239,75,79,.12);color:#ff8a8d;font-size:.82rem;font-weight:800}
 .dm-warn[hidden]{display:none}
+.dm-warn.bad{background:rgba(239,75,79,.2);color:#ffb3b5;border:1px solid rgba(239,75,79,.45)}
+.dm-scam{display:flex;align-items:flex-start;gap:7px;margin:8px -2px 0;padding:7px 2px 0;border-top:1px dashed rgba(245,200,60,.35);color:#ffd96a;font-size:.76rem;font-weight:800;line-height:1.35}
+.dm-scam-i{width:16px;height:16px;flex:none;margin-top:1px}
+[data-theme=light] .dm-scam{color:#7a5500;border-top-color:#e8c766}
+[data-theme=light] .dm-warn.bad{background:#fde8e8;color:#9b1c20;border-color:#f3b4b6}
 .dm-comp{position:relative}
 .dm-emo img{width:24px;height:24px;filter:grayscale(.6);opacity:.8;transition:filter .15s,opacity .15s,transform .15s}
 .dm-emo:hover img,.dm-emo[aria-expanded=true] img{filter:none;opacity:1;transform:scale(1.12) rotate(-8deg)}
@@ -3880,3 +3885,31 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 @keyframes dmBump{0%{transform:scale(.4)}100%{transform:scale(1)}}
 .p-acts .me-badge{margin-left:6px}
 @media (prefers-reduced-motion:reduce){.me-dot.bump{animation:none}}
+
+/* ── "Message on Bloombot" card on profiles ── */
+.pdm{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(180deg,rgba(51,196,106,.12),rgba(51,196,106,.05));border:2px solid rgba(51,196,106,.32);box-shadow:inset 0 2px 0 rgba(255,255,255,.04)}
+.pdm-ic{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:12px;background:rgba(51,196,106,.18);border:2px solid #0c0e12}
+.pdm-ic img{width:28px;height:28px}
+.pdm-t{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.25}
+.pdm-t strong{font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdm-h{color:var(--soft);font-size:.84rem;font-weight:700}
+.pdm-go{flex:none;white-space:nowrap}
+.pdm.off{background:var(--card-2);border-color:var(--border)}
+.pdm.off .pdm-ic{background:rgba(255,255,255,.06)}
+.pdm.off .pdm-ic img{filter:grayscale(1);opacity:.7}
+.pdm.off .pdm-go{filter:grayscale(1);opacity:.55;pointer-events:none;cursor:default}
+.pdm[data-state=you_blocked] .pdm-h,.pdm[data-state=wait_reply] .pdm-h{color:#ffd96a}
+.pdm.sm{padding:10px 12px;gap:10px}
+.pdm.sm .pdm-ic{width:38px;height:38px;border-radius:10px}
+.pdm.sm .pdm-ic img{width:24px;height:24px}
+.pdm.sm .pdm-t strong{font-size:.95rem}
+.pdm.sm .pdm-h{font-size:.8rem}
+@media (max-width:520px){
+  .pdm{flex-wrap:wrap}
+  .pdm-go{flex:1 1 100%;text-align:center;justify-content:center}
+}
+[data-theme=light] .pdm{background:linear-gradient(180deg,#e7f6ec,#f3fbf5);border-color:#b6e0bd}
+[data-theme=light] .pdm-ic{background:#d2efda;border-color:#9fd2ad}
+[data-theme=light] .pdm.off{background:var(--card-2);border-color:var(--line)}
+[data-theme=light] .pdm.off .pdm-ic{background:#ece6d6;border-color:var(--line-2)}
+[data-theme=light] .pdm[data-state=you_blocked] .pdm-h,[data-theme=light] .pdm[data-state=wait_reply] .pdm-h{color:#7a5500}

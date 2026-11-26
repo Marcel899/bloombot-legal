@@ -29,6 +29,7 @@
     "dm:not_found": "That message is gone.",
     "dm:bad_word": RULES_MSG,
     "dm:link": "Only Bloombot links can be sent.",
+    "dm:secret": "That looks like a login cookie or token. Never share it with anyone, not even Bloombot staff.",
   };
   const NOTE = {
     you_blocked: "You blocked this trader.",
@@ -55,8 +56,9 @@
   let msgs = [], oldest = null, newest = 0, noMore = false, loadingOld = false;
   let firstUnread = null, missed = 0;
   let pending = null;           // { blob, ext, url }
-  let busy = false;
+  let busy = false, polling = false;
   const signed = new Map();     // path -> { url, exp }
+  const SIGN_FOR = 900;         // picture links work for 15 minutes, then get re-signed
 
   /* ── emojis ──────────────────────────────────────────────── */
   const BB_EMOJI = ["bloombot", "win", "lose", "fair", "offer", "lf", "nlf", "any", "gem", "candy", "dollar", "cookie",
@@ -122,19 +124,28 @@
     a.append(emojiImg(bbSrc("bloombot"), "bloombot", "dm-chip-i"), el("span", null, label));
     return a;
   }
-  /* Same rule the server uses, so the warning shows before sending. */
-  const TLD = "com|net|org|gg|io|xyz|ru|ly|tk|ml|ga|cf|gq|info|biz|cc|gl|eu|ws|su|vip|tv|uk|de|fr|ca|au|nl|pl|online|shop|store|site|app|dev|link|gift|gifts|click|top|club|live|codes|sh|gd|nu";
+  /* Same rule the server uses (dm_has_link in sql/dm-messages.sql), so the
+     warning shows before sending. Full-width letters and dots count too, and
+     our own links only pass when nothing is glued on either side. */
+  const TLD = "com|net|org|gg|io|xyz|ru|ly|tk|ml|ga|cf|gq|info|biz|cc|gl|eu|ws|su|vip|tv|uk|de|fr|ca|au|nl|pl|online|shop|store|site|app|dev|link|gift|gifts|click|top|club|live|codes|sh|gd|nu|co|me|to|us|ai|pw|lol|fun|win|zip|mov|icu|cam|sbs|cfd|cyou|rip|page|art|best|space|wtf|bio|pro|one|world|today|cloud|host|website|tech|games|fyi|ink|lat|bond|buzz|monster|rest|quest|beauty|hair|skin|mom|boo";
   const LINK_RES = [
-    /[a-z][a-z0-9+.-]*:\/\//, /\bwww\s*\.\s*[a-z0-9]/, new RegExp("[a-z0-9-]\\.(?:" + TLD + ")\\b"),
-    /[a-z0-9-]\s*(?:\(dot\)|\[dot\]|\sdot\s)\s*(?:com|net|org|gg|xyz|ru|io)\b/, /[a-z0-9-]\s+\.\s*(?:com|net|org|gg|xyz|ru)\b/,
+    /[a-z][a-z0-9+.-]*:\/\//, /\bwww\s*\.\s*[a-z0-9]/, new RegExp("[a-z0-9-]\\.(?:" + TLD + ")(?![a-z0-9_])"),
+    /[a-z0-9-]\s*(?:\(dot\)|\[dot\]|\{dot\}|\sdot\s)\s*(?:com|net|org|gg|xyz|ru|io|co|me|app)(?![a-z0-9_])/,
+    /[a-z0-9-]\s+\.\s*(?:com|net|org|gg|xyz|ru|io|co|me|app)(?![a-z0-9_])/,
     /\b(?:discord|dsc)\s*\.\s*gg\b/,
   ];
+  const OWN_SITE = /(^|[^a-z0-9.@-])(?:https?:\/\/)?(?:www\.)?bloombot-gtd\.vercel\.app(?:[/?#]\S*)?(?=[.,!?)]*(?:\s|$))/g;
+  const OWN_INVITE = /(^|[^a-z0-9.@-])(?:https?:\/\/)?(?:www\.)?discord(?:app)?\.(?:gg|com\/invite)\/tguxfcjxwf(?=[.,!?)]*(?:\s|$))/g;
   function hasLink(t) {
-    const s = String(t).toLowerCase()
-      .replace(/(?:https?:\/\/)?(?:www\.)?bloombot-gtd\.vercel\.app(?:\/\S*)?/g, " ")
-      .replace(/(?:https?:\/\/)?(?:www\.)?discord(?:app)?\.(?:gg|com\/invite)\/tguxfcjxwf\b/g, " ");
+    const s = String(t).normalize("NFKC").replace(/[。｡︒․]/g, ".").toLowerCase()
+      .replace(OWN_SITE, "$1 ").replace(OWN_INVITE, "$1 ");
     return LINK_RES.some(r => r.test(s));
   }
+  /* Roblox .ROBLOSECURITY cookies and Discord tokens: never sent (dm_has_secret). */
+  const hasSecret = t => /warning:-?do-?not-?share-?this/i.test(t) || /\.?roblosecurity\s*[=:]/i.test(t)
+    || /[A-Za-z0-9_-]{23,28}\.[A-Za-z0-9_-]{6,7}\.[A-Za-z0-9_-]{27,}/.test(t) || /\b[A-F0-9]{250,}\b/.test(t);
+  /* Things scammers ask for. Their message gets a small warning under it. */
+  const RISKY = /\b(?:pass ?words?|passcode|pw|cookies?|roblosecurity|2fa|login code|verification code|security code|backup codes?|free robux|robux generator|verify (?:your|ur) (?:account|acc)|gift ?cards?|pay ?pal|cash ?app|venmo|crypto|nitro|log ?in (?:to|on) (?:my|your|ur)|screen ?share|you go first|u go first|trust trade)\b/i;
 
   /* ── text with chips and emojis (never innerHTML) ────────── */
   const TOKENS = /((?:https?:\/\/)?(?:www\.)?bloombot-gtd\.vercel\.app(?:\/[^\s<>"']*[^\s<>"'.,:;!?)\]])?|(?:https?:\/\/)?(?:www\.)?discord(?:app)?\.(?:gg|com\/invite)\/tGuXfcJxwf\b|<a?:\w{2,32}:\d{15,22}>|:[a-z0-9_]{2,32}:)/gi;
@@ -193,8 +204,8 @@
     const now = Date.now();
     const need = [...new Set(paths)].filter(p => p && !(signed.has(p) && signed.get(p).exp > now + 60000));
     if (need.length) {
-      const { data, error } = await BB.sb.storage.from(BUCKET).createSignedUrls(need, 3600);
-      if (!error && data) data.forEach(r => { if (r.signedUrl) signed.set(r.path, { url: r.signedUrl, exp: now + 3500000 }); });
+      const { data, error } = await BB.sb.storage.from(BUCKET).createSignedUrls(need, SIGN_FOR);
+      if (!error && data) data.forEach(r => { if (r.signedUrl) signed.set(r.path, { url: r.signedUrl, exp: now + SIGN_FOR * 1000 - 30000 }); });
     }
   }
   const urlFor = p => (signed.get(p) || {}).url || null;
@@ -369,9 +380,22 @@
         i.loading = "lazy";
         i.decoding = "async";
         if (u) i.src = u;
-        i.onerror = () => { fig.classList.add("broken"); i.remove(); fig.append(el("span", null, "Picture unavailable")); };
+        i.onerror = async () => {
+          /* Picture links expire: sign it again once before giving up. */
+          if (m.image_path && !i.dataset.again) {
+            i.dataset.again = "1";
+            signed.delete(m.image_path);
+            await signedUrls([m.image_path]);
+            if (urlFor(m.image_path)) { i.src = urlFor(m.image_path); return; }
+          }
+          fig.classList.add("broken"); i.remove(); fig.append(el("span", null, "Picture unavailable"));
+        };
         fig.append(i);
-        fig.onclick = () => u && lightbox(u);
+        fig.onclick = async () => {
+          if (m.image_path && !m.local_url) await signedUrls([m.image_path]);
+          const v = m.local_url || urlFor(m.image_path);
+          if (v && !fig.classList.contains("broken")) lightbox(v);
+        };
         b.append(fig);
       }
       if (m.body) {
@@ -380,6 +404,7 @@
         if (t.classList.contains("big") && !m.image_path && !m.local_url) row.classList.add("emo");
       }
     }
+    if (!m.from_me && !m.unsent && m.body && RISKY.test(m.body)) b.append(scamNote());
     row.append(b);
     if (!m.unsent && !m.sending && !m.failed && m.id > 0) {
       const more = el("button", "dm-mm");
@@ -397,6 +422,13 @@
       row.append(r);
     }
     return row;
+  }
+  function scamNote() {
+    const n = el("p", "dm-scam");
+    n.setAttribute("role", "note");
+    n.append(emojiImg(bbSrc("warning"), "warning", "dm-scam-i"),
+      document.createTextNode("Careful: never share passwords, cookies or codes, and only trade inside the game."));
+    return n;
   }
   function hello() {
     const w = el("div", "dm-hello");
@@ -466,11 +498,17 @@
   }
 
   async function poll() {
-    if (!cur || document.hidden || busy) return;
+    if (!cur || document.hidden || busy || polling) return;
+    polling = true;
+    try { await pollOnce(); } finally { polling = false; }
+  }
+  async function pollOnce() {
     const id = cur;
     let r;
     try { r = await rpc("dm_poll", { p_other: id, p_after: newest }); } catch (e) { return; }
     if (cur !== id || !r) return;
+    /* dm_poll sends at most 100 at a time, oldest first: fetch the rest right after. */
+    if ((r.msgs || []).length >= 100) setTimeout(poll, 50);
     let changed = false;
     const fresh = (r.msgs || []).filter(m => !msgs.some(x => x.id === m.id));
     if (fresh.length) {
@@ -503,10 +541,13 @@
   function ready() {
     const t = $("dtext").value;
     const n = t.length;
-    const link = !!t.trim() && hasLink(t);
+    const secret = !!t.trim() && hasSecret(t);
+    const link = !secret && !!t.trim() && hasLink(t);
     const w = $("dwarn");
-    w.hidden = !link;
-    $("dsend").disabled = busy || $("dtext").disabled || (!t.trim() && !pending) || n > MAX_LEN || link;
+    w.hidden = !link && !secret;
+    w.classList.toggle("bad", secret);
+    if (!w.hidden) w.textContent = secret ? ERR["dm:secret"] : ERR["dm:link"];
+    $("dsend").disabled = busy || $("dtext").disabled || (!t.trim() && !pending) || n > MAX_LEN || link || secret;
     const c = $("dcount");
     c.hidden = n < MAX_LEN - 300;
     c.textContent = n + "/" + MAX_LEN;
@@ -557,7 +598,7 @@
       }
       const row = await rpc("dm_send", { p_to: id, p_body: temp._body, p_image: path });
       if (row && row.error) throw new Error("dm:" + row.error);
-      if (att) signed.set(row.image_path, { url: att.url, exp: Date.now() + 3500000 });
+      if (att) signed.set(row.image_path, { url: att.url, exp: Infinity });
       const i = msgs.indexOf(temp);
       if (i >= 0) msgs[i] = row;
       newest = Math.max(newest, row.id);
@@ -565,7 +606,10 @@
     } catch (err) {
       if (path) BB.sb.storage.from(BUCKET).remove([path]).catch(() => {});
       const k = codeOf(err);
-      if (k === "dm:bad_word" || k === "dm:link") {
+      if (k === "dm:secret") {
+        msgs = msgs.filter(m => m !== temp);
+        if (att && !pending) restorePending(att);
+      } else if (k === "dm:bad_word" || k === "dm:link") {
         /* Put the text back so it can be fixed, and drop the failed bubble. */
         msgs = msgs.filter(m => m !== temp);
         if (!$("dtext").value) { $("dtext").value = temp._body; grow(); }
@@ -651,6 +695,7 @@
     } catch (e) { BB.toast(e.message, "bad", { title: "Can't add that picture" }); }
   }
   function clearPending() {
+    if (pending && pending.url) URL.revokeObjectURL(pending.url);
     pending = null;
     $("datt").hidden = true;
     $("dfile").value = "";
@@ -666,7 +711,8 @@
     const x = el("button", "upop-x"); x.type = "button"; x.setAttribute("aria-label", "Close");
     x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg>';
     back.append(i, x);
-    const close = () => { back.remove(); document.removeEventListener("keydown", key); };
+    const opener = document.activeElement;
+    const close = () => { back.remove(); document.removeEventListener("keydown", key); if (opener && opener.focus) opener.focus({ preventScroll: true }); };
     const key = e => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", key);
     back.onclick = e => { if (e.target !== i) close(); };
@@ -891,7 +937,7 @@
     const quote = el("div", "dmr-quote");
     const qa = el("img", "dmr-av");
     qa.alt = "";
-    qa.src = (curInfo && curInfo.avatar) || "img/flower.png";
+    qa.src = BB.safeUrl(curInfo && curInfo.avatar) || "img/flower.png";
     qa.onerror = () => { qa.src = "img/flower.png"; };
     const qt = el("div", "dmr-qt");
     qt.append(el("strong", null, who));
@@ -1071,7 +1117,7 @@
     [["warning", "No bad words or slurs", "They're blocked before they send."],
       ["bloombot", "Only Bloombot links", "Other links can't be sent."],
       ["envelope", "Pictures after a reply", "Strangers can't send you pictures."],
-      ["shield", "Never share your password", "Staff will never ask for it."]].forEach(([ic, t, d]) => {
+      ["shield", "Never share your password", "Login cookies and tokens can't be sent. Staff will never ask."]].forEach(([ic, t, d]) => {
       const li = el("li");
       li.append(emojiImg(bbSrc(ic), ic, "dms-ri"));
       const tx = el("span");
@@ -1158,10 +1204,30 @@
     setInterval(() => { if (!document.hidden) loadInbox(); }, 20000);
   }
 
+  /* Logged out, or a different account: forget the last person's chats,
+     picture links and drafts so nothing of theirs stays on the page. */
+  function reset() {
+    if (cur) closeChat();
+    inbox = []; inboxLoaded = false; msgs = []; oldest = null; newest = 0; noMore = false;
+    firstUnread = null; missed = 0; canSend = "ok";
+    signed.clear();
+    reported.clear();
+    closeMenu();
+    document.querySelectorAll(".wm-back").forEach(b => { if (b.querySelector(".dm-set") || b.classList.contains("dm-lb")) b.remove(); });
+    $("dlist").replaceChildren();
+    $("dmsgs").replaceChildren();
+    $("dtext").value = "";
+    $("dq").value = "";
+    setUnread(0);
+    started = false;
+    me = null;
+  }
+
   BB.onAuth(async s => {
     const u = s ? BB.user(s) : null;
     $("dlogin").hidden = !!(u && u.id);
     $("dm").hidden = !(u && u.id);
+    if (started && (!u || u.id !== me)) reset();
     if (!s) return;
     if (!u.id) { BB.requireDiscord(); return; }
     if (started && me === u.id) return;

@@ -82,6 +82,8 @@
       d.append(el("h3", "upop-h", "About me"), el("p", "hint", "Tell other traders how you play, what you collect and when you're online. Add an About me →"));
       c.append(d);
     }
+    /* How to reach them: a Bloombot chat first, their accounts after. */
+    if (p && !isMe && did0) c.append(BB.dmCard(did0, p.discord_name || fallbackName));
     const acc = el("div", "p-accs upop-accs");
     const pill = (kind, label, name, href) => {
       const a = el(href ? "a" : "span", "acc " + kind);
@@ -123,11 +125,6 @@
         mb.append(badge);
         acts.append(mb);
       }
-    }
-    if (did && !isMe && p) {
-      const m = el("a", "brick green sm", "Message");
-      m.href = "messages.html?to=" + encodeURIComponent(did);
-      acts.append(m);
     }
     const share = el("button", "brick dark sm", "Copy link");
     share.type = "button";

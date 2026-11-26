@@ -139,20 +139,35 @@ returns text language sql immutable set search_path = '' as $$
 $$;
 
 -- Links are blocked, except Bloombot's own website and support server.
--- Catches the usual tricks too: "site . com", "site(dot)com", "www site".
+-- Catches the usual tricks too: "site . com", "site(dot)com", "www site",
+-- full-width letters and dots ("ｅｖｉｌ．ｃｏｍ"), and look-alike domains that
+-- only contain ours ("free-bloombot-gtd.vercel.app", "bloombot-gtd.vercel.app.evil.co").
+-- js/messages.js has the same rule so the warning shows before sending.
 create or replace function public.dm_has_link(t text)
 returns boolean language plpgsql immutable set search_path = '' as $$
-declare s text := lower(coalesce(t, ''));
+declare s text := lower(translate(normalize(coalesce(t, ''), NFKC), '。｡︒․', '....'));
 begin
-  s := regexp_replace(s, '(https?://)?(www\.)?bloombot-gtd\.vercel\.app(/[^[:space:]]*)?', ' ', 'g');
-  s := regexp_replace(s, '(https?://)?(www\.)?discord(app)?\.(gg|com/invite)/tguxfcjxwf\M', ' ', 'g');
+  -- Our own links only count when nothing is glued on either side.
+  s := regexp_replace(s, '(^|[^a-z0-9.@-])(https?://)?(www\.)?bloombot-gtd\.vercel\.app([/?#][^[:space:]]*)?(?=[.,!?)]*([[:space:]]|$))', '\1 ', 'g');
+  s := regexp_replace(s, '(^|[^a-z0-9.@-])(https?://)?(www\.)?discord(app)?\.(gg|com/invite)/tguxfcjxwf(?=[.,!?)]*([[:space:]]|$))', '\1 ', 'g');
   return s ~ '[a-z][a-z0-9+.-]*://'
       or s ~ '\mwww[[:space:]]*\.[[:space:]]*[a-z0-9]'
-      or s ~ '[a-z0-9-]\.(com|net|org|gg|io|xyz|ru|ly|tk|ml|ga|cf|gq|info|biz|cc|gl|eu|ws|su|vip|tv|uk|de|fr|ca|au|nl|pl|online|shop|store|site|app|dev|link|gift|gifts|click|top|club|live|codes|sh|gd|nu)\M'
-      or s ~ '[a-z0-9-][[:space:]]*(\(dot\)|\[dot\]|[[:space:]]dot[[:space:]])[[:space:]]*(com|net|org|gg|xyz|ru|io)\M'
-      or s ~ '[a-z0-9-][[:space:]]+\.[[:space:]]*(com|net|org|gg|xyz|ru)\M'
+      or s ~ '[a-z0-9-]\.(com|net|org|gg|io|xyz|ru|ly|tk|ml|ga|cf|gq|info|biz|cc|gl|eu|ws|su|vip|tv|uk|de|fr|ca|au|nl|pl|online|shop|store|site|app|dev|link|gift|gifts|click|top|club|live|codes|sh|gd|nu|co|me|to|us|ai|pw|lol|fun|win|zip|mov|icu|cam|sbs|cfd|cyou|rip|page|art|best|space|wtf|bio|pro|one|world|today|cloud|host|website|tech|games|fyi|ink|lat|bond|buzz|monster|rest|quest|beauty|hair|skin|mom|boo)\M'
+      or s ~ '[a-z0-9-][[:space:]]*(\(dot\)|\[dot\]|\{dot\}|[[:space:]]dot[[:space:]])[[:space:]]*(com|net|org|gg|xyz|ru|io|co|me|app)\M'
+      or s ~ '[a-z0-9-][[:space:]]+\.[[:space:]]*(com|net|org|gg|xyz|ru|io|co|me|app)\M'
       or s ~ '\m(discord|dsc)[[:space:]]*\.[[:space:]]*gg\M';
 end $$;
+
+-- Login secrets people get tricked into pasting: a Roblox .ROBLOSECURITY
+-- cookie or a Discord token. These are never sent (or stored), to protect the
+-- person typing them.
+create or replace function public.dm_has_secret(t text)
+returns boolean language sql immutable set search_path = '' as $$
+  select coalesce(t, '') ~* 'warning:-?do-?not-?share-?this'
+      or coalesce(t, '') ~* '\.?roblosecurity[[:space:]]*[=:]'
+      or coalesce(t, '') ~ '[A-Za-z0-9_-]{23,28}\.[A-Za-z0-9_-]{6,7}\.[A-Za-z0-9_-]{27,}'
+      or coalesce(t, '') ~ '\m[A-F0-9]{250,}\M'
+$$;
 
 -- Used by the storage policies below.
 create or replace function public.dm_upload_ok()
@@ -219,10 +234,14 @@ begin
   end if;
 
   -- Content rules. Logged rather than raised, so the owner can see what was tried.
+  -- A pasted login secret is never stored, not even in the log.
   if char_length(b) > 0 then
-    why := case when public.dm_has_link(b) then 'link' when public.dm_bad_text(b) then 'bad_word' end;
+    why := case when public.dm_has_secret(b) then 'secret'
+                when public.dm_has_link(b) then 'link'
+                when public.dm_bad_text(b) then 'bad_word' end;
     if why is not null then
-      insert into public.dm_filtered (sender, recipient, reason, body) values (me, p_to, why, b);
+      insert into public.dm_filtered (sender, recipient, reason, body)
+      values (me, p_to, why, case when why = 'secret' then '[hidden: looked like a login cookie or token]' else b end);
       return json_build_object('error', why);
     end if;
   end if;
@@ -232,8 +251,9 @@ begin
 
   if not they_replied then
     if not coalesce((select allow_new from public.dm_settings where discord_id = p_to), true) then raise exception 'dm:closed'; end if;
-    -- Until they answer, you can send 3 messages.
-    if (select count(*) from public.dm_messages where sender = me and recipient = p_to and not unsent) >= 3 then raise exception 'dm:wait_reply'; end if;
+    -- Until they answer, you can send 3 messages. Unsent ones still count, so
+    -- send → unsend → send can't be used to keep pinging a stranger.
+    if (select count(*) from public.dm_messages where sender = me and recipient = p_to) >= 3 then raise exception 'dm:wait_reply'; end if;
     -- No pictures from strangers: they unlock once the other person replies.
     if img is not null then raise exception 'dm:image_wait'; end if;
   end if;
@@ -301,13 +321,25 @@ begin
 end $$;
 
 -- New messages after an id, plus which of mine were read (for live updates).
+-- Returns the OLDEST 100 after p_after, so a tab that was away for a while
+-- catches up over a few polls instead of skipping the middle.
 create or replace function public.dm_poll(p_other text, p_after bigint)
 returns json language plpgsql stable security definer set search_path = '' as $$
 declare me text := public.dm_require();
 begin
   if p_other is null or p_other !~ '^[0-9]{15,22}$' then raise exception 'dm:bad_user'; end if;
   return json_build_object(
-    'msgs', coalesce((select json_agg(t order by t.id) from public.dm_thread(p_other, null, 100) t where t.id > coalesce(p_after, 0)), '[]'::json),
+    'msgs', coalesce((select json_agg(t order by t.id) from (
+               select m.id, m.sender = me as from_me,
+                      case when m.unsent then '' else m.body end as body,
+                      case when m.unsent then null else m.image_path end as image_path,
+                      m.created_at, m.read_at, m.unsent
+               from public.dm_messages m
+               where least(m.sender, m.recipient) = least(me, p_other) and greatest(m.sender, m.recipient) = greatest(me, p_other)
+                 and ((m.sender = me and not m.hidden_sender) or (m.recipient = me and not m.hidden_recipient))
+                 and m.id > coalesce(p_after, 0)
+               order by m.id
+               limit 100) t), '[]'::json),
     'read_upto', (select max(m.id) from public.dm_messages m where m.sender = me and m.recipient = p_other and m.read_at is not null),
     'unsent', coalesce((select json_agg(m.id) from public.dm_messages m
                         where least(m.sender, m.recipient) = least(me, p_other) and greatest(m.sender, m.recipient) = greatest(me, p_other)
@@ -318,6 +350,7 @@ create or replace function public.dm_read(p_other text)
 returns integer language plpgsql volatile security definer set search_path = '' as $$
 declare me text := public.dm_require(); n integer;
 begin
+  if p_other is null or p_other !~ '^[0-9]{15,22}$' then raise exception 'dm:bad_user'; end if;
   update public.dm_messages set read_at = now()
   where recipient = me and sender = p_other and read_at is null;
   get diagnostics n = row_count;
@@ -491,7 +524,7 @@ begin
   select exists (select 1 from public.dm_messages where sender = p_other and recipient = me) into they_replied;
   if not they_replied then
     if not coalesce((select allow_new from public.dm_settings where discord_id = p_other), true) then return 'closed'; end if;
-    if (select count(*) from public.dm_messages where sender = me and recipient = p_other and not unsent) >= 3 then return 'wait_reply'; end if;
+    if (select count(*) from public.dm_messages where sender = me and recipient = p_other) >= 3 then return 'wait_reply'; end if;
     return 'new';   -- can write; pictures unlock once they reply
   end if;
   return 'ok';
@@ -597,7 +630,7 @@ begin
     'dm_report(bigint,text,text)', 'dm_get_settings()', 'dm_set_allow(boolean)', 'dm_can_message(text)',
     'dm_admin_reports(text)', 'dm_admin_filtered()', 'dm_admin_ban(text,boolean,text)', 'dm_has_link(text)',
     'dm_set_email(boolean)', 'dm_image_kept(text)', 'dm_admin_open_count()', 'dm_admin_resolve(bigint,text)',
-    'dm_admin_bans()']
+    'dm_admin_bans()', 'dm_has_secret(text)']
   loop
     execute format('revoke all on function public.%s from public, anon', f);
     execute format('grant execute on function public.%s to authenticated', f);

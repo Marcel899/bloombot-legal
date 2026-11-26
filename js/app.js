@@ -1279,6 +1279,62 @@
     return error;
   };
 
+  /* ── "Message on Bloombot" card for a trader's profile (page and popup) ──
+     Starts with a plain Message button, then asks dm_can_message whether a
+     chat is possible and says so in one line, so nobody types into a dead end. */
+  const DM_STATE = {
+    ok: ["Open chat", "You've talked before. Pick up where you left off.", true],
+    new: ["Message", "Private chat on Bloombot. Pictures unlock once they reply.", true],
+    wait_reply: ["Open chat", "You've sent 3 messages. You can send more once they reply.", true],
+    you_blocked: ["Open chat", "You blocked them. Open the chat to unblock.", true],
+    closed: ["Message", "Not taking new messages right now.", false],
+    no_user: ["Message", "They haven't set up Bloombot yet, so they can't get messages.", false],
+    banned: ["Message", "You can't send messages right now.", false],
+    profile: ["Set up account", "Create your Bloombot account to message traders.", true, "profile.html#edit"],
+    discord: ["Connect Discord", "Messages use your Discord login.", true, null],
+  };
+  BB.dmCard = (id, name, opts = {}) => {
+    const el = BB.el;
+    const box = el("div", "pdm" + (opts.compact ? " sm" : ""));
+    const ic = el("span", "pdm-ic");
+    const ii = el("img"); ii.src = "img/envelope.png"; ii.alt = "";
+    ic.append(ii);
+    const t = el("div", "pdm-t");
+    const nm = BB.plain(name || "") || "this trader";
+    const hint = el("span", "pdm-h", DM_STATE.new[1]);
+    t.append(el("strong", null, "Message " + nm), hint);
+    const go = el("a", "brick green sm pdm-go");
+    const label = el("span", null, "Message");
+    go.append(label);
+    go.href = "messages.html?to=" + encodeURIComponent(id);
+    if (opts.onGo) go.addEventListener("click", opts.onGo);
+    box.append(ic, t, go);
+    const set = key => {
+      const [btn, text, can, href] = DM_STATE[key] || DM_STATE.new;
+      label.textContent = btn;
+      hint.textContent = text;
+      box.dataset.state = key;
+      box.classList.toggle("off", !can);
+      if (!can) { go.removeAttribute("href"); go.setAttribute("aria-disabled", "true"); go.tabIndex = -1; }
+      if (href) go.href = href;
+      if (href === null) {
+        go.removeAttribute("href");
+        go.setAttribute("role", "button");
+        go.tabIndex = 0;
+        go.onclick = e => { e.preventDefault(); BB.requireDiscord(); };
+        go.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); BB.requireDiscord(); } };
+      }
+    };
+    const u = BB.session && BB.user(BB.session);
+    if (!u || !u.id) { set("discord"); return box; }
+    BB.sb.rpc("dm_can_message", { p_other: id }).then(({ data, error }) => {
+      if (!error) { set(data); return; }
+      const code = (String(error.message || "").match(/dm:([a-z_]+)/) || [])[1];
+      if (code === "profile" || code === "banned") set(code);
+    }).catch(() => {});
+    return box;
+  };
+
   /* ── profile popup: opens a player's profile on top of the current page ── */
   let popOpen = null;
   BB.openProfile = async (id, hint = {}) => {
@@ -1403,6 +1459,8 @@
     stats.append(stat(p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"), stat(ads.length, ads.length === 1 ? "Trade ad" : "Trade ads", "g-blue", "swap"), stat(strs.length, strs.length === 1 ? "Strategy" : "Strategies", "g-purple", "bullseye"));
     body.append(stats);
 
+    /* How to reach them: a Bloombot chat first, their accounts after. */
+    if (!isMe && p) body.append(BB.dmCard(id, nm, { compact: true, onGo: () => close(true) }));
     const accs = el("div", "upop-accs");
     const pill = (kind, label, val, href) => {
       const a = el(href ? "a" : "span", "acc " + kind);
@@ -1453,12 +1511,6 @@
     }
 
     const acts = el("div", "upop-acts");
-    if (!isMe && p && BB.user(BB.session).id) {
-      const m = el("a", "brick green sm", "Message");
-      m.href = "messages.html?to=" + encodeURIComponent(id);
-      m.onclick = () => close(true);
-      acts.append(m);
-    }
     if (isMe) {
       const e = el("a", "brick blue sm", "Edit profile"); e.href = "profile.html#edit";
       acts.append(e);
