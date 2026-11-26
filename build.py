@@ -1058,6 +1058,43 @@ unit_body = f"""<main class="wrap unitp" id="main">
 open("unit.html", "w").write(page("Unit value · Garden Tower Defense · Bloombot", "Garden Tower Defense unit value, demand and 30-day trend on Bloombot.", unit_body, "v", "unit.html", index=False)
                               .replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="/">\n', 1))
 
+# ── Collection: the units you own ───────────────────────────────────────
+JSVER["collection"] = hashlib.md5(open("js/collection.js", "rb").read()).hexdigest()[:8]
+collection_body = f"""<main class="wrap colp" id="main">
+<section class="panel login" id="clogin" hidden>
+<img class="login-icon" src="img/gem.png" alt="">
+<h2>Log in to track your collection</h2>
+<p>Add the units you own and see what they're worth together, updated with the live value list.</p>
+<button class="brick green" type="button" data-login>Log in</button>
+</section>
+<div class="skel-grid" id="cload" hidden aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
+<section class="panel col-msg" id="cmsg" hidden></section>
+<div class="col-wrap" id="cmain" hidden>
+<section class="panel col-head">
+<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">The units you own, valued with the live value list.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
+<div class="col-stats">
+<div class="col-stat big"><span>Total value</span><strong id="ctotal">0</strong></div>
+<div class="col-stat"><span>30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
+<div class="col-stat"><span>Units</span><strong id="ccount">0</strong><small id="ckinds"></small></div>
+</div>
+<label class="ktog-line col-pub" id="cpub-row" hidden><span class="ktog"><input type="checkbox" id="cpub"><i></i></span><span><strong>Show on my profile</strong><span>Other traders can see what you own and its total value.</span></span></label>
+</section>
+<section class="panel col-body">
+<div class="col-tools">
+<div class="picker col-add" id="cadd" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="cq" type="search" placeholder="Add a unit you own…" aria-label="Add a unit you own" autocomplete="off"><div class="sugs" id="csug" hidden></div></div>
+<input class="search col-filter" id="cfilter" type="search" placeholder="Filter…" aria-label="Filter your collection" hidden>
+</div>
+<div class="col-list" id="clist"></div>
+<div class="col-empty" id="cempty" hidden><img src="img/gem.png" alt=""><strong id="cempty-own">Add the units you own</strong><strong id="cempty-other" hidden>Nothing here yet</strong><span>Search above. Values update on their own.</span></div>
+<p class="hint col-nomatch" id="cnomatch" hidden>No unit matches that.</p>
+</section>
+</div>
+<div class="col-bar" id="cbar" hidden><span id="cbar-n"></span><a class="brick purple sm" id="cbar-go" href="trades.html">Post a trade ad</a><a class="brick dark sm" id="cbar-calc" href="calculator.html">Check value</a><button class="col-barx" type="button" id="cbar-x" aria-label="Clear selection">&times;</button></div>
+</main>
+<script defer src="js/collection.js?v={JSVER['collection']}"></script>
+"""
+open("collection.html", "w").write(page("My collection · Bloombot", "Track the Garden Tower Defense units you own and what they're worth together.", collection_body, "", "collection.html", index=False))
+
 def _sitemap():
     import datetime, glob, subprocess
     today = datetime.date.today().isoformat()

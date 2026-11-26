@@ -82,6 +82,12 @@
       d.append(el("h3", "upop-h", "About me"), el("p", "hint", "Tell other traders how you play, what you collect and when you're online. Add an About me →"));
       c.append(d);
     }
+    /* Their collection (yours always; others' only if they made it public). */
+    if (p && did0) {
+      const slot = el("div", "pcol-slot");
+      c.append(slot);
+      collection(slot, did0, isMe);
+    }
     /* How to reach them: a Bloombot chat first, their accounts after. */
     if (p && !isMe && did0) c.append(BB.dmCard(did0, p.discord_name || fallbackName));
     const acc = el("div", "p-accs upop-accs");
@@ -129,6 +135,43 @@
     if (acts.childElementCount) c.append(acts);
     c.append(BB.copyLinkBtn(location.origin + location.pathname.replace(/[^/]*$/, "profile.html") + "?id=" + did, "Bloombot profile"));
     c.hidden = false;
+  }
+
+  /* Collection summary: total value and the most valuable units, linking to the full list. */
+  async function collection(slot, did, isMe) {
+    let res, vals;
+    try {
+      [res, vals] = await Promise.all([BB.sb.rpc("col_get", { p_user: isMe ? null : did }), BB.loadValues()]);
+    } catch (e) { return; }
+    if (!res || res.error || !res.data) return;
+    const items = res.data.items || [];
+    if (!isMe && !items.length) return;
+    const by = new Map(vals.map(v => [v.name, v]));
+    const rows = items.map(r => ({ ...r, it: by.get(r.name) })).map(r => ({ ...r, worth: r.it && r.it.est > 0 ? r.it.est * r.qty : 0 }))
+      .sort((a, b) => b.worth - a.worth);
+    const total = rows.reduce((n, r) => n + r.worth, 0), count = rows.reduce((n, r) => n + r.qty, 0);
+    const box = el("a", "pcol");
+    box.href = isMe ? "collection.html" : "collection.html?id=" + encodeURIComponent(did);
+    const head = el("div", "pcol-h");
+    const t = el("span", "pcol-t");
+    t.append(el("em", null, "Collection" + (isMe && !res.data.public ? " · only you" : "")));
+    if (rows.length) t.append(el("strong", null, BB.fmt(total) + " · " + count + (count === 1 ? " unit" : " units")));
+    else t.append(el("strong", null, "Track the units you own"));
+    head.append(t, el("span", "pcol-go", rows.length ? (isMe ? "Manage →" : "See all →") : "Start →"));
+    box.append(head);
+    if (rows.length) {
+      const icons = el("div", "pcol-icons");
+      rows.slice(0, 10).forEach(r => {
+        const w = el("span", "pcol-i");
+        w.title = r.name + (r.qty > 1 ? " ×" + r.qty : "");
+        w.append(BB.itemImg(r.it || { name: r.name }, null));
+        if (r.qty > 1) w.append(el("b", null, "×" + r.qty));
+        icons.append(w);
+      });
+      if (rows.length > 10) icons.append(el("span", "pcol-more", "+" + (rows.length - 10)));
+      box.append(icons);
+    }
+    slot.replaceChildren(box);
   }
 
   function delBtn(kind, id, label, did) {

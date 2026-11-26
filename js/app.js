@@ -859,6 +859,7 @@
       link("profile.html#edit", "gear", "Edit profile"),
       link("levels.html", "medal_gold", "Levels & perks"),
       link("values.html#watchlist", "wish_star", "My watchlist"),
+      link("collection.html", "gem", "My collection"),
       sep(),
       link("trades.html#post", "plus", "Post a trade ad"),
       link("trades.html?mine=1", "trading", "My trade ads"),

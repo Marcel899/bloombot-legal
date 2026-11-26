@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My collection · Bloombot</title>
+<meta name="description" content="Track the Garden Tower Defense units you own and what they're worth together.">
+<meta property="og:title" content="My collection · Bloombot">
+<meta property="og:description" content="Track the Garden Tower Defense units you own and what they're worth together.">
+<meta property="og:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://bloombot-gtd.vercel.app/img/og-v2.jpg">
+<meta property="og:url" content="https://bloombot-gtd.vercel.app/collection.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bloombot">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://bloombot-gtd.vercel.app/collection.html">
+<meta name="robots" content="noindex, follow">
+<meta name="keywords" content="Garden Tower Defense, GTD, Roblox, Discord bot, GTD Discord, Garden Tower Defense Discord, GTD values, Garden Tower Defense values, GTD trading, GTD trade ads, value list, Bloombot">
+<meta name="google-site-verification" content="wgEfTTw4ymFeGxytFVhbK6OwL639P6QfcPRBa0BeqMo">
+<meta name="theme-color" content="#13151b">
+<meta name="color-scheme" content="dark">
+<meta name="darkreader-lock">
+<link rel="icon" href="img/favicon.png">
+<link rel="stylesheet" href="style.css?v=4c543dbe">
+<script src="js/theme.js?v=9fa9b3c2"></script>
+<script defer src="js/supabase.js?v=2.45.4"></script>
+<script defer src="js/app.js?v=c544f61f"></script>
+<script defer src="js/site.js?v=82f28661"></script>
+<script defer src="js/giveaway.js?v=2bd59658"></script>
+<script defer src="js/consent.js?v=650a8387"></script>
+<script defer src="js/track.js?v=0580d865"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+<header class="topbar">
+<div class="wrap bar">
+<a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a></nav>
+<div class="right">
+<button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
+<button class="theme-btn" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
+<a class="brick nb discord add" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt=""><span>Add<span class="wide"> to Discord</span></span></a>
+<div class="acct" id="acct"><button class="brick nb dark login-btn" type="button" data-login><img class="dc" src="img/login.png" alt=""><span>Log in</span></button></div>
+<button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div>
+</div>
+</header>
+<main class="wrap colp" id="main">
+<section class="panel login" id="clogin" hidden>
+<img class="login-icon" src="img/gem.png" alt="">
+<h2>Log in to track your collection</h2>
+<p>Add the units you own and see what they're worth together, updated with the live value list.</p>
+<button class="brick green" type="button" data-login>Log in</button>
+</section>
+<div class="skel-grid" id="cload" hidden aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
+<section class="panel col-msg" id="cmsg" hidden></section>
+<div class="col-wrap" id="cmain" hidden>
+<section class="panel col-head">
+<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">The units you own, valued with the live value list.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
+<div class="col-stats">
+<div class="col-stat big"><span>Total value</span><strong id="ctotal">0</strong></div>
+<div class="col-stat"><span>30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
+<div class="col-stat"><span>Units</span><strong id="ccount">0</strong><small id="ckinds"></small></div>
+</div>
+<label class="ktog-line col-pub" id="cpub-row" hidden><span class="ktog"><input type="checkbox" id="cpub"><i></i></span><span><strong>Show on my profile</strong><span>Other traders can see what you own and its total value.</span></span></label>
+</section>
+<section class="panel col-body">
+<div class="col-tools">
+<div class="picker col-add" id="cadd" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="cq" type="search" placeholder="Add a unit you own…" aria-label="Add a unit you own" autocomplete="off"><div class="sugs" id="csug" hidden></div></div>
+<input class="search col-filter" id="cfilter" type="search" placeholder="Filter…" aria-label="Filter your collection" hidden>
+</div>
+<div class="col-list" id="clist"></div>
+<div class="col-empty" id="cempty" hidden><img src="img/gem.png" alt=""><strong id="cempty-own">Add the units you own</strong><strong id="cempty-other" hidden>Nothing here yet</strong><span>Search above. Values update on their own.</span></div>
+<p class="hint col-nomatch" id="cnomatch" hidden>No unit matches that.</p>
+</section>
+</div>
+<div class="col-bar" id="cbar" hidden><span id="cbar-n"></span><a class="brick purple sm" id="cbar-go" href="trades.html">Post a trade ad</a><a class="brick dark sm" id="cbar-calc" href="calculator.html">Check value</a><button class="col-barx" type="button" id="cbar-x" aria-label="Clear selection">&times;</button></div>
+</main>
+<script defer src="js/collection.js?v=53f71897"></script>
+<footer>
+<div class="wrap foot">
+<div class="foot-top">
+<div class="foot-brand">
+<a class="foot-mark" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<p>The trading bot for Roblox Garden Tower Defense. Trade ads, live values, calculators and strategies, free in every server.</p>
+<div class="foot-cta"><a class="brick discord sm" href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands"><img class="dc" src="img/discord_stud_white.png" alt="">Add to Discord</a><a class="brick dark sm" href="https://discord.gg/tGuXfcJxwf"><img src="img/envelope.png" alt="">Support</a></div>
+</div>
+<nav class="foot-cols" aria-label="Footer">
+<div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="farm.html">Farm calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
+<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="https://discord.com/oauth2/authorize?client_id=1510660385517211820&permissions=1374926793824&integration_type=0&scope=bot+applications.commands">Add to Discord</a><a href="https://discord.gg/tGuXfcJxwf">Support server</a></div>
+<div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
+</nav>
+</div>
+<div class="foot-bottom">
+<p>Unit values come from the <a href="https://sites.google.com/view/garden-td-values/main-page" target="_blank" rel="noopener">official Garden TD value list</a>. Thanks to its team!</p>
+<p>&copy; 2026 Bloombot. A fan-made bot, not affiliated with Discord, Roblox, or the developers of Garden Tower Defense.</p>
+</div>
+</div>
+</footer>
+<a class="totop brick dark" href="#" aria-label="Back to top"><img src="img/up.png" alt=""></a>
+</body>
+</html>
