@@ -4013,3 +4013,43 @@ body:has(.pedit.dirty:not([hidden])) .totop{opacity:0;pointer-events:none}
   .ban-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
   .ban-sw{height:34px}
 }
+
+/* ── page polish: trade ads, values ── */
+/* Trade ad cards: "Message on Bloombot" is a full-width row under the Discord / Roblox pills. */
+.tc-users .tc-msg{grid-column:1/-1;justify-content:center;gap:8px;padding:8px 12px;background:linear-gradient(180deg,#26864a,#1f6b38);transition:filter .15s,transform .15s}
+.tc-users .tc-msg:hover{transform:translateY(-1px)}
+.tc-msg .acc-ic{width:20px;height:20px}
+.tc-msg-t{font-size:.92rem;white-space:nowrap}
+.tc-msg-t span{opacity:.8;font-weight:700}
+[data-theme=light] .tc-users .tc-msg{background:linear-gradient(180deg,#e3f6e8,#d3efdc);border-color:#9fd2ad;color:#1d5c2e}
+
+/* Value cards: the header keeps one height, so price and demand line up across a row. */
+.vgrid:not(.list) .vtop{min-height:69px}
+.vgrid:not(.list) .vtitle strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+[data-theme=light] .tc-msg-t strong,[data-theme=light] .tc-msg-t span{color:#1d5c2e}
+
+/* ── page polish: phones ── */
+/* Farm / crate inputs: the unit label ("min:sec", "Fertilizer") keeps its width; the box shrinks instead of the label spilling out of the card. */
+.kin b{flex:none}
+.kin input{min-width:0}
+
+/* Trade calculator on phones: You give → You get → the answer, in the order you fill it in.
+   Empty sides don't need 300px each. */
+@media (max-width:1000px){
+  .cmid{order:1}
+  .cside{min-height:0}
+  .cside .cempty{margin:14px 0}
+}
+
+/* Value cards on phones: the status chip always gets its own line, so demand bars line up across a row.
+   Long single-word names hyphenate instead of breaking anywhere. */
+.vtitle strong{-webkit-hyphens:auto;hyphens:auto}
+@media (max-width:600px){
+  .vgrid:not(.list) .vval::after{content:"";flex-basis:100%;order:1}
+  .vgrid:not(.list) .vval .vst{order:2}
+}
+
+/* Levels, light theme: the level card and XP task cards use the same soft border as every other light panel,
+   and rank names are dark enough to read (silver ranks were nearly white on cream). */
+[data-theme=light] .lv-card,[data-theme=light] .tk{border-color:var(--line-2);box-shadow:0 2px 0 #eadfc5,0 14px 28px -20px rgba(90,70,20,.4)}
+[data-theme=light] .lv-rank-n,[data-theme=light] .rd-node.got strong{color:color-mix(in srgb,var(--rk) 45%,#000)}

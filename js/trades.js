@@ -113,12 +113,13 @@
     if (a.roblox_name || r) users.append(account("roblox", a.roblox_name || "Profile", r));
     else users.append(account("roblox", "Not linked", null));
     if (did && !own) {
-      const m = el("a", "acc bloombot");
+      /* The quickest way to reach them: a full-width row under their accounts. */
+      const m = el("a", "acc bloombot tc-msg");
       m.href = "messages.html?to=" + encodeURIComponent(did);
       m.title = "Message " + (a.discord_name || "this trader") + " on Bloombot";
-      const i = el("img", "acc-ic"); i.src = "img/flower.png"; i.alt = "";
-      const t = el("span", "acc-t");
-      t.append(el("em", null, "Bloombot"), el("strong", null, "Message"));
+      const i = el("img", "acc-ic"); i.src = "img/envelope.png"; i.alt = "";
+      const t = el("span", "tc-msg-t");
+      t.append(el("strong", null, "Message"), el("span", null, " on Bloombot"));
       m.append(i, t);
       users.append(m);
     }
