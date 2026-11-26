@@ -4742,3 +4742,6 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
   .p-flakes{background-size:36px 36px}.p-stars{background-size:32px 32px}
 }
 @media (prefers-reduced-motion:reduce){.xm-door::after{transition:none}}
+/* studs a bit bigger: board 48px → 64px tiles, studs wrapping paper 40px → 52px */
+.xm-board::after{background-size:64px 64px}
+.p-studs{background-size:auto,52px 52px}
