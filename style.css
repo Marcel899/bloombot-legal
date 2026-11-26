@@ -4804,3 +4804,10 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 .xm-cd-c{font-size:2.6rem;padding-top:8px;text-shadow:0 2px 0 rgba(0,0,0,.35)}
 .xm-hero{padding-bottom:150px}
 @media (max-width:600px){.xm-cd-c{font-size:1.7rem;padding-top:8px}.xm-hero{padding-bottom:118px}}
+
+/* welds on the countdown: dark lines on the white number cards, light lines on the dark panel */
+.xm-cd{isolation:isolate}
+.xm-cd::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:url(img/weld-light.png) 0 0/45px 45px repeat;opacity:.55}
+.xm-cd-t b{isolation:isolate}
+.xm-cd-t b::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:url(img/weld.png) 0 0/36px 36px repeat;opacity:.16}
+@media (max-width:600px){.xm-cd-t b::after{background-size:28px 28px}}
