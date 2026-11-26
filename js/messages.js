@@ -1200,7 +1200,7 @@
       s.has_email ? "When a message waits 2 minutes. One email per chat every 30 minutes." : "Your login has no email address, so there's nowhere to send them.",
       !!s.has_email && s.email_notify !== false, v => rpc("dm_set_email", { p_on: v }), v => v ? "Email alerts on" : "Email alerts off");
     if (!s.has_email) { m.inp.disabled = true; m.r.classList.add("off"); }
-    const v = row("verified", "Verified traders only", "New chats only from traders with a verified Roblox account. People you already talk to aren't affected.",
+    const v = row("verified", "Verified traders only", "Only traders with a verified Roblox account can start a new chat with you.",
       !!s.verified_only, val => rpc("dm_set_verified", { p_on: val }), val => val ? "Only verified traders can start a chat" : "Any trader can start a chat");
     /* With new messages off, nobody new can write anyway. */
     const sync = () => { v.r.classList.toggle("off", !a.inp.checked); v.inp.disabled = !a.inp.checked; };

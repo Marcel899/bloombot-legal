@@ -154,7 +154,7 @@
     box.href = isMe ? "collection.html" : "collection.html?id=" + encodeURIComponent(did);
     const head = el("div", "pcol-h");
     const t = el("span", "pcol-t");
-    t.append(el("em", null, "Collection" + (isMe && !res.data.public ? " · only you" : "")));
+    t.append(el("em", null, "Collection" + (isMe && !res.data.public ? " · private" : "")));
     if (rows.length) t.append(el("strong", null, BB.fmt(total) + " · " + count + (count === 1 ? " unit" : " units")));
     else t.append(el("strong", null, "Track the units you own"));
     head.append(t, el("span", "pcol-go", rows.length ? (isMe ? "Manage →" : "See all →") : "Start →"));

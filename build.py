@@ -1052,7 +1052,6 @@ unit_body = f"""<main class="wrap unitp" id="main">
 </section>
 <section class="panel u-simp" id="usim-sec"><h2 class="u-h">Worth about the same</h2><div class="u-sim" id="usim"></div></section>
 <section class="panel guide" id="uabout"></section>
-<p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
 </main>
 <script defer src="js/unit.js?v={JSVER['unit']}"></script>
 <script defer src="js/alerts.js?v={JSVER['alerts']}"></script>
@@ -1073,21 +1072,22 @@ collection_body = f"""<main class="wrap colp" id="main">
 <section class="panel col-msg" id="cmsg" hidden></section>
 <div class="col-wrap" id="cmain" hidden>
 <section class="panel col-head">
-<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">The units you own, valued with the live value list.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
+<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">What you own and what it's worth today.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
 <div class="col-stats" id="cstats">
 <div class="col-stat big"><span>Total value</span><strong id="ctotal">0</strong></div>
-<div class="col-stat"><span>30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
+<div class="col-stat"><span>Last 30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
 <div class="col-stat"><span>Units</span><strong id="ccount">0</strong><small id="ckinds"></small></div>
 </div>
-<label class="ktog-line col-pub" id="cpub-row" hidden><span class="ktog"><input type="checkbox" id="cpub"><i></i></span><span><strong>Show on my profile</strong><span>Other traders can see what you own and its total value.</span></span></label>
+<label class="ktog-line col-pub" id="cpub-row" hidden><span class="ktog"><input type="checkbox" id="cpub"><i></i></span><span><strong>Show on my profile</strong><span>Off: only you can see it.</span></span></label>
 </section>
 <section class="panel col-body">
 <div class="col-tools">
 <div class="picker col-add" id="cadd" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="cq" type="search" placeholder="Add a unit you own…" aria-label="Add a unit you own" autocomplete="off"><div class="sugs" id="csug" hidden></div></div>
 <input class="search col-filter" id="cfilter" type="search" placeholder="Filter…" aria-label="Filter your collection" hidden>
 </div>
+<p class="col-tip" id="ctip" hidden>Tick units to put them in a trade ad.</p>
 <div class="col-list" id="clist"></div>
-<div class="col-empty" id="cempty" hidden><img src="img/gem.png" alt=""><strong id="cempty-own">Add the units you own</strong><strong id="cempty-other" hidden>Nothing here yet</strong><span>Search above. Values update on their own.</span></div>
+<div class="col-empty" id="cempty" hidden><img src="img/gem.png" alt=""><strong id="cempty-own">Add the units you own</strong><strong id="cempty-other" hidden>Nothing here yet</strong><span>Search above to add one. Values update on their own.</span></div>
 <p class="hint col-nomatch" id="cnomatch" hidden>No unit matches that.</p>
 </section>
 </div>
@@ -1111,7 +1111,7 @@ alerts_body = f"""<main class="wrap colp" id="main">
 <div class="picker col-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="aq" type="search" placeholder="Add an alert for a unit…" aria-label="Add an alert for a unit" autocomplete="off"><div class="sugs" id="asug" hidden></div></div>
 </section>
 <section class="panel col-body"><div class="col-list" id="alist"><p class="hint">Loading…</p></div></section>
-<p class="note">Values come from the community value list, which updates about every 2 days, so alerts arrive when it does.</p>
+<p class="note">Alerts go out when the value list updates, about every 2 days.</p>
 </div>
 </main>
 <script defer src="js/alerts.js?v={JSVER['alerts']}"></script>

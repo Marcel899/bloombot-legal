@@ -16,7 +16,7 @@
   const errText = e => ERR[codeOf(e)] || "Something went wrong. Try again.";
   const rpc = async (fn, args) => { const { data, error } = await BB.sb.rpc(fn, args || {}); if (error) throw error; return data; };
   const KIND = { above: "Goes above", below: "Drops below", change: "Any change" };
-  const describe = a => a.kind === "change" ? "Any price change" : (a.kind === "above" ? "Above " : "Below ") + BB.fmt(Number(a.target));
+  const describe = a => a.kind === "change" ? "Any change" : (a.kind === "above" ? "Above " : "Below ") + BB.fmt(Number(a.target));
   const roundNice = n => { if (!(n > 0)) return ""; const p = Math.pow(10, Math.max(0, Math.floor(Math.log10(n)) - 1)); return BB.fmt(Math.round(n / p) * p); };
 
   function ready() {
@@ -77,24 +77,22 @@
     const explain = () => {
       hint.className = "al-hint";
       hint.replaceChildren();
-      if (kind === "change") { hint.textContent = "Every time the value list changes its price."; return; }
+      if (kind === "change") { hint.textContent = "You'll hear every time its price changes."; return; }
       const t = BB.parseValue(price.value.replace(/\s+/g, ""));
       if (!(t > 0)) { hint.textContent = "Type a price, like " + (roundNice(now ? now * (kind === "above" ? 1.1 : 0.9) : 0) || "60k") + "."; return; }
-      if (!now) { hint.textContent = "Once when it " + (kind === "above" ? "rises to " : "falls to ") + BB.fmt(t) + "."; return; }
+      if (!now) { hint.textContent = "You'll hear when it " + (kind === "above" ? "reaches " : "falls to ") + BB.fmt(t) + "."; return; }
       const past = kind === "above" ? now >= t : now <= t;
       if (past) {
         hint.classList.add("warn");
-        hint.append("It's already " + (kind === "above" ? "at or above " : "at or below ") + BB.fmt(t) + " (now " + BB.fmt(now) + "), so this only fires after it " +
-          (kind === "above" ? "drops below and comes back up. " : "rises above and comes back down. "));
-        const sw = el("button", "al-sw", kind === "above" ? "Use Drops below" : "Use Goes above");
+        hint.append("It's already " + (kind === "above" ? "above " : "below ") + BB.fmt(t) + " (now " + BB.fmt(now) + "). ");
+        const sw = el("button", "al-sw", kind === "above" ? "Switch to Drops below" : "Switch to Goes above");
         sw.type = "button";
         sw.onclick = () => { kind = kind === "above" ? "below" : "above"; fill(); price.focus(); };
         hint.append(sw);
         return;
       }
       const pct = Math.round(Math.abs(t - now) / now * 1000) / 10;
-      hint.textContent = (kind === "above" ? "+" : "−") + pct + "% from now (" + BB.fmt(now) + "). Once when it " +
-        (kind === "above" ? "rises" : "falls") + " to " + BB.fmt(t) + ", then again if it goes back and crosses it again.";
+      hint.textContent = "You'll hear when it " + (kind === "above" ? "reaches " : "falls to ") + BB.fmt(t) + ", " + pct + "% " + (kind === "above" ? "above" : "below") + " now.";
     };
     price.addEventListener("input", explain);
     const fill = () => {
@@ -223,10 +221,10 @@
       sub.append(el("span", null, "Now " + (nowV > 0 ? BB.fmt(nowV) : "–")));
       if (a.kind !== "change" && nowV > 0 && tg > 0) {
         const gap = a.kind === "above" ? tg - nowV : nowV - tg;
-        sub.append(gap > 0 ? el("span", "al-gap", "· " + BB.fmt(gap) + " to go (" + Math.round(gap / nowV * 1000) / 10 + "%)")
-          : el("span", "al-gap hit", "· already past, waits for the next crossing"));
+        sub.append(gap > 0 ? el("span", "al-gap", "· " + Math.round(gap / nowV * 100) + "% away")
+          : el("span", "al-gap hit", "· already past it"));
       }
-      if (a.fired_at) sub.append(el("span", null, "· last sent " + BB.ago(a.fired_at)));
+      if (a.fired_at) sub.append(el("span", null, "· sent " + BB.ago(a.fired_at)));
       t.append(sub);
       u.append(t);
       const cond = el("span", "al-cond " + a.kind, describe(a));

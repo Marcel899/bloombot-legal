@@ -4400,3 +4400,18 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 [data-theme=light] .al-kinds .al-kind[aria-checked=true]{background:#fff;box-shadow:0 1px 2px rgba(90,70,20,.15)}
 [data-theme=light] .al-hint.warn,[data-theme=light] .al-gap.hit{color:#a35a00}
 [data-theme=light] .al-sw{color:#1a63d0}
+
+/* ── cleaner unit actions: one "Trade ad: I have it / I want it" choice ── */
+.u-adpick{display:inline-flex;align-items:stretch;border:2px solid #0c0e12;border-radius:12px;overflow:hidden;background:var(--card-2);font-weight:900;font-size:.95rem}
+.u-adpick>span{display:flex;align-items:center;padding:0 10px;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+.u-adpick a{display:flex;align-items:center;padding:6px 14px;border-left:2px solid #0c0e12;color:var(--text);text-decoration:none;transition:background .15s}
+.u-adpick a:hover{background:rgba(169,79,255,.2)}
+@media (max-width:600px){
+  .u-adpick{flex:1 1 100%}
+  .u-adpick a{flex:1;justify-content:center}
+}
+[data-theme=light] .u-adpick{background:#fff;border-color:var(--line-2)}
+[data-theme=light] .u-adpick a{border-left-color:var(--line-2)}
+[data-theme=light] .u-adpick a:hover{background:#f5ecff}
+.col-tip{margin:-2px 2px 0;color:var(--muted);font-size:.84rem;font-weight:700}
+.col-tip[hidden]{display:none}

@@ -52,9 +52,9 @@
     const h = el("h1", null, it.name);
     const tags = el("div", "u-tags");
     if (it.rarity) tags.append(el("span", "rar r-" + it.rarity.toLowerCase().replace(/\W/g, ""), cap(it.rarity)));
-    tags.append(el("span", "u-cat", it.category === "gamepasses" ? "Gamepass" : "Unit"));
+    if (it.category === "gamepasses") tags.append(el("span", "u-cat", "Gamepass"));
     const rank = all.filter(x => x.category === it.category && x.est > it.est).length + 1;
-    if (it.est > 0) tags.append(el("span", "u-rank", "#" + rank + " most valuable " + (it.category === "gamepasses" ? "gamepass" : "unit")));
+    if (it.est > 0) { const r = el("span", "u-rank", "#" + rank + " by value"); r.title = "#" + rank + " most valuable " + (it.category === "gamepasses" ? "gamepass" : "unit"); tags.append(r); }
     t.append(h, tags);
     head.append(img, t);
 
@@ -77,12 +77,17 @@
     const acts = el("div", "u-acts");
     const calc = el("a", "brick green sm", "Check a trade");
     calc.href = "calculator.html#give=" + encodeURIComponent(it.name).replace(/%20/g, "_");
-    const have = el("a", "brick purple sm", "Trade it away");
+    /* Trade ad: "I have it" puts it on your side, "I want it" on theirs. */
+    const ad = el("div", "u-adpick");
+    ad.setAttribute("role", "group");
+    ad.setAttribute("aria-label", "Post a trade ad");
+    const have = el("a", null, "I have it");
     have.href = "trades.html#have=" + encodeURIComponent(it.name);
-    have.title = "Start a trade ad offering " + it.name;
-    const want = el("a", "brick blue sm", "Look for it");
+    have.title = "Post a trade ad offering " + it.name;
+    const want = el("a", null, "I want it");
     want.href = "trades.html#want=" + encodeURIComponent(it.name);
-    want.title = "Start a trade ad asking for " + it.name;
+    want.title = "Post a trade ad asking for " + it.name;
+    ad.append(el("span", null, "Trade ad"), have, want);
     const star = el("button", "brick yellow sm");
     star.type = "button";
     const label = () => {
@@ -96,14 +101,13 @@
       label();
       BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your watchlist" : "Removed from your watchlist" });
     };
-    acts.append(calc, have, want, star);
+    acts.append(calc, ad, star);
     const slot = el("div", "u-alert-slot");
     slot.id = "ualert";
     acts.append(slot);
 
     const when = el("p", "u-when");
-    if (it.updated_at) when.append("Value list checked " + BB.ago(it.updated_at) + ". ");
-    when.append("Values are estimates from the ");
+    when.append((it.updated_at ? "Updated " + BB.ago(it.updated_at) + " · " : "") + "An estimate from the ");
     const a = el("a", null, "official Garden TD value list");
     a.href = "https://sites.google.com/view/garden-td-values/main-page";
     a.target = "_blank"; a.rel = "noopener";

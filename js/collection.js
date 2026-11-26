@@ -47,7 +47,7 @@
     c.textContent = ch == null ? "–" : (ch > 0 ? "+" : "") + ch + "%";
     $("cchange-v").textContent = ch == null || !then ? "" : (now >= then ? "+" : "−") + BB.fmt(Math.abs(now - then));
     $("ccount").textContent = n.toLocaleString();
-    $("ckinds").textContent = kinds === 1 ? "1 kind" : kinds.toLocaleString() + " kinds";
+    $("ckinds").textContent = kinds === 1 ? "1 unit type" : kinds.toLocaleString() + " different";
   }
 
   function save(name, qty) {
@@ -162,6 +162,7 @@
   function bar() {
     if (!mine) return;
     const sel = rows.filter(r => picked.has(r.name));
+    $("ctip").hidden = !rows.length || sel.length > 0;
     $("cbar").hidden = !sel.length;
     $("cbar-n").textContent = sel.length === 1 ? "1 unit selected" : sel.length + " units selected";
     const have = sel.slice(0, 15).map(r => encodeURIComponent(r.name) + (r.qty > 1 ? "*" + r.qty : "")).join(",");
@@ -253,13 +254,16 @@
     $("cempty-other").hidden = mine;
     if (mine) {
       $("cpub").checked = pub;
+      const pubHint = () => { $("cpub-row").querySelector("span:last-child > span").textContent = $("cpub").checked ? "On: traders see it on your profile." : "Off: only you can see it."; };
+      pubHint();
+      $("cpub").addEventListener("change", pubHint);
       $("cpub").onchange = async () => {
         const on = $("cpub").checked;
         $("cpub").disabled = true;
         try {
           await rpc("col_set_public", { p_on: on });
           BB.toast(on ? "Traders can see it on your profile." : "Only you can see it now.", "ok", { title: on ? "Collection is public" : "Collection is private" });
-        } catch (e) { $("cpub").checked = !on; BB.toast(errText(e), "bad"); }
+        } catch (e) { $("cpub").checked = !on; pubHint(); BB.toast(errText(e), "bad"); }
         $("cpub").disabled = false;
       };
       picker();
