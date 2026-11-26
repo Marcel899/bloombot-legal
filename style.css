@@ -4173,3 +4173,19 @@ body:has(.pedit.dirty:not([hidden])) .totop{opacity:0;pointer-events:none}
 [data-theme=light] .u-changes em.up,[data-theme=light] .u-simc em.up{color:#24731a}
 [data-theme=light] .u-changes em.down,[data-theme=light] .u-simc em.down{color:#b42323}
 .u-grid>.panel{margin:0}
+
+/* Icon-only "Copy link" in a card's top-right corner (unit page, profile) */
+.card-link{position:absolute;top:14px;right:14px;z-index:3;display:grid;place-items:center;width:38px;height:38px;padding:0;border:2px solid #0c0e12;border-radius:11px;background:var(--card-2);color:var(--soft);cursor:pointer;transition:background .15s,color .15s,transform .15s}
+.card-link svg{width:19px;height:19px}
+.card-link:hover{background:#2e3442;color:var(--text);transform:translateY(-1px)}
+.card-link.done{color:#5be08b}
+.u-card .u-head{padding-right:46px}
+/* on a profile it sits on the banner */
+.pcard>.card-link{background:rgba(0,0,0,.42);border-color:rgba(0,0,0,.3);color:#fff;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.pcard>.card-link:hover{background:rgba(0,0,0,.6);color:#fff}
+.pcard>.card-link.done{color:#7ef0a0}
+[data-theme=light] .card-link{background:#fff;border-color:var(--line-2);color:var(--soft)}
+[data-theme=light] .card-link:hover{background:#f6f0df;color:var(--text)}
+[data-theme=light] .card-link.done{color:#24731a}
+[data-theme=light] .pcard>.card-link{background:rgba(255,255,255,.85);border-color:rgba(255,255,255,.9);color:#2a2a1f}
+[data-theme=light] .pcard>.card-link.done{color:#24731a}

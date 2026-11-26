@@ -280,6 +280,26 @@
     return BB.copy(url, done);
   };
 
+  /* Icon-only "Copy link" button for the top-right corner of a card. Flips to a check once copied. */
+  const LINK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>';
+  const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  BB.copyLinkBtn = (url, title, done) => {
+    const b = BB.el("button", "card-link");
+    b.type = "button";
+    b.title = "Copy link";
+    b.setAttribute("aria-label", "Copy link");
+    b.innerHTML = LINK_SVG;
+    let t = null;
+    b.onclick = async () => {
+      await BB.share(typeof url === "function" ? url() : url, title, done);
+      b.classList.add("done");
+      b.innerHTML = CHECK_SVG;
+      clearTimeout(t);
+      t = setTimeout(() => { b.classList.remove("done"); b.innerHTML = LINK_SVG; }, 1600);
+    };
+    return b;
+  };
+
   /* Watchlist: units you starred, kept in this browser only. */
   const FKEY = "bb_watch";
   BB.favs = {

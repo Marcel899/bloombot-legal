@@ -126,11 +126,8 @@
         acts.append(mb);
       }
     }
-    const share = el("button", "brick dark sm", "Copy link");
-    share.type = "button";
-    share.onclick = () => BB.share(location.origin + location.pathname.replace(/[^/]*$/, "profile.html") + "?id=" + did, "Bloombot profile");
-    acts.append(share);
-    c.append(acts);
+    if (acts.childElementCount) c.append(acts);
+    c.append(BB.copyLinkBtn(location.origin + location.pathname.replace(/[^/]*$/, "profile.html") + "?id=" + did, "Bloombot profile"));
     c.hidden = false;
   }
 

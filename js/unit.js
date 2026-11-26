@@ -80,10 +80,7 @@
       label();
       BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your watchlist" : "Removed from your watchlist" });
     };
-    const share = el("button", "brick dark sm", "Copy link");
-    share.type = "button";
-    share.onclick = () => BB.share(location.origin + "/" + BB.unitUrl(it.name), it.name + " value · Bloombot");
-    acts.append(calc, have, want, star, share);
+    acts.append(calc, have, want, star);
     const slot = el("div", "u-alert-slot");
     slot.id = "ualert";
     acts.append(slot);
@@ -95,7 +92,7 @@
     a.href = "https://sites.google.com/view/garden-td-values/main-page";
     a.target = "_blank"; a.rel = "noopener";
     when.append(a, ".");
-    c.append(head, stats, acts, when);
+    c.append(head, stats, acts, when, BB.copyLinkBtn(location.origin + "/" + BB.unitUrl(it.name), it.name + " value · Bloombot"));
     c.classList.add("ready");
     document.dispatchEvent(new CustomEvent("bb:unit", { detail: it }));
   }
