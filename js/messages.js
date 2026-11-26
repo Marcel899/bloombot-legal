@@ -89,6 +89,82 @@
     }).catch(() => {});
     return unitsReady;
   }
+  /* ── trade offers in chat: "my X for your Y" gets the calculator's verdict ── */
+  const FAIR = 0.05, BIG = 0.25;          // same fair rule as the trade calculator; 25%+ counts as a big loss
+  const valByName = new Map(), valById = new Map();
+  let nameRe = null, valsReady = null;
+  const esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  function loadVals() {
+    if (!valsReady) valsReady = BB.loadValues().then(list => {
+      list.forEach(it => {
+        if (!it.name || it.category === "gamepasses" || !(it.est > 0)) return;
+        valByName.set(it.name.toLowerCase(), it);
+        const id = (String(it.icon_url || "").match(/emojis\/(\d{15,22})/) || [])[1];
+        if (id) valById.set(id, it);
+      });
+      const names = [...valByName.keys()].sort((a, b) => b.length - a.length).map(esc);
+      /* optional "2x" / "2 " before or "x2" after, plural s, whole words only */
+      if (names.length) nameRe = new RegExp("(?<![a-z0-9])(?:(\\d{1,3})\\s*x?\\s*)?(" + names.join("|") + ")s?(?:\\s*x\\s*(\\d{1,3}))?(?![a-z0-9])", "gi");
+    }).catch(() => {});
+    return valsReady;
+  }
+  /* The units on one side of an offer, or null if something on it can't be valued. */
+  function offerSide(text) {
+    const got = new Map();
+    let unknown = false;
+    const add = (it, q) => { const r = got.get(it.name) || { item: it, qty: 0 }; r.qty += Math.max(1, Math.min(999, parseInt(q) || 1)); got.set(it.name, r); };
+    const rest = text.replace(/(?:(\d{1,3})\s*x\s*)?<a?:(\w{2,32}):(\d{15,22})>(?:\s*x\s*(\d{1,3}))?/gi, (m0, q1, nm, id, q2) => {
+      const it = valById.get(id) || valByName.get(nm.replace(/_/g, " ").toLowerCase());
+      if (it) add(it, q1 || q2); else unknown = true;
+      return " ";
+    });
+    rest.replace(nameRe, (m0, q1, nm, q2) => { const it = valByName.get(nm.toLowerCase()); if (it) add(it, q1 || q2); return " "; });
+    return unknown || !got.size ? null : [...got.values()];
+  }
+  /* "X for Y": the sender gives X and wants Y. "your Y for my X" is read the other way round. */
+  function parseOffer(body) {
+    if (!nameRe) return null;
+    const t = String(body).replace(/\s+/g, " ");
+    const m = t.match(/^(.*?)\s+(?:for|fr|in exchange for|→|->|=>|↔|<->)\s+(.*)$/i);
+    if (!m) return null;
+    let [a, b] = [m[1], m[2]];
+    if (/\b(?:your|ur|yours)\b/i.test(a) && /\b(?:my|mine)\b/i.test(b)) [a, b] = [b, a];
+    const gives = offerSide(a), wants = offerSide(b);
+    return gives && wants ? { gives, wants } : null;
+  }
+  const sideTotal = list => list.reduce((n, r) => n + r.item.est * r.qty, 0);
+  const calcLink = (give, get) => {
+    const enc = l => l.map(r => encodeURIComponent(r.item.name).replace(/%20/g, "_") + (r.qty > 1 ? "~" + r.qty : "")).join("!");
+    return "calculator.html#give=" + enc(give) + "&get=" + enc(get);
+  };
+  /* The verdict for whoever is reading: on their message you'd give what they want and get what they offer. */
+  function offerNote(m) {
+    if (!m.body || m.unsent) return null;
+    const o = parseOffer(m.body);
+    if (!o) return null;
+    const give = m.from_me ? o.gives : o.wants, get = m.from_me ? o.wants : o.gives;
+    const g = sideTotal(give), r = sideTotal(get);
+    if (!(g > 0 && r > 0)) return null;
+    const share = (r - g) / g, pct = Math.round(Math.abs(share) * 100);
+    const kind = Math.abs(share) <= FAIR ? "fair" : share > 0 ? "win" : pct >= BIG * 100 ? "big" : "lose";
+    const n = el("div", "dm-offer " + kind);
+    n.setAttribute("role", "note");
+    const icon = el("img", "dm-offer-i");
+    icon.src = "img/" + (kind === "big" ? "lose" : kind) + ".png";
+    icon.alt = "";
+    const t = el("div", "dm-offer-t");
+    t.append(el("strong", null, { fair: "Fair trade for you", win: "Win for you · +" + pct + "%", lose: "Loss for you · −" + pct + "%", big: "Big loss for you · −" + pct + "%" }[kind]));
+    const sub = el("span", null, "You give " + BB.fmt(g) + " · you get " + BB.fmt(r) + " · ");
+    const a = el("a", null, "Check it");
+    a.href = calcLink(give, get);
+    a.target = "_blank";
+    a.rel = "noopener";
+    sub.append(a);
+    t.append(sub);
+    n.append(icon, t);
+    return n;
+  }
+
   function emojiImg(src, name, cls = "dm-e") {
     const i = el("img", cls);
     i.src = src;
@@ -411,6 +487,8 @@
         if (t.classList.contains("big") && !m.image_path && !m.local_url) row.classList.add("emo");
       }
     }
+    const offer = offerNote(m);
+    if (offer) b.append(offer);
     if (!m.from_me && !m.unsent && m.body && RISKY.test(m.body)) b.append(scamNote());
     row.append(b);
     if (!m.unsent && !m.sending && !m.failed && m.id > 0) {
@@ -1250,6 +1328,8 @@
     skeleton();
     /* Unit emojis show as icons once the value list is in. */
     loadUnits().then(() => { if (units.size && inboxLoaded) { renderInbox(); if (cur && msgs.some(m => /<a?:\w+:\d+>/.test(m.body || ""))) renderMsgs(nearBottom()); } });
+    /* Offers get their verdict once the value list is in. */
+    loadVals().then(() => { if (nameRe && cur && msgs.some(m => offerNote(m))) renderMsgs(nearBottom()); });
     await loadInbox();
     const to = new URLSearchParams(location.search).get("to");
     if (BB.isId(to) && to !== me) open(to, { keepUrl: true });
