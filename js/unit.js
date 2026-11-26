@@ -22,6 +22,16 @@
     if (d) d.setAttribute("content", name + " is worth " + value + " in Garden Tower Defense trades. Live value, demand, 30-day trend and trade ads on Bloombot.");
   }
 
+  /* The latest price move in the history, for when there's no clean 30-day trend. */
+  function lastMove() {
+    const h = (it.history || []).filter(p => p[1] > 0);
+    for (let i = h.length - 1; i > 0; i--) {
+      if (h[i][1] !== h[i - 1][1]) return { from: h[i - 1][1], to: h[i][1], date: h[i][0], pct: Math.round((h[i][1] - h[i - 1][1]) / h[i - 1][1] * 1000) / 10 };
+    }
+    return null;
+  }
+  const day = d => new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+
   function demand(d) {
     const n = demandNum(d), box = el("div", "u-dem");
     if (n >= 0 && n <= 10) {
@@ -53,8 +63,14 @@
     const val = el("strong", "u-val", it.est > 0 ? BB.fmt(it.est) : (it.value_text || "N/A"));
     if (it.oc) { const oc = el("span", "oc", "O/C"); oc.title = "Owner's choice: no fixed value"; val.append(oc); }
     stats.append(stat("Value", val, "big"));
-    const ch = it.change_30d;
-    stats.append(stat("30 days", el("strong", "chg " + (ch > 0 ? "up" : ch < 0 ? "down" : "flat"), ch == null ? "–" : (ch > 0 ? "+" : "") + ch + "%")));
+    const ch = it.change_30d, mv = ch == null ? lastMove() : null;
+    if (ch != null) stats.append(stat("30 days", el("strong", "chg " + (ch > 0 ? "up" : ch < 0 ? "down" : "flat"), (ch > 0 ? "+" : "") + ch + "%")));
+    else if (mv) {
+      /* No clean 30-day trend (the list was catching up): show its latest move instead. */
+      const v = el("div", "u-move");
+      v.append(el("strong", "chg " + (mv.pct > 0 ? "up" : mv.pct < 0 ? "down" : "flat"), (mv.pct > 0 ? "+" : "") + mv.pct + "%"), el("small", null, day(mv.date)));
+      stats.append(stat("Last change", v));
+    } else stats.append(stat("30 days", el("strong", "u-none", "No changes yet")));
     stats.append(stat("Demand", demand(it.demand)));
     stats.append(stat("Status", el("strong", "vst st-" + statusKind(it.status), it.status || "?")));
 
@@ -180,18 +196,41 @@
         " in Garden Tower Defense trades" + (it.oc ? ", but it's owner's choice, so sellers set their own price." : ".")),
       q("Is " + it.name + " in demand?", n >= 0 ? "Its demand is " + Math.round(n * 10) / 10 + " out of 10, which is " +
         (n >= 7 ? "high: it trades fast." : n >= 4 ? "medium: you'll find takers with some patience." : "low: expect to wait or add more.") : "There is no demand rating for it yet."),
-      q("Is " + it.name + " going up or down?", (it.change_30d == null ? "There isn't 30 days of history yet." :
-        "Over the last 30 days it moved " + (it.change_30d > 0 ? "+" : "") + it.change_30d + "%.") + (it.status ? " The value list marks it as " + it.status.toLowerCase() + "." : "")),
+      q("Is " + it.name + " going up or down?", (() => {
+        const mv = lastMove();
+        const trend = it.change_30d != null ? "Over the last 30 days it moved " + (it.change_30d > 0 ? "+" : "") + it.change_30d + "%."
+          : mv ? "Its last price change was " + (mv.pct > 0 ? "+" : "") + mv.pct + "% on " + day(mv.date) + " (" + BB.fmt(mv.from) + " → " + BB.fmt(mv.to) + ")."
+          : "No price changes are recorded yet.";
+        return trend + (it.status ? " The value list marks it as " + it.status.toLowerCase() + "." : "");
+      })()),
     );
     $("uabout").replaceChildren(el("h2", null, "About " + it.name), list);
   }
 
   function missing() {
-    $("ucard").replaceChildren(el("h1", null, "Unit not found"),
-      el("p", "hint", "We couldn't find that unit on the value list. It may have been renamed."));
+    const box = el("div", "u-miss");
+    box.append(el("h1", null, "Unit not found"), el("p", "hint", "We couldn't find that unit on the value list. It may have been renamed or spelled differently."));
+    /* "Did you mean": units sharing a word with the address */
+    const words = slug.split("-").filter(w => w.length > 2);
+    const near = all.map(x => [words.filter(w => BB.unitSlug(x.name).includes(w)).length, x]).filter(([n]) => n > 0)
+      .sort((a, b) => b[0] - a[0] || b[1].est - a[1].est).slice(0, 6).map(([, x]) => x);
+    if (near.length) {
+      const g = el("div", "u-sim");
+      near.forEach(x => {
+        const a = el("a", "u-simc");
+        a.href = BB.unitUrl(x.name);
+        const t = el("span", "u-simt");
+        t.append(el("strong", null, x.name), el("span", null, x.est > 0 ? BB.fmt(x.est) : x.value_text || ""));
+        a.append(BB.itemImg(x, "u-simi"), t);
+        g.append(a);
+      });
+      box.append(el("h2", "u-h", "Did you mean"), g);
+    }
     const a = el("a", "brick blue sm", "Browse all values");
     a.href = "values.html";
-    $("ucard").append(a);
+    box.append(a);
+    $("ucard").replaceChildren(box);
+    $("ucrumb").textContent = "Not found";
     ["usec", "usim-sec", "uabout"].forEach(id => { $(id).hidden = true; });
     document.title = "Unit not found · Bloombot";
   }

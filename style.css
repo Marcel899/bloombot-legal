@@ -4363,3 +4363,20 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 .wm .al-price{width:100%;min-width:0;max-width:none}
 .al-dlg .al-head h2{display:block;margin:0;padding:0;text-align:left!important;font-size:1.2rem;background:none;border:0;box-shadow:none}
 .al-dlg .al-head h2::before,.al-dlg .al-head h2::after{content:none}
+
+/* ── unit page polish ── */
+.u-move{display:flex;align-items:center;gap:8px}
+.u-move small{color:var(--muted);font-size:.82rem;font-weight:800}
+.u-none{color:var(--muted);font-size:.95rem!important;font-weight:800}
+.u-alert-slot{display:contents}
+.u-miss{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.u-miss h1{margin:0;font-size:1.7rem}
+.u-miss .hint{margin:0}
+.u-miss .u-sim{width:100%;margin-bottom:6px}
+.u-miss .u-h{margin:8px 0 0;font-size:1rem}
+.u-miss .u-simc{gap:10px}
+@media (max-width:600px){
+  /* five buttons: the main one full width, then two pairs */
+  .u-acts>.brick:first-child{flex-basis:100%}
+}
+.u-move{flex-wrap:wrap;row-gap:2px}.u-move small{white-space:nowrap}
