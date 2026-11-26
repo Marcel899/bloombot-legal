@@ -1129,36 +1129,43 @@ def _advent():
     cells = []
     for i, d in enumerate(order):
         if d == 24:
-            cells.append('<li class="xm-cell big" aria-label="December 24"><span class="xm-in"><img src="img/units/christmas_tree.webp" alt=""></span>'
-                         '<span class="xm-door c-gold p-ribbon snowy"><img class="xm-star" src="img/wish_star.png" alt=""><span class="xm-tag">24</span><em>Christmas Eve</em></span></li>')
+            cells.append('<li class="xm-cell big" data-day="24" aria-label="December 24"><span class="xm-in"><i></i><i></i><i></i><img src="img/units/christmas_tree.webp" alt=""></span>'
+                         '<span class="xm-door c-gold p-ribbon snowy"><img class="xm-star" src="img/wish_star.png" alt=""><span class="xm-tag">24</span><em>Christmas Eve</em><i class="xm-knob"></i></span></li>')
             continue
         col, pat = looks[(d * 5) % len(looks)]
         peek = peeks[d % len(peeks)]
         ext = "webp" if peek.startswith("units/") else "png"
         wide = " w" + (" w2" if d in (13, 19) else "") if d in (6, 13, 19) else ""   # w2: normal width on tablets, so 4 columns fill evenly
         snowy = " snowy" if d % 3 == 0 else ""
-        cells.append(f'<li class="xm-cell{wide}" aria-label="December {d}"><span class="xm-in"><img src="img/{peek}.{ext}" alt=""></span>'
-                     f'<span class="xm-door c-{col} p-{pat}{snowy}"><span class="xm-tag">{d}</span></span></li>')
+        bow = '<i class="xm-bow"></i>' if pat == "ribbon" else ""
+        cells.append(f'<li class="xm-cell{wide}" data-day="{d}" aria-label="December {d}"><span class="xm-in"><i></i><i></i><i></i><img src="img/{peek}.{ext}" alt=""></span>'
+                     f'<span class="xm-door c-{col} p-{pat}{snowy}">{bow}<span class="xm-tag">{d}</span><i class="xm-knob"></i></span></li>')
     lights = "".join("<i></i>" for _ in range(32))
     flakes = "".join("<i></i>" for _ in range(36))
+    stars = "".join("<i></i>" for _ in range(40))
+    trees = "".join("<i></i>" for _ in range(9))
     return f"""<section class="xm-hero">
+<div class="xm-sky" aria-hidden="true"><span class="xm-moon"></span>{stars}</div>
+<div class="xm-trees" aria-hidden="true">{trees}</div>
 <div class="xm-lights" aria-hidden="true">{lights}</div>
 <div class="xm-snow" aria-hidden="true">{flakes}</div>
 <div class="wrap xm-hero-in">
 <img class="xm-hero-gift" src="img/gift.png" alt="">
 <h1 class="xm-title"><span>Advent</span> <span>Calendar</span></h1>
 <p class="sub">24 doors of Garden Tower Defense surprises. A new one opens every day until Christmas.</p>
-<div class="xm-chips"><span><img src="img/bell.png" alt="">1 – 24 December</span><span><img src="img/gift.png" alt="">One door a day</span></div>
+<div class="xm-chips"><span class="xm-count" id="xmcount" hidden><img src="img/wish_star.png" alt=""><b id="xmcount-t"></b></span><span><img src="img/bell.png" alt="">1 – 24 December</span><span><img src="img/gift.png" alt="">One door a day</span></div>
 </div>
 </section>
 <main class="wrap xm" id="main">
 <section class="xm-board" aria-label="Advent calendar">
+<i class="xm-holly l" aria-hidden="true"></i><i class="xm-holly r" aria-hidden="true"></i>
 <div class="xm-banner"><span>Bloombot Advent 2026</span></div>
 <ol class="xm-grid">{"".join(cells)}</ol>
 <div class="xm-gifts" aria-hidden="true"><img src="img/cur/presents-2.webp" alt=""><img src="img/units/christmas_tree.webp" alt=""><img src="img/cur/candy-2.webp" alt=""><img src="img/units/rolling_wreath.webp" alt=""><img src="img/cur/presents-2.webp" alt=""></div>
 </section>
 <p class="xm-foot"><img src="img/wish_star.png" alt="">Doors open from 1 December. Come back every day.</p>
 </main>
+<script defer src="js/advent.js?v={hashlib.md5(open("js/advent.js", "rb").read()).hexdigest()[:8]}"></script>
 """
 open("advent.html", "w").write(page("Advent calendar · Bloombot", "The Bloombot advent calendar: 24 doors of Garden Tower Defense surprises in December.", _advent(), "", "advent.html", index=False))
 

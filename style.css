@@ -4601,3 +4601,109 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
   mask:radial-gradient(60% 120px at 20% 120px,#000 98%,transparent 100%),radial-gradient(55% 110px at 75% 120px,#000 98%,transparent 100%),radial-gradient(40% 80px at 50% 120px,#000 98%,transparent 100%),linear-gradient(#000,#000) 0 100%/100% 40px no-repeat}
 .xm-foot{display:block}
 .xm-foot img{display:inline-block;margin-right:6px;vertical-align:-4px}
+
+/* ── advent calendar: more festive ── */
+/* moon and twinkling stars */
+.xm-sky{position:absolute;inset:0;z-index:0;pointer-events:none}
+.xm-moon{position:absolute;top:128px;right:9%;width:74px;height:74px;border-radius:50%;
+  background:radial-gradient(circle at 32% 36%,rgba(140,120,70,.16) 8px,transparent 9px),radial-gradient(circle at 63% 62%,rgba(140,120,70,.14) 12px,transparent 13px),radial-gradient(circle at 70% 27%,rgba(140,120,70,.12) 5px,transparent 6px),radial-gradient(circle at 40% 40%,#fffbea,#ffeeb8);
+  box-shadow:0 0 40px 10px rgba(255,236,180,.3),0 0 130px 50px rgba(255,236,180,.1)}
+.xm-sky i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(255,255,255,.7);animation:xmStar 3.2s ease-in-out infinite}
+.xm-sky i:nth-child(5n){width:4px;height:4px}
+@keyframes xmStar{50%{opacity:.25;transform:scale(.6)}}
+/* snowy pine trees on the hill */
+.xm-trees{position:absolute;left:0;right:0;bottom:46px;height:130px;z-index:1;pointer-events:none}
+.xm-trees i{position:absolute;bottom:0;aspect-ratio:40/64;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 64'%3E%3Crect x='17' y='53' width='6' height='11' fill='%233d2414'/%3E%3Cpath d='M20 2 L33 22 H27 L37 38 H30 L39 56 H1 L10 38 H3 L13 22 H7 Z' fill='%230d3a27'/%3E%3Cpath d='M20 2 L25.5 10.5 Q20 13.5 14.5 10.5 Z M7 22 H33 L31 25.5 Q20 29 9 25.5 Z M3 38 H37 L35 41.5 Q20 45 5 41.5 Z M1 56 H39 L37 58.5 Q20 61 3 58.5 Z' fill='%23f4f7fc'/%3E%3C/svg%3E") center bottom/contain no-repeat;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+/* the board: snow along the top, holly in the corners */
+.xm-board::before{content:"";position:absolute;left:14px;right:14px;top:-11px;height:22px;z-index:3;pointer-events:none;border-radius:14px 14px 0 0;
+  background:radial-gradient(circle at 13px 9px,#fff 11px,transparent 11.5px) 0 4px/26px 20px repeat-x,linear-gradient(#fff,#fff) 0 0/100% 11px no-repeat;
+  filter:drop-shadow(0 3px 0 rgba(0,0,0,.18))}
+.xm-holly{position:absolute;top:-24px;z-index:5;width:86px;height:54px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M30 22 C24 10 12 6 2 10 C6 13 4 17 8 19 C6 23 10 25 12 28 C18 26 24 27 30 22 Z' fill='%231f8a4a' stroke='%230c0e12' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M34 22 C40 10 52 6 62 10 C58 13 60 17 56 19 C58 23 54 25 52 28 C46 26 40 27 34 22 Z' fill='%2327a356' stroke='%230c0e12' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M29 21 C22 15 14 12 6 12 M35 21 C42 15 50 12 58 12' stroke='%23145c32' stroke-width='1.6' fill='none'/%3E%3Ccircle cx='32' cy='21' r='5' fill='%23e0303f' stroke='%230c0e12' stroke-width='2'/%3E%3Ccircle cx='25' cy='27' r='4.5' fill='%23c8202f' stroke='%230c0e12' stroke-width='2'/%3E%3Ccircle cx='38' cy='28' r='4.5' fill='%23d8293a' stroke='%230c0e12' stroke-width='2'/%3E%3Ccircle cx='30.5' cy='19.5' r='1.4' fill='%23fff' opacity='.8'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35));pointer-events:none}
+.xm-holly.l{left:-20px;transform:rotate(-22deg)}
+.xm-holly.r{right:-20px;transform:scaleX(-1) rotate(-22deg)}
+/* doors: a bow on the ribbon, a little gold handle */
+.xm-bow{position:absolute;left:50%;top:calc(50% - 44px);z-index:2;width:44px;height:26px;margin-left:-22px;
+  filter:drop-shadow(1.5px 0 0 #0c0e12) drop-shadow(-1.5px 0 0 #0c0e12) drop-shadow(0 1.5px 0 #0c0e12) drop-shadow(0 -1.5px 0 #0c0e12)}
+.xm-bow::before{content:"";position:absolute;inset:0;background:var(--r,#ffe08a);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'%3E%3Cpath d='M20 12 C12 -1 0 1 3 11 C5 18 14 16 20 12 Z M20 12 C28 -1 40 1 37 11 C35 18 26 16 20 12 Z M18 14 L11 24 L16 22.5 L20 15 Z M22 14 L29 24 L24 22.5 L20 15 Z'/%3E%3Ccircle cx='20' cy='12' r='4.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'%3E%3Cpath d='M20 12 C12 -1 0 1 3 11 C5 18 14 16 20 12 Z M20 12 C28 -1 40 1 37 11 C35 18 26 16 20 12 Z M18 14 L11 24 L16 22.5 L20 15 Z M22 14 L29 24 L24 22.5 L20 15 Z'/%3E%3Ccircle cx='20' cy='12' r='4.5'/%3E%3C/svg%3E") center/contain no-repeat}
+.xm-cell.big .xm-bow{display:none}
+.xm-knob{position:absolute;right:9px;top:50%;z-index:2;width:10px;height:10px;margin-top:-5px;border-radius:50%;border:2px solid #0c0e12;background:radial-gradient(circle at 35% 35%,#fff6c8,#e7b13a 55%,#8a5d10)}
+.xm-cell:hover .xm-door{filter:brightness(.93)}
+/* sparkles around what's inside, when a door swings open */
+.xm-in i{position:absolute;z-index:1;width:14px;height:14px;background:#fff8d6;opacity:0;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
+.xm-in i:nth-child(1){top:18%;left:20%}.xm-in i:nth-child(2){top:24%;right:18%;width:10px;height:10px}.xm-in i:nth-child(3){bottom:18%;left:30%;width:9px;height:9px}
+.xm-cell:hover .xm-in i{animation:xmSpark 1.2s ease-in-out infinite}
+.xm-cell:hover .xm-in i:nth-child(2){animation-delay:.35s}.xm-cell:hover .xm-in i:nth-child(3){animation-delay:.7s}
+@keyframes xmSpark{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+/* the next door (or today's): a soft gold glow and a little flag */
+.xm-cell.next .xm-door{animation:xmGlow 2.4s ease-in-out infinite}
+@keyframes xmGlow{50%{box-shadow:inset 0 3px 0 rgba(255,255,255,.28),inset 0 -5px 0 rgba(0,0,0,.22),0 0 0 3px #ffd24a,0 0 26px 8px rgba(255,210,74,.55)}}
+.xm-flag{position:absolute;top:-9px;right:-6px;z-index:6;padding:2px 9px;border:2px solid #0c0e12;border-radius:999px;background:linear-gradient(180deg,#e33a48,#b51d2b);color:#fff;font:700 .78rem "Fredoka",sans-serif;transform:rotate(8deg);box-shadow:0 3px 0 rgba(0,0,0,.25);pointer-events:none}
+/* countdown chip */
+.xm-chips .xm-count{background:linear-gradient(180deg,#ffd96a,#f1b52f);border:2px solid #0c0e12;color:#3b2a00;box-shadow:0 0 18px rgba(255,210,74,.45)}
+.xm-chips .xm-count[hidden]{display:none}
+.xm-chips .xm-count b{font-weight:900}
+@media (max-width:900px){.xm-moon{right:5%;width:56px;height:56px}}
+@media (max-width:600px){
+  .xm-moon{top:96px;right:4%;width:40px;height:40px}
+  .xm-trees{bottom:52px;height:84px}
+  .xm-holly{width:60px;height:38px;top:-18px}
+  .xm-holly.l{left:-10px}.xm-holly.r{right:-10px}
+  .xm-bow{width:34px;height:20px;margin-left:-17px;top:calc(50% - 34px)}
+  .xm-knob{right:6px;width:8px;height:8px;margin-top:-4px}
+  .xm-flag{font-size:.7rem;padding:1px 7px}
+}
+@media (prefers-reduced-motion:reduce){.xm-sky i,.xm-cell.next .xm-door,.xm-cell:hover .xm-in i{animation:none}.xm-cell.next .xm-door{box-shadow:0 0 0 3px #ffd24a}}
+.xm-sky i:nth-child(2){top:23.8%;left:2.6%;animation-delay:-0.7s;animation-duration:3.2s}
+.xm-sky i:nth-child(3){top:58.9%;left:32.4%;animation-delay:-2.0s;animation-duration:4.1s}
+.xm-sky i:nth-child(4){top:61.0%;left:3.4%;animation-delay:-1.4s;animation-duration:3.1s}
+.xm-sky i:nth-child(5){top:57.6%;left:54.8%;animation-delay:-1.4s;animation-duration:4.3s}
+.xm-sky i:nth-child(6){top:51.5%;left:4.0%;animation-delay:-0.3s;animation-duration:4.6s}
+.xm-sky i:nth-child(7){top:58.2%;left:52.6%;animation-delay:-1.4s;animation-duration:3.0s}
+.xm-sky i:nth-child(8){top:15.1%;left:19.4%;animation-delay:-2.5s;animation-duration:3.0s}
+.xm-sky i:nth-child(9){top:59.8%;left:51.2%;animation-delay:-1.0s;animation-duration:4.6s}
+.xm-sky i:nth-child(10){top:11.6%;left:14.4%;animation-delay:-1.0s;animation-duration:3.6s}
+.xm-sky i:nth-child(11){top:46.1%;left:94.0%;animation-delay:-1.9s;animation-duration:3.1s}
+.xm-sky i:nth-child(12){top:51.2%;left:16.5%;animation-delay:-1.0s;animation-duration:3.9s}
+.xm-sky i:nth-child(13){top:50.6%;left:57.5%;animation-delay:-2.5s;animation-duration:4.5s}
+.xm-sky i:nth-child(14){top:13.3%;left:81.8%;animation-delay:-1.8s;animation-duration:2.8s}
+.xm-sky i:nth-child(15){top:35.9%;left:42.6%;animation-delay:-3.1s;animation-duration:4.4s}
+.xm-sky i:nth-child(16){top:17.6%;left:89.0%;animation-delay:-2.9s;animation-duration:4.1s}
+.xm-sky i:nth-child(17){top:31.4%;left:12.5%;animation-delay:-0.9s;animation-duration:2.6s}
+.xm-sky i:nth-child(18){top:53.8%;left:10.3%;animation-delay:-2.3s;animation-duration:3.1s}
+.xm-sky i:nth-child(19){top:59.4%;left:69.6%;animation-delay:-1.7s;animation-duration:2.9s}
+.xm-sky i:nth-child(20){top:39.8%;left:13.2%;animation-delay:-0.2s;animation-duration:2.9s}
+.xm-sky i:nth-child(21){top:8.8%;left:84.1%;animation-delay:-2.6s;animation-duration:3.9s}
+.xm-sky i:nth-child(22){top:17.9%;left:54.5%;animation-delay:-1.7s;animation-duration:4.5s}
+.xm-sky i:nth-child(23){top:8.9%;left:94.1%;animation-delay:-0.0s;animation-duration:3.0s}
+.xm-sky i:nth-child(24){top:4.7%;left:53.7%;animation-delay:-1.3s;animation-duration:3.1s}
+.xm-sky i:nth-child(25){top:50.3%;left:48.3%;animation-delay:-1.9s;animation-duration:3.9s}
+.xm-sky i:nth-child(26){top:42.6%;left:73.4%;animation-delay:-0.4s;animation-duration:2.8s}
+.xm-sky i:nth-child(27){top:58.2%;left:98.0%;animation-delay:-2.2s;animation-duration:3.0s}
+.xm-sky i:nth-child(28){top:31.5%;left:7.8%;animation-delay:-2.4s;animation-duration:3.4s}
+.xm-sky i:nth-child(29){top:40.3%;left:8.6%;animation-delay:-0.1s;animation-duration:4.4s}
+.xm-sky i:nth-child(30){top:47.1%;left:61.7%;animation-delay:-1.4s;animation-duration:2.9s}
+.xm-sky i:nth-child(31){top:55.0%;left:52.1%;animation-delay:-2.3s;animation-duration:2.6s}
+.xm-sky i:nth-child(32){top:10.9%;left:62.4%;animation-delay:-1.5s;animation-duration:3.8s}
+.xm-sky i:nth-child(33){top:50.9%;left:96.9%;animation-delay:-1.9s;animation-duration:3.4s}
+.xm-sky i:nth-child(34){top:13.6%;left:38.4%;animation-delay:-2.2s;animation-duration:3.0s}
+.xm-sky i:nth-child(35){top:53.0%;left:59.1%;animation-delay:-2.7s;animation-duration:2.6s}
+.xm-sky i:nth-child(36){top:24.9%;left:58.7%;animation-delay:-2.6s;animation-duration:2.8s}
+.xm-sky i:nth-child(37){top:50.9%;left:1.4%;animation-delay:-0.3s;animation-duration:4.4s}
+.xm-sky i:nth-child(38){top:23.8%;left:64.5%;animation-delay:-0.6s;animation-duration:4.1s}
+.xm-sky i:nth-child(39){top:52.7%;left:34.2%;animation-delay:-0.6s;animation-duration:2.6s}
+.xm-sky i:nth-child(40){top:46.0%;left:82.1%;animation-delay:-1.9s;animation-duration:3.2s}
+.xm-sky i:nth-child(41){top:22.4%;left:50.7%;animation-delay:-1.0s;animation-duration:3.7s}
+.xm-trees i:nth-child(1){left:2%;height:118px}
+.xm-trees i:nth-child(2){left:7%;height:86px}
+.xm-trees i:nth-child(3){left:12%;height:104px}
+.xm-trees i:nth-child(4){left:18%;height:70px}
+.xm-trees i:nth-child(5){left:24%;height:58px}
+.xm-trees i:nth-child(6){left:77%;height:62px}
+.xm-trees i:nth-child(7){left:83%;height:96px}
+.xm-trees i:nth-child(8){left:89%;height:76px}
+.xm-trees i:nth-child(9){left:95%;height:112px}
+@media (max-width:600px){.xm-trees i:nth-child(1){height:73px}.xm-trees i:nth-child(2){height:53px}.xm-trees i:nth-child(3){height:64px}.xm-trees i:nth-child(4){height:43px}.xm-trees i:nth-child(5){height:36px}.xm-trees i:nth-child(6){height:38px}.xm-trees i:nth-child(7){height:60px}.xm-trees i:nth-child(8){height:47px}.xm-trees i:nth-child(9){height:69px}}
+.xm-trees{bottom:78px}
+.xm-board::before{top:-13px;height:30px;background:radial-gradient(14px 10px at 15px 22px,#fff 98%,transparent 100%) 0 0/30px 30px repeat-x,linear-gradient(#fff,#fff) 0 0/100% 23px no-repeat}
+@media (max-width:600px){.xm-trees{bottom:70px}}
