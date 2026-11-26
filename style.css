@@ -4380,3 +4380,4 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
   .u-acts>.brick:first-child{flex-basis:100%}
 }
 .u-move{flex-wrap:wrap;row-gap:2px}.u-move small{white-space:nowrap}
+.col-stats[hidden]{display:none}

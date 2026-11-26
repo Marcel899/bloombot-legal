@@ -1074,7 +1074,7 @@ collection_body = f"""<main class="wrap colp" id="main">
 <div class="col-wrap" id="cmain" hidden>
 <section class="panel col-head">
 <div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">The units you own, valued with the live value list.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
-<div class="col-stats">
+<div class="col-stats" id="cstats">
 <div class="col-stat big"><span>Total value</span><strong id="ctotal">0</strong></div>
 <div class="col-stat"><span>30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
 <div class="col-stat"><span>Units</span><strong id="ccount">0</strong><small id="ckinds"></small></div>

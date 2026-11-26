@@ -17,6 +17,7 @@
   const rpc = async (fn, args) => { const { data, error } = await BB.sb.rpc(fn, args || {}); if (error) throw error; return data; };
 
   let me = null, mine = false, values = [], byName = new Map(), rows = [], pub = false, started = false;
+  let order = [];               // row order: sorted by worth on load, then kept while you edit
   const picked = new Set();
   const timers = new Map();
 
@@ -68,7 +69,7 @@
       save(name, 0);
       draw();
       const undo = r.qty;
-      BB.toast(name, "info", { title: "Removed from your collection", action: { label: "Undo", run: () => { rows.push({ name, qty: undo }); save(name, undo); draw(); } } });
+      BB.toast(name, "info", { title: "Removed from your collection", action: { label: "Undo", run: () => { if (!rows.some(x => x.name === name)) rows.push({ name, qty: undo }); save(name, undo); draw(); } } });
       return;
     }
     r.qty = qty;
@@ -85,6 +86,7 @@
       cb.type = "checkbox";
       cb.checked = picked.has(r.name);
       cb.setAttribute("aria-label", "Select " + r.name + " for a trade ad");
+      cb.dataset.f = r.name + "|pick";
       cb.onchange = () => { if (cb.checked) picked.add(r.name); else picked.delete(r.name); d.classList.toggle("on", cb.checked); bar(); };
       pick.append(cb, el("i"));
       d.append(pick);
@@ -107,6 +109,7 @@
       const n = el("input", "col-qn");
       n.type = "number"; n.min = "0"; n.max = "9999"; n.value = r.qty; n.inputMode = "numeric";
       n.setAttribute("aria-label", "How many " + r.name);
+      minus.dataset.f = r.name + "|minus"; plus.dataset.f = r.name + "|plus"; n.dataset.f = r.name + "|qty";
       minus.onclick = () => setQty(r.name, r.qty - 1);
       plus.onclick = () => setQty(r.name, r.qty + 1);
       n.onchange = () => setQty(r.name, parseInt(n.value, 10));
@@ -120,18 +123,35 @@
       x.title = "Remove";
       x.setAttribute("aria-label", "Remove " + r.name);
       x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg>';
+      x.dataset.f = r.name + "|del";
       x.onclick = () => setQty(r.name, 0);
       d.append(x);
     }
     return d;
   }
 
+  const worth = r => { const it = byName.get(r.name); return it && it.est > 0 ? it.est * r.qty : -1; };
   function draw() {
-    const worth = r => { const it = byName.get(r.name); return it && it.est > 0 ? it.est * r.qty : -1; };
     const q = $("cfilter").value.trim().toLowerCase();
-    const list = rows.filter(r => !q || r.name.toLowerCase().includes(q)).sort((a, b) => worth(b) - worth(a) || a.name.localeCompare(b.name));
+    const pos = n => { const i = order.indexOf(n); return i < 0 ? -1 : i; };   // new ones first
+    const list = rows.filter(r => !q || r.name.toLowerCase().includes(q)).sort((a, b) => pos(a.name) - pos(b.name));
+    /* Redrawing replaces the buttons, so put keyboard focus back on the same control. */
+    const was = document.activeElement && document.activeElement.closest && document.activeElement.closest("#clist") ? document.activeElement.dataset.f : null;
+    const wasRow = was ? [...$("clist").children].indexOf(document.activeElement.closest(".col-row")) : -1;
     $("clist").replaceChildren(...list.map(row));
+    if (was) {
+      const back = $("clist").querySelector('[data-f="' + CSS.escape(was) + '"]');
+      if (back) back.focus();
+      else {
+        /* that row was removed: move to the same control on the next row, or the search box */
+        const rowsNow = $("clist").querySelectorAll(".col-row");
+        const next = wasRow >= 0 ? rowsNow[Math.min(wasRow, rowsNow.length - 1)] : null;
+        const f = next && next.querySelector('[data-f$="|' + was.split("|")[1] + '"]');
+        if (f) f.focus(); else if (mine) $("cq").focus();
+      }
+    }
     $("cempty").hidden = rows.length > 0;
+    $("cstats").hidden = !rows.length;
     $("cnomatch").hidden = !rows.length || list.length > 0;
     $("cfilter").hidden = rows.length < 8;
     summary();
@@ -172,11 +192,18 @@
     const choose = it => {
       const have = rows.find(r => r.name === it.name);
       if (have) setQty(it.name, have.qty + 1);
-      else { rows.push({ name: it.name, qty: 1 }); save(it.name, 1); draw(); }
+      else { rows.push({ name: it.name, qty: 1 }); order = [it.name].concat(order.filter(n => n !== it.name)); save(it.name, 1); draw(); }
       BB.toast(it.name, "ok", { title: have ? "One more added" : "Added to your collection" });
       input.value = ""; opts = []; drawSug(); input.focus();
     };
-    input.oninput = () => { opts = input.value.trim() ? find(input.value) : []; idx = 0; drawSug(); };
+    /* Empty box: the most traded units you don't own yet, to get started quickly. */
+    const popular = () => {
+      const dem = d => { const m = String(d || "").match(/[\d.]+/); return m ? parseFloat(m[0]) : -1; };
+      return values.filter(v => v.est > 0 && v.category !== "gamepasses" && !rows.some(r => r.name === v.name))
+        .sort((a, b) => dem(b.demand) - dem(a.demand) || b.est - a.est).slice(0, 8);
+    };
+    input.onfocus = () => { if (!input.value.trim()) { opts = popular(); idx = 0; drawSug(); } };
+    input.oninput = () => { opts = input.value.trim() ? find(input.value) : popular(); idx = 0; drawSug(); };
     input.onkeydown = e => {
       if (e.key === "ArrowDown") { idx = Math.min(idx + 1, opts.length - 1); drawSug(); e.preventDefault(); }
       else if (e.key === "ArrowUp") { idx = Math.max(idx - 1, 0); drawSug(); e.preventDefault(); }
@@ -191,6 +218,7 @@
     mine = !!res.mine;
     pub = !!res.public;
     rows = (res.items || []).map(x => ({ name: x.name, qty: x.qty }));
+    order = rows.slice().sort((a, b) => worth(b) - worth(a) || a.name.localeCompare(b.name)).map(r => r.name);
     return res;
   }
 
