@@ -151,7 +151,65 @@
       return;
     }
     ads = data || [];
+    waiting = [];
+    pill();
     render();
+  }
+
+  /* ── live: new ads wait behind a "3 new trade ads" button instead of moving the list under you ── */
+  let live = null, liveOn = false, waiting = [];
+  function pill() {
+    let b = $("tnew");
+    if (!b) {
+      b = el("button", "live-pill");
+      b.id = "tnew";
+      b.type = "button";
+      b.onclick = () => {
+        ads = waiting.concat(ads);
+        waiting = [];
+        pill();
+        render();
+        $("tlist").scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth" });
+      };
+      $("tlist").before(b);
+    }
+    const n = waiting.length;
+    b.hidden = !n;
+    b.textContent = "";
+    const ar = el("i", "live-ar"); ar.setAttribute("aria-hidden", "true"); ar.textContent = "↑";
+    b.append(ar, document.createTextNode(n === 1 ? "1 new trade ad" : n + " new trade ads"));
+    $("count").classList.toggle("is-live", liveOn);
+    $("count").title = liveOn ? "Live: new ads show up as they're posted" : "";
+  }
+  function goLive() {
+    if (live || !BB.sb.channel) return;
+    const has = id => ads.some(x => x.id === id) || waiting.some(x => x.id === id);
+    live = BB.sb.channel("trade-ads")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "trade_ads" }, ({ new: a }) => {
+        if (!a || has(a.id)) return;
+        if (a.discord_id === me) { ads.unshift(a); render(); return; }   // your own ad shows straight away
+        waiting.unshift(a);
+        pill();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_ads" }, ({ new: a }) => {
+        if (!a) return;
+        const i = ads.findIndex(x => x.id === a.id);
+        if (i >= 0) { ads[i] = a; render(); }
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "trade_ads" }, ({ old: o }) => {
+        const id = o && o.id;
+        if (id == null) return;
+        const before = ads.length + waiting.length;
+        ads = ads.filter(x => x.id !== id);
+        waiting = waiting.filter(x => x.id !== id);
+        if (ads.length + waiting.length !== before) { pill(); render(); }
+      })
+      .subscribe(st => {
+        const was = liveOn;
+        liveOn = st === "SUBSCRIBED";
+        pill();
+        if (liveOn && !was) load();   // catch anything posted while connecting
+      });
   }
 
   /* ── posting ─────────────────────────────────────────────── */
@@ -434,8 +492,11 @@
     BB.loadValues().then(v => { prepUnits(v); render(); preview(); prefill(v); }).catch(() => {});
     load();
     loadLimit();
+    try { goLive(); } catch (e) { /* live updates are optional */ }
     clearInterval(timer);
-    timer = setInterval(load, 60000);
+    /* Without live updates, reload every minute; with them, only every 5 minutes as a safety net. */
+    let ticks = 0;
+    timer = setInterval(() => { if (!liveOn || ++ticks % 5 === 0) load(); }, 60000);
   }
 
   const reset = () => { shown = PAGE; render(); };

@@ -694,6 +694,27 @@
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden && BB.session) checkDms(); });
 
+  /* Live messages: each trader has a private realtime topic only they can join (sql/dm-messages.sql).
+     When one of their chats changes, the database sends a nudge with no message text in it, just which
+     chat. Pages then fetch through the usual checked functions. BB.dmLive says whether it's connected,
+     so the messages page can slow its fallback polling right down. */
+  let dmLive = null, dmLiveFor = null, dmNudge = null;
+  function dmLiveStart() {
+    const id = BB.session && BB.user(BB.session).id;
+    if (dmLiveFor === (id || null)) return;
+    if (dmLive) { BB.sb.removeChannel(dmLive); dmLive = null; }
+    BB.dmLive = false;
+    dmLiveFor = id || null;
+    if (!id || !BB.sb || !BB.sb.channel) return;
+    dmLive = BB.sb.channel("dm:" + id, { config: { private: true } })
+      .on("broadcast", { event: "dm" }, msg => {
+        document.dispatchEvent(new CustomEvent("bb:dm", { detail: (msg && msg.payload) || {} }));
+        clearTimeout(dmNudge);
+        dmNudge = setTimeout(checkDms, 300);
+      })
+      .subscribe(status => { BB.dmLive = status === "SUBSCRIBED"; });
+  }
+
   function renderAcct() {
     const box = document.getElementById("acct");
     if (!box) return;
@@ -867,6 +888,7 @@
     BB.session = s;
     BB.ready = true;
     renderAcct();
+    try { dmLiveStart(); } catch (e) { /* live updates are optional */ }
     listeners.forEach(fn => { try { fn(s); } catch (e) { console.error(e); } });
     if (s) checkAccount(s);
     if (BB.loginError && !document.getElementById("loginerr")) {

@@ -582,9 +582,15 @@
     finally { loadingOld = false; }
   }
 
-  async function poll() {
-    if (!cur || document.hidden || busy || polling) return;
+  let lastPoll = 0, retryPoll = null;
+  async function poll(force) {
+    if (!cur || document.hidden) return;
+    /* Busy sending or already fetching: a live nudge must not get lost, so try again shortly. */
+    if (busy || polling) { if (force) { clearTimeout(retryPoll); retryPoll = setTimeout(() => poll(true), 600); } return; }
+    /* With live updates connected, the timer is only a safety net: every 30s instead of every 4s. */
+    if (!force && BB.dmLive && Date.now() - lastPoll < 30000) return;
     polling = true;
+    lastPoll = Date.now();
     try { await pollOnce(); } finally { polling = false; }
   }
   async function pollOnce() {
@@ -593,7 +599,7 @@
     try { r = await rpc("dm_poll", { p_other: id, p_after: newest }); } catch (e) { return; }
     if (cur !== id || !r) return;
     /* dm_poll sends at most 100 at a time, oldest first: fetch the rest right after. */
-    if ((r.msgs || []).length >= 100) setTimeout(poll, 50);
+    if ((r.msgs || []).length >= 100) setTimeout(() => poll(true), 50);
     let changed = false;
     const fresh = (r.msgs || []).filter(m => !msgs.some(x => x.id === m.id));
     if (fresh.length) {
@@ -1290,9 +1296,18 @@
       if ($("dmsgs").scrollTop < 80) loadOlder();
       if (!$("djump").hidden && nearBottom()) { missed = 0; $("djump").hidden = true; }
     }, { passive: true });
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) { poll(); markRead(); loadInbox(); } });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) { poll(true); markRead(); loadInbox(); } });
+    /* Live nudge from app.js: one of my chats changed. Fetch it now, through the checked functions. */
+    let inboxSoon = null;
+    document.addEventListener("bb:dm", e => {
+      const other = e.detail && e.detail.with;
+      if (other && other === cur) poll(true);
+      clearTimeout(inboxSoon);
+      inboxSoon = setTimeout(() => { if (!document.hidden) loadInbox(); }, 350);
+    });
     setInterval(poll, 4000);
-    setInterval(() => { if (!document.hidden) loadInbox(); }, 20000);
+    let tick = 0;
+    setInterval(() => { if (!document.hidden && (!BB.dmLive || ++tick % 4 === 0)) loadInbox(); }, 20000);
   }
 
   /* Logged out, or a different account: forget the last person's chats,

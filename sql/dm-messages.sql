@@ -666,6 +666,42 @@ begin
   end loop;
 end $$;
 
+-- ── Live updates ──────────────────────────────────────────────────────
+-- When a message is sent, read or unsent, both people get a nudge on their
+-- own private Realtime topic "dm:<discord id>". The nudge has NO message text,
+-- only which chat changed; the page then fetches through dm_poll / dm_inbox,
+-- which check everything as before. Pages fall back to polling without it.
+create or replace function public.dm_nudge()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  begin
+    perform realtime.send(jsonb_build_object('with', new.recipient), 'dm', 'dm:' || new.sender, true);
+    perform realtime.send(jsonb_build_object('with', new.sender), 'dm', 'dm:' || new.recipient, true);
+  exception when others then
+    null;   -- live updates are a nice-to-have: never let them stop a message
+  end;
+  return null;
+end $$;
+revoke all on function public.dm_nudge() from public, anon, authenticated;
+
+drop trigger if exists dm_nudge_insert on public.dm_messages;
+drop trigger if exists dm_nudge_update on public.dm_messages;
+create trigger dm_nudge_insert after insert on public.dm_messages
+  for each row execute function public.dm_nudge();
+create trigger dm_nudge_update after update on public.dm_messages
+  for each row when (old.read_at is distinct from new.read_at or old.unsent is distinct from new.unsent)
+  execute function public.dm_nudge();
+
+-- Only you can listen on your own topic. Nobody gets a policy to send on it,
+-- so nudges can only come from the trigger above.
+do $$ begin
+  drop policy if exists "dm nudges: own topic only" on realtime.messages;
+  create policy "dm nudges: own topic only" on realtime.messages for select to authenticated
+    using (realtime.messages.extension = 'broadcast' and (select realtime.topic()) = 'dm:' || public.dm_me());
+exception when undefined_table or undefined_function or invalid_schema_name then
+  raise notice 'Realtime authorization is not available in this project: messages will poll instead.';
+end $$;
+
 -- ── Image storage ─────────────────────────────────────────────────────
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('dm-images', 'dm-images', false, 3145728, array['image/webp', 'image/jpeg'])
