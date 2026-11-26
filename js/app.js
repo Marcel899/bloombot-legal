@@ -1288,6 +1288,7 @@
     wait_reply: ["Open chat", "You've sent 3 messages. You can send more once they reply.", true],
     you_blocked: ["Open chat", "You blocked them. Open the chat to unblock.", true],
     closed: ["Message", "Not taking new messages right now.", false],
+    verified_only: ["Get verified", "Only takes new chats from verified Roblox accounts.", true, "profile.html#edit"],
     no_user: ["Message", "They haven't set up Bloombot yet, so they can't get messages.", false],
     banned: ["Message", "You can't send messages right now.", false],
     profile: ["Set up account", "Create your Bloombot account to message traders.", true, "profile.html#edit"],

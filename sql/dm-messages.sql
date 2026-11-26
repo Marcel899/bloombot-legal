@@ -90,6 +90,8 @@ create index if not exists dm_filtered_sender_idx on public.dm_filtered (sender,
 
 -- Email alerts: on unless turned off in Message settings.
 alter table public.dm_settings add column if not exists email_notify boolean not null default true;
+-- Verified only: new chats only from traders with a verified Roblox account.
+alter table public.dm_settings add column if not exists verified_only boolean not null default false;
 
 -- Which unread messages someone was already emailed about.
 create table if not exists public.dm_email_log (
@@ -167,6 +169,12 @@ returns boolean language sql immutable set search_path = '' as $$
       or coalesce(t, '') ~* '\.?roblosecurity[[:space:]]*[=:]'
       or coalesce(t, '') ~ '[A-Za-z0-9_-]{23,28}\.[A-Za-z0-9_-]{6,7}\.[A-Za-z0-9_-]{27,}'
       or coalesce(t, '') ~ '\m[A-F0-9]{250,}\M'
+$$;
+
+-- Whether a trader has a verified Roblox account (shown publicly on profiles anyway).
+create or replace function public.dm_is_verified(p_user text)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.profiles p where p.discord_id::text = p_user and coalesce(p.roblox_verified, false))
 $$;
 
 -- Used by the storage policies below.
@@ -251,6 +259,8 @@ begin
 
   if not they_replied then
     if not coalesce((select allow_new from public.dm_settings where discord_id = p_to), true) then raise exception 'dm:closed'; end if;
+    if coalesce((select verified_only from public.dm_settings where discord_id = p_to), false)
+       and not public.dm_is_verified(me) then raise exception 'dm:verified_only'; end if;
     -- Until they answer, you can send 3 messages. Unsent ones still count, so
     -- send → unsend → send can't be used to keep pinging a stranger.
     if (select count(*) from public.dm_messages where sender = me and recipient = p_to) >= 3 then raise exception 'dm:wait_reply'; end if;
@@ -435,6 +445,8 @@ begin
   return json_build_object(
     'allow_new', coalesce((select allow_new from public.dm_settings where discord_id = me), true),
     'email_notify', coalesce((select email_notify from public.dm_settings where discord_id = me), true),
+    'verified_only', coalesce((select verified_only from public.dm_settings where discord_id = me), false),
+    'me_verified', public.dm_is_verified(me),
     'has_email', public.dm_email_of(me) is not null,
     'blocked', coalesce((select json_agg(json_build_object('id', k.blocked, 'name', p.discord_name, 'avatar', p.discord_avatar) order by k.created_at desc)
                          from public.dm_blocks k left join public.profiles p on p.discord_id::text = k.blocked
@@ -448,6 +460,15 @@ begin
   insert into public.dm_settings (discord_id, allow_new, updated_at) values (me, coalesce(p_allow, true), now())
   on conflict (discord_id) do update set allow_new = excluded.allow_new, updated_at = now();
   return coalesce(p_allow, true);
+end $$;
+
+create or replace function public.dm_set_verified(p_on boolean)
+returns boolean language plpgsql volatile security definer set search_path = '' as $$
+declare me text := public.dm_require();
+begin
+  insert into public.dm_settings (discord_id, verified_only, updated_at) values (me, coalesce(p_on, false), now())
+  on conflict (discord_id) do update set verified_only = excluded.verified_only, updated_at = now();
+  return coalesce(p_on, false);
 end $$;
 
 create or replace function public.dm_set_email(p_on boolean)
@@ -524,6 +545,8 @@ begin
   select exists (select 1 from public.dm_messages where sender = p_other and recipient = me) into they_replied;
   if not they_replied then
     if not coalesce((select allow_new from public.dm_settings where discord_id = p_other), true) then return 'closed'; end if;
+    if coalesce((select verified_only from public.dm_settings where discord_id = p_other), false)
+       and not public.dm_is_verified(me) then return 'verified_only'; end if;
     if (select count(*) from public.dm_messages where sender = me and recipient = p_other) >= 3 then return 'wait_reply'; end if;
     return 'new';   -- can write; pictures unlock once they reply
   end if;
@@ -630,7 +653,7 @@ begin
     'dm_report(bigint,text,text)', 'dm_get_settings()', 'dm_set_allow(boolean)', 'dm_can_message(text)',
     'dm_admin_reports(text)', 'dm_admin_filtered()', 'dm_admin_ban(text,boolean,text)', 'dm_has_link(text)',
     'dm_set_email(boolean)', 'dm_image_kept(text)', 'dm_admin_open_count()', 'dm_admin_resolve(bigint,text)',
-    'dm_admin_bans()', 'dm_has_secret(text)']
+    'dm_admin_bans()', 'dm_has_secret(text)', 'dm_is_verified(text)', 'dm_set_verified(boolean)']
   loop
     execute format('revoke all on function public.%s from public, anon', f);
     execute format('grant execute on function public.%s to authenticated', f);

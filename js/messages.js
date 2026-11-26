@@ -22,6 +22,7 @@
     "dm:image_wait": "Pictures unlock once they reply.",
     "dm:you_blocked": "You blocked this trader. Unblock them to send a message.",
     "dm:closed": "This trader isn't taking new messages.",
+    "dm:verified_only": "This trader only takes new chats from verified Roblox accounts.",
     "dm:slow": "Slow down a little.",
     "dm:wait_reply": "Wait for a reply before sending more.",
     "dm:new_limit": "You started a lot of new chats today. Try again tomorrow.",
@@ -34,6 +35,7 @@
   const NOTE = {
     you_blocked: "You blocked this trader.",
     closed: "This trader isn't taking new messages.",
+    verified_only: "This trader only takes new chats from verified Roblox accounts.",
     wait_reply: "You can send more once they reply.",
     no_user: "This trader isn't on Bloombot yet.",
     self: "This is you.",
@@ -342,6 +344,11 @@
       b.onclick = () => block(false);
       note.append(" ", b);
     }
+    if (canSend === "verified_only") {
+      const b = el("a", "dm-link", "Verify your Roblox");
+      b.href = "profile.html#edit";
+      note.append(" ", b);
+    }
     $("dtext").disabled = typeOff;
     $("dfile").disabled = typeOff || canSend === "new";
     $("dclip").title = canSend === "new" ? "Pictures unlock once they reply" : "Add a picture";
@@ -618,7 +625,7 @@
         temp.sending = false;
         temp.failed = true;
       }
-      if (k === "dm:wait_reply" || k === "dm:closed" || k === "dm:you_blocked") setCan(k.slice(3));
+      if (k === "dm:wait_reply" || k === "dm:closed" || k === "dm:you_blocked" || k === "dm:verified_only") setCan(k.slice(3));
       if (k === "dm:image_wait") setCan("new");
       BB.toast(errText(err), "bad", { title: "Message not sent" });
     } finally {
@@ -1109,7 +1116,13 @@
       s.has_email ? "When a message waits 2 minutes. One email per chat every 30 minutes." : "Your login has no email address, so there's nowhere to send them.",
       !!s.has_email && s.email_notify !== false, v => rpc("dm_set_email", { p_on: v }), v => v ? "Email alerts on" : "Email alerts off");
     if (!s.has_email) { m.inp.disabled = true; m.r.classList.add("off"); }
-    card.append(a.r, el("div", "dms-sep"), m.r);
+    const v = row("verified", "Verified traders only", "New chats only from traders with a verified Roblox account. People you already talk to aren't affected.",
+      !!s.verified_only, val => rpc("dm_set_verified", { p_on: val }), val => val ? "Only verified traders can start a chat" : "Any trader can start a chat");
+    /* With new messages off, nobody new can write anyway. */
+    const sync = () => { v.r.classList.toggle("off", !a.inp.checked); v.inp.disabled = !a.inp.checked; };
+    a.inp.addEventListener("change", sync);
+    sync();
+    card.append(a.r, el("div", "dms-sep"), v.r, el("div", "dms-sep"), m.r);
     priv.append(card);
 
     const rules = section("Chat rules");
