@@ -3913,3 +3913,59 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 [data-theme=light] .pdm.off{background:var(--card-2);border-color:var(--line)}
 [data-theme=light] .pdm.off .pdm-ic{background:#ece6d6;border-color:var(--line-2)}
 [data-theme=light] .pdm[data-state=you_blocked] .pdm-h,[data-theme=light] .pdm[data-state=wait_reply] .pdm-h{color:#7a5500}
+
+/* ── polish pass: hover feedback, alignment, small-screen fixes ── */
+/* Text links inside sentences: a clear hover everywhere, not just on buttons. */
+:where(p,li,td,.md,.note,.credit,.hint,.cz-empty,.dm-t) a:not([class]){text-underline-offset:3px;text-decoration-thickness:1px;transition:color .15s,text-decoration-thickness .15s,text-underline-offset .15s}
+:where(p,li,td,.md,.note,.credit,.hint,.cz-empty,.dm-t) a:not([class]):hover{text-decoration-line:underline;text-decoration-thickness:2px;text-underline-offset:4px;filter:brightness(1.2)}
+[data-theme=light] :where(p,li,td,.md,.note,.credit,.hint,.cz-empty,.dm-t) a:not([class]):hover{filter:brightness(.8)}
+.linkbtn,.cz-empty button{transition:color .15s,text-decoration-thickness .15s}
+.linkbtn:hover,.cz-empty button:hover{text-decoration-thickness:2px;filter:brightness(1.2)}
+[data-theme=light] .linkbtn:hover,[data-theme=light] .cz-empty button:hover{filter:brightness(.8)}
+
+/* "Open →" style links nudge toward where they go. */
+.sec-head a,.fgo,.tlink .more{display:inline-block;transition:color .15s,transform .15s}
+.sec-head a:hover,.fgo:hover{transform:translateX(3px)}
+.tlink:hover .more{transform:translateX(3px)}
+.sec-head a:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* Footer logo: the flower gives a little wiggle. */
+.foot-mark img{transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.foot-mark:hover img.flower{transform:rotate(-14deg) scale(1.08)}
+.foot-mark:hover img:not(.flower){transform:translateX(2px)}
+
+/* Crate calculator: event crates toggle and switch rows answer the pointer too. */
+.kc-more>summary{transition:background .15s,border-color .15s,color .15s}
+.kc-more>summary:hover{background:#343a48;color:var(--text)}
+[data-theme=light] .kc-more>summary:hover{background:#f6f0df;border-color:var(--line-2);color:var(--text)}
+.ktog-line:hover .ktog i{filter:brightness(1.15)}
+.ktog-line:hover>span:last-child strong{color:var(--text)}
+
+/* Feature cards: command chips sit on the same line in every card of a row. */
+.ffoot{min-height:30px}
+.fgo{line-height:1.3}
+
+/* "About …" panels: heading lines up with the questions under it. */
+.panel.guide h2{padding:0}
+
+/* Trade ads / strategies filter bar: a panel like the values page, not a floating row. */
+.panel.board-bar{padding:12px;margin-bottom:18px}
+.panel.board-bar .search{height:44px;border-width:2px;border-radius:12px;padding:0 14px 0 40px;background:var(--card-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%239aa3b4' stroke-width='2.6' stroke-linecap='round' d='M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21'/%3E%3C/svg%3E") 13px 50%/17px no-repeat}
+.panel.board-bar .count-pill{margin-left:auto}
+.panel.board-bar .mine{padding:6px 10px;border-radius:10px;transition:background .15s,color .15s}
+.panel.board-bar .mine:hover{background:rgba(255,255,255,.05);color:var(--text)}
+[data-theme=light] .panel.board-bar .mine:hover{background:var(--hov)}
+.mine input{accent-color:var(--green);width:17px;height:17px}
+@media (max-width:600px){
+  .panel.board-bar{padding:10px}
+  /* the sort menu was squeezed to an empty 30px box next to "Only my ads" */
+  .board-bar .dd,.board-bar select{flex:1 1 150px;min-width:140px}
+  .panel.board-bar .count-pill{margin-left:0}
+  /* quick search chips scroll sideways: fade the edge so it's clear there's more */
+  .quick{-webkit-mask:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-right:24px}
+}
+
+/* Light theme: the hero line sits on a bright sky, so give it a stronger shadow. */
+[data-theme=light] .hero .sub{color:#fff;text-shadow:0 1px 2px rgba(16,36,64,.65),0 2px 14px rgba(16,36,64,.55)}
+/* Even line lengths for short centred lines and headings ("30-\nday" no longer splits). */
+.hero .sub,.hero h1,.tile h3,.guide h3,.sec-head h2{text-wrap:balance}

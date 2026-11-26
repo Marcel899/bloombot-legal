@@ -481,7 +481,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 </div>
 <p class="post-status" id="poststatus" hidden></p>
 </form>
-<div class="board-bar">
+<div class="panel board-bar">
 <input class="search" id="adq" type="search" placeholder="Search units or traders…" aria-label="Search trade ads">
 <select id="adsort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="ending">Ending soon</option></select>
 <label class="mine"><input type="checkbox" id="mine"> Only my ads</label>
@@ -773,7 +773,7 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <p class="post-status" id="sstatus" hidden></p>
 </form>
 </section>
-<div class="board-bar">
+<div class="panel board-bar">
 <input class="search" id="sq" type="search" placeholder="Search strategies…" aria-label="Search strategies">
 <div class="chips"><button class="chip on" type="button" data-scat="all">All<i></i></button><button class="chip" type="button" data-scat="meta-units">Meta units<i></i></button><button class="chip" type="button" data-scat="map-specific">Map-specific<i></i></button><button class="chip" type="button" data-scat="general">General<i></i></button><button class="chip" type="button" data-scat="mine" hidden>Mine<i></i></button></div>
 <select id="ssort" aria-label="Sort strategies"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
