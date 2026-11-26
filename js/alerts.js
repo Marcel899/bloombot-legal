@@ -72,13 +72,37 @@
     const priceRow = el("label", "al-row");
     priceRow.append(el("span", null, "Price"), price);
     const hint = el("p", "al-hint");
+    hint.setAttribute("aria-live", "polite");
+    /* What this alert will do, worked out from the price typed so far. */
+    const explain = () => {
+      hint.className = "al-hint";
+      hint.replaceChildren();
+      if (kind === "change") { hint.textContent = "Every time the value list changes its price."; return; }
+      const t = BB.parseValue(price.value.replace(/\s+/g, ""));
+      if (!(t > 0)) { hint.textContent = "Type a price, like " + (roundNice(now ? now * (kind === "above" ? 1.1 : 0.9) : 0) || "60k") + "."; return; }
+      if (!now) { hint.textContent = "Once when it " + (kind === "above" ? "rises to " : "falls to ") + BB.fmt(t) + "."; return; }
+      const past = kind === "above" ? now >= t : now <= t;
+      if (past) {
+        hint.classList.add("warn");
+        hint.append("It's already " + (kind === "above" ? "at or above " : "at or below ") + BB.fmt(t) + " (now " + BB.fmt(now) + "), so this only fires after it " +
+          (kind === "above" ? "drops below and comes back up. " : "rises above and comes back down. "));
+        const sw = el("button", "al-sw", kind === "above" ? "Use Drops below" : "Use Goes above");
+        sw.type = "button";
+        sw.onclick = () => { kind = kind === "above" ? "below" : "above"; fill(); price.focus(); };
+        hint.append(sw);
+        return;
+      }
+      const pct = Math.round(Math.abs(t - now) / now * 1000) / 10;
+      hint.textContent = (kind === "above" ? "+" : "−") + pct + "% from now (" + BB.fmt(now) + "). Once when it " +
+        (kind === "above" ? "rises" : "falls") + " to " + BB.fmt(t) + ", then again if it goes back and crosses it again.";
+    };
+    price.addEventListener("input", explain);
     const fill = () => {
       kinds.querySelectorAll("button").forEach(b => { b.setAttribute("aria-checked", String(b.dataset.k === kind)); });
       priceRow.hidden = kind === "change";
       const have = mine.find(a => a.kind === kind);
       if (kind !== "change") price.value = have ? BB.fmt(Number(have.target)) : roundNice(now ? now * (kind === "above" ? 1.1 : 0.9) : 0);
-      hint.textContent = kind === "change" ? "Every time the value list changes its price." :
-        "Once when it " + (kind === "above" ? "rises to" : "falls to") + " that price. It re-arms if the price goes back.";
+      explain();
       save.textContent = have ? "Update alert" : "Set alert";
     };
     Object.entries(KIND).forEach(([k, label]) => {
@@ -195,7 +219,13 @@
       const t = el("span", "col-t");
       t.append(el("strong", null, a.item));
       const sub = el("span", "col-sub");
-      sub.append(el("span", null, "Now " + (a.now > 0 ? BB.fmt(Number(a.now)) : "–")));
+      const nowV = Number(a.now), tg = Number(a.target);
+      sub.append(el("span", null, "Now " + (nowV > 0 ? BB.fmt(nowV) : "–")));
+      if (a.kind !== "change" && nowV > 0 && tg > 0) {
+        const gap = a.kind === "above" ? tg - nowV : nowV - tg;
+        sub.append(gap > 0 ? el("span", "al-gap", "· " + BB.fmt(gap) + " to go (" + Math.round(gap / nowV * 1000) / 10 + "%)")
+          : el("span", "al-gap hit", "· already past, waits for the next crossing"));
+      }
       if (a.fired_at) sub.append(el("span", null, "· last sent " + BB.ago(a.fired_at)));
       t.append(sub);
       u.append(t);

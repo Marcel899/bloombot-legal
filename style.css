@@ -4381,3 +4381,22 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 }
 .u-move{flex-wrap:wrap;row-gap:2px}.u-move small{white-space:nowrap}
 .col-stats[hidden]{display:none}
+
+/* ── price alert polish ── */
+.al-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--card-2)}
+.al-kinds .al-kind{padding:8px 6px;border-radius:10px;background:none;white-space:nowrap}
+.al-kinds .al-kind:hover{background:rgba(255,255,255,.06)}
+.al-kinds .al-kind[aria-checked=true]{background:rgba(20,174,234,.16)}
+.al-hint{min-height:2.6em}
+.al-hint.warn{color:#ffd96a}
+.al-sw{margin-left:2px;padding:0;border:0;background:none;color:#7cc4ff;font:900 .82rem "Nunito",sans-serif;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.al-sw:hover{text-decoration-thickness:2px}
+.al-gap{color:var(--muted)}
+.al-gap.hit{color:#ffd96a}
+@media (max-width:420px){.al-kinds .al-kind{font-size:.84rem;padding:8px 2px}}
+[data-theme=light] .al-kinds{background:#f6f2e6}
+[data-theme=light] .al-kinds .al-kind{background:none}
+[data-theme=light] .al-kinds .al-kind:hover{background:rgba(255,255,255,.7)}
+[data-theme=light] .al-kinds .al-kind[aria-checked=true]{background:#fff;box-shadow:0 1px 2px rgba(90,70,20,.15)}
+[data-theme=light] .al-hint.warn,[data-theme=light] .al-gap.hit{color:#a35a00}
+[data-theme=light] .al-sw{color:#1a63d0}
