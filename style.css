@@ -4753,3 +4753,54 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 .xm-holly::after{content:"";position:absolute;inset:0;pointer-events:none;background:url(img/studs.png) 0 0/30px 30px;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M30 22 C24 10 12 6 2 10 C6 13 4 17 8 19 C6 23 10 25 12 28 C18 26 24 27 30 22 Z'/%3E%3Cpath d='M34 22 C40 10 52 6 62 10 C58 13 60 17 56 19 C58 23 54 25 52 28 C46 26 40 27 34 22 Z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M30 22 C24 10 12 6 2 10 C6 13 4 17 8 19 C6 23 10 25 12 28 C18 26 24 27 30 22 Z'/%3E%3Cpath d='M34 22 C40 10 52 6 62 10 C58 13 60 17 56 19 C58 23 54 25 52 28 C46 26 40 27 34 22 Z'/%3E%3C/svg%3E") center/contain no-repeat}
 @media (max-width:600px){.xm-board::after{background-size:72px 72px}.p-studs{background-size:auto,56px 56px}.xm-holly::after{background-size:22px 22px}}
+
+/* ── advent: live countdown ── */
+.xm-cd{position:relative;margin-top:6px;padding:16px 22px 18px;border-radius:20px;background:rgba(6,18,38,.62);border:2px solid rgba(255,255,255,.16);
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.xm-cd[hidden]{display:none}
+/* snow resting on top of the panel */
+.xm-cd::before{content:"";position:absolute;left:12px;right:12px;top:-9px;height:20px;border-radius:12px 12px 0 0;pointer-events:none;
+  background:radial-gradient(12px 8px at 13px 15px,#fff 98%,transparent 100%) 0 0/26px 22px repeat-x,linear-gradient(#fff,#fff) 0 0/100% 15px no-repeat;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.18))}
+.xm-cd-h{display:flex;align-items:center;justify-content:center;gap:8px;margin:4px 0 12px;color:#ffd24a;font:700 1.15rem "Fredoka",sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.xm-cd-h img{width:20px;height:20px}
+.xm-cd-row{display:flex;align-items:flex-start;justify-content:center;gap:8px}
+.xm-cd-row[hidden]{display:none}
+/* each number is a gift tag, like the ones on the doors */
+.xm-cd-t{display:flex;flex-direction:column;align-items:center;gap:7px}
+.xm-cd-t[hidden],.xm-cd-c[hidden]{display:none}
+.xm-cd-t b{position:relative;display:block;min-width:2.3em;padding:12px 10px 8px;border:3px solid #0c0e12;border-radius:14px;
+  background:linear-gradient(180deg,#fffdf6 0 49%,#efe8d6 49% 51%,#fffaf0 51%);color:#c8202f;
+  font:700 2.4rem/1 "Fredoka",sans-serif;font-variant-numeric:tabular-nums;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,.3),inset 0 -4px 0 rgba(0,0,0,.06)}
+.xm-cd-t b::before{content:"";position:absolute;top:5px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;border:2px solid #0c0e12;background:#d9d3c3}
+.xm-cd-t:nth-child(odd) b{transform:rotate(-2.5deg)}
+.xm-cd-t:nth-child(even) b{transform:rotate(2deg)}
+.xm-cd-t span{color:#dbe4f3;font-size:.74rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.xm-cd-c{padding-top:14px;color:#ffd24a;font:700 2rem/1 "Fredoka",sans-serif;font-style:normal;animation:xmBlink 1s steps(2) infinite}
+@keyframes xmBlink{50%{opacity:.35}}
+.xm-cd-t b.tick{animation:xmTick .32s cubic-bezier(.2,.9,.3,1.3)}
+.xm-cd-t:nth-child(odd) b.tick{--r:-2.5deg}.xm-cd-t:nth-child(even) b.tick{--r:2deg}
+@keyframes xmTick{from{transform:translateY(-5px) rotate(var(--r,0)) scale(1.05)}to{transform:rotate(var(--r,0))}}
+.xm-cd-x{margin:0;color:#fff;font:700 1.3rem "Fredoka",sans-serif}
+.xm-cd-x[hidden]{display:none}
+/* a shooting star every few seconds */
+.xm-shoot{position:absolute;top:16%;left:8%;width:130px;height:2px;border-radius:2px;opacity:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),#fff);box-shadow:0 0 8px rgba(255,255,255,.7);transform:rotate(18deg);animation:xmShoot 9s ease-in 2s infinite}
+@keyframes xmShoot{0%{opacity:0;transform:translate(0,0) rotate(18deg)}2%{opacity:1}12%{opacity:0;transform:translate(560px,182px) rotate(18deg)}100%{opacity:0;transform:translate(560px,182px) rotate(18deg)}}
+@media (max-width:600px){
+  .xm-cd{padding:14px 12px 14px;border-radius:16px}
+  .xm-cd-h{font-size:1rem;margin-bottom:10px}
+  .xm-cd-row{gap:4px}
+  .xm-cd-t b{min-width:2.1em;padding:10px 6px 6px;font-size:1.7rem;border-radius:11px}
+  .xm-cd-t span{font-size:.62rem;letter-spacing:.06em}
+  .xm-cd-c{font-size:1.4rem;padding-top:11px}
+}
+@media (prefers-reduced-motion:reduce){.xm-cd-c,.xm-cd-t b.tick,.xm-shoot{animation:none}}
+
+/* weld texture on every door, like the site's weld badges (under the gloss, bow and tag) */
+.xm-weld{position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;background:url(img/weld.png) 0 0/45px 45px repeat;opacity:.3}
+.c-snow .xm-weld{opacity:.16}
+@media (max-width:600px){.xm-weld{background-size:36px 36px}}
+.xm-cd-c{font-size:2.6rem;padding-top:8px;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.xm-hero{padding-bottom:150px}
+@media (max-width:600px){.xm-cd-c{font-size:1.7rem;padding-top:8px}.xm-hero{padding-bottom:118px}}

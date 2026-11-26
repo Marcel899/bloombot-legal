@@ -1130,7 +1130,7 @@ def _advent():
     for i, d in enumerate(order):
         if d == 24:
             cells.append('<li class="xm-cell big" data-day="24" aria-label="December 24"><span class="xm-in"><i></i><i></i><i></i><img src="img/units/christmas_tree.webp" alt=""></span>'
-                         '<span class="xm-door c-gold p-ribbon snowy"><img class="xm-star" src="img/wish_star.png" alt=""><span class="xm-tag">24</span><em>Christmas Eve</em><i class="xm-knob"></i></span></li>')
+                         '<span class="xm-door c-gold p-ribbon snowy"><i class="xm-weld"></i><img class="xm-star" src="img/wish_star.png" alt=""><span class="xm-tag">24</span><em>Christmas Eve</em><i class="xm-knob"></i></span></li>')
             continue
         col, pat = looks[(d * 5) % len(looks)]
         peek = peeks[d % len(peeks)]
@@ -1139,13 +1139,13 @@ def _advent():
         snowy = " snowy" if d % 3 == 0 else ""
         bow = '<i class="xm-bow"></i>' if pat == "ribbon" else ""
         cells.append(f'<li class="xm-cell{wide}" data-day="{d}" aria-label="December {d}"><span class="xm-in"><i></i><i></i><i></i><img src="img/{peek}.{ext}" alt=""></span>'
-                     f'<span class="xm-door c-{col} p-{pat}{snowy}">{bow}<span class="xm-tag">{d}</span><i class="xm-knob"></i></span></li>')
+                     f'<span class="xm-door c-{col} p-{pat}{snowy}"><i class="xm-weld"></i>{bow}<span class="xm-tag">{d}</span><i class="xm-knob"></i></span></li>')
     lights = "".join("<i></i>" for _ in range(32))
     flakes = "".join("<i></i>" for _ in range(36))
     stars = "".join("<i></i>" for _ in range(40))
     trees = "".join("<i></i>" for _ in range(9))
     return f"""<section class="xm-hero">
-<div class="xm-sky" aria-hidden="true"><span class="xm-moon"></span>{stars}</div>
+<div class="xm-sky" aria-hidden="true"><span class="xm-moon"></span><span class="xm-shoot"></span>{stars}</div>
 <div class="xm-trees" aria-hidden="true">{trees}</div>
 <div class="xm-lights" aria-hidden="true">{lights}</div>
 <div class="xm-snow" aria-hidden="true">{flakes}</div>
@@ -1153,7 +1153,16 @@ def _advent():
 <img class="xm-hero-gift" src="img/gift.png" alt="">
 <h1 class="xm-title"><span>Advent</span> <span>Calendar</span></h1>
 <p class="sub">24 doors of Garden Tower Defense surprises. A new one opens every day until Christmas.</p>
-<div class="xm-chips"><span class="xm-count" id="xmcount" hidden><img src="img/wish_star.png" alt=""><b id="xmcount-t"></b></span><span><img src="img/bell.png" alt="">1 – 24 December</span><span><img src="img/gift.png" alt="">One door a day</span></div>
+<div class="xm-cd" id="xmcd" role="timer" aria-live="off" hidden>
+<p class="xm-cd-h"><img src="img/wish_star.png" alt=""><span id="xmcd-h">Door 1 opens in</span><img src="img/wish_star.png" alt=""></p>
+<div class="xm-cd-row" id="xmcd-row">
+<div class="xm-cd-t" id="xmcd-dt"><b id="xmcd-d">0</b><span id="xmcd-dl">days</span></div><i class="xm-cd-c" id="xmcd-dc">:</i>
+<div class="xm-cd-t"><b id="xmcd-hh">00</b><span>hours</span></div><i class="xm-cd-c">:</i>
+<div class="xm-cd-t"><b id="xmcd-mm">00</b><span>mins</span></div><i class="xm-cd-c">:</i>
+<div class="xm-cd-t"><b id="xmcd-ss">00</b><span>secs</span></div>
+</div>
+<p class="xm-cd-x" id="xmcd-x" hidden></p>
+</div>
 </div>
 </section>
 <main class="wrap xm" id="main">
@@ -1163,7 +1172,7 @@ def _advent():
 <ol class="xm-grid">{"".join(cells)}</ol>
 <div class="xm-gifts" aria-hidden="true"><img src="img/cur/presents-2.webp" alt=""><img src="img/units/christmas_tree.webp" alt=""><img src="img/cur/candy-2.webp" alt=""><img src="img/units/rolling_wreath.webp" alt=""><img src="img/cur/presents-2.webp" alt=""></div>
 </section>
-<p class="xm-foot"><img src="img/wish_star.png" alt="">Doors open from 1 December. Come back every day.</p>
+<p class="xm-foot"><img src="img/wish_star.png" alt="">Happy holidays from the Bloombot team!</p>
 </main>
 <script defer src="js/advent.js?v={hashlib.md5(open("js/advent.js", "rb").read()).hexdigest()[:8]}"></script>
 """
