@@ -4745,3 +4745,11 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 /* studs a bit bigger: board 48px → 64px tiles, studs wrapping paper 40px → 52px */
 .xm-board::after{background-size:64px 64px}
 .p-studs{background-size:auto,52px 52px}
+
+/* studs even bigger: board 64px → 88px tiles, studs paper 52px → 70px */
+.xm-board::after{background-size:88px 88px}
+.p-studs{background-size:auto,70px 70px}
+/* studs on the holly leaves too */
+.xm-holly::after{content:"";position:absolute;inset:0;pointer-events:none;background:url(img/studs.png) 0 0/30px 30px;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M30 22 C24 10 12 6 2 10 C6 13 4 17 8 19 C6 23 10 25 12 28 C18 26 24 27 30 22 Z'/%3E%3Cpath d='M34 22 C40 10 52 6 62 10 C58 13 60 17 56 19 C58 23 54 25 52 28 C46 26 40 27 34 22 Z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M30 22 C24 10 12 6 2 10 C6 13 4 17 8 19 C6 23 10 25 12 28 C18 26 24 27 30 22 Z'/%3E%3Cpath d='M34 22 C40 10 52 6 62 10 C58 13 60 17 56 19 C58 23 54 25 52 28 C46 26 40 27 34 22 Z'/%3E%3C/svg%3E") center/contain no-repeat}
+@media (max-width:600px){.xm-board::after{background-size:72px 72px}.p-studs{background-size:auto,56px 56px}.xm-holly::after{background-size:22px 22px}}
