@@ -164,6 +164,7 @@
       b = el("button", "live-pill");
       b.id = "tnew";
       b.type = "button";
+      b.setAttribute("aria-live", "polite");   // screen readers hear "2 new trade ads"
       b.onclick = () => {
         ads = waiting.concat(ads);
         waiting = [];

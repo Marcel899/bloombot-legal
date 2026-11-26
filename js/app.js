@@ -705,13 +705,26 @@
 
   /* Unread direct messages, shown on the account button. */
   let dmTimer = null;
+  let dmFrom = null, dmFromAt = 0, dmToasted = 0;
   async function checkDms() {
     clearTimeout(dmTimer);
     if (!BB.session || !BB.user(BB.session).id) return;
     if (!document.hidden && !/\/messages(\.html)?$/.test(location.pathname)) {
       try {
+        const before = BB.dmUnread;
         const { data, error } = await BB.sb.rpc("dm_unread");
         if (!error && BB.setDmUnread) BB.setDmUnread(data || 0);
+        /* A live nudge just raised the unread count: say who wrote, with a way to open the chat. */
+        if (!error && before != null && (data || 0) > before && dmFrom && Date.now() - dmFromAt < 8000 && Date.now() - dmToasted > 4000) {
+          dmToasted = Date.now();
+          const from = dmFrom;
+          let name = "a trader";
+          try {
+            const { data: p } = await BB.sb.from("profiles").select("discord_name").eq("discord_id", from).maybeSingle();
+            if (p && p.discord_name) name = BB.plain(p.discord_name) || name;
+          } catch (e) { /* name is optional */ }
+          BB.toast("From " + name, "info", { title: "New message", action: { label: "Open", run: () => { location.href = "messages.html?to=" + encodeURIComponent(from); } } });
+        }
       } catch (e) { /* not set up yet */ }
     }
     dmTimer = setTimeout(checkDms, 30000);
@@ -732,7 +745,9 @@
     if (!id || !BB.sb || !BB.sb.channel) return;
     dmLive = BB.sb.channel("dm:" + id, { config: { private: true } })
       .on("broadcast", { event: "dm" }, msg => {
-        document.dispatchEvent(new CustomEvent("bb:dm", { detail: (msg && msg.payload) || {} }));
+        const pl = (msg && msg.payload) || {};
+        if (BB.isId(pl.with)) { dmFrom = pl.with; dmFromAt = Date.now(); }
+        document.dispatchEvent(new CustomEvent("bb:dm", { detail: pl }));
         clearTimeout(dmNudge);
         dmNudge = setTimeout(checkDms, 300);
       })
