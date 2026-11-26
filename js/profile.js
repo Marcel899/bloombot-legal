@@ -228,6 +228,8 @@
     $("fdc").classList.toggle("bad", n > 280);
     const d = dirty();
     $("pdirty").hidden = !d;
+    /* With unsaved changes the Save bar floats at the bottom of the screen, so it's never a scroll away. */
+    $("pedit").classList.toggle("dirty", d);
     $("psave").disabled = busy || !ok || (!d && !!mine);
     return ok;
   }
@@ -272,6 +274,7 @@
     $("fv-row").classList.toggle("ok", vf);
     $("fv-s").textContent = vf ? "Verified Roblox account" : mine && mine.roblox_name ? "Not verified yet. Prove it's yours to get the verified tag." : "Prefer to prove it's yours? Verify with a code instead.";
     $("fverify").textContent = vf ? "Verify again" : "Verify";
+    $("fverify").className = "brick sm " + (vf ? "dark" : "blue");   // already verified: a quiet button, not a call to action
     accounts();
     $("pdanger").hidden = !mine;
     $("pclose").hidden = !mine;
@@ -436,6 +439,7 @@
     setTimeout(poll, 1200);
   }
   $("pedit").onsubmit = save;
+  if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.querySelector(".pe-kbd").textContent = "⌘ + Enter to save";
   $("fverify").onclick = () => BB.verifyRoblox({ name: $("fu").value.trim() || (mine && mine.roblox_name) || "" });
   document.addEventListener("bb:roblox-verified", () => { if (me) { orig = vals(); closeEdit(); setTimeout(load, 600); } });
   $("pdel").onclick = async () => {

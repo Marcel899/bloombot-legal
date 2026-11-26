@@ -3969,3 +3969,47 @@ img.dc{object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 [data-theme=light] .hero .sub{color:#fff;text-shadow:0 1px 2px rgba(16,36,64,.65),0 2px 14px rgba(16,36,64,.55)}
 /* Even line lengths for short centred lines and headings ("30-\nday" no longer splits). */
 .hero .sub,.hero h1,.tile h3,.guide h3,.sec-head h2{text-wrap:balance}
+
+/* ── profile settings polish ── */
+/* Unsaved changes: the Save bar floats at the bottom of the screen until you save or cancel. */
+.pedit.dirty .pe-bar,[data-theme=light] .pedit.dirty .pe-bar{position:sticky;bottom:14px;z-index:6;margin:0 -10px;padding:10px 10px 10px 16px;border:2px solid #0c0e12;border-radius:14px;background:var(--card-2);box-shadow:0 16px 34px -14px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.04);animation:peBar .22s cubic-bezier(.2,.9,.3,1.2)}
+[data-theme=light] .pedit.dirty .pe-bar{border-color:var(--line-2);background:#fffdf7;box-shadow:0 16px 30px -16px rgba(90,70,20,.45)}
+@keyframes peBar{from{transform:translateY(10px);opacity:0}}
+.pe-kbd{margin-left:8px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.07);color:var(--muted);font:700 .72rem ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:0}
+[data-theme=light] .pe-kbd{background:#f3eddd}
+@media (hover:none),(max-width:640px){.pe-kbd{display:none}}
+@media (max-width:640px){.pedit.dirty .pe-bar,[data-theme=light] .pedit.dirty .pe-bar{bottom:10px;margin:0 -6px;padding:10px}}
+/* the back-to-top button would sit on top of the floating Save button */
+body:has(.pedit.dirty:not([hidden])) .totop{opacity:0;pointer-events:none}
+
+/* Danger zone: a clear row that opens, not a loose red link. */
+.pe-danger summary{display:flex;align-items:center;gap:12px;width:auto;padding:12px 14px;border:1px solid rgba(239,75,79,.25);border-radius:12px;background:rgba(239,75,79,.04);color:var(--text);font-size:1rem;transition:background .15s,border-color .15s}
+.pe-danger summary::before,.pe-danger[open] summary::before{content:none}
+.pe-danger summary:hover{background:rgba(239,75,79,.09);border-color:rgba(239,75,79,.45)}
+.pe-dz-t{display:flex;flex-direction:column;flex:1;min-width:0;line-height:1.3}
+.pe-dz-t strong{color:#ff8a8d;font-size:.95rem}
+.pe-dz-t span{color:var(--muted);font-size:.82rem;font-weight:700}
+.pe-dz-c{flex:none;width:9px;height:9px;margin:0 4px 4px 0;border:solid var(--muted);border-width:0 2.5px 2.5px 0;transform:rotate(45deg);transition:transform .2s}
+.pe-danger[open] .pe-dz-c{transform:rotate(-135deg);margin:4px 4px 0 0}
+.pe-danger[open] summary{border-color:rgba(220,50,50,.45);background:rgba(220,50,50,.08);border-radius:12px 12px 0 0;border-bottom-style:dashed}
+.pe-danger .pdanger{margin-top:0;border-top:0;border-radius:0 0 12px 12px}
+[data-theme=light] .pe-danger summary{background:#fffafa;border-color:#f2c9c9}
+[data-theme=light] .pe-danger summary:hover,[data-theme=light] .pe-danger[open] summary{background:#fff2f2;border-color:#f2b0b0}
+[data-theme=light] .pe-dz-t strong{color:#c62828}
+
+/* Write / Preview tabs answer the pointer. */
+.pe-tabs button{transition:color .15s,background .15s}
+.pe-tabs button:not(.on):hover{color:var(--text);background:rgba(255,255,255,.05)}
+[data-theme=light] .pe-tabs button:not(.on):hover{background:rgba(255,255,255,.6)}
+
+@media (max-width:520px){
+  /* account rows: let the status line wrap instead of cutting it off */
+  .pacc .pacc-t span{white-space:normal}
+  .pacc-row,.pacc .rv-row{gap:10px;padding:12px}
+  .pacc .brick.sm{padding:6px 12px;font-size:.9rem}
+  /* 16 banners: 4 across fills every row */
+  .ban-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .ban-opt{padding:4px 2px;font-size:.72rem}
+  .ban-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+  .ban-sw{height:34px}
+}

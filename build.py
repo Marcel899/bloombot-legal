@@ -843,7 +843,7 @@ profile_body = f"""<main class="wrap prof" id="main">
 </div>
 </section>
 <section class="pe-sec" aria-labelledby="ps-look"><h3 class="pe-st" id="ps-look">Your profile</h3>
-<div class="pe-field pe-ban" id="fb-f"><div class="pe-lrow"><label id="fb-l">Profile banner</label><span class="pe-bs" id="fb-s" role="status"></span></div><div class="ban-grid" id="fban" role="radiogroup" aria-labelledby="fb-l"></div><p class="pe-msg">Shown at the top of your profile. Saves by itself as soon as you pick one, no need to press Save changes.</p></div>
+<div class="pe-field pe-ban" id="fb-f"><div class="pe-lrow"><label id="fb-l">Profile banner</label><span class="pe-bs" id="fb-s" role="status"></span></div><div class="ban-grid" id="fban" role="radiogroup" aria-labelledby="fb-l"></div><p class="pe-msg">Shown at the top of your profile. Saves as soon as you pick one.</p></div>
 <div class="pe-field" id="fd-f"><div class="pe-lrow"><label for="fd">About me <em>optional</em></label><div class="pe-tabs" role="tablist"><button type="button" role="tab" class="on" id="fdw" aria-selected="true">Write</button><button type="button" role="tab" id="fdp" aria-selected="false">Preview</button></div></div>
 <div class="pe-ta"><textarea id="fd" rows="4" maxlength="300" placeholder="How you play, what you collect, when you're online…"></textarea><div class="pe-prev" id="fdprev" hidden></div></div>
 <div class="pe-foot"><span><b>**bold**</b> <i>*italic*</i> and emojis work</span><span class="count" id="fdc">0/300</span></div></div>
@@ -851,9 +851,9 @@ profile_body = f"""<main class="wrap prof" id="main">
 <section class="pe-sec" id="fab-sec" aria-labelledby="ps-ads" hidden><h3 class="pe-st" id="ps-ads">Trade ads</h3>
 <label class="ktog-line pe-tog"><span class="ktog"><input type="checkbox" id="fab" aria-describedby="fab-m"><i></i></span><span><strong>Auto-bump my trade ads</strong><span id="fab-m"></span></span></label>
 </section>
-<div class="pe-bar"><span class="pe-dirty" id="pdirty" hidden>Unsaved changes</span><span class="pe-sp"></span><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
+<div class="pe-bar"><span class="pe-dirty" id="pdirty" hidden>Unsaved changes<kbd class="pe-kbd">Ctrl + Enter to save</kbd></span><span class="pe-sp"></span><button class="brick dark sm" type="button" id="pcancel">Cancel</button><button class="brick green" id="psave" type="submit">Save changes</button></div>
 <p class="post-status" id="pstatus" hidden role="status"></p>
-<details class="pe-danger" id="pdanger" hidden><summary>Delete account</summary><div class="pdanger"><div><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div></details>
+<details class="pe-danger" id="pdanger" hidden><summary><span class="pe-dz-t"><strong>Delete account</strong><span>Remove your account and everything on it</span></span><i class="pe-dz-c" aria-hidden="true"></i></summary><div class="pdanger"><div><p class="hint">Removes your Bloombot account, trade ads, strategies, wishlist and website login. This can't be undone.</p></div><button class="brick red sm" type="button" id="pdel">Delete account</button></div></details>
 </form>
 <div class="pcols">
 <section class="panel psec" id="pads-sec" hidden><div class="upop-sh"><h3 class="upop-h">Live trade ads</h3><a href="trades.html" id="pads-all">All trade ads &rarr;</a></div><div class="plist" id="pads"></div></section>
