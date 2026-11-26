@@ -126,6 +126,10 @@
   ],
   "rewrites": [
     {
+      "source": "/units/:slug",
+      "destination": "/unit.html"
+    },
+    {
       "source": "/giveaway",
       "destination": "/giveaway.html"
     },
@@ -143,6 +147,11 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/units",
+      "destination": "/values.html",
+      "permanent": false
+    },
     {
       "source": "/index.html",
       "destination": "/",

@@ -488,6 +488,9 @@
     $("mename").textContent = u.name;
     $("login").hidden = true; $("board").hidden = false;
     if (new URLSearchParams(location.search).get("mine")) $("mine").checked = true;
+    /* trades.html?q=Grim Gardener: open with that search, e.g. from a unit's page */
+    const q0 = (new URLSearchParams(location.search).get("q") || "").slice(0, 60);
+    if (q0) $("adq").value = q0;
     if (location.hash.startsWith("#post")) setTimeout(() => { $("post").scrollIntoView({ block: "center" }); $("hq").focus(); }, 50);
     BB.loadValues().then(v => { prepUnits(v); render(); preview(); prefill(v); }).catch(() => {});
     load();

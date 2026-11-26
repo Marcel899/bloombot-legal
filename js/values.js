@@ -148,7 +148,10 @@
     const share = el("button", "brick dark sm", "Copy link");
     share.type = "button";
     share.onclick = () => BB.share(location.origin + location.pathname + "#" + encodeURIComponent(it.name), it.name + " value · Bloombot");
-    acts.append(add, star, share);
+    const full = el("a", "brick blue sm", "Full page");
+    full.href = BB.unitUrl(it.name);
+    full.title = "Price history, live trade ads and similar units";
+    acts.append(full, add, star, share);
     body.append(head, stats, ch, changes, acts);
     m.hidden = false;
     document.body.classList.add("noscroll");

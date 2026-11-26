@@ -1037,6 +1037,27 @@ open("robots.txt", "w").write(f"User-agent: *\nAllow: /\nDisallow: /admin.html\n
 # Sitemap: every page whose robots meta says "index" (noindex pages such as the
 # dashboard, profile and admin pages stay out on their own). A page's lastmod only
 # moves when its HTML changed since the last commit, so Google sees real updates.
+# ── One unit's page (/units/<slug>) ──────────────────────────────────────
+# A template: scripts/build-dist.mjs copies it once per unit at deploy time with the
+# unit's name, value and description baked in (those copies are indexed). This file
+# itself is the fallback for units added since the last deploy, so it stays noindex.
+JSVER["unit"] = hashlib.md5(open("js/unit.js", "rb").read()).hexdigest()[:8]
+unit_body = f"""<main class="wrap unitp" id="main">
+<nav class="u-crumbs" aria-label="Breadcrumb"><a href="values.html">Values</a><span aria-hidden="true">›</span><span id="ucrumb">Unit</span></nav>
+<article class="panel u-card" id="ucard"><div class="u-seed" id="useed"><h1 id="uname">Garden Tower Defense unit value</h1><p id="uline">Loading the latest value…</p></div></article>
+<section class="u-grid" id="usec">
+<div class="panel u-chartp"><h2 class="u-h">Price history</h2><div class="vm-chart u-chart" id="uchart"></div><div id="uchanges"></div></div>
+<div class="panel u-adsp"><div class="upop-sh"><h2 class="u-h">Live trade ads with <span id="uadsn"></span></h2><a href="trades.html" id="uadsall">All trade ads &rarr;</a></div><div class="u-ads" id="uads"><p class="hint">Loading…</p></div></div>
+</section>
+<section class="panel u-simp" id="usim-sec"><h2 class="u-h">Worth about the same</h2><div class="u-sim" id="usim"></div></section>
+<section class="panel guide" id="uabout"></section>
+<p class="note">Values come from the community value list and update about every 2 days. They are estimates, not guarantees.</p>
+</main>
+<script defer src="js/unit.js?v={JSVER['unit']}"></script>
+"""
+open("unit.html", "w").write(page("Unit value · Garden Tower Defense · Bloombot", "Garden Tower Defense unit value, demand and 30-day trend on Bloombot.", unit_body, "v", "unit.html", index=False)
+                              .replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="/">\n', 1))
+
 def _sitemap():
     import datetime, glob, subprocess
     today = datetime.date.today().isoformat()

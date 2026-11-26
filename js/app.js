@@ -295,6 +295,10 @@
   };
 
   /* An item's picture: the bot's emoji, then the value list's picture, then the flower. */
+  /* Address of a unit's own page: "Grim Gardener" -> "units/grim-gardener". scripts/build-dist.mjs uses the same rule. */
+  BB.unitSlug = name => String(name || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/['\u2019]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  BB.unitUrl = name => "units/" + BB.unitSlug(name);
   BB.itemImg = (item, cls) => {
     const img = BB.el("img", cls);
     img.alt = "";
