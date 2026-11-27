@@ -2,7 +2,7 @@
 title: "New: unit pages, your collection and price alerts"
 date: 2026-11-27
 tag: Update
-icon: gem
+icon: news_tag
 color: purple
 summary: Every unit gets its own page, track what your units are worth, get a DM when a price moves, make real offers in chats, and upvote the best strategies.
 ---

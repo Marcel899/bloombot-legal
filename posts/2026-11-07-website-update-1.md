@@ -2,7 +2,7 @@
 title: "Website update: levels, crate calculator, profiles and more"
 date: 2026-11-07
 tag: Update
-icon: medal_gold
+icon: news_levelup
 color: yellow
 summary: Levels with one-time XP tasks, an in-game style crate calculator, profile popups, Google login, Roblox verify, a server dashboard and a light mode.
 ---

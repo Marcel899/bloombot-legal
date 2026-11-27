@@ -2,7 +2,7 @@
 title: The Bloombot website is here!
 date: 2026-11-03
 tag: Launch
-icon: flower
+icon: news_web
 color: green
 summary: Everything Bloombot does in Discord, now in your browser too. Values, a trade calculator, trade ads and strategies, with one-click Discord login.
 ---

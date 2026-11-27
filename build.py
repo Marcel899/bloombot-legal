@@ -167,7 +167,7 @@ NAV = [
     ("a", "trades.html", "trading", "Trade ads", "purple"),
     ("s", "strategies.html", "bullseye", "Strategies", "orange"),
     ("f", "features.html", "gem", "Features", "yellow"),
-    ("n", "news.html", "bell", "News", "red"),
+    ("n", "news.html", "news", "News", "red"),
 ]
 APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
 SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
@@ -297,7 +297,7 @@ def _load_posts():
         words = len(re.findall(r"\w+", body))
         posts.append({
             "slug": slug, "title": meta["title"], "date": date, "tag": meta.get("tag", "News"),
-            "icon": meta.get("icon", "bell"), "color": meta.get("color", "green"),
+            "icon": meta.get("icon", "news"), "color": meta.get("color", "green"),
             "summary": meta.get("summary", ""), "html": _md(body), "mins": max(1, round(words / 200)),
             "image": meta.get("image", ""),
             "url": f"news/{slug}.html",
@@ -309,6 +309,14 @@ def _load_posts():
 POSTS = _load_posts()
 
 
+TAG_ICONS = {"launch": "tag_launch", "update": "tag_update", "feature": "tag_feature"}
+
+
+def _tag(p):
+    t = TAG_ICONS.get(p["tag"].lower(), "news")
+    return f'<span class="nw-tag"><img src="img/{t}.png" alt="">{_html.escape(p["tag"])}</span>'
+
+
 def _nice_date(d):
     return f"{d.day} {d.strftime('%B %Y')}"
 
@@ -317,7 +325,7 @@ def news_card(p, big=False):
     e = _html.escape
     cover = (f'<img class="nw-cover" src="{e(p["image"])}" alt="" loading="lazy" decoding="async">' if p["image"] else "")
     return (f'<a class="tile nw-card{" big" if big else ""}{" has-cover" if cover else ""}" href="{p["url"]}" data-tag="{e(p["tag"].lower())}">'
-            f'{cover}<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>'
+            f'{cover}<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt="">{_tag(p)}</span>'
             f'<span class="nw-cb"><span class="nw-when"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span></span>'
             f'<strong class="nw-ct">{e(p["title"])}</strong><span class="nw-cs">{e(p["summary"])}</span>'
             f'<span class="more">Read{" the post" if big else ""} &rarr;</span></span></a>')
@@ -1389,7 +1397,7 @@ def _news():
         chips = ""
         if len(tags) > 1:
             chips = (f'<div class="chips nw-chips" role="group" aria-label="Filter posts"><button class="chip on" type="button" data-t="all" aria-pressed="true">All</button>'
-                     + "".join(f'<button class="chip" type="button" data-t="{e(t.lower())}" aria-pressed="false">{e(t)}<i>{n}</i></button>' for t, n in sorted(tags.items(), key=lambda x: (-x[1], x[0])))
+                     + "".join(f'<button class="chip" type="button" data-t="{e(t.lower())}" aria-pressed="false"><img src="img/{TAG_ICONS.get(t.lower(), 'news')}.png" alt="">{e(t)}<i>{n}</i></button>' for t, n in sorted(tags.items(), key=lambda x: (-x[1], x[0])))
                      + "</div>")
         n_rest = len(rest)
         lst = (f'<section class="nw-top">{news_card(first, True)}</section>\n'
@@ -1397,12 +1405,12 @@ def _news():
                   f'<section class="nw-grid" id="nw-grid" aria-labelledby="nw-h">{news_card(first).replace("<a ", "<a data-first hidden ", 1)}{"".join(news_card(p) for p in rest)}</section>'
                   '<p class="panel nw-none" id="nw-none" hidden>No posts with that tag yet.</p>\n' if rest else ""))
     else:
-        lst = '<section class="panel nw-empty"><img src="img/bell.png" alt=""><p>No news yet. Check back soon!</p></section>\n'
-    body = hero("bell", "News", "Updates, new features and announcements from the Bloombot team.", "t_news") + f"""<main class="wrap nw" id="main">
+        lst = '<section class="panel nw-empty"><img src="img/news.png" alt=""><p>No news yet. Check back soon!</p></section>\n'
+    body = hero("news", "News", "Updates, new features and announcements from the Bloombot team.", "t_news") + f"""<main class="wrap nw" id="main">
 {lst}<section class="hband nw-band-cta">
 <img class="hband-flower" src="img/flower.png" alt="">
 <div class="hband-text"><h2>Get news first</h2><p>Join the support server for updates, giveaways and sneak peeks.</p></div>
-<div class="hband-btns"><a class="brick discord" href="{SUPPORT}">{DISCORD_SVG}Join the server</a><a class="brick dark" href="news/feed.xml"><img src="img/bell.png" alt="">RSS feed</a></div>
+<div class="hband-btns"><a class="brick discord" href="{SUPPORT}">{DISCORD_SVG}Join the server</a><a class="brick dark" href="news/feed.xml"><img src="img/news.png" alt="">RSS feed</a></div>
 </section>
 </main>
 <script defer src="js/news.js?v={NEWSVER}"></script>
@@ -1432,7 +1440,7 @@ def _news():
 <nav class="u-crumbs" aria-label="Breadcrumb"><a href="news.html">News</a><span aria-hidden="true">›</span><span>{e(p["title"])}</span></nav>
 <article class="panel nw-art">
 <header class="nw-head">
-<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>
+<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt="">{_tag(p)}</span>
 <h1>{e(p["title"])}</h1>
 <p class="nw-meta"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span><span aria-hidden="true">·</span><span>Bloombot team</span>
 <button class="nw-share" type="button" id="nw-share" data-title="{e(p["title"])}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Share</button></p>
@@ -1440,7 +1448,7 @@ def _news():
 {f'<img class="nw-hero-pic" src="{e(p["image"])}" alt="" decoding="async">' if p["image"] else ""}{toc}<div class="nw-body">
 {body_html}
 </div>
-<div class="nw-end"><a class="brick dark sm" href="news.html"><img src="img/bell.png" alt="">All news</a><a class="brick discord sm" href="{SUPPORT}">{DISCORD_SVG}Talk about it on Discord</a></div>
+<div class="nw-end"><a class="brick dark sm" href="news.html"><img src="img/news.png" alt="">All news</a><a class="brick discord sm" href="{SUPPORT}">{DISCORD_SVG}Talk about it on Discord</a></div>
 </article>
 {f'<nav class="nw-pns" aria-label="More posts">{pn}</nav>' if pn else ""}
 {f'<div class="sec-head"><h2>More news</h2><a href="news.html">All news &rarr;</a></div><section class="nw-grid two">{"".join(news_card(q) for q in others)}</section>' if others else ""}
