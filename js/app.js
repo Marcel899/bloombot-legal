@@ -906,20 +906,22 @@
       btn.setAttribute("aria-label", "Account menu for " + u.name + (n ? ", " + n + " unread message" + (n === 1 ? "" : "s") : ""));
     };
     if (u.hasDiscord) checkDms();
+    /* the "my stuff" pages share one compact row instead of four menu lines */
+    const tiles = BB.el("div", "me-tiles");
+    [["levels.html", "medal_gold", "Levels"], ["values.html#watchlist", "wish_star", "Wishlist"],
+     ["collection.html", "gem", "Collection"], ["alerts.html", "bell", "Alerts"]].forEach(([h, i, l]) => {
+      const a = link(h, i, l); a.className = "me-tile"; tiles.append(a);
+    });
     const extra = [];
     if (!u.hasDiscord) extra.push(act("plus", "Connect Discord", () => connectDialog(true)), sep());
     menu.append(head, sep(), ...extra,
       dmLink,
       link("profile.html#edit", "gear", "Edit profile"),
-      link("levels.html", "medal_gold", "Levels & perks"),
-      link("values.html#watchlist", "wish_star", "My wishlist"),
-      link("collection.html", "gem", "My collection"),
-      link("alerts.html", "bell", "Price alerts"),
-      sep(),
-      link("trades.html#post", "plus", "Post a trade ad"),
       link("trades.html?mine=1", "trading", "My trade ads"),
+      tiles,
+      sep(),
       link("dashboard.html", "shield", "Server dashboard"),
-      sep(), out);
+      out);
     /* owner-only link; Supabase also checks on every giveaway call */
     BB.sb.rpc("is_site_owner").then(({ data }) => {
       if (data !== true) return;
