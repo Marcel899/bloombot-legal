@@ -114,10 +114,14 @@ const estOf = it => {
 };
 
 async function unitPages() {
-  const py = fs.readFileSync(path.join(ROOT, "build.py"), "utf8");
-  const setting = k => (py.match(new RegExp("^" + k + '\\s*=\\s*"([^"]+)"', "m")) || [])[1];
-  const url = setting("SUPABASE_URL"), key = setting("SUPABASE_KEY"), base = setting("BASE");
-  if (!url || !key || !base) { console.log("units: no Supabase settings in build.py, skipped"); return; }
+  /* Settings from files Vercel uploads (build.py and src/ are left out by .vercelignore):
+     the public Supabase address and key in js/app.js, the site address from index.html. */
+  const read = f => { try { return fs.readFileSync(path.join(ROOT, f), "utf8"); } catch (e) { return ""; } };
+  const app = read("js/app.js"), home = read("index.html");
+  const url = (app.match(/url:\s*"(https:\/\/[a-z0-9-]+\.supabase\.co)"/) || [])[1];
+  const key = (app.match(/key:\s*"(sb_publishable_[A-Za-z0-9_-]+)"/) || [])[1];
+  const base = (home.match(/<link rel="canonical" href="(https:\/\/[^"]+\/)"/) || [])[1];
+  if (!url || !key || !base) { console.log("units: couldn't find the Supabase settings, skipped; /units/* uses unit.html"); return; }
   let list;
   try {
     const r = await fetch(url + "/rest/v1/item_values?select=name,category,value,value_text,demand,status,rarity&order=value.desc&limit=3000",
@@ -178,4 +182,5 @@ fs.rmSync(OUT, { recursive: true, force: true });
 const files = walk(ROOT);
 for (const f of files) await build(f);
 console.log(`dist/: ${files.length} files`);
-await unitPages();
+/* Unit pages are extra: never let them fail the deploy. */
+try { await unitPages(); } catch (e) { console.log("units: skipped (" + e.message + "); /units/* uses unit.html"); }
