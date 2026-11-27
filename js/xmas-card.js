@@ -26,33 +26,34 @@
     const opened = st && Array.isArray(st.opened) ? st.opened : [];
     const doneToday = v.kind === "live" && opened.some(o => o.day === v.door);
     const set = (id, t) => { const n = $(id); if (n.textContent !== t) n.textContent = t; };
-    set("xmc-n", v.kind === "done" ? "25" : String(v.door));
     if (v.kind === "soon") {
       set("xmc-h", "Door 1 opens in");
-      set("xmc-sub", "24 doors of XP, banners and 13 free units, including an Infectia.");
+      set("xmc-sub", "24 doors of surprises, one a day until Christmas. Log in to open them.");
       set("xmc-go", "See the calendar");
     } else if (v.kind === "live") {
-      set("xmc-h", doneToday ? "You opened door " + v.door + "! Next door in" : "Door " + v.door + " is open! It closes in");
-      set("xmc-sub", st && st.me
-        ? (doneToday ? "Come back tomorrow for the next one. " : "Open it for XP and a ticket for the Infectia. ") + opened.length + " of 24 opened."
-        : "Open today's door for XP, a ticket for the Infectia and a shot at a hidden unit.");
+      set("xmc-h", doneToday ? "Door " + v.door + " opened! Next one in" : "Door " + v.door + " is open!");
+      set("xmc-sub", doneToday ? "Nice! Come back tomorrow for door " + (v.door + 1 > 24 ? 24 : v.door + 1) + "."
+        : "Open it before it closes for XP, a ticket for the Infectia and a shot at a hidden unit. Closes in:");
       set("xmc-go", doneToday ? "See the calendar" : "Open door " + v.door);
     } else {
-      set("xmc-h", "Merry Christmas from Bloombot!");
+      set("xmc-h", "Merry Christmas!");
       set("xmc-sub", "The doors are closed. See who won the Infectia and the hidden units.");
       set("xmc-go", "See the winners");
     }
     box.classList.toggle("is-done", doneToday);
 
-    const dots = $("xmc-dots");
-    dots.hidden = !(st && st.me && v.kind !== "soon");
-    if (!dots.hidden) {
-      const have = new Set(opened.map(o => o.day));
-      for (const i of dots.children) {
-        const n = +i.dataset.d;
-        i.className = have.has(n) ? "y" : v.kind === "live" && n === v.door ? "t" : n < (v.door || 25) ? "m" : "";
-      }
+    /* the mini calendar: opened (logged in), today, missed, still to come */
+    const have = new Set(opened.map(o => o.day));
+    const today = v.kind === "live" ? v.door : v.kind === "done" ? 25 : 0;
+    for (const i of $("xmc-cal").children) {
+      const n = +i.dataset.d;
+      i.classList.toggle("y", have.has(n));
+      i.classList.toggle("t", n === today && !have.has(n));
+      i.classList.toggle("p", n < today && !have.has(n));
     }
+    const prog = $("xmc-prog");
+    prog.hidden = !(st && st.me && v.kind !== "soon");
+    if (!prog.hidden) set("xmc-prog", "You've opened " + opened.length + " of 24 doors" + (opened.length >= 24 ? ": Golden Advent banner unlocked!" : opened.length >= 12 ? ": Advent banner unlocked!" : ""));
 
     $("xmc-cd").hidden = !v.at;
     if (v.at) {

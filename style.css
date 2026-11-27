@@ -1338,7 +1338,7 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
 /* News tab: just the bell on wide screens, so 6 tabs fit next to the account button */
 @media (min-width:1181px) and (max-width:1300px){.bar .links .nl{padding:0 7px!important}}
 @media (min-width:1301px){.bar .links .nl{padding:0 8px!important}.bar .me-name{max-width:80px}}
-@media (min-width:1181px){.bar .links .nl[href="news.html"]{padding:0 10px!important}.bar .links .nl[href="news.html"] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}}
+
 /* ── news (news.html, news/*.html, home "Latest news") ── */
 .nw{padding-bottom:56px}
 .nw-top{margin-top:-72px;position:relative}
@@ -5256,55 +5256,59 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 /* night snow: the hills fade into a deep blue instead of a grey band */
 :root:not([data-theme=light]) .xm-hero::after{background:linear-gradient(180deg,#eef3fb 0%,#d9e2f0 30%,#3a4d6e 62%,var(--bg) 100%)}
 /* ── Advent calendar card on the home page (xmas_card() in build.py, js/xmas-card.js) ── */
-.xmc{margin:8px 0 22px}
+.xmc{margin:8px 0 26px}
 .xmc[hidden]{display:none}
-.xmc-in{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:20px;padding:18px 22px 22px;border-radius:16px;border:3px solid #0c0e12;color:#fff;text-decoration:none;
-  background:radial-gradient(1.4px 1.4px at 12% 22%,rgba(255,255,255,.85) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 31% 70%,rgba(255,255,255,.6) 50%,transparent 51%),radial-gradient(1.6px 1.6px at 57% 18%,rgba(255,255,255,.7) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 74% 62%,rgba(255,255,255,.55) 50%,transparent 51%),radial-gradient(1.4px 1.4px at 92% 30%,rgba(255,255,255,.75) 50%,transparent 51%),radial-gradient(420px 200px at 88% 0%,rgba(255,240,200,.16),transparent 70%),linear-gradient(160deg,#0b1d3a 0%,#123058 60%,#1a4272 100%);
-  box-shadow:0 3px 5px -2px rgba(0,0,0,.4),inset 0 3px 0 rgba(255,255,255,.08);transition:transform .18s}
-/* snowy hill along the bottom */
-.xmc-in::after{content:"";position:absolute;z-index:-1;left:-4%;right:-4%;bottom:-14px;height:30px;border-radius:50% 50% 0 0/100% 100% 0 0;background:linear-gradient(180deg,#eef3fb,#c9d6ea);opacity:.92}
-.xmc-in:hover{transform:translateY(-3px)}
-.xmc-in:focus-visible{outline:3px solid #8dbbff;outline-offset:3px}
-.xmc-art{position:relative;flex:none;width:86px;height:86px}
-.xmc-door{position:absolute;inset:6px 10px 10px 6px;display:grid;place-items:center;border-radius:12px;border:3px solid #0c0e12;background:linear-gradient(180deg,#e04444,#b52424);box-shadow:inset 0 3px 0 rgba(255,255,255,.25),inset 0 -4px 0 rgba(0,0,0,.18)}
-.xmc-door::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:8px;margin-left:-4px;background:#f5c83c;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
-.xmc-door b{position:relative;padding:0 6px;border-radius:8px;background:#fff;color:#b52424;font:700 1.6rem/1.15 "Fredoka",sans-serif;box-shadow:0 2px 0 rgba(0,0,0,.25)}
-.xmc-gift{position:absolute;right:-6px;bottom:-4px;width:40px;height:40px;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
-.xmc-t{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
-.xmc-kick{display:flex;align-items:center;gap:6px;color:#ffe08a;font-weight:900;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase}
-.xmc-kick img{width:18px;height:18px}
-.xmc-h{font:700 1.35rem/1.2 "Fredoka",sans-serif;color:#fff}
-.xmc-sub{color:#cfdaee;font-weight:700;font-size:.94rem;line-height:1.45}
-.xmc-dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.xmc-dots[hidden]{display:none}
-.xmc-dots i{width:10px;height:10px;border-radius:3px;background:rgba(255,255,255,.18)}
-.xmc-dots i.y{background:#3fd36b}
-.xmc-dots i.t{background:#f5c83c;box-shadow:0 0 0 2px rgba(245,200,60,.35)}
-.xmc-dots i.m{background:rgba(255,255,255,.07)}
-.xmc-cd{display:flex;gap:6px;flex:none}
+.xmc-in{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:22px 34px;padding:26px 30px 38px;border-radius:18px;border:3px solid #0c0e12;color:#fff;
+  background:radial-gradient(1.5px 1.5px at 8% 18%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 22% 64%,rgba(255,255,255,.7) 50%,transparent 51%),radial-gradient(1.6px 1.6px at 41% 12%,rgba(255,255,255,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 49% 56%,rgba(255,255,255,.55) 50%,transparent 51%),radial-gradient(1.4px 1.4px at 63% 8%,rgba(255,255,255,.75) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 96% 46%,rgba(255,255,255,.6) 50%,transparent 51%),radial-gradient(260px 260px at 4% 100%,rgba(220,50,50,.35),transparent 70%),radial-gradient(520px 260px at 80% -10%,rgba(255,236,180,.2),transparent 70%),linear-gradient(160deg,#0a1a35 0%,#11305a 58%,#1a4675 100%);
+  box-shadow:0 10px 30px -12px rgba(10,30,70,.8),inset 0 3px 0 rgba(255,255,255,.08)}
+/* snowy hills along the bottom */
+.xmc-in::before,.xmc-in::after{content:"";position:absolute;z-index:-1;bottom:-22px;height:44px;border-radius:50%;background:linear-gradient(180deg,#f4f7fc,#cbd8eb)}
+.xmc-in::before{left:-6%;width:62%;opacity:.95}
+.xmc-in::after{right:-8%;width:64%;bottom:-26px;opacity:.85}
+.xmc-main{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
+.xmc-kick{display:flex;align-items:center;gap:8px;margin:0;padding:4px 12px 4px 6px;border-radius:999px;background:rgba(220,50,50,.9);border:2px solid #0c0e12;font-weight:900;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
+.xmc-kick img{width:22px;height:22px}
+.xmc .xmc-h,[data-theme=light] .xmc .xmc-h{margin:2px 0 0;font:700 clamp(1.6rem,3.2vw,2.3rem)/1.1 "Fredoka",sans-serif;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.3)}
+.xmc .xmc-sub,[data-theme=light] .xmc .xmc-sub{margin:0;max-width:46ch;color:#d3def1;font-weight:700;font-size:.98rem;line-height:1.5}
+.xmc-cd{display:flex;gap:8px}
 .xmc-cd[hidden],.xmc-cd>[hidden]{display:none}
-.xmc-cd>span{display:flex;flex-direction:column;align-items:center;min-width:54px;padding:6px 6px 5px;border-radius:10px;border:2px solid #0c0e12;background:rgba(6,14,30,.55);box-shadow:inset 0 2px 0 rgba(255,255,255,.08)}
-.xmc-cd b{font:700 1.45rem/1.1 "Fredoka",sans-serif;font-variant-numeric:tabular-nums;color:#fff}
-.xmc-cd em{font-style:normal;font-size:.68rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#a9b9d6}
-.xmc-go{flex:none;pointer-events:none}
+.xmc-cd>span{display:flex;flex-direction:column;align-items:center;min-width:62px;padding:7px 8px 6px;border-radius:12px;border:3px solid #0c0e12;background:linear-gradient(180deg,#f4f7fc,#d8e2f1);box-shadow:inset 0 -3px 0 rgba(0,0,0,.08),0 3px 0 rgba(0,0,0,.35)}
+.xmc-cd b{font:700 1.6rem/1.05 "Fredoka",sans-serif;font-variant-numeric:tabular-nums;color:#c8202f}
+.xmc-cd em{font-style:normal;font-size:.66rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#4a5a78}
+.xmc-go{margin-top:4px}
 .xmc-go img{width:22px;height:22px}
-.xmc.is-done .xmc-door{background:linear-gradient(180deg,#36b85a,#22863f)}
-.xmc.is-done .xmc-door b{color:#22863f}
-[data-theme=light] .xmc-in{border-color:#0c0e12}
-@media (max-width:900px){.xmc-in{flex-wrap:wrap;gap:14px 16px}.xmc-t{flex-basis:calc(100% - 110px)}.xmc-cd{order:3}.xmc-go{order:4;margin-left:auto}}
-@media (max-width:560px){.xmc-in{padding:14px 14px 20px}.xmc-art{width:64px;height:64px}.xmc-door b{font-size:1.2rem}.xmc-gift{width:30px;height:30px}.xmc-h{font-size:1.12rem}.xmc-sub{font-size:.86rem}.xmc-t{flex-basis:calc(100% - 82px)}
-  .xmc-cd{width:100%;justify-content:center}.xmc-cd>span{flex:1;min-width:0}.xmc-go{width:100%;justify-content:center;margin:0}}
-@media (prefers-reduced-motion:reduce){.xmc-in{transition:none}.xmc-in:hover{transform:none}}
-.xmc .xmc-h,[data-theme=light] .xmc .xmc-h{color:#fff}
-[data-theme=light] .xmc .xmc-sub{color:#cfdaee}
-@media (max-width:560px){.xmc-dots{gap:3px}.xmc-dots i{width:7px;height:7px;border-radius:2px}}
+.xmc-side{display:flex;flex-direction:column;align-items:center;gap:10px}
+/* mini calendar: 24 little doors, same colours as the real board */
+.xmc-cal{display:grid;grid-template-columns:repeat(8,38px);grid-auto-rows:38px;gap:6px;padding:12px;border-radius:14px;border:3px solid #0c0e12;background:linear-gradient(180deg,#6b3b1f,#4e2a15);box-shadow:inset 0 3px 0 rgba(255,255,255,.12),0 6px 0 rgba(0,0,0,.3);text-decoration:none;transition:transform .18s}
+.xmc-cal:hover{transform:translateY(-3px) rotate(-.6deg)}
+.xmc-cal:focus-visible{outline:3px solid #8dbbff;outline-offset:3px}
+.xmc-cal i{position:relative;display:grid;place-items:center;border-radius:7px;border:2px solid rgba(0,0,0,.45);background:var(--c);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 var(--k)}
+.xmc-cal i::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:4px;margin-left:-2px;background:rgba(255,255,255,.28)}
+.xmc-cal b{position:relative;font:700 .95rem/1 "Fredoka",sans-serif;color:var(--t);text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.xmc-cal .c-snow b{text-shadow:none}
+.xmc-cal i.p{filter:grayscale(.85) brightness(.55)}
+.xmc-cal i.y{background:#2a3a26;box-shadow:inset 0 3px 6px rgba(0,0,0,.5)}
+.xmc-cal i.y::before{display:none}
+.xmc-cal i.y b{font-size:0}
+.xmc-cal i.y b::after{content:"";display:block;width:16px;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%235be08b' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round' d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/contain no-repeat}
+.xmc-cal i.t{z-index:1;transform:scale(1.16);border-color:#0c0e12;box-shadow:0 0 0 3px #ffe08a,0 0 18px 4px rgba(255,214,90,.7),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 var(--k);animation:xmcGlow 2.4s ease-in-out infinite}
+@keyframes xmcGlow{50%{box-shadow:0 0 0 3px #ffe08a,0 0 8px 1px rgba(255,214,90,.35),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 var(--k)}}
+.xmc-prog{margin:0;color:#ffe08a;font-weight:900;font-size:.86rem;text-align:center}
+.xmc-prog[hidden]{display:none}
+.xmc-perks{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px;padding:0;list-style:none}
+.xmc-perks li{display:flex;align-items:center;gap:5px;padding:3px 10px 3px 5px;border-radius:999px;background:rgba(6,14,30,.55);border:1px solid rgba(255,255,255,.12);color:#e6ecf7;font-weight:800;font-size:.8rem}
+.xmc-perks img{width:20px;height:20px;object-fit:contain}
+.xmc.is-done .xmc-kick{background:rgba(40,168,80,.95)}
+@media (max-width:900px){.xmc-in{grid-template-columns:1fr;padding:22px 20px 36px}.xmc-side{align-items:stretch}.xmc-cal{grid-template-columns:repeat(8,minmax(0,1fr));grid-auto-rows:auto}.xmc-cal i{aspect-ratio:1}.xmc-perks{max-width:none}}
+@media (max-width:560px){.xmc-in{padding:16px 14px 34px;gap:16px}.xmc-cal{gap:4px;padding:8px}.xmc-cal b{font-size:.8rem}.xmc-cal i.y b::after{width:12px;height:12px}.xmc-cd{width:100%}.xmc-cd>span{flex:1;min-width:0}.xmc-go{width:100%;justify-content:center;box-sizing:border-box}.xmc-main{align-items:stretch}.xmc-kick{align-self:flex-start}.xmc-perks li{font-size:.74rem}}
+@media (prefers-reduced-motion:reduce){.xmc-cal{transition:none}.xmc-cal:hover{transform:none}.xmc-cal i.t{animation:none}}
 /* ── News v2: unread bell, filters, cards, post reading ── */
 .bar .links .nl.fresh{position:relative}
 .bar .links .nl.fresh::after{content:"";position:absolute;top:4px;left:24px;width:9px;height:9px;border-radius:50%;background:#ff4b4f;box-shadow:0 0 0 2px var(--bg)}
 .nl-new{display:none;margin-left:6px;padding:1px 7px;border-radius:999px;background:#dc3232;color:#fff;font:900 .68rem/1.5 "Nunito",sans-serif;font-style:normal;letter-spacing:.04em;text-transform:uppercase}
 @media (max-width:1180px){.nl-new{display:inline-block}.bar .links .nl.fresh::after{top:8px;left:30px}}
 /* wide screens have room for the word "News" next to the bell */
-@media (min-width:1400px){.bar .links .nl[href="news.html"]{padding:0 8px!important}.bar .links .nl[href="news.html"] span{position:static;width:auto;height:auto;overflow:visible;clip-path:none}}
+
 .nw-chips{margin:0 0 14px}
 .nw-chips .chip{display:inline-flex;align-items:center;gap:7px}
 .nw-chips .chip i{font-style:normal;padding:0 6px;border-radius:999px;background:rgba(0,0,0,.25);font-size:.78rem}
