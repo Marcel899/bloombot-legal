@@ -2,8 +2,8 @@
    Doors open at 00:00 UTC, one a day, 1–24 December. Opening today's door gives XP
    (paid by the bot), a ticket for the Infectia draw and, if a hidden unit has dropped,
    that unit. Everything is checked by adv_status / adv_open / adv_draw (sql/advent.sql);
-   the page only shows what the server says. Before December, or logged out, the
-   doors are just for peeking. */
+   the page only shows what the server says. Only today's door opens: the others
+   wiggle and say when they open (or that they were missed). */
 (() => {
   const $ = id => document.getElementById(id);
   const box = $("xmcd");
@@ -11,6 +11,9 @@
   const { el } = BB;
   const pad = n => String(n).padStart(2, "0");
   const XP = d => (d === 24 ? 250 : 50);
+  const YEAR = 2026;  // the doors are 1-24 December 2026 (sql/advent.sql)
+  const doorOfClock = now => (now.getUTCFullYear() === YEAR && now.getUTCMonth() === 11 && now.getUTCDate() <= 24 ? now.getUTCDate() : null);
+  const isOver = now => now.getTime() >= Date.UTC(YEAR, 11, 25);
   const cells = [...document.querySelectorAll(".xm-cell")];
   const cellOf = d => document.querySelector('.xm-cell[data-day="' + d + '"]');
   let markedDay = null, last = {};
@@ -31,8 +34,9 @@
     const y = now.getUTCFullYear(), m = now.getUTCMonth(), d = now.getUTCDate();
     const opened = st && st.opened && st.opened.some(o => o.day === d);
     if (m === 11 && d <= 24) mark(d, opened ? "Opened" : me ? "Open me!" : "Today");
-    if (m === 11 && d <= 23) return { at: Date.UTC(y, 11, d + 1), title: "Door " + (d + 1) + " opens in" };
-    if (m === 11 && d === 24) return { at: Date.UTC(y, 11, 25), title: "Infectia draw in" };
+    const waiting = me && st && st.today === d && !opened;
+    if (m === 11 && d <= 23) return { at: Date.UTC(y, 11, d + 1), title: waiting ? "Door " + d + " closes in" : "Door " + (d + 1) + " opens in" };
+    if (m === 11 && d === 24) return { at: Date.UTC(y, 11, 25), title: waiting ? "Door 24 closes in" : "Infectia draw in" };
     if (m === 11) return { done: "Merry Christmas from Bloombot!" };
     mark(1, "Next");
     return { at: Date.UTC(y, 11, 1), title: "Door 1 opens in" };
@@ -76,28 +80,37 @@
   const tz = $("xmtz");
   if (tz) tz.textContent = new Date(Date.UTC(2026, 11, 1)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " your time";
 
-  /* ── peeking (any door that isn't today's to open) ── */
-  const peek = (cell, on) => {
-    cells.forEach(c => { if (c !== cell && c.classList.contains("peek")) { c.classList.remove("peek"); c.setAttribute("aria-pressed", "false"); } });
-    cell.classList.toggle("peek", on);
-    cell.setAttribute("aria-pressed", String(on));
+  /* ── doors: only today's opens; the others wiggle and say when they open ── */
+  const opensAt = d => {
+    const t = new Date(Date.UTC(YEAR, 11, d));
+    return t.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" }) + " at " + t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
+  let doorToast = null;
+  function nope(c, text, title) {
+    c.classList.remove("nope");
+    void c.offsetWidth;
+    c.classList.add("nope");
+    /* one door message at a time: the next door's replaces it */
+    if (doorToast) doorToast.close();
+    doorToast = BB.toast(text, "info", { title });
+  }
   function press(c) {
-    const d = +c.dataset.day;
-    if (st && st.today === d && !c.classList.contains("opened")) {
-      if (!me) {
-        BB.toast("Log in to open today's door and win prizes.", "info", { title: "Door " + d, action: { label: "Log in", run: () => BB.login() } });
-        return peek(c, !c.classList.contains("peek"));
-      }
+    const d = +c.dataset.day, now = new Date();
+    if (c.classList.contains("opened")) return;
+    const today = st ? st.today : doorOfClock(now);
+    if (today === d) {
+      if (!me) return BB.toast("Log in to open today's door and win prizes.", "info", { title: "Door " + d, action: { label: "Log in", run: () => BB.login() } });
       return openDoor(d, false);
     }
-    if (!c.classList.contains("opened")) peek(c, !c.classList.contains("peek"));
+    if (isOver(now)) return nope(c, "The advent calendar is over. Merry Christmas!", "Door " + d);
+    if (today != null && d < today) return nope(c, "Each door can only be opened on its own day.", "Door " + d + " was missed");
+    nope(c, "It opens on " + opensAt(d) + ".", "Door " + d + " is still locked");
   }
   cells.forEach(c => {
     c.addEventListener("click", () => press(c));
     c.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); press(c); } });
+    c.addEventListener("animationend", e => { if (e.animationName === "xmNope") c.classList.remove("nope"); });
   });
-  document.addEventListener("click", e => { if (!e.target.closest(".xm-cell")) cells.forEach(c => c.classList.contains("peek") && peek(c, false)); });
 
   /* ── data ── */
   const img = (name, cls) => BB.itemImg(imgs[name] || {}, cls);
@@ -140,12 +153,18 @@
     const opened = new Map((st.opened || []).map(o => [o.day, o]));
     const n = opened.size, today = st.today;
     /* doors */
+    const over = isOver(new Date(st.now));
     cells.forEach(c => {
       const d = +c.dataset.day, o = opened.get(d);
+      const missed = !o && (over || (today != null && d < today));
+      const locked = !o && !missed && today !== d;
       c.classList.toggle("opened", !!o);
-      c.classList.toggle("missed", !o && !!me && today != null && d < today);
+      c.classList.toggle("missed", missed && !!me);
+      c.classList.toggle("locked", locked);
       c.classList.toggle("can-open", !o && today === d);
-      c.setAttribute("aria-label", "December " + d + (o ? ", opened" : today === d ? ", open today" : ""));
+      const state = o ? "opened" : today === d ? "open today" : missed ? (me ? "missed" : "closed") : "opens " + opensAt(d);
+      c.setAttribute("aria-label", "December " + d + ", " + state);
+      c.title = state.charAt(0).toUpperCase() + state.slice(1);
       let got = c.querySelector(".xm-got");
       if (o) {
         if (!got) { got = el("span", "xm-got"); c.querySelector(".xm-in").append(got); }
@@ -187,7 +206,7 @@
       });
       const xp = [...opened.entries()].reduce((a, [d, o]) => a + (o.status !== "failed" ? XP(d) : 0), 0);
       const stats = el("ul", "xm-stats");
-      [["XP earned", "+" + xp], ["Infectia tickets", String(n)], ["Banners", n >= 24 ? "2 unlocked" : n >= 12 ? "1 unlocked" : (12 - n) + " doors to go"]]
+      [["XP earned", "+" + xp], ["Banners", n >= 24 ? "2 unlocked" : n >= 12 ? "1 unlocked" : (12 - n) + " doors to go"]]
         .forEach(([k, v]) => { const li = el("li"); li.append(el("span", null, k), el("b", null, v)); stats.append(li); });
       const out = [big, bar, stats];
       if (n >= 12) { const a = el("a", "xm-link", "Use your banner"); a.href = "profile.html#edit"; out.push(a); }
@@ -204,17 +223,31 @@
       }
       meB.replaceChildren(...out);
     }
-    /* drops */
-    const fmt = d => "Dec " + d;
-    $("xmdrops").replaceChildren(...(st.prizes || []).map(p => {
-      const li = el("li", "xm-d st-" + p.state + (p.mine ? " mine" : "") + (p.day === today && p.state === "hunt" ? " now" : ""));
-      li.append(img(p.unit, "xm-di"), el("span", "xm-dn", p.unit));
-      const chip = p.state === "won" ? (p.mine ? "You found it!" : "Found by " + (p.winner || "someone"))
-        : p.state === "hunt" ? (p.day === today ? "Drops today" : "Still hidden")
-        : p.state === "gone" ? "Not found" : "Coming";
-      const sub = el("span", "xm-chip");
-      sub.append(el("b", "xm-dd", fmt(p.day)), document.createTextNode(" · " + chip));
-      li.append(sub);
+    /* hidden units: one card per unit, with the days it drops */
+    const groups = [];
+    (st.prizes || []).forEach(p => {
+      let g = groups.find(x => x.unit === p.unit);
+      if (!g) groups.push(g = { unit: p.unit, days: [] });
+      g.days.push(p);
+    });
+    $("xmdrops").replaceChildren(...groups.map(g => {
+      const live = g.days.some(p => p.state === "hunt" && p.day === today);
+      const li = el("li", "xm-u" + (g.days.some(p => p.mine) ? " xm-you" : "") + (live ? " live" : ""));
+      const found = g.days.filter(p => p.state === "won").length;
+      const head = el("div", "xm-uh"), name = el("div");
+      name.append(el("strong", null, g.unit), el("span", null, found + " of " + g.days.length + " found"));
+      head.append(img(g.unit, "xm-ui"), name);
+      const days = el("ul", "xm-ud");
+      g.days.forEach(p => {
+        const now = p.state === "hunt" && p.day === today;
+        const text = p.state === "won" ? (p.mine ? "You found it!" : "Found by " + (p.winner || "someone"))
+          : p.state === "hunt" ? (now ? "Drops today" : "Still hidden") : p.state === "gone" ? "Not found" : "Coming";
+        const row = el("li", "st-" + p.state + (p.mine ? " xm-you" : "") + (now ? " now" : ""));
+        row.title = "Dec " + p.day + ": " + text;
+        row.append(el("b", null, "Dec " + p.day), el("span", null, text));
+        days.append(row);
+      });
+      li.append(head, days);
       return li;
     }));
     drawHunt();
@@ -282,7 +315,6 @@
     coolUntil = Date.now() + 20000;
     if (c) {
       c.classList.remove("opening");
-      peek(c, false);
       if (res && res.opened) { c.classList.add("opened", "pop"); setTimeout(() => c.classList.remove("pop"), 900); }
     }
     if (res && res.won) win(res.won);
