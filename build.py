@@ -34,7 +34,7 @@ PAGE_KW = {
     "features.html": "Discord trading bot, Roblox trading bot, slash commands, wishlist, trade check",
 }
 # Pages Google should list (profile, dashboard and 404 are noindex).
-SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "farm.html", "levels.html", "strategies.html", "news.html", "privacy.html", "terms.html", "intents.html"]
+SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "farm.html", "levels.html", "strategies.html", "news.html", "gtd-news.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<img class="dc" src="img/discord_stud_white.png" alt="">'
 
 HEAD = """<!doctype html>
@@ -99,7 +99,7 @@ FOOT = """<footer>
 </div>
 <nav class="foot-cols" aria-label="Footer">
 <div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="farm.html">Farm calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
-<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="news.html">News</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
+<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="news.html">News</a><a href="gtd-news.html">GTD news</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
 <div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
 </nav>
 </div>
@@ -300,6 +300,7 @@ def _load_posts():
             "icon": meta.get("icon", "news"), "color": meta.get("color", "green"),
             "summary": meta.get("summary", ""), "html": _md(body), "mins": max(1, round(words / 200)),
             "image": meta.get("image", ""),
+            "sec": "gtd" if meta.get("section", "").lower() == "gtd" else "bloombot",
             "url": f"news/{slug}.html",
         })
     posts.sort(key=lambda p: (p["date"], p["slug"]), reverse=True)
@@ -309,7 +310,18 @@ def _load_posts():
 POSTS = _load_posts()
 
 
-TAG_ICONS = {"launch": "tag_rocket", "update": "tag_refresh", "feature": "tag_feature"}
+TAG_ICONS = {"codes": "gem", "event": "gift", "launch": "tag_rocket", "update": "tag_refresh", "feature": "tag_feature"}
+
+
+# The two news pages: Bloombot's own news and Garden Tower Defense (game) news.
+NEWS_SECS = {
+    "bloombot": ("news.html", "Bloombot news", "Updates, new features and announcements from the Bloombot team.",
+                 "News · Bloombot", "Bloombot news: website updates, new features and announcements for the Garden Tower Defense trading bot.",
+                 "Bloombot news, Bloombot updates, patch notes"),
+    "gtd": ("gtd-news.html", "GTD news", "Garden Tower Defense updates, events and codes, in one place.",
+            "GTD news · Garden Tower Defense updates and codes · Bloombot", "Garden Tower Defense news: game updates, events, new units and codes for Roblox GTD.",
+            "GTD news, Garden Tower Defense news, GTD update, Garden Tower Defense update, GTD codes, Garden Tower Defense codes"),
+}
 
 
 def _tag(p):
@@ -1389,10 +1401,12 @@ def _news():
     e = _html.escape
     NEWSVER = hashlib.md5(open("js/news.js", "rb").read()).hexdigest()[:8]
     rss = f'<link rel="alternate" type="application/rss+xml" title="Bloombot news" href="{BASE}news/feed.xml">\n'
-    if POSTS:
-        first, rest = POSTS[0], POSTS[1:]
+    for sec, (spath, sname, ssub, stitle, sdesc, skw) in NEWS_SECS.items():
+     SP = [q for q in POSTS if q["sec"] == sec]
+     if SP:
+        first, rest = SP[0], SP[1:]
         tags = {}
-        for q in POSTS:
+        for q in SP:
             tags.setdefault(q["tag"], 0)
             tags[q["tag"]] += 1
         chips = ""
@@ -1405,10 +1419,11 @@ def _news():
                + (f'<div class="sec-head nw-head2"><h2 id="nw-h">Earlier posts</h2><span class="nw-n" id="nw-n">{n_rest} {"post" if n_rest == 1 else "posts"}</span></div>{chips}'
                   f'<section class="nw-grid" id="nw-grid" aria-labelledby="nw-h">{news_card(first).replace("<a ", "<a data-first hidden ", 1)}{"".join(news_card(p) for p in rest)}</section>'
                   '<p class="panel nw-none" id="nw-none" hidden>No posts with that tag yet.</p>\n' if rest else ""))
-    else:
+     else:
         lst = '<section class="panel nw-empty"><img src="img/news.png" alt=""><p>No news yet. Check back soon!</p></section>\n'
-    body = hero("news", "News", "Updates, new features and announcements from the Bloombot team.", "t_news") + f"""<main class="wrap nw" id="main">
-{lst}<section class="hband nw-band-cta">
+     tabs = '<nav class="nw-secs" aria-label="News sections">' + "".join(f'<a class="nw-sec{" on" if k == sec else ""}" href="{v[0]}"{" aria-current=\'page\'" if k == sec else ""}><img src="img/{"news" if k == "bloombot" else "news_gtd"}.png" alt="">{v[1]}<i>{sum(q["sec"] == k for q in POSTS)}</i></a>' for k, v in NEWS_SECS.items()) + "</nav>\n"
+     body = hero("news", "News", ssub, "t_news") + f"""<main class="wrap nw" id="main">
+{tabs}{lst}<section class="hband nw-band-cta">
 <img class="hband-flower" src="img/flower.png" alt="">
 <div class="hband-text"><h2>Get news first</h2><p>Join the support server for updates, giveaways and sneak peeks.</p></div>
 <div class="hband-btns"><a class="brick discord" href="{SUPPORT}">{DISCORD_SVG}Join the server</a><a class="brick dark" href="news/feed.xml"><img src="img/news.png" alt="">RSS feed</a></div>
@@ -1416,19 +1431,21 @@ def _news():
 </main>
 <script defer src="js/news.js?v={NEWSVER}"></script>
 """
-    ld = '<script type="application/ld+json">' + _json.dumps({
-        "@context": "https://schema.org", "@type": "Blog", "name": "Bloombot news", "url": BASE + "news.html",
-        "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": BASE + p["url"], "datePublished": p["date"].isoformat()} for p in POSTS],
-    }).replace("<", "\\u003c") + "</script>\n"
-    open("news.html", "w").write(page("News · Bloombot", "Bloombot news: website updates, new features and announcements for the Garden Tower Defense trading bot.",
-                                      body, "n", "news.html", ld=rss + ld, kw="Bloombot news, Bloombot updates, GTD news, Garden Tower Defense news, patch notes"))
+     ld = '<script type="application/ld+json">' + _json.dumps({
+        "@context": "https://schema.org", "@type": "Blog", "name": sname, "url": BASE + spath,
+        "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": BASE + p["url"], "datePublished": p["date"].isoformat()} for p in SP],
+     }).replace("<", "\\u003c") + "</script>\n"
+     open(spath, "w").write(page(stitle, sdesc, body, "n", spath, ld=rss + ld, kw=skw))
 
     os.makedirs("news", exist_ok=True)
     keep = set()
     for i, p in enumerate(POSTS):
-        newer = POSTS[i - 1] if i > 0 else None
-        older = POSTS[i + 1] if i + 1 < len(POSTS) else None
-        others = [q for q in POSTS if q is not p][:2]
+        SP = [q for q in POSTS if q["sec"] == p["sec"]]
+        k = SP.index(p)
+        spath, sname = NEWS_SECS[p["sec"]][:2]
+        newer = SP[k - 1] if k > 0 else None
+        older = SP[k + 1] if k + 1 < len(SP) else None
+        others = [q for q in SP if q is not p][:2]
         pn = "".join(
             f'<a class="nw-pn {cls}" href="{q["url"]}"><span>{lab}</span><strong>{e(q["title"])}</strong></a>'
             for q, cls, lab in ((older, "prev", "&larr; Older"), (newer, "next", "Newer &rarr;")) if q)
@@ -1438,7 +1455,7 @@ def _news():
         # a # link next to each heading, to share one section
         body_html = re.sub(r'<(h[23]) id="([^"]+)">(.*?)</\1>', lambda m: f'<{m.group(1)} id="{m.group(2)}">{m.group(3)}<a class="nw-anchor" href="{p["url"]}#{m.group(2)}" aria-label="Link to this section">#</a></{m.group(1)}>', p["html"])
         body = f"""<main class="wrap nw nw-post" id="main">
-<nav class="u-crumbs" aria-label="Breadcrumb"><a href="news.html">News</a><span aria-hidden="true">›</span><span>{e(p["title"])}</span></nav>
+<nav class="u-crumbs" aria-label="Breadcrumb"><a href="{spath}">{sname}</a><span aria-hidden="true">›</span><span>{e(p["title"])}</span></nav>
 <article class="panel nw-art">
 <header class="nw-head">
 <span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt="">{_tag(p)}</span>
@@ -1449,10 +1466,10 @@ def _news():
 {f'<img class="nw-hero-pic" src="{e(p["image"])}" alt="" decoding="async">' if p["image"] else ""}{toc}<div class="nw-body">
 {body_html}
 </div>
-<div class="nw-end"><a class="brick dark sm" href="news.html"><img src="img/news.png" alt="">All news</a><a class="brick discord sm" href="{SUPPORT}">{DISCORD_SVG}Talk about it on Discord</a></div>
+<div class="nw-end"><a class="brick dark sm" href="{spath}"><img src="img/{"news" if p["sec"] == "bloombot" else "news_gtd"}.png" alt="">All {sname}</a><a class="brick discord sm" href="{SUPPORT}">{DISCORD_SVG}Talk about it on Discord</a></div>
 </article>
 {f'<nav class="nw-pns" aria-label="More posts">{pn}</nav>' if pn else ""}
-{f'<div class="sec-head"><h2>More news</h2><a href="news.html">All news &rarr;</a></div><section class="nw-grid two">{"".join(news_card(q) for q in others)}</section>' if others else ""}
+{f'<div class="sec-head"><h2>More {sname}</h2><a href="{spath}">All {sname} &rarr;</a></div><section class="nw-grid two">{"".join(news_card(q) for q in others)}</section>' if others else ""}
 </main>
 <script defer src="js/news.js?v={NEWSVER}"></script>
 """
@@ -1461,10 +1478,10 @@ def _news():
              "datePublished": p["date"].isoformat(), "url": BASE + p["url"], "image": BASE + (p["image"] or "img/og-v2.jpg"),
              "author": {"@type": "Organization", "name": "Bloombot"}, "publisher": {"@type": "Organization", "name": "Bloombot", "logo": {"@type": "ImageObject", "url": BASE + "img/logo.png"}}},
             {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-                {"@type": "ListItem", "position": 1, "name": "News", "item": BASE + "news.html"},
+                {"@type": "ListItem", "position": 1, "name": sname, "item": BASE + spath},
                 {"@type": "ListItem", "position": 2, "name": p["title"], "item": BASE + p["url"]}]},
         ]).replace("<", "\\u003c") + "</script>\n"
-        out = page(f'{e(p["title"])} · Bloombot news', e(p["summary"]), body, "n", p["url"], ld=rss + ld,
+        out = page(f'{e(p["title"])} · {sname}', e(p["summary"]), body, "n", p["url"], ld=rss + ld,
                    kw="Bloombot news, " + e(p["tag"]))
         out = (out.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="/">\n', 1)
                   .replace("img/og-v2.jpg", p["image"] or "img/og-v2.jpg")

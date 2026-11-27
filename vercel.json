@@ -158,7 +158,7 @@
       "permanent": true
     },
     {
-      "source": "/:page(features|trades|values|calculator|crates|farm|levels|strategies|privacy|terms|intents|profile|dashboard|news)",
+      "source": "/:page(features|trades|values|calculator|crates|farm|levels|strategies|privacy|terms|intents|profile|dashboard|news|gtd-news)",
       "destination": "/:page.html",
       "permanent": true
     }
