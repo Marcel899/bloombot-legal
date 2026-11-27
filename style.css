@@ -5258,20 +5258,36 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 /* ── Advent calendar card on the home page (xmas_card() in build.py, js/xmas-card.js) ── */
 .xmc{margin:8px 0 24px}
 .xmc[hidden]{display:none}
-.xmc-in{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:18px;padding:14px 18px 20px 14px;border-radius:16px;border:3px solid #0c0e12;color:#fff;
+.xmc-in{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:18px;padding:22px 18px 22px 16px;border-radius:16px;border:3px solid #0c0e12;color:#fff;
   background:radial-gradient(1.4px 1.4px at 14% 20%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 33% 72%,rgba(255,255,255,.6) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 52% 16%,rgba(255,255,255,.75) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 71% 64%,rgba(255,255,255,.55) 50%,transparent 51%),radial-gradient(1.4px 1.4px at 90% 22%,rgba(255,255,255,.7) 50%,transparent 51%),radial-gradient(380px 160px at 85% -20%,rgba(255,236,180,.16),transparent 70%),linear-gradient(160deg,#0b1d3a 0%,#123058 60%,#1a4272 100%);
   box-shadow:0 3px 5px -2px rgba(0,0,0,.4),inset 0 3px 0 rgba(255,255,255,.08)}
 /* snowy hills along the bottom */
 .xmc-in::before,.xmc-in::after{content:"";position:absolute;z-index:-1;bottom:-15px;height:26px;border-radius:50%;background:linear-gradient(180deg,#f4f7fc,#cbd8eb)}
 .xmc-in::before{left:-5%;width:60%;opacity:.95}
 .xmc-in::after{right:-6%;width:62%;bottom:-17px;opacity:.82}
-.xmc-art{position:relative;flex:none;width:72px;height:72px}
-.xmc-door{position:absolute;inset:2px 8px 8px 2px;display:grid;place-items:center;border-radius:11px;border:3px solid #0c0e12;background:var(--c);box-shadow:inset 0 3px 0 rgba(255,255,255,.28),inset 0 -4px 0 var(--k),0 3px 0 rgba(0,0,0,.3)}
-.xmc-door::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:7px;margin-left:-3.5px;background:#f5c83c}
+.xmc-art{position:relative;flex:none;width:68px;height:68px;margin-top:6px;perspective:300px}
+.xmc-behind{position:absolute;inset:2px;display:grid;place-items:center;border-radius:11px;border:3px solid #0c0e12;background:radial-gradient(circle at 50% 55%,#ffe7a0,#f0a020 55%,#8a4b0c)}
+.xmc-behind img{width:40px;height:40px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4))}
+.xmc-door{position:absolute;inset:2px;display:grid;place-items:center;border-radius:11px;border:3px solid #0c0e12;background:var(--c);box-shadow:inset 0 3px 0 rgba(255,255,255,.28),inset 0 -4px 0 var(--k),0 3px 0 rgba(0,0,0,.3);transform-origin:0 50%;transition:transform .45s cubic-bezier(.2,.9,.3,1.1)}
+.xmc-door::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:7px;margin-left:-3.5px;background:#f5c83c;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+/* snow on top of the door */
+.xmc-door::after{content:"";position:absolute;left:-4px;right:-4px;top:-8px;height:12px;border-radius:8px 8px 10px 10px;background:linear-gradient(180deg,#fff,#dfe8f5);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.xmc-knob{position:absolute;right:7px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:#f5c83c;box-shadow:0 0 0 1.5px #0c0e12}
 .xmc-door b{position:relative;min-width:26px;padding:0 5px;border-radius:7px;background:#fff;color:#c8202f;font:700 1.35rem/1.2 "Fredoka",sans-serif;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.25)}
-.xmc-gift{position:absolute;right:-4px;bottom:-2px;width:34px;height:34px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.xmc-in:hover .xmc-door,.xmc-in:focus-within .xmc-door{transform:rotateY(-58deg)}
 .xmc.is-done .xmc-door{--c:#21924f;--k:#156a38}
 .xmc.is-done .xmc-door b{color:#156a38}
+/* fairy lights along the top: a wire and bulbs, a few twinkle */
+.xmc-lights{position:absolute;z-index:-1;left:0;right:0;top:-3px;height:20px;display:flex;justify-content:space-around;pointer-events:none;
+  background:radial-gradient(60px 14px at 50% -6px,transparent 13px,rgba(10,14,22,.85) 14px,transparent 15.5px) 0 0/calc(100% / 14) 20px repeat-x}
+.xmc-lights i{width:7px;height:10px;margin-top:7px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:#ff5252;box-shadow:0 0 8px 2px rgba(255,82,82,.55)}
+.xmc-lights i:nth-child(4n+2){background:#ffd54a;box-shadow:0 0 8px 2px rgba(255,213,74,.55)}
+.xmc-lights i:nth-child(4n+3){background:#4fd17a;box-shadow:0 0 8px 2px rgba(79,209,122,.55)}
+.xmc-lights i:nth-child(4n){background:#5ab8ff;box-shadow:0 0 8px 2px rgba(90,184,255,.55)}
+.xmc-lights i:nth-child(odd){margin-top:9px}
+.xmc-lights i:nth-child(5n+1){animation:xmcTw 2.8s ease-in-out infinite}
+.xmc-lights i:nth-child(7n+3){animation:xmcTw 3.4s ease-in-out .9s infinite}
+@keyframes xmcTw{50%{opacity:.35;box-shadow:none}}
 .xmc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .xmc-kick{display:flex;align-items:center;gap:5px;margin:0;color:#ffe08a;font-weight:900;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
 .xmc-kick img{width:16px;height:16px}
@@ -5291,7 +5307,7 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 .xmc-go{flex:none}
 .xmc-go img{width:22px;height:22px}
 @media (max-width:900px){.xmc-in{flex-wrap:wrap;gap:12px 14px}.xmc-main{flex-basis:calc(100% - 90px)}.xmc-cd{margin-left:86px}.xmc-go{margin-left:auto}}
-@media (max-width:560px){.xmc-in{padding:12px 12px 18px}.xmc-art{width:56px;height:56px}.xmc-door b{font-size:1.05rem;min-width:20px}.xmc-gift{width:26px;height:26px}.xmc-main{flex-basis:calc(100% - 72px)}.xmc .xmc-h{font-size:1.1rem}.xmc .xmc-sub{font-size:.84rem}
+@media (max-width:560px){.xmc-in{padding:20px 12px 20px}.xmc-art{width:56px;height:56px}.xmc-door b{font-size:1.05rem;min-width:20px}.xmc-behind img{width:32px;height:32px}.xmc-lights i:nth-child(n+15){display:none}.xmc-main{flex-basis:calc(100% - 72px)}.xmc .xmc-h{font-size:1.1rem}.xmc .xmc-sub{font-size:.84rem}
   .xmc-cd{margin:0;flex:1}.xmc-cd>span{flex:1;min-width:0}.xmc-go{margin:0;flex:1 1 auto;justify-content:center}.xmc-dots i{width:7px;height:7px;border-radius:2px}}
 @media (max-width:380px){.xmc-cd{flex-basis:100%}.xmc-go{width:100%;justify-content:center;box-sizing:border-box}}
 /* ── News v2: unread bell, filters, cards, post reading ── */
@@ -5359,3 +5375,4 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 .col-tools .col-add{flex:1 1 220px}
 .col-tools .col-filter{flex:0 1 160px}
 .col-legend li{line-height:1.2}
+@media (prefers-reduced-motion:reduce){.xmc-door{transition:none}.xmc-in:hover .xmc-door,.xmc-in:focus-within .xmc-door{transform:none}.xmc-lights i{animation:none!important}}

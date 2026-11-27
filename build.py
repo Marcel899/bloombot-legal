@@ -426,7 +426,8 @@ def xmas_card():
     dots = "".join(f'<i data-d="{d}"></i>' for d in range(1, 25))
     return f"""<section class="xmc" id="xmc" hidden aria-labelledby="xmc-h">
 <div class="xmc-in">
-<a class="xmc-art" href="advent.html" tabindex="-1" aria-hidden="true"><span class="xmc-door c-red"><b id="xmc-n">1</b></span><img class="xmc-gift" src="img/gift.png" alt="" loading="lazy"></a>
+<span class="xmc-lights" aria-hidden="true">{"".join("<i></i>" for _ in range(28))}</span>
+<a class="xmc-art" href="advent.html" tabindex="-1" aria-hidden="true"><span class="xmc-behind"><img src="img/gift.png" alt="" loading="lazy"></span><span class="xmc-door c-red"><i class="xmc-knob"></i><b id="xmc-n">1</b></span></a>
 <div class="xmc-main">
 <p class="xmc-kick"><img src="img/wish_star.png" alt="">Advent calendar</p>
 <h2 class="xmc-h" id="xmc-h">Door 1 opens in</h2>
