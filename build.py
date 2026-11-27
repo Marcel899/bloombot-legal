@@ -34,7 +34,7 @@ PAGE_KW = {
     "features.html": "Discord trading bot, Roblox trading bot, slash commands, wishlist, trade check",
 }
 # Pages Google should list (profile, dashboard and 404 are noindex).
-SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "farm.html", "levels.html", "strategies.html", "privacy.html", "terms.html", "intents.html"]
+SITEMAP = ["", "features.html", "trades.html", "values.html", "calculator.html", "crates.html", "farm.html", "levels.html", "strategies.html", "news.html", "privacy.html", "terms.html", "intents.html"]
 DISCORD_SVG = '<img class="dc" src="img/discord_stud_white.png" alt="">'
 
 HEAD = """<!doctype html>
@@ -99,7 +99,7 @@ FOOT = """<footer>
 </div>
 <nav class="foot-cols" aria-label="Footer">
 <div><h2>Tools</h2><a href="values.html">Values</a><a href="calculator.html">Trade calculator</a><a href="crates.html">Crate calculator</a><a href="farm.html">Farm calculator</a><a href="trades.html">Trade ads</a><a href="strategies.html">Strategies</a><a href="levels.html">Levels &amp; perks</a></div>
-<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
+<div><h2>Bot</h2><a href="./">Home</a><a href="features.html">Features &amp; commands</a><a href="news.html">News</a><a href="dashboard.html">Server dashboard</a><a href="{invite}">Add to Discord</a><a href="{support}">Support server</a></div>
 <div><h2>Legal</h2><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="privacy.html#cookies" data-cookies>Cookie settings</a></div>
 </nav>
 </div>
@@ -167,6 +167,7 @@ NAV = [
     ("a", "trades.html", "trading", "Trade ads", "purple"),
     ("s", "strategies.html", "bullseye", "Strategies", "orange"),
     ("f", "features.html", "gem", "Features", "yellow"),
+    ("n", "news.html", "bell", "News", "red"),
 ]
 APPVER = hashlib.md5(open("js/app.js", "rb").read()).hexdigest()[:8]
 SITEVER = hashlib.md5(open("js/site.js", "rb").read()).hexdigest()[:8]
@@ -178,7 +179,7 @@ TRVER = hashlib.md5(open("js/track.js", "rb").read()).hexdigest()[:8]
 
 def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
     nav = "".join(
-        f'<a class="nl{" on g-" + color if key == cur else ""}" data-g="{color}" href="{href}"><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
+        f'<a class="nl{" on g-" + color if key == cur else ""}" data-g="{color}" href="{href}"{' title="' + label + '"' if key == "n" else ""}><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
         for key, href, icon, label, color in NAV)
     kw = kw or PAGE_KW.get(path, "")
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
@@ -187,6 +188,131 @@ def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
                         robots="index, follow, max-image-preview:large" if index else "noindex, follow",
                         ld=ld, keywords=(kw + ", " if kw else "") + KEYWORDS)
             + body + FOOT.replace("{support}", SUPPORT).replace("{invite}", INVITE).replace("{dsvg}", DISCORD_SVG))
+
+
+# ── News: blog posts from posts/*.md ─────────────────────────────────────
+# To add a post, drop a file named YYYY-MM-DD-slug.md into posts/ with this header:
+#   ---
+#   title: Post title
+#   date: 2026-11-27
+#   tag: Update            (Launch, Update, Feature, Event…)
+#   icon: gem              (any img/<icon>.png)
+#   color: purple          (green, blue, yellow, purple, red, orange)
+#   summary: One or two sentences for the cards and link previews.
+#   ---
+# Body is Markdown: ## headings, - lists, **bold**, *italic*, `code`, [links](url),
+# ![pictures](img/...), > quotes, -# small print, and :icon: for any img/<icon>.png.
+# Then run python3 build.py: it writes news.html, news/<slug>.html, news/feed.xml and the home cards.
+import html as _html
+import os
+import glob as _glob
+import datetime as _dt
+
+
+def _md_inline(t):
+    t = _html.escape(t, quote=False)
+    codes = []
+    t = re.sub(r"`([^`]+)`", lambda m: codes.append(m.group(1)) or f"\x00{len(codes) - 1}\x00", t)
+    t = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)", lambda m: f'<img class="nw-pic" src="{m.group(2)}" alt="{m.group(1)}" loading="lazy" decoding="async">', t)
+    t = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", lambda m: f'<a href="{m.group(2)}"' + (' target="_blank" rel="noopener"' if m.group(2).startswith("http") else "") + f">{m.group(1)}</a>", t)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", t)
+
+    def ico(m):
+        n = m.group(1)
+        return f'<img class="nw-ico" src="img/{n}.png" alt="">' if n == "trading" or os.path.exists(f"img/{n}.png") else m.group(0)
+    t = re.sub(r":([a-z0-9_]+):", ico, t)
+    return re.sub(r"\x00(\d+)\x00", lambda m: f"<code>{codes[int(m.group(1))]}</code>", t)
+
+
+def _md(src):
+    out, para, items, quote = [], [], [], []
+
+    def flush():
+        if para:
+            out.append("<p>" + _md_inline(" ".join(para)) + "</p>")
+            para.clear()
+        if items:
+            out.append("<ul>" + "".join(f"<li>{_md_inline(i)}</li>" for i in items) + "</ul>")
+            items.clear()
+        if quote:
+            out.append("<blockquote><p>" + _md_inline(" ".join(quote)) + "</p></blockquote>")
+            quote.clear()
+    for line in src.splitlines():
+        s = line.strip()
+        if not s:
+            flush()
+        elif s.startswith("-# "):
+            flush()
+            out.append(f'<p class="nw-small">{_md_inline(s[3:])}</p>')
+        elif m := re.match(r"(#{2,3}) (.+)", s):
+            flush()
+            lvl = len(m.group(1))
+            hid = re.sub(r"[^a-z0-9]+", "-", m.group(2).lower()).strip("-")
+            out.append(f'<h{lvl} id="{hid}">{_md_inline(m.group(2))}</h{lvl}>')
+        elif s.startswith(("- ", "* ")):
+            if para or quote:
+                flush()
+            items.append(s[2:])
+        elif s.startswith("> "):
+            if para or items:
+                flush()
+            quote.append(s[2:])
+        elif items and line.startswith("  "):
+            items[-1] += " " + s
+        else:
+            if items or quote:
+                flush()
+            para.append(s)
+    flush()
+    return "\n".join(out)
+
+
+def _load_posts():
+    posts = []
+    for f in sorted(_glob.glob("posts/*.md")):
+        raw = open(f, encoding="utf-8").read()
+        m = re.match(r"---\n(.*?)\n---\n(.*)", raw, re.S)
+        if not m:
+            raise SystemExit(f"{f}: missing the --- header")
+        meta = {}
+        for ln in m.group(1).splitlines():
+            k, _, v = ln.partition(":")
+            v = v.strip()
+            if len(v) > 1 and v[0] == v[-1] and v[0] in "\"'":
+                v = v[1:-1]
+            meta[k.strip()] = v
+        name = os.path.basename(f)[:-3]
+        slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", name)
+        date = _dt.date.fromisoformat(meta.get("date") or name[:10])
+        if meta.get("draft", "").lower() in ("yes", "true"):
+            continue
+        body = m.group(2)
+        words = len(re.findall(r"\w+", body))
+        posts.append({
+            "slug": slug, "title": meta["title"], "date": date, "tag": meta.get("tag", "News"),
+            "icon": meta.get("icon", "bell"), "color": meta.get("color", "green"),
+            "summary": meta.get("summary", ""), "html": _md(body), "mins": max(1, round(words / 200)),
+            "url": f"news/{slug}.html",
+        })
+    posts.sort(key=lambda p: (p["date"], p["slug"]), reverse=True)
+    return posts
+
+
+POSTS = _load_posts()
+
+
+def _nice_date(d):
+    return f"{d.day} {d.strftime('%B %Y')}"
+
+
+def news_card(p, big=False):
+    e = _html.escape
+    return (f'<a class="tile nw-card{" big" if big else ""}" href="{p["url"]}">'
+            f'<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>'
+            f'<span class="nw-cb"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time>'
+            f'<strong class="nw-ct">{e(p["title"])}</strong><span class="nw-cs">{e(p["summary"])}</span>'
+            f'<span class="more">Read &rarr;</span></span></a>')
 
 
 SPY = ""
@@ -277,6 +403,7 @@ DEMOS = [
 demo_tabs = "".join(f'<button type="button" role="tab" class="dtab{" on" if i == 0 else ""}" data-d="{k}" aria-selected="{"true" if i == 0 else "false"}"><img src="{ic}" alt="">{t}</button>' for i, (k, t, ic, _) in enumerate(DEMOS))
 demo_panes = "".join(f'<div class="dpane" data-d="{k}" role="tabpanel"{"" if i == 0 else " hidden"}>{m}</div>' for i, (k, t, ic, m) in enumerate(DEMOS))
 
+home_news = ('<section class="hnews"><div class="sec-head"><h2>Latest news</h2><a href="news.html">All news &rarr;</a></div><div class="nw-grid">' + "".join(news_card(p) for p in POSTS[:3]) + "</div></section>\n") if POSTS else ""
 home = f"""<section class="hero big">
 <div class="wrap hero-in">
 <h1 class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.webp" alt="Bloombot, the Garden Tower Defense trading bot"></h1>
@@ -311,7 +438,7 @@ home = f"""<section class="hero big">
 <div class="sec-head"><h2>New strategies</h2><a href="strategies.html">All strategies &rarr;</a></div>
 <div class="hs-list" id="hs-list"></div>
 </section>
-<section class="demo">
+{home_news}<section class="demo">
 <div class="demo-text">
 <h2>Right inside your Discord</h2>
 <p>Bloombot does the busy work, so you can focus on the trade.</p>
@@ -1215,11 +1342,89 @@ def _advent():
 """
 open("advent.html", "w").write(page("Advent calendar · Bloombot", "The Bloombot advent calendar: 24 doors of Garden Tower Defense surprises in December.", _advent(), "", "advent.html", index=False))
 
+# ── News pages ───────────────────────────────────────────────────────────
+def _news():
+    e = _html.escape
+    rss = f'<link rel="alternate" type="application/rss+xml" title="Bloombot news" href="{BASE}news/feed.xml">\n'
+    if POSTS:
+        first, rest = POSTS[0], POSTS[1:]
+        lst = (f'<section class="nw-top">{news_card(first, True)}</section>\n'
+               + (f'<div class="sec-head"><h2>Earlier posts</h2><span class="nw-n">{len(POSTS)} posts</span></div><section class="nw-grid">{"".join(news_card(p) for p in rest)}</section>\n' if rest else ""))
+    else:
+        lst = '<section class="panel nw-empty"><img src="img/bell.png" alt=""><p>No news yet. Check back soon!</p></section>\n'
+    body = hero("bell", "News", "Updates, new features and announcements from the Bloombot team.", "t_news") + f"""<main class="wrap nw" id="main">
+{lst}<section class="hband nw-band-cta">
+<img class="hband-flower" src="img/flower.png" alt="">
+<div class="hband-text"><h2>Get news first</h2><p>Join the support server for updates, giveaways and sneak peeks.</p></div>
+<div class="hband-btns"><a class="brick discord" href="{SUPPORT}">{DISCORD_SVG}Join the server</a><a class="brick dark" href="news/feed.xml"><img src="img/bell.png" alt="">RSS feed</a></div>
+</section>
+</main>
+"""
+    ld = '<script type="application/ld+json">' + _json.dumps({
+        "@context": "https://schema.org", "@type": "Blog", "name": "Bloombot news", "url": BASE + "news.html",
+        "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": BASE + p["url"], "datePublished": p["date"].isoformat()} for p in POSTS],
+    }).replace("<", "\\u003c") + "</script>\n"
+    open("news.html", "w").write(page("News · Bloombot", "Bloombot news: website updates, new features and announcements for the Garden Tower Defense trading bot.",
+                                      body, "n", "news.html", ld=rss + ld, kw="Bloombot news, Bloombot updates, GTD news, Garden Tower Defense news, patch notes"))
+
+    os.makedirs("news", exist_ok=True)
+    keep = set()
+    for i, p in enumerate(POSTS):
+        newer = POSTS[i - 1] if i > 0 else None
+        older = POSTS[i + 1] if i + 1 < len(POSTS) else None
+        others = [q for q in POSTS if q is not p][:2]
+        pn = "".join(
+            f'<a class="nw-pn {cls}" href="{q["url"]}"><span>{lab}</span><strong>{e(q["title"])}</strong></a>'
+            for q, cls, lab in ((older, "prev", "&larr; Older"), (newer, "next", "Newer &rarr;")) if q)
+        body = f"""<main class="wrap nw nw-post" id="main">
+<nav class="u-crumbs" aria-label="Breadcrumb"><a href="news.html">News</a><span aria-hidden="true">›</span><span>{e(p["title"])}</span></nav>
+<article class="panel nw-art">
+<header class="nw-head">
+<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>
+<h1>{e(p["title"])}</h1>
+<p class="nw-meta"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span><span aria-hidden="true">·</span><span>Bloombot team</span></p>
+</header>
+<div class="nw-body">
+{p["html"]}
+</div>
+</article>
+{f'<nav class="nw-pns" aria-label="More posts">{pn}</nav>' if pn else ""}
+{f'<div class="sec-head"><h2>More news</h2><a href="news.html">All news &rarr;</a></div><section class="nw-grid two">{"".join(news_card(q) for q in others)}</section>' if others else ""}
+</main>
+"""
+        ld = '<script type="application/ld+json">' + _json.dumps([
+            {"@context": "https://schema.org", "@type": "BlogPosting", "headline": p["title"], "description": p["summary"],
+             "datePublished": p["date"].isoformat(), "url": BASE + p["url"], "image": BASE + "img/og-v2.jpg",
+             "author": {"@type": "Organization", "name": "Bloombot"}, "publisher": {"@type": "Organization", "name": "Bloombot", "logo": {"@type": "ImageObject", "url": BASE + "img/logo.png"}}},
+            {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "News", "item": BASE + "news.html"},
+                {"@type": "ListItem", "position": 2, "name": p["title"], "item": BASE + p["url"]}]},
+        ]).replace("<", "\\u003c") + "</script>\n"
+        out = page(f'{e(p["title"])} · Bloombot news', e(p["summary"]), body, "n", p["url"], ld=rss + ld,
+                   kw="Bloombot news, " + e(p["tag"]))
+        out = (out.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="/">\n', 1)
+                  .replace('<meta property="og:type" content="website">', f'<meta property="og:type" content="article">\n<meta property="article:published_time" content="{p["date"].isoformat()}">', 1))
+        open(p["url"], "w").write(out)
+        keep.add(p["url"])
+    for f in _glob.glob("news/*.html"):   # a post that was renamed or removed
+        if f.replace(os.sep, "/") not in keep:
+            os.remove(f)
+
+    items = "".join(
+        f'<item><title>{e(p["title"])}</title><link>{BASE}{p["url"]}</link><guid>{BASE}{p["url"]}</guid>'
+        f'<pubDate>{_dt.datetime.combine(p["date"], _dt.time(12)).strftime("%a, %d %b %Y %H:%M:%S +0000")}</pubDate><description>{e(p["summary"])}</description></item>\n'
+        for p in POSTS[:20])
+    open("news/feed.xml", "w").write(f'<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>Bloombot news</title><link>{BASE}news.html</link>'
+                                     f'<description>Updates and announcements from Bloombot, the Garden Tower Defense trading bot.</description><language>en</language>\n{items}</channel></rss>\n')
+
+
+_news()
+
 def _sitemap():
     import datetime, glob, subprocess
     today = datetime.date.today().isoformat()
     old = dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>", open("sitemap.xml").read())) if os.path.exists("sitemap.xml") else {}
-    pages = [f for f in glob.glob("*.html") if re.search(r'<meta name="robots" content="index', open(f).read())]
+    pages = [f.replace(os.sep, "/") for f in glob.glob("*.html") + glob.glob("news/*.html") if re.search(r'<meta name="robots" content="index', open(f).read())]
     order = {u or "index.html": i for i, u in enumerate(SITEMAP)}
     pages.sort(key=lambda f: (order.get(f, len(order)), f))
     rows = []
