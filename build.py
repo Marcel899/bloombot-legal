@@ -309,7 +309,7 @@ def _load_posts():
 POSTS = _load_posts()
 
 
-TAG_ICONS = {"launch": "tag_launch", "update": "tag_update", "feature": "tag_feature"}
+TAG_ICONS = {"launch": "tag_rocket", "update": "tag_refresh", "feature": "tag_feature"}
 
 
 def _tag(p):
