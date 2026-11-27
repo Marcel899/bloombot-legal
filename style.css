@@ -14,7 +14,7 @@ body{
     radial-gradient(1200px 600px at 50% -200px,rgba(239,75,79,.10),transparent 70%),
     linear-gradient(rgba(19,21,27,.7),rgba(19,21,27,.7)),
     url(img/studs-bg.png) 0 0/160px 160px,var(--bg);
-  background-attachment:scroll,fixed,scroll,fixed;
+  background-attachment:scroll;
 }
 main{flex:1}
 .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
@@ -1149,7 +1149,7 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
     radial-gradient(1200px 600px at 50% -200px,rgba(20,174,234,.10),transparent 70%),
     linear-gradient(rgba(238,243,248,.93),rgba(238,243,248,.93)),
     url(img/studs-bg.png) 0 0/160px 160px,var(--bg);
-  background-attachment:scroll,fixed,scroll,fixed;
+  background-attachment:scroll;
 }
 :where([data-theme=light]) a{color:#1a63d0}
 [data-theme=light] a.brick{color:#fff}
@@ -1346,7 +1346,7 @@ body.scrolled .topbar .bar{height:54px;background:rgba(14,16,21,.94);border-colo
   radial-gradient(900px 500px at 85% 10%,rgba(80,170,230,.12),transparent 70%),
   linear-gradient(rgba(244,241,230,.94),rgba(244,241,230,.94)),
   url(img/studs-bg.png) 0 0/160px 160px,var(--bg);
-  background-attachment:scroll,scroll,fixed,scroll,fixed}
+  background-attachment:scroll}
 [data-theme=light] .hero::before{filter:blur(6px) saturate(1.15);inset:-30px -30px 0}
 [data-theme=light] .hero::after{background:linear-gradient(180deg,rgba(40,90,160,.18) 0%,rgba(40,90,160,.08) 45%,rgba(244,241,230,.3) 78%,rgba(244,241,230,0) 100%)}
 [data-theme=light] .bar,[data-theme=light] body.scrolled .topbar .bar{background:rgba(255,252,242,.88);border-color:rgba(120,100,50,.16);box-shadow:0 12px 28px -18px rgba(90,70,20,.45)}
@@ -1452,13 +1452,13 @@ body{background:
   radial-gradient(1200px 600px at 50% -200px,rgba(239,75,79,.10),transparent 70%),
   linear-gradient(rgba(19,21,27,.82),rgba(19,21,27,.82)),
   url(img/studs-bg.png) 0 0/128px 128px,var(--bg);
-  background-attachment:scroll,fixed,scroll,fixed}
+  background-attachment:scroll}
 [data-theme=light] body{background:
   radial-gradient(900px 500px at 15% 0,rgba(126,200,80,.14),transparent 70%),
   radial-gradient(900px 500px at 85% 10%,rgba(80,170,230,.12),transparent 70%),
   linear-gradient(rgba(244,241,230,.965),rgba(244,241,230,.965)),
   url(img/studs-bg.png) 0 0/128px 128px,var(--bg);
-  background-attachment:scroll,scroll,fixed,scroll,fixed}
+  background-attachment:scroll}
 
 
 .home{padding-bottom:56px}
@@ -3084,7 +3084,7 @@ main.dash,main.gwa{min-width:0;width:100%;max-width:1148px;box-sizing:border-box
   radial-gradient(900px 500px at 85% 10%,rgba(80,170,230,.12),transparent 70%),
   linear-gradient(rgba(244,241,230,.45),rgba(244,241,230,.45)),
   url(img/studs-bg-light.png) 0 0/128px 128px,var(--bg);
-  background-attachment:scroll,scroll,fixed,scroll,fixed}
+  background-attachment:scroll}
 [data-theme=light] .tile::before,[data-theme=light] .cta-panel::before,[data-theme=light] .toc-box::before,[data-theme=light] .panel::before,
 [data-theme=light] .step::before,[data-theme=light] .tcard::before{background-image:url(img/weld.png);opacity:.07}
 [data-theme=light] .nl.on::before{opacity:.18}
@@ -5142,3 +5142,34 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 @media (max-width:600px){.xm-board{margin-bottom:26px}.xm-rew{grid-template-columns:1fr;gap:12px}.xm-rc{padding:14px}.xm-ul{gap:8px}.xm-u{padding:8px}.xm-ui{width:36px;height:36px}.xm-uh{gap:8px}.xm-ud li{padding:4px 6px;gap:6px}}
 @media (prefers-reduced-motion:reduce){.xm-cell.can-open .xm-door,.xm-cell.opening .xm-door,.xm-cell.pop .xm-in,.xm-wpic{animation:none}}
 @media (max-width:400px){.xm-ud b{width:3.1em}}
+
+/* ── advent: smooth animations ──
+   Only transform and opacity animate (the GPU does those without repainting).
+   Snow is two big drifting layers instead of 36 flakes, stars twinkle in a few
+   groups, the glow on today's door fades a layer in and out, and everything in
+   the sky stops while the sky is scrolled out of view (.xm-off, js/advent.js). */
+.xm-snow i{display:none}
+.xm-snow{overflow:hidden}
+.xm-snow::before,.xm-snow::after{content:"";position:absolute;left:0;right:0;top:-320px;bottom:0;pointer-events:none;will-change:transform;
+  background-image:radial-gradient(circle at 20% 30%,#fff 2.5px,transparent 3.5px),radial-gradient(circle at 70% 12%,rgba(255,255,255,.8) 2px,transparent 3px),radial-gradient(circle at 45% 70%,#fff 3px,transparent 4px),radial-gradient(circle at 88% 55%,rgba(255,255,255,.7) 2px,transparent 3px),radial-gradient(circle at 8% 85%,rgba(255,255,255,.85) 2.5px,transparent 3.5px);
+  background-size:320px 320px;animation:xmSnowA 16s linear infinite}
+.xm-snow::after{top:-240px;opacity:.6;background-size:240px 240px;background-position:60px 40px;animation:xmSnowB 11s linear infinite}
+@keyframes xmSnowA{to{transform:translate3d(0,320px,0)}}
+@keyframes xmSnowB{to{transform:translate3d(0,240px,0)}}
+.xm-sky i{animation-name:xmStar2}
+.xm-sky i:not(:nth-child(3n)){animation:none;opacity:.75}
+@keyframes xmStar2{50%{opacity:.2}}
+@keyframes xmTwinkle{50%{opacity:.4}}
+.xm-cell.next .xm-door,.xm-cell.can-open .xm-door{animation:none}
+.xm-cell.opening .xm-door{animation:xmShake .5s ease-in-out infinite}
+.xm-cell::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:14px;pointer-events:none;opacity:0;box-shadow:0 0 0 3px #ffd24a,0 0 26px 8px rgba(255,210,74,.55)}
+.xm-cell.next::after,.xm-cell.can-open::after{animation:xmGlow2 2.4s ease-in-out infinite}
+@keyframes xmGlow2{50%{opacity:1}}
+.xm-off *,.xm-off::before,.xm-off::after,.xm-off *::before,.xm-off *::after{animation-play-state:paused!important}
+.xm-chips span{backdrop-filter:none;background:rgba(7,20,40,.8)}
+/* the top bar's blur would be redrawn every frame over the moving sky */
+body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(17,19,25,.95)}
+[data-theme=light] body:has(.xm-hero) .topbar .bar{background:rgba(255,255,255,.97)}
+@media (prefers-reduced-motion:reduce){.xm-snow::before,.xm-snow::after,.xm-cell::after,.xm-lights i,.xm-hero-gift,.xm-star{animation:none}.xm-cell.next::after,.xm-cell.can-open::after{opacity:1}}
+/* night snow: the hills fade into a deep blue instead of a grey band */
+:root:not([data-theme=light]) .xm-hero::after{background:linear-gradient(180deg,#eef3fb 0%,#d9e2f0 30%,#3a4d6e 62%,var(--bg) 100%)}

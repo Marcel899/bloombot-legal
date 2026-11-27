@@ -46,9 +46,8 @@
     last[id] = v;
     const b = $(id);
     b.textContent = v;
-    b.classList.remove("tick");
-    void b.offsetWidth;
-    b.classList.add("tick");
+    /* restart the flip without forcing a layout every second */
+    if (b.animate && !reduceMotion) b.animate([{ transform: "translateY(-45%)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 350, easing: "cubic-bezier(.2,.9,.3,1.2)" });
   }
   function tick() {
     const now = new Date(), g = goal(now);
@@ -77,6 +76,10 @@
     if (st && cd !== st.today && cd !== reloadedFor && !busy) { reloadedFor = cd; load(); }
     if (coolUntil) drawHunt();
   }
+  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* stop the sky (snow, stars, lights) while it's scrolled out of view */
+  const hero = document.querySelector(".xm-hero");
+  if (hero && "IntersectionObserver" in window) new IntersectionObserver(es => es.forEach(e => hero.classList.toggle("xm-off", !e.isIntersecting))).observe(hero);
   const tz = $("xmtz");
   if (tz) tz.textContent = new Date(Date.UTC(2026, 11, 1)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " your time";
 
@@ -195,7 +198,7 @@
   function draw() {
     if (!st) {
       $("xmme-b").replaceChildren(el("p", "xm-rs", "Prizes aren't switched on yet. Check back soon."));
-      $("xmgrand").replaceChildren();
+      $("xmgrand").replaceChildren(el("p", "xm-rs", "An Infectia, drawn after door 24. Every door you open is one ticket."));
       return;
     }
     const opened = new Map((st.opened || []).map(o => [o.day, o]));
