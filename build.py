@@ -310,7 +310,7 @@ def _load_posts():
 POSTS = _load_posts()
 
 
-TAG_ICONS = {"codes": "gem", "event": "gift", "launch": "tag_rocket", "update": "tag_refresh", "feature": "tag_feature"}
+TAG_ICONS = {"codes": "gem", "event": "gift", "notice": "warning", "launch": "tag_rocket", "update": "tag_refresh", "feature": "tag_feature"}
 
 
 # The two news pages: Bloombot's own news and Garden Tower Defense (game) news.
@@ -1460,7 +1460,7 @@ def _news():
 <header class="nw-head">
 <span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt="">{_tag(p)}</span>
 <h1>{e(p["title"])}</h1>
-<p class="nw-meta"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span><span aria-hidden="true">·</span><span>Bloombot team</span>
+<p class="nw-meta"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span><span aria-hidden="true">·</span><span>{"Bloombot team" if p["sec"] == "bloombot" else "GTD update notes"}</span>
 <button class="nw-share" type="button" id="nw-share" data-title="{e(p["title"])}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Share</button></p>
 </header>
 {f'<img class="nw-hero-pic" src="{e(p["image"])}" alt="" decoding="async">' if p["image"] else ""}{toc}<div class="nw-body">
