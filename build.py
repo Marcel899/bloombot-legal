@@ -494,6 +494,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 </section>
 <div class="skel-grid sk-ads" id="loading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
 {guide('trades')}</main>
+<script defer src="js/offer.js?v={hashlib.md5(open("js/offer.js", "rb").read()).hexdigest()[:8]}"></script>
 <script defer src="js/trades.js?v={JSVER['trades']}"></script>
 """
 open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense", "Browse and post Garden Tower Defense trade ads from every Bloombot server. Log in with Discord or Google.", trades_body, "a", "trades.html", ld=faq_ld("trades")))
@@ -914,6 +915,7 @@ messages_body = f"""<main class="wrap dmw" id="main">
 </section>
 </div>
 </main>
+<script defer src="js/offer.js?v={hashlib.md5(open("js/offer.js", "rb").read()).hexdigest()[:8]}"></script>
 <script defer src="js/messages.js?v={JSVER['messages']}"></script>
 """
 open("messages.html", "w").write(page("Bloombot Messages", "Private messages between Bloombot traders.", messages_body, "", "messages.html", index=False))

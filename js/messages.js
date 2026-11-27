@@ -139,7 +139,7 @@
   };
   /* The verdict for whoever is reading: on their message you'd give what they want and get what they offer. */
   function offerNote(m) {
-    if (!m.body || m.unsent) return null;
+    if (!m.body || m.unsent || m.offer) return null;
     const o = parseOffer(m.body);
     if (!o) return null;
     const give = m.from_me ? o.gives : o.wants, get = m.from_me ? o.wants : o.gives;
@@ -481,7 +481,15 @@
         };
         b.append(fig);
       }
-      if (m.body) {
+      if (m.offer && BB.offerCard) {
+        /* a structured trade offer: the card replaces the plain "Offer: …" text */
+        row.classList.add("offer");
+        b.append(BB.offerCard(m, {
+          name: curInfo && curInfo.name,
+          onChange: () => loadInbox(),
+          onCounter: (om, give, get) => makeOffer(give, get, om.id),
+        }));
+      } else if (m.body) {
         const t = richText(m.body);
         b.append(t);
         if (t.classList.contains("big") && !m.image_path && !m.local_url) row.classList.add("emo");
@@ -612,6 +620,11 @@
     (r.unsent || []).forEach(gone => {
       const m = msgs.find(x => x.id === gone);
       if (m && !m.unsent) { m.unsent = true; m.body = ""; m.image_path = null; changed = true; }
+    });
+    /* offers already on screen: accepted / declined / countered elsewhere */
+    Object.entries(r.offers || {}).forEach(([id, st]) => {
+      const m = msgs.find(x => String(x.id) === id);
+      if (m && m.offer && m.offer.status !== st) { m.offer.status = st; changed = true; }
     });
     if (r.read_upto) msgs.forEach(m => { if (m.from_me && !m.read_at && m.id <= r.read_upto) { m.read_at = new Date().toISOString(); changed = true; } });
     if (changed) {
@@ -1111,10 +1124,24 @@
     setTimeout(() => list.querySelector("input").focus(), 50);
   }
 
+  /* Offer dialog for this chat; the sent offer drops straight into the thread. */
+  function makeOffer(give, get, replyTo) {
+    const id = cur;
+    BB.offerDialog({ to: id, name: curInfo && curInfo.name, give, get, replyTo, onSent: row => {
+      if (cur !== id || !row || !row.id) return;
+      if (replyTo) { const o = msgs.find(x => x.id === replyTo); if (o && o.offer) o.offer.status = "countered"; }
+      if (!msgs.some(x => x.id === row.id)) msgs.push(row);
+      newest = Math.max(newest, row.id);
+      bumpInbox(id, row);
+      renderMsgs(true);
+    } });
+  }
+
   function chatMenu() {
     const c = inbox.find(x => x.other === cur) || curInfo || {};
     const blocked = c.blocked || canSend === "you_blocked";
     const items = [["View profile", () => BB.openProfile(cur, { name: c.name, avatar: c.avatar })]];
+    if (BB.offerDialog && ["ok", "new"].includes(canSend)) items.push(["Make an offer", () => makeOffer([], [], null)]);
     const last = theirLatest();
     if (last) items.push(["Report", () => report(last), true]);
     items.push([blocked ? "Unblock" : "Block", () => block(!blocked), !blocked], ["Delete chat", deleteChat, true]);

@@ -122,6 +122,19 @@
       t.append(el("strong", null, "Message"), el("span", null, " on Bloombot"));
       m.append(i, t);
       users.append(m);
+      /* Make an offer: their side and what they're after, filled in from the ad */
+      const of = el("button", "acc tc-offer");
+      of.type = "button";
+      of.title = "Make " + (a.discord_name || "this trader") + " an offer";
+      const oi = el("img", "acc-ic"); oi.src = "img/swap.png"; oi.alt = "";
+      of.append(oi, el("span", "tc-msg-t", "Make an offer"));
+      of.onclick = async () => {
+        of.disabled = true;
+        const sides = await BB.adSides(a.content).catch(() => ({ have: [], want: [] }));
+        of.disabled = false;
+        BB.offerDialog({ to: did, name: a.discord_name, give: sides.want, get: sides.have, ad: a.id });
+      };
+      users.append(of);
     }
     c.append(users);
     return c;

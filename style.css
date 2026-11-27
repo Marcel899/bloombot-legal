@@ -4791,3 +4791,96 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
   .xm-cd-c{gap:7px}.xm-cd-c::before,.xm-cd-c::after{width:6px;height:6px}
 }
 @media (prefers-reduced-motion:reduce){.xm-cd-t b.tick,.xm-shoot{animation:none}}
+
+/* ── trade offers ── */
+/* trade ad card: Message and Make an offer side by side under the accounts */
+.tc-users .tc-msg{grid-column:auto}
+.tc-users .tc-offer{justify-content:center;gap:8px;padding:8px 12px;border:2px solid #0c0e12;background:linear-gradient(180deg,#3a7fe8,#2a62c2);color:#fff;font:inherit;cursor:pointer;transition:filter .15s,transform .15s}
+.tc-users .tc-offer:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.tc-users .tc-offer:disabled{opacity:.6;cursor:progress}
+.tc-offer .acc-ic{width:20px;height:20px}
+[data-theme=light] .tc-users .tc-offer{background:linear-gradient(180deg,#e3edff,#d3e2fc);border-color:#a9c3f0;color:#1a4fa0}
+[data-theme=light] .tc-offer .tc-msg-t{color:#1a4fa0}
+
+/* the dialog */
+.of-dlg{max-width:760px;gap:14px;padding:20px 22px}
+.of-head{display:flex;align-items:center;gap:12px}
+.of-head>div{flex:1;min-width:0}
+.wm.of-dlg .of-head h2{margin:0;padding:0;font-size:1.25rem;text-align:left!important;background:none;border:0;box-shadow:none}
+.of-head p{margin:2px 0 0;color:var(--muted);font-weight:700;font-size:.88rem}
+.of-hi{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:12px;background:rgba(75,141,248,.18)}
+.of-hi img{width:28px;height:28px}
+.of-cols{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start}
+.of-arrow{align-self:center;color:var(--muted);font-size:1.4rem;font-weight:900}
+.of-side{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--card-2);border:2px solid var(--border);min-width:0}
+.of-side.give{border-color:rgba(239,75,79,.35)}
+.of-side.get{border-color:rgba(51,196,106,.4)}
+.of-st{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.wm .of-st h3{margin:0;font-size:1rem}
+.of-sum{font-weight:900;color:var(--soft)}
+.of-list{display:flex;flex-direction:column;gap:6px;min-height:46px}
+.of-empty{margin:0;padding:12px 6px;border:2px dashed var(--border);border-radius:10px;color:var(--muted);font-size:.86rem;font-weight:700;text-align:center}
+.of-row{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:10px;background:var(--card)}
+.of-img{width:32px;height:32px;flex:none;object-fit:contain}
+.of-rt{display:flex;flex-direction:column;flex:1;min-width:0;line-height:1.2}
+.of-rt strong{font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.of-rt span{color:var(--muted);font-size:.78rem;font-weight:800}
+.of-row .col-qty{background:var(--card-2)}
+.of-qn{min-width:28px;text-align:center;font-weight:900}
+.of-row .col-qb{width:26px;height:28px}
+.of-find{position:relative}
+.wm .of-q{width:100%;height:40px;padding:0 12px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:var(--card);color:var(--text);font:700 .95rem "Nunito",sans-serif;outline:none;box-sizing:border-box}
+.wm .of-q:focus{border-color:#14aeea}
+.of-verdict{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 10px;padding:10px 14px;border-radius:12px;background:var(--card-2);color:var(--muted);font-weight:800;text-align:center}
+.of-verdict img{width:26px;height:26px}
+.of-verdict strong{font-size:1.05rem}
+.of-verdict span{font-size:.86rem}
+.of-verdict.fair strong{color:#7cc4ff}.of-verdict.win strong{color:#5be08b}.of-verdict.lose strong{color:#ffb35c}
+.of-send{align-self:stretch;justify-content:center}
+.of-send:disabled{opacity:.55;cursor:not-allowed}
+@media (max-width:640px){
+  .of-dlg{padding:16px 14px}
+  .of-cols{grid-template-columns:1fr}
+  .of-arrow{justify-self:center;transform:rotate(90deg)}
+}
+[data-theme=light] .of-side,[data-theme=light] .of-verdict{background:#f6f2e6}
+[data-theme=light] .of-row,[data-theme=light] .wm .of-q{background:#fff}
+[data-theme=light] .of-verdict.fair strong{color:#1a63d0}[data-theme=light] .of-verdict.win strong{color:#24731a}[data-theme=light] .of-verdict.lose strong{color:#a35a00}
+
+/* the card in a chat */
+.dm-m.offer{max-width:min(440px,86%)}
+.dm-m.offer .dm-b{padding:0;overflow:hidden}
+.of-card{min-width:260px}
+.of-card>div{display:flex;flex-direction:column;gap:8px;padding:12px}
+.of-ch{display:flex;align-items:center;gap:8px}
+.of-ch img{width:22px;height:22px}
+.of-ch strong{flex:1;font-size:.95rem}
+.of-pill{padding:2px 9px;border-radius:999px;font-size:.74rem;font-weight:900;background:rgba(255,255,255,.14)}
+.of-pill.accepted{background:#2fa55c;color:#fff}.of-pill.declined,.of-pill.withdrawn{background:rgba(0,0,0,.28);color:rgba(255,255,255,.8)}
+.of-pill.countered{background:#e0a020;color:#2a1c00}.of-pill.open{background:rgba(255,210,74,.22);color:#ffd96a}
+.of-cb{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.of-cs{display:flex;flex-direction:column;gap:5px;padding:8px;border-radius:10px;background:rgba(0,0,0,.18);min-width:0}
+.of-cs>em{font-style:normal;font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;opacity:.75}
+.of-cs>b{margin-top:auto;font-size:.95rem}
+.of-cl{display:flex;flex-direction:column;gap:3px}
+.of-cu{display:flex;align-items:center;gap:6px;min-width:0;font-size:.84rem;font-weight:700}
+.of-cu img{width:22px;height:22px;flex:none;object-fit:contain}
+.of-cu span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.of-cv{padding:5px 10px;border-radius:9px;background:rgba(0,0,0,.18);font-size:.84rem;font-weight:900;text-align:center}
+.of-cv.fair{color:#9fd4ff}.of-cv.win{color:#7ef0a0}.of-cv.lose{color:#ffc27a}
+.dm-m.mine .of-cv.fair,.dm-m.mine .of-cv.win,.dm-m.mine .of-cv.lose{color:#fff}
+.of-ca{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.of-ca .brick{flex:1;justify-content:center}
+.of-wait{flex:1;font-size:.8rem;font-weight:700;opacity:.8}
+.of-link{padding:0;border:0;background:none;color:inherit;font:800 .82rem "Nunito",sans-serif;text-decoration:underline;cursor:pointer;opacity:.85}
+.of-link:hover{opacity:1}
+.of-note{margin:0;font-size:.8rem;font-weight:700;opacity:.85}
+.of-card.st-declined .of-cb,.of-card.st-withdrawn .of-cb,.of-card.st-countered .of-cb{opacity:.6}
+[data-theme=light] .dm-m.theirs .of-cs,[data-theme=light] .dm-m.theirs .of-cv{background:#f1ead7}
+[data-theme=light] .dm-m.theirs .of-cv.fair{color:#1a63d0}[data-theme=light] .dm-m.theirs .of-cv.win{color:#24731a}[data-theme=light] .dm-m.theirs .of-cv.lose{color:#a35a00}
+[data-theme=light] .dm-m.theirs .of-pill.open{background:#fff3cc;color:#7a5500}
+.wm.of-dlg .of-head h2{display:block;justify-content:flex-start!important}
+/* half-width buttons: just "Message" */
+.tc-users .tc-msg .tc-msg-t span{display:none}
+.of-ca .brick{padding:6px 8px;white-space:nowrap;font-size:.92rem;min-width:0}
+@media (max-width:600px){.dm-m.offer{max-width:94%}.of-card{min-width:0}.of-ca .brick{font-size:.84rem;padding:6px 4px}}
