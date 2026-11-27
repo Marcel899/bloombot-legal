@@ -5256,52 +5256,44 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 /* night snow: the hills fade into a deep blue instead of a grey band */
 :root:not([data-theme=light]) .xm-hero::after{background:linear-gradient(180deg,#eef3fb 0%,#d9e2f0 30%,#3a4d6e 62%,var(--bg) 100%)}
 /* ── Advent calendar card on the home page (xmas_card() in build.py, js/xmas-card.js) ── */
-.xmc{margin:8px 0 26px}
+.xmc{margin:8px 0 24px}
 .xmc[hidden]{display:none}
-.xmc-in{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:22px 34px;padding:26px 30px 38px;border-radius:18px;border:3px solid #0c0e12;color:#fff;
-  background:radial-gradient(1.5px 1.5px at 8% 18%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 22% 64%,rgba(255,255,255,.7) 50%,transparent 51%),radial-gradient(1.6px 1.6px at 41% 12%,rgba(255,255,255,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 49% 56%,rgba(255,255,255,.55) 50%,transparent 51%),radial-gradient(1.4px 1.4px at 63% 8%,rgba(255,255,255,.75) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 96% 46%,rgba(255,255,255,.6) 50%,transparent 51%),radial-gradient(260px 260px at 4% 100%,rgba(220,50,50,.35),transparent 70%),radial-gradient(520px 260px at 80% -10%,rgba(255,236,180,.2),transparent 70%),linear-gradient(160deg,#0a1a35 0%,#11305a 58%,#1a4675 100%);
-  box-shadow:0 10px 30px -12px rgba(10,30,70,.8),inset 0 3px 0 rgba(255,255,255,.08)}
+.xmc-in{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:18px;padding:14px 18px 20px 14px;border-radius:16px;border:3px solid #0c0e12;color:#fff;
+  background:radial-gradient(1.4px 1.4px at 14% 20%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 33% 72%,rgba(255,255,255,.6) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 52% 16%,rgba(255,255,255,.75) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 71% 64%,rgba(255,255,255,.55) 50%,transparent 51%),radial-gradient(1.4px 1.4px at 90% 22%,rgba(255,255,255,.7) 50%,transparent 51%),radial-gradient(380px 160px at 85% -20%,rgba(255,236,180,.16),transparent 70%),linear-gradient(160deg,#0b1d3a 0%,#123058 60%,#1a4272 100%);
+  box-shadow:0 3px 5px -2px rgba(0,0,0,.4),inset 0 3px 0 rgba(255,255,255,.08)}
 /* snowy hills along the bottom */
-.xmc-in::before,.xmc-in::after{content:"";position:absolute;z-index:-1;bottom:-22px;height:44px;border-radius:50%;background:linear-gradient(180deg,#f4f7fc,#cbd8eb)}
-.xmc-in::before{left:-6%;width:62%;opacity:.95}
-.xmc-in::after{right:-8%;width:64%;bottom:-26px;opacity:.85}
-.xmc-main{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
-.xmc-kick{display:flex;align-items:center;gap:8px;margin:0;padding:4px 12px 4px 6px;border-radius:999px;background:rgba(220,50,50,.9);border:2px solid #0c0e12;font-weight:900;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
-.xmc-kick img{width:22px;height:22px}
-.xmc .xmc-h,[data-theme=light] .xmc .xmc-h{margin:2px 0 0;font:700 clamp(1.6rem,3.2vw,2.3rem)/1.1 "Fredoka",sans-serif;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.3)}
-.xmc .xmc-sub,[data-theme=light] .xmc .xmc-sub{margin:0;max-width:46ch;color:#d3def1;font-weight:700;font-size:.98rem;line-height:1.5}
-.xmc-cd{display:flex;gap:8px}
+.xmc-in::before,.xmc-in::after{content:"";position:absolute;z-index:-1;bottom:-15px;height:26px;border-radius:50%;background:linear-gradient(180deg,#f4f7fc,#cbd8eb)}
+.xmc-in::before{left:-5%;width:60%;opacity:.95}
+.xmc-in::after{right:-6%;width:62%;bottom:-17px;opacity:.82}
+.xmc-art{position:relative;flex:none;width:72px;height:72px}
+.xmc-door{position:absolute;inset:2px 8px 8px 2px;display:grid;place-items:center;border-radius:11px;border:3px solid #0c0e12;background:var(--c);box-shadow:inset 0 3px 0 rgba(255,255,255,.28),inset 0 -4px 0 var(--k),0 3px 0 rgba(0,0,0,.3)}
+.xmc-door::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:7px;margin-left:-3.5px;background:#f5c83c}
+.xmc-door b{position:relative;min-width:26px;padding:0 5px;border-radius:7px;background:#fff;color:#c8202f;font:700 1.35rem/1.2 "Fredoka",sans-serif;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.xmc-gift{position:absolute;right:-4px;bottom:-2px;width:34px;height:34px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.xmc.is-done .xmc-door{--c:#21924f;--k:#156a38}
+.xmc.is-done .xmc-door b{color:#156a38}
+.xmc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.xmc-kick{display:flex;align-items:center;gap:5px;margin:0;color:#ffe08a;font-weight:900;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
+.xmc-kick img{width:16px;height:16px}
+.xmc .xmc-h,[data-theme=light] .xmc .xmc-h{margin:0;font:700 1.3rem/1.2 "Fredoka",sans-serif;color:#fff}
+.xmc .xmc-sub,[data-theme=light] .xmc .xmc-sub{margin:0;color:#cfdaee;font-weight:700;font-size:.9rem;line-height:1.4}
+.xmc-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.xmc-dots[hidden]{display:none}
+.xmc-dots i{width:9px;height:9px;border-radius:3px;background:rgba(255,255,255,.2)}
+.xmc-dots i.y{background:#3fd36b}
+.xmc-dots i.t{background:#f5c83c;box-shadow:0 0 0 2px rgba(245,200,60,.35)}
+.xmc-dots i.m{background:rgba(255,255,255,.07)}
+.xmc-cd{display:flex;gap:6px;flex:none}
 .xmc-cd[hidden],.xmc-cd>[hidden]{display:none}
-.xmc-cd>span{display:flex;flex-direction:column;align-items:center;min-width:62px;padding:7px 8px 6px;border-radius:12px;border:3px solid #0c0e12;background:linear-gradient(180deg,#f4f7fc,#d8e2f1);box-shadow:inset 0 -3px 0 rgba(0,0,0,.08),0 3px 0 rgba(0,0,0,.35)}
-.xmc-cd b{font:700 1.6rem/1.05 "Fredoka",sans-serif;font-variant-numeric:tabular-nums;color:#c8202f}
-.xmc-cd em{font-style:normal;font-size:.66rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#4a5a78}
-.xmc-go{margin-top:4px}
+.xmc-cd>span{display:flex;flex-direction:column;align-items:center;min-width:50px;padding:5px 6px 4px;border-radius:10px;border:2px solid #0c0e12;background:linear-gradient(180deg,#f4f7fc,#d8e2f1);box-shadow:inset 0 -3px 0 rgba(0,0,0,.08),0 2px 0 rgba(0,0,0,.3)}
+.xmc-cd b{font:700 1.3rem/1.05 "Fredoka",sans-serif;font-variant-numeric:tabular-nums;color:#c8202f}
+.xmc-cd em{font-style:normal;font-size:.62rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#4a5a78}
+.xmc-go{flex:none}
 .xmc-go img{width:22px;height:22px}
-.xmc-side{display:flex;flex-direction:column;align-items:center;gap:10px}
-/* mini calendar: 24 little doors, same colours as the real board */
-.xmc-cal{display:grid;grid-template-columns:repeat(8,38px);grid-auto-rows:38px;gap:6px;padding:12px;border-radius:14px;border:3px solid #0c0e12;background:linear-gradient(180deg,#6b3b1f,#4e2a15);box-shadow:inset 0 3px 0 rgba(255,255,255,.12),0 6px 0 rgba(0,0,0,.3);text-decoration:none;transition:transform .18s}
-.xmc-cal:hover{transform:translateY(-3px) rotate(-.6deg)}
-.xmc-cal:focus-visible{outline:3px solid #8dbbff;outline-offset:3px}
-.xmc-cal i{position:relative;display:grid;place-items:center;border-radius:7px;border:2px solid rgba(0,0,0,.45);background:var(--c);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 var(--k)}
-.xmc-cal i::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:4px;margin-left:-2px;background:rgba(255,255,255,.28)}
-.xmc-cal b{position:relative;font:700 .95rem/1 "Fredoka",sans-serif;color:var(--t);text-shadow:0 1px 0 rgba(0,0,0,.25)}
-.xmc-cal .c-snow b{text-shadow:none}
-.xmc-cal i.p{filter:grayscale(.85) brightness(.55)}
-.xmc-cal i.y{background:#2a3a26;box-shadow:inset 0 3px 6px rgba(0,0,0,.5)}
-.xmc-cal i.y::before{display:none}
-.xmc-cal i.y b{font-size:0}
-.xmc-cal i.y b::after{content:"";display:block;width:16px;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%235be08b' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round' d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/contain no-repeat}
-.xmc-cal i.t{z-index:1;transform:scale(1.16);border-color:#0c0e12;box-shadow:0 0 0 3px #ffe08a,0 0 18px 4px rgba(255,214,90,.7),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 var(--k);animation:xmcGlow 2.4s ease-in-out infinite}
-@keyframes xmcGlow{50%{box-shadow:0 0 0 3px #ffe08a,0 0 8px 1px rgba(255,214,90,.35),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 var(--k)}}
-.xmc-prog{margin:0;color:#ffe08a;font-weight:900;font-size:.86rem;text-align:center}
-.xmc-prog[hidden]{display:none}
-.xmc-perks{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px;padding:0;list-style:none}
-.xmc-perks li{display:flex;align-items:center;gap:5px;padding:3px 10px 3px 5px;border-radius:999px;background:rgba(6,14,30,.55);border:1px solid rgba(255,255,255,.12);color:#e6ecf7;font-weight:800;font-size:.8rem}
-.xmc-perks img{width:20px;height:20px;object-fit:contain}
-.xmc.is-done .xmc-kick{background:rgba(40,168,80,.95)}
-@media (max-width:900px){.xmc-in{grid-template-columns:1fr;padding:22px 20px 36px}.xmc-side{align-items:stretch}.xmc-cal{grid-template-columns:repeat(8,minmax(0,1fr));grid-auto-rows:auto}.xmc-cal i{aspect-ratio:1}.xmc-perks{max-width:none}}
-@media (max-width:560px){.xmc-in{padding:16px 14px 34px;gap:16px}.xmc-cal{gap:4px;padding:8px}.xmc-cal b{font-size:.8rem}.xmc-cal i.y b::after{width:12px;height:12px}.xmc-cd{width:100%}.xmc-cd>span{flex:1;min-width:0}.xmc-go{width:100%;justify-content:center;box-sizing:border-box}.xmc-main{align-items:stretch}.xmc-kick{align-self:flex-start}.xmc-perks li{font-size:.74rem}}
-@media (prefers-reduced-motion:reduce){.xmc-cal{transition:none}.xmc-cal:hover{transform:none}.xmc-cal i.t{animation:none}}
+@media (max-width:900px){.xmc-in{flex-wrap:wrap;gap:12px 14px}.xmc-main{flex-basis:calc(100% - 90px)}.xmc-cd{margin-left:86px}.xmc-go{margin-left:auto}}
+@media (max-width:560px){.xmc-in{padding:12px 12px 18px}.xmc-art{width:56px;height:56px}.xmc-door b{font-size:1.05rem;min-width:20px}.xmc-gift{width:26px;height:26px}.xmc-main{flex-basis:calc(100% - 72px)}.xmc .xmc-h{font-size:1.1rem}.xmc .xmc-sub{font-size:.84rem}
+  .xmc-cd{margin:0;flex:1}.xmc-cd>span{flex:1;min-width:0}.xmc-go{margin:0;flex:1 1 auto;justify-content:center}.xmc-dots i{width:7px;height:7px;border-radius:2px}}
+@media (max-width:380px){.xmc-cd{flex-basis:100%}.xmc-go{width:100%;justify-content:center;box-sizing:border-box}}
 /* ── News v2: unread bell, filters, cards, post reading ── */
 .bar .links .nl.fresh{position:relative}
 .bar .links .nl.fresh::after{content:"";position:absolute;top:4px;left:24px;width:9px;height:9px;border-radius:50%;background:#ff4b4f;box-shadow:0 0 0 2px var(--bg)}

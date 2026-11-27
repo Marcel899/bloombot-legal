@@ -423,24 +423,18 @@ demo_panes = "".join(f'<div class="dpane" data-d="{k}" role="tabpanel"{"" if i =
 #    so it can move into any home layout. It stays hidden outside November and December.
 def xmas_card():
     v = hashlib.md5(open("js/xmas-card.js", "rb").read()).hexdigest()[:8]
-    cols = ["red", "green", "gold", "ice", "snow", "green", "red", "ice"]
-    doors = "".join(f'<i class="c-{cols[(d * 5) % len(cols)]}{" big" if d == 24 else ""}" data-d="{d}"><b>{d}</b></i>' for d in range(1, 25))
-    perks = [("lightning", "+50 XP a door"), ("gem", "12 hidden units"), ("cur/tickets-2", "Infectia draw"), ("medal_gold", "2 banners")]
-    perk_html = "".join(f'<li><img src="img/{i}.{"webp" if i.startswith("cur/") else "png"}" alt="" loading="lazy">{t}</li>' for i, t in perks)
+    dots = "".join(f'<i data-d="{d}"></i>' for d in range(1, 25))
     return f"""<section class="xmc" id="xmc" hidden aria-labelledby="xmc-h">
 <div class="xmc-in">
+<a class="xmc-art" href="advent.html" tabindex="-1" aria-hidden="true"><span class="xmc-door c-red"><b id="xmc-n">1</b></span><img class="xmc-gift" src="img/gift.png" alt="" loading="lazy"></a>
 <div class="xmc-main">
-<p class="xmc-kick"><img src="img/gift.png" alt="">Advent calendar 2026</p>
+<p class="xmc-kick"><img src="img/wish_star.png" alt="">Advent calendar</p>
 <h2 class="xmc-h" id="xmc-h">Door 1 opens in</h2>
-<p class="xmc-sub" id="xmc-sub">24 doors of surprises, one a day until Christmas.</p>
-<ul class="xmc-perks" aria-label="What you can win">{perk_html}</ul>
+<p class="xmc-sub" id="xmc-sub">24 doors of XP, banners and 13 free units, including an Infectia.</p>
+<span class="xmc-dots" id="xmc-dots" hidden>{dots}</span>
+</div>
 <div class="xmc-cd" id="xmc-cd" role="timer" aria-live="off"><span id="xmc-dw"><b id="xmc-d">0</b><em id="xmc-dl">days</em></span><span><b id="xmc-hh">00</b><em>hrs</em></span><span><b id="xmc-mm">00</b><em>mins</em></span></div>
 <a class="brick red xmc-go" href="advent.html"><img src="img/gift.png" alt=""><span id="xmc-go">See the calendar</span></a>
-</div>
-<div class="xmc-side">
-<a class="xmc-cal" href="advent.html" aria-label="Open the advent calendar" id="xmc-cal">{doors}</a>
-<p class="xmc-prog" id="xmc-prog" hidden></p>
-</div>
 </div>
 </section>
 <script defer src="js/xmas-card.js?v={v}"></script>
