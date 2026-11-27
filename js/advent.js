@@ -17,7 +17,7 @@
   const cells = [...document.querySelectorAll(".xm-cell")];
   const cellOf = d => document.querySelector('.xm-cell[data-day="' + d + '"]');
   let markedDay = null, last = {};
-  let st = null, me = null, imgs = {}, busy = false, coolUntil = 0, drew = false, reloadedFor;
+  let st = null, me = null, imgs = {}, busy = false, coolUntil = 0, drew = false, reloadedFor, grandShown = false;
 
   /* ── countdown (UTC, like the doors) ── */
   function mark(day, label) {
@@ -136,13 +136,61 @@
     if (st && st.opened && st.opened.some(o => o.status === "pending" || o.status === "processing")) load.t = setTimeout(load, 3000);
   }
 
-  const WHY = {
-    verify: ["Verify your Roblox account to win units.", "Verify", "profile.html#edit"],
-    level: ["Reach level 3 to win units. Doors still give XP.", "Get XP", "levels.html"],
-    new: ["Your Bloombot account needs to be 7 days old to win units.", null, null],
-    profile: ["Create your Bloombot account to open doors.", "Set up", "profile.html#edit"],
-    won: ["You've won a unit! Doors still give XP and Infectia tickets.", null, null],
+  /* What it takes to win a unit, in the order adv_why_not checks it: the server
+     names the first thing missing, so the ones before it are done and the ones
+     after it aren't checked yet. */
+  const CHECKS = [
+    ["profile", "Bloombot account", "Set up", "profile.html#edit"],
+    ["verify", "Verified Roblox account", "Verify", "profile.html#edit"],
+    ["level", "Level 3 or higher", "Get XP", "levels.html"],
+    ["new", "Account at least 7 days old", null, null],
+  ];
+  const WHY_SHORT = {
+    profile: "Create your Bloombot account first.", verify: "Verify your Roblox account to win units.",
+    level: "Reach level 3 to win units.", new: "Your Bloombot account needs to be 7 days old to win units.",
   };
+  function canWin(why) {
+    if (why === "won") {
+      return el("p", "xm-why ok", "You found a unit! It's one per person, but doors still give XP and Infectia tickets.");
+    }
+    const at = CHECKS.findIndex(c => c[0] === why);
+    const box = el("div", "xm-can" + (at < 0 ? " all" : ""));
+    box.append(el("p", "xm-can-h", at < 0 ? "You can win units" : "To win units you need"));
+    const ul = el("ul");
+    CHECKS.forEach(([, label, act, href], i) => {
+      const state = at < 0 || i < at ? "ok" : i === at ? "no" : "todo";
+      const li = el("li", "c-" + state);
+      li.append(el("span", "xm-ck"), el("span", null, label));
+      if (state === "no" && act) { const a = el("a", null, act); a.href = href; li.append(a); }
+      ul.append(li);
+    });
+    box.append(ul);
+    return box;
+  }
+
+  /* ── confetti ── */
+  const CONF = ["#ffd24a", "#e33a48", "#3ddc84", "#4fb3ff", "#ffffff", "#ff8fd0"];
+  function confetti(host, n, spread) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, r = spread * (0.45 + Math.random() * 0.55);
+      const p = el("i");
+      p.style.setProperty("--x", Math.round(Math.cos(a) * r) + "px");
+      p.style.setProperty("--y", Math.round(Math.sin(a) * r * 0.8 - spread * 0.25) + "px");
+      p.style.setProperty("--r", Math.round(Math.random() * 720 - 360) + "deg");
+      p.style.setProperty("--c", CONF[i % CONF.length]);
+      p.style.setProperty("--d", Math.round(Math.random() * 120) + "ms");
+      if (i % 3 === 0) p.className = "dot";
+      host.append(p);
+    }
+    return host;
+  }
+  /* a burst out of a door that just opened */
+  function burst(c) {
+    const b = confetti(el("span", "xm-burst"), 22, 110);
+    c.classList.add("fx");
+    c.append(b);
+    setTimeout(() => { b.remove(); c.classList.remove("fx"); }, 1400);
+  }
 
   function draw() {
     if (!st) {
@@ -210,12 +258,7 @@
         .forEach(([k, v]) => { const li = el("li"); li.append(el("span", null, k), el("b", null, v)); stats.append(li); });
       const out = [big, bar, stats];
       if (n >= 12) { const a = el("a", "xm-link", "Use your banner"); a.href = "profile.html#edit"; out.push(a); }
-      const w = st.why && WHY[st.why];
-      if (w) {
-        const p = el("p", "xm-why" + (st.why === "won" ? " ok" : ""), w[0] + " ");
-        if (w[1]) { const a = el("a", null, w[1]); a.href = w[2]; p.append(a); }
-        out.push(p);
-      }
+      out.push(canWin(st.why));
       if (today && !opened.has(today) && st.why !== "profile") {
         const b = el("button", "brick green", "Open door " + today);
         b.type = "button"; b.onclick = () => openDoor(today, false);
@@ -232,7 +275,7 @@
     });
     $("xmdrops").replaceChildren(...groups.map(g => {
       const live = g.days.some(p => p.state === "hunt" && p.day === today);
-      const li = el("li", "xm-u" + (g.days.some(p => p.mine) ? " xm-you" : "") + (live ? " live" : ""));
+      const li = el("li", "xm-u" + (g.days.some(p => p.mine) ? " xm-you" : "") + (live ? " xm-live" : ""));
       const found = g.days.filter(p => p.state === "won").length;
       const head = el("div", "xm-uh"), name = el("div");
       name.append(el("strong", null, g.unit), el("span", null, found + " of " + g.days.length + " found"));
@@ -251,6 +294,7 @@
       return li;
     }));
     drawHunt();
+    drawGet();
     /* Infectia */
     const g = st.grand;
     const gb = $("xmgrand");
@@ -266,9 +310,32 @@
        ["Draw", g.winner ? "Done" : when.toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })]]
         .forEach(([k, v]) => { const li = el("li"); li.append(el("span", null, k), el("b", null, v)); rows.append(li); });
       const out = [head, rows];
+      if (!g.winner) out.push(el("p", "xm-rs xm-gtip", "Open every door for the most tickets. The same rules as the units decide who can win."));
       if (g.winner) out.push(el("p", "xm-why ok", g.mine ? "You won the Infectia! Check your Discord DMs." : "Won by " + g.winner + ". Merry Christmas!"));
       gb.replaceChildren(...out);
+      if (g.mine && me && !grandShown) {
+        grandShown = true;
+        const k = "bb_adv_infectia_" + me;
+        let seen = null;
+        try { seen = localStorage.getItem(k); } catch (e) { /* storage blocked */ }
+        if (!seen) {
+          try { localStorage.setItem(k, "1"); } catch (e) { /* show it anyway */ }
+          win(g.unit, { grand: true });
+        }
+      }
     }
+  }
+
+  /* "What you can get": the real unit pictures once the value list has them */
+  function drawGet() {
+    const units = [...new Set((st && st.prizes || []).map(p => p.unit))].filter(u => imgs[u]);
+    const box = $("xmg-units");
+    if (box && units.length) {
+      box.classList.add("many");
+      box.replaceChildren(...units.slice(0, 4).map(u => img(u)));
+    }
+    const inf = $("xmg-inf"), g = st && st.grand;
+    if (inf && g && imgs[g.unit]) { inf.classList.add("unit"); inf.replaceChildren(img(g.unit)); }
   }
 
   /* "Look for the drop": today's door is open, a unit is still hidden and you can win */
@@ -313,26 +380,84 @@
     }
     busy = false;
     coolUntil = Date.now() + 20000;
+    const fresh = !!(res && res.opened);
     if (c) {
       c.classList.remove("opening");
-      if (res && res.opened) { c.classList.add("opened", "pop"); setTimeout(() => c.classList.remove("pop"), 900); }
+      if (fresh) { c.classList.add("opened", "pop"); burst(c); setTimeout(() => c.classList.remove("pop"), 900); }
     }
-    if (res && res.won) win(res.won);
-    else if (res && res.opened) BB.toast("+" + XP(day) + " XP and 1 Infectia ticket.", "ok", { title: "Door " + day + " opened" });
+    await load();
+    if (res && res.won) win(res.won, { day, fresh });
+    else if (fresh) setTimeout(() => reveal(day), 450);
     else BB.toast("No unit yet. It drops at a secret time today, so check back later.", "info", { title: "Nothing here yet" });
-    load();
   }
 
-  /* you found a unit */
-  function win(unit) {
-    const d = el("dialog", "xm-win");
-    d.setAttribute("aria-labelledby", "xmwin-h");
-    const pic = el("div", "xm-wpic"); pic.append(img(unit));
-    const h = el("h2", null, "You found a " + unit + "!"); h.id = "xmwin-h";
-    const b = el("button", "brick green", "Yay!"); b.type = "button";
-    b.onclick = () => d.close();
-    d.append(pic, h, el("p", null, "Bloombot will DM you on Discord. Someone from the Bloombot team trades it to your verified Roblox account, so keep your DMs open."), b);
+  function dialog(cls, label) {
+    const d = el("dialog", cls);
+    d.setAttribute("aria-labelledby", label);
     d.addEventListener("close", () => d.remove());
+    d.addEventListener("click", e => { if (e.target === d) d.close(); });
+    return d;
+  }
+  const icon = src => { const i = el("img"); i.src = src; i.alt = ""; return i; };
+  const an = name => (/^[aeiou]/i.test(name) ? "an " : "a ") + name;
+
+  /* the card after opening a door: what you got and what's next */
+  function reveal(day) {
+    const n = Math.max(1, (st && st.opened || []).length);
+    const d = dialog("xm-pop", "xmpop-h");
+    const tag = el("div", "xm-pop-n", String(day));
+    const h = el("h2", null, day === 24 ? "Merry Christmas Eve!" : "Door " + day + " opened!"); h.id = "xmpop-h";
+    const got = el("ul", "xm-pop-got");
+    [["img/lightning.png", "+" + XP(day) + " XP", "added in a few seconds"], ["img/cur/tickets-2.webp", "+1 ticket", "for the Infectia draw"]]
+      .forEach(([src, big, small]) => { const li = el("li"); li.append(icon(src), el("b", null, big), el("span", null, small)); got.append(li); });
+    const next = n < 12 ? [12, "the Advent banner"] : n < 24 ? [24, "the Golden Advent banner"] : null;
+    const bar = el("div", "xm-pbar xm-pop-bar"); const fill = el("i"); fill.style.width = (n / 24 * 100) + "%"; bar.append(fill);
+    const prog = el("p", "xm-pop-prog");
+    prog.append(el("b", null, n + " / 24 doors"), document.createTextNode(next ? " · " + (next[0] - n) + " more for " + next[1] : " · both banners are yours!"));
+    const out = [tag, h, got, prog, bar];
+    const hunt = (st && st.prizes || []).find(p => p.state === "hunt" && p.day === day);
+    const why = st && st.why;
+    if (hunt && !why) {
+      const p = el("p", "xm-pop-hint");
+      p.append(img(hunt.unit, "xm-pop-u"), el("span", null, "There's " + an(hunt.unit) + " hidden behind this door. It drops at a secret time today: come back and press Look for the drop."));
+      out.push(p);
+    } else if (why && why !== "won" && WHY_SHORT[why]) {
+      const p = el("p", "xm-pop-hint");
+      const c = CHECKS.find(x => x[0] === why);
+      p.append(el("span", null, WHY_SHORT[why] + " "));
+      if (c && c[2]) { const a = el("a", null, c[2]); a.href = c[3]; p.append(a); }
+      out.push(p);
+    } else if (!hunt) out.push(el("p", "xm-pop-hint quiet", "No unit is hidden behind this door. See you tomorrow!"));
+    const b = el("button", "brick green", "Nice!"); b.type = "button"; b.onclick = () => d.close();
+    out.push(b);
+    d.append(...out);
+    document.body.append(d);
+    d.showModal();
+  }
+
+  /* you found a unit (or won the Infectia) */
+  function win(unit, o = {}) {
+    const d = dialog("xm-win", "xmwin-h");
+    const fx = confetti(el("div", "xm-fx"), 46, 230);
+    const pic = el("div", "xm-wpic"); pic.append(el("i", "xm-rays"), img(unit));
+    const kick = el("p", "xm-kick", o.grand ? "Christmas Eve draw" : "Hidden unit found" + (o.day ? " · door " + o.day : ""));
+    const h = el("h2", null, (o.grand ? "You won the " + unit : "You found " + an(unit)) + "!"); h.id = "xmwin-h";
+    const out = [fx, pic, kick, h];
+    if (o.fresh) {
+      const chips = el("ul", "xm-wchips");
+      [["img/lightning.png", "+" + XP(o.day) + " XP"], ["img/cur/tickets-2.webp", "+1 Infectia ticket"]]
+        .forEach(([src, t]) => { const li = el("li"); li.append(icon(src), el("span", null, t)); chips.append(li); });
+      out.push(chips);
+    }
+    const steps = el("ol", "xm-steps");
+    [["img/discord_stud.png", "Bloombot sends you a DM on Discord."],
+     ["img/rbx_stud.png", "The Bloombot team trades the " + unit + " to your verified Roblox account."],
+     ["img/envelope.png", "Keep your Discord DMs open so they can reach you."]]
+      .forEach(([src, t]) => { const li = el("li"); li.append(icon(src), el("span", null, t)); steps.append(li); });
+    out.push(el("p", "xm-steps-h", "What happens now"), steps);
+    const b = el("button", "brick green", "Yay!"); b.type = "button"; b.onclick = () => d.close();
+    out.push(b);
+    d.append(...out);
     document.body.append(d);
     d.showModal();
   }

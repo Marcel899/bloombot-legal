@@ -5011,7 +5011,7 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 /* hidden units: a card per unit with the days it drops */
 .xm-ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .xm-u{padding:10px;border-radius:14px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.07);min-width:0}
-.xm-u.live{border-color:#ffd24a;background:rgba(255,210,74,.09)}
+.xm-u.xm-live{border-color:#ffd24a;background:rgba(255,210,74,.09)}
 .xm-u.xm-you{border-color:#4bd17a;background:rgba(75,209,122,.12)}
 .xm-uh{display:flex;align-items:center;gap:10px;margin:0 0 8px;min-width:0}
 .xm-uh>div{min-width:0}
@@ -5033,6 +5033,7 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 .xm-gh strong{display:block;font:700 1.5rem "Fredoka",sans-serif;color:#ffd24a}
 .xm-gh .xm-rs{margin:0}
 .xm-gpic{flex:none;display:grid;place-items:center;width:104px;height:104px;border-radius:18px;background:radial-gradient(circle,rgba(255,210,74,.45),transparent 70%)}
+.xm-gtip{margin:12px 0 0}
 .xm-gpic img{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
 .xm-rules{margin:0 0 22px;padding:12px 16px;border-radius:14px;background:var(--card,#1a1d26);border:2px solid rgba(255,255,255,.08)}
 .xm-rules summary{cursor:pointer;font:700 1rem "Fredoka",sans-serif}
@@ -5057,6 +5058,86 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 .xm-wpic{display:grid;place-items:center;width:120px;height:120px;margin:0 auto;border-radius:50%;background:radial-gradient(circle,rgba(255,210,74,.6),transparent 70%);animation:xmPop .7s cubic-bezier(.2,.9,.3,1.3)}
 .xm-wpic img{width:96px;height:96px;object-fit:contain}
 .xm-win .brick{width:100%;justify-content:center}
+/* what you can get: four reward tiles under the board */
+.xm-get{margin:0 0 24px}
+.xm-sh{display:flex;align-items:center;gap:10px;margin:0 0 12px;font:700 1.45rem "Fredoka",sans-serif;color:var(--text,#fff)}
+.xm-sh img{width:30px;height:30px;object-fit:contain}
+.xm-gl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.xm-g{position:relative;display:flex;flex-direction:column;gap:12px;margin:0;padding:16px;border-radius:18px;border:3px solid #0c0e12;box-shadow:0 8px 0 rgba(0,0,0,.25);color:#e9edf5;overflow:hidden;min-width:0;background:linear-gradient(180deg,var(--g1),var(--g2))}
+.xm-g::before{content:"";position:absolute;inset:0;background:url(img/weld.png) 0 0/45px 45px;opacity:.13;pointer-events:none}
+.xm-g>*{position:relative}
+.g-xp{--g1:#7a5c0d;--g2:#4d3a08}
+.g-ban{--g1:#7a1f2a;--g2:#521219}
+.g-unit{--g1:#1d4274;--g2:#132c4f}
+.g-inf{--g1:#1f6a3c;--g2:#124a28}
+.xm-gi{display:grid;place-items:center;width:64px;height:64px;border-radius:16px;background:radial-gradient(circle,rgba(255,255,255,.24),transparent 70%)}
+.xm-gi img{width:50px;height:50px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+.xm-gi.many{width:auto;grid-auto-flow:column;justify-content:start;padding-right:12px;background:none}
+.xm-gi.many img{width:46px;height:46px;margin-right:-12px}
+.xm-gi.unit img{width:60px;height:60px}
+.xm-gb{width:auto;grid-auto-flow:column;justify-content:start;gap:8px;background:none}
+.xm-gb .pban{width:46px;height:46px;border-radius:12px;border:2px solid #0c0e12;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.xm-g strong{display:block;margin:0 0 4px;font:700 1.15rem "Fredoka",sans-serif;color:#fff}
+.xm-g p{margin:0;font-size:.88rem;line-height:1.42;color:rgba(233,237,245,.85)}
+/* can you win units: a checklist in your panel */
+.xm-can{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.24)}
+.xm-can.all{background:rgba(61,220,132,.16)}
+.xm-can-h{margin:0 0 7px;font:700 .92rem "Fredoka",sans-serif;color:#fff}
+.xm-can ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:5px 12px}
+.xm-can li{display:flex;align-items:center;gap:7px;min-width:0;margin:0;font-size:.84rem;line-height:1.25}
+.xm-can li a{margin-left:auto;color:#ffd24a;font-weight:800;white-space:nowrap}
+.xm-ck{flex:none;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;border:2px solid #0c0e12;font:900 .66rem/1 "Nunito",sans-serif}
+.c-ok .xm-ck{background:#3ddc84;color:#0b3a1c}.c-ok .xm-ck::before{content:"\2713"}
+.c-no{color:#fff;font-weight:800}.c-no .xm-ck{background:#e33a48;color:#fff}.c-no .xm-ck::before{content:"\2715"}
+.c-todo{color:rgba(233,237,245,.55)}.c-todo .xm-ck{background:rgba(255,255,255,.16)}
+/* confetti: out of a door that opened, and over the win card */
+.xm-fx,.xm-burst{position:absolute;left:50%;top:34%;width:0;height:0;pointer-events:none;z-index:8}
+.xm-burst{top:50%}
+.xm-cell.fx{z-index:7}
+.xm-fx i,.xm-burst i{position:absolute;left:-4px;top:-6px;width:8px;height:13px;border-radius:2px;background:var(--c);opacity:0;animation:xmConf 1.15s cubic-bezier(.15,.7,.3,1) var(--d) forwards}
+.xm-fx i.dot,.xm-burst i.dot{width:8px;height:8px;border-radius:50%}
+@keyframes xmConf{0%{opacity:1;transform:translate(0,0) rotate(0) scale(.5)}75%{opacity:1}100%{opacity:0;transform:translate(var(--x),calc(var(--y) + 70px)) rotate(var(--r)) scale(1)}}
+/* after opening a door: what you got */
+.xm-pop{overflow:visible;max-width:min(400px,calc(100vw - 32px));padding:40px 22px 22px;border:3px solid #0c0e12;border-radius:22px;background:linear-gradient(180deg,#1f6a3c,#124a28);color:#fff;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.xm-pop::backdrop{background:rgba(5,8,14,.7)}
+.xm-pop-n{position:absolute;top:-28px;left:50%;padding:2px 16px;border:3px solid #0c0e12;border-radius:12px;background:#fffdf6;color:#c8202f;font:700 2.2rem/1.1 "Fredoka",sans-serif;box-shadow:0 4px 0 rgba(0,0,0,.25);transform:translateX(-50%) rotate(-6deg);animation:xmTag .6s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes xmTag{from{transform:translateX(-50%) rotate(-30deg) scale(.4);opacity:0}}
+.xm-pop h2{margin:0 0 14px;font:700 1.6rem "Fredoka",sans-serif;color:#ffd24a}
+.xm-pop-got{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.xm-pop-got li{display:flex;flex-direction:column;align-items:center;gap:3px;margin:0;padding:12px 8px;border-radius:14px;background:rgba(0,0,0,.25);animation:xmPop .5s cubic-bezier(.2,.9,.3,1.3) both}
+.xm-pop-got li:nth-child(2){animation-delay:.12s}
+.xm-pop-got img{width:42px;height:42px;object-fit:contain}
+.xm-pop-got b{font:700 1.35rem "Fredoka",sans-serif;color:#fff}
+.xm-pop-got span{font-size:.78rem;color:rgba(255,255,255,.75)}
+.xm-pop-prog{margin:0 0 8px;font-size:.88rem;color:rgba(255,255,255,.85)}
+.xm-pop-prog b{color:#ffd24a;font-family:"Fredoka",sans-serif}
+.xm-pbar.xm-pop-bar{margin:0 0 16px}
+.xm-pop-hint{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:10px 12px;border-radius:12px;background:rgba(255,210,74,.15);color:#ffe9a3;font-size:.86rem;line-height:1.4;text-align:left}
+.xm-pop-hint.quiet{justify-content:center;background:rgba(0,0,0,.22);color:rgba(255,255,255,.82);text-align:center}
+.xm-pop-hint a{color:#ffd24a;font-weight:800}
+.xm-pop-u{flex:none;width:42px;height:42px;object-fit:contain}
+.xm-pop .brick{width:100%;justify-content:center}
+/* winning: rays behind the unit and what happens next */
+.xm-win{overflow:visible;max-width:min(420px,calc(100vw - 32px))}
+.xm-win .xm-fx{top:22%}
+.xm-wpic{position:relative;width:150px;height:150px}
+.xm-rays{position:absolute;inset:-46px;background:url(img/sunburst.webp) center/contain no-repeat;opacity:.5;animation:xmSpin 16s linear infinite}
+@keyframes xmSpin{to{transform:rotate(360deg)}}
+.xm-wpic img{position:relative;width:118px;height:118px}
+.xm-win .xm-kick{margin:12px 0 0;font:700 .78rem "Fredoka",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.xm-wchips{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 14px;padding:0}
+.xm-wchips li{display:flex;align-items:center;gap:6px;margin:0;padding:4px 11px;border-radius:999px;background:rgba(0,0,0,.25);font-weight:800;font-size:.85rem}
+.xm-wchips img{width:20px;height:20px;object-fit:contain}
+.xm-win .xm-steps-h{margin:0 0 6px;font:700 .95rem "Fredoka",sans-serif;color:#ffd24a;text-align:left}
+.xm-steps{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:6px;text-align:left}
+.xm-steps li{display:flex;align-items:center;gap:10px;margin:0;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.22);font-size:.86rem;line-height:1.35}
+.xm-steps img{flex:none;width:26px;height:26px;object-fit:contain}
+/* how it works: numbered steps */
+.xm-rules ol{margin:10px 0 0;padding-left:22px;color:var(--soft);line-height:1.6}
+.xm-rules li+li{margin-top:4px}
+@media (max-width:900px){.xm-gl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.xm-g{padding:12px;gap:8px}.xm-gi{width:52px;height:52px}.xm-gi img{width:40px;height:40px}.xm-gi.many img{width:36px;height:36px}.xm-gb .pban{width:36px;height:36px}.xm-g strong{font-size:1.02rem}.xm-g p{font-size:.82rem}.xm-can ul{grid-template-columns:1fr}.xm-sh{font-size:1.25rem}}
+@media (prefers-reduced-motion:reduce){.xm-fx,.xm-burst{display:none}.xm-rays,.xm-pop-n,.xm-pop-got li{animation:none}}
 @media (max-width:1000px){.xm-ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:600px){.xm-board{margin-bottom:26px}.xm-rew{grid-template-columns:1fr;gap:12px}.xm-rc{padding:14px}.xm-ul{gap:8px}.xm-u{padding:8px}.xm-ui{width:36px;height:36px}.xm-uh{gap:8px}.xm-ud li{padding:4px 6px;gap:6px}}
 @media (prefers-reduced-motion:reduce){.xm-cell.can-open .xm-door,.xm-cell.opening .xm-door,.xm-cell.pop .xm-in,.xm-wpic{animation:none}}

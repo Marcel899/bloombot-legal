@@ -1184,6 +1184,15 @@ def _advent():
 <ol class="xm-grid">{"".join(cells)}</ol>
 <div class="xm-gifts" aria-hidden="true"><img src="img/cur/presents-2.webp" alt=""><img src="img/units/christmas_tree.webp" alt=""><img src="img/cur/candy-2.webp" alt=""><img src="img/units/rolling_wreath.webp" alt=""><img src="img/cur/presents-2.webp" alt=""></div>
 </section>
+<section class="xm-get" aria-labelledby="xmget-h">
+<h2 class="xm-sh" id="xmget-h"><img src="img/gift.png" alt="">What you can get</h2>
+<ul class="xm-gl">
+<li class="xm-g g-xp"><span class="xm-gi"><img src="img/lightning.png" alt=""></span><div><strong>XP every day</strong><p>+50 XP for each door and +250 on Christmas Eve: up to 1,400 XP.</p></div></li>
+<li class="xm-g g-ban"><span class="xm-gi xm-gb"><span class="pban" data-banner="xmas"></span><span class="pban" data-banner="xmasgold"></span></span><div><strong>Two profile banners</strong><p>Advent at 12 doors, Golden Advent when you open all 24.</p></div></li>
+<li class="xm-g g-unit"><span class="xm-gi" id="xmg-units"><img src="img/gem.png" alt=""></span><div><strong>12 hidden units</strong><p>Each drops at a secret time on its day. The first trader to find it keeps it.</p></div></li>
+<li class="xm-g g-inf"><span class="xm-gi" id="xmg-inf"><img src="img/cur/tickets-2.webp" alt=""></span><div><strong>An Infectia</strong><p>Every door you open is one ticket for the draw on 25 December.</p></div></li>
+</ul>
+</section>
 <section class="xm-rew" aria-label="Advent prizes">
 <div class="xm-rc xm-me weld" id="xmme"><h2><img src="img/gift.png" alt="">Your advent</h2><div id="xmme-b"><p class="xm-rs">Loading…</p></div><div id="xmhunt"></div></div>
 <div class="xm-rc xm-grand"><h2><img src="img/wish_star.png" alt="">Christmas Eve prize</h2><div id="xmgrand"><p class="xm-rs">Loading…</p></div></div>
@@ -1191,7 +1200,7 @@ def _advent():
 <p class="xm-rs">Each one drops at a <b>secret time</b> on its day. The first trader to open that day's door after the drop wins it. Opened today's door already? Press <b>Look for the drop</b> later on.</p>
 <ol class="xm-ul" id="xmdrops"></ol></div>
 </section>
-<details class="xm-rules"><summary>Prize rules</summary><ul>
+<details class="xm-rules"><summary>How it works</summary><ol>
 <li>Doors open at 00:00 UTC (<span id="xmtz">midnight UTC</span> for you), one a day from 1 to 24 December. You can only open today's door.</li>
 <li>Every door gives XP: +50, and +250 on Christmas Eve. The bot adds it within a few seconds.</li>
 <li>To win a unit you need a verified Roblox account, level 3 or higher and a Bloombot account that's at least 7 days old. One unit per person.</li>
@@ -1199,7 +1208,7 @@ def _advent():
 <li>Every door you open is one ticket for the Infectia. It's drawn after door 24 closes (25 December, 00:00 UTC), with the same rules.</li>
 <li>Open 12 doors for the Advent profile banner, all 24 for the Golden Advent banner.</li>
 <li>Winners get a DM from Bloombot and are traded the unit in Roblox by the Bloombot team. Alt accounts or cheating lose the prize.</li>
-</ul></details>
+</ol></details>
 <p class="xm-foot"><img src="img/wish_star.png" alt="">Happy holidays from the Bloombot team!</p>
 </main>
 <script defer src="js/advent.js?v={hashlib.md5(open("js/advent.js", "rb").read()).hexdigest()[:8]}"></script>
