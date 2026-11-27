@@ -23,7 +23,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="style.css?v=a7b21d5c">
+<link rel="stylesheet" href="style.css?v=3493e5e1">
 <script src="js/theme.js?v=9fa9b3c2"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=d143ab6d"></script>
@@ -59,6 +59,11 @@
 <div class="skel-grid sk-prof" id="lvloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
 <section class="panel lv-card" id="lvcard" hidden aria-live="polite"></section>
 <nav class="lv-road" id="lvroad" aria-label="Ranks"></nav>
+<section class="lv-sec" id="wqsec" hidden>
+<div class="lv-sh"><h2><img src="img/bullseye.png" alt="">Weekly quests</h2><span class="count-pill" id="wqreset"></span></div>
+<p class="hint lv-sub">Three new quests every Monday. Finish one, press <b>Claim</b>, and the XP goes to your level in Discord too.</p>
+<div class="wq-list" id="wqlist"></div>
+</section>
 <section class="lv-sec" id="tasks">
 <div class="lv-sh"><h2><img src="img/lightning.png" alt="">XP tasks</h2><span class="count-pill" id="lvtsum"></span></div>
 <p class="hint lv-sub">One-time bonuses. Do the task, then press <b>Claim</b>. Bloombot checks it and adds the XP to your level in Discord too.</p>
@@ -80,6 +85,7 @@
 <section class="panel guide" aria-labelledby="guide-h"><h2 id="guide-h">About Bloombot levels</h2><div class="guide-list"><div class="guide-q"><h3>How do I earn XP?</h3><p>Use any Bloombot command (+15 XP, once every 30 seconds), post trade ads (+50 XP for your first 3 each day) and finish the one-time tasks on this page.</p></div><div class="guide-q"><h3>What do ranks unlock?</h3><p>Each rank adds perks in Discord and on this website. You keep every perk from the ranks below yours.</p></div></div></section>
 </main>
 <script defer src="js/levels.js?v=2b72409e"></script>
+<script defer src="js/quests.js?v=a41f3b96"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

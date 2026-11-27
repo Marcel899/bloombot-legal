@@ -796,6 +796,11 @@ levels_body = hero("medal_gold", "Levels", "Earn XP in Discord and on the websit
 <div class="skel-grid sk-prof" id="lvloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div></div>
 <section class="panel lv-card" id="lvcard" hidden aria-live="polite"></section>
 <nav class="lv-road" id="lvroad" aria-label="Ranks"></nav>
+<section class="lv-sec" id="wqsec" hidden>
+<div class="lv-sh"><h2><img src="img/bullseye.png" alt="">Weekly quests</h2><span class="count-pill" id="wqreset"></span></div>
+<p class="hint lv-sub">Three new quests every Monday. Finish one, press <b>Claim</b>, and the XP goes to your level in Discord too.</p>
+<div class="wq-list" id="wqlist"></div>
+</section>
 <section class="lv-sec" id="tasks">
 <div class="lv-sh"><h2><img src="img/lightning.png" alt="">XP tasks</h2><span class="count-pill" id="lvtsum"></span></div>
 <p class="hint lv-sub">One-time bonuses. Do the task, then press <b>Claim</b>. Bloombot checks it and adds the XP to your level in Discord too.</p>
@@ -816,6 +821,7 @@ levels_body = hero("medal_gold", "Levels", "Earn XP in Discord and on the websit
 </section>
 {guide('levels')}</main>
 <script defer src="js/levels.js?v={JSVER['levels']}"></script>
+<script defer src="js/quests.js?v={hashlib.md5(open("js/quests.js", "rb").read()).hexdigest()[:8]}"></script>
 """
 open("levels.html", "w").write(page("Bloombot Levels & Perks · Garden Tower Defense", "Your Bloombot level, every rank perk in Discord and on the website, and one-time tasks for bonus XP.", levels_body, "", "levels.html", ld=faq_ld("levels")))
 

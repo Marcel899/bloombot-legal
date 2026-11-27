@@ -4907,3 +4907,21 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 [data-theme=light] .pwant{background:#fff;border-color:var(--line)}
 [data-theme=light] .pwant-c{background:#fff8e0;border-color:#efd58a}
 .panel .pwant-c,[data-theme=light] .panel .pwant-c{color:var(--text)}
+
+/* ── weekly quests ── */
+.wq-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.wq{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;background:var(--card);border:3px solid #0c0e12;box-shadow:0 10px 24px -18px rgba(0,0,0,.8)}
+.wq-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.wq-top strong{font-size:1rem;line-height:1.3}
+.wq-bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:2px solid #0c0e12}
+.wq-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#33c46a,#7ee08f);transition:width .6s ease}
+.wq-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.wq-n{color:var(--muted);font-size:.82rem;font-weight:700;line-height:1.35}
+.wq.st-ready{border-color:#33c46a;box-shadow:0 0 0 1px rgba(51,196,106,.35),0 10px 24px -18px rgba(0,0,0,.8)}
+.wq.st-given{opacity:.75}
+.wq.st-given .wq-bar i{background:#3fcf5f}
+.wq.st-given .tk-xp{text-decoration:line-through}
+.wq.st-failed .wq-n{color:#ff8a8d}
+@media (max-width:860px){.wq-list{grid-template-columns:1fr}}
+[data-theme=light] .wq{background:#fffdf7;border-color:var(--line-2)}
+[data-theme=light] .wq-bar{background:#efe8d6;border-color:var(--line-2)}
