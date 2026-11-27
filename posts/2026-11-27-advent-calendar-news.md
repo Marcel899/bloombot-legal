@@ -4,6 +4,7 @@ date: 2026-11-27
 tag: Event
 icon: gift
 color: red
+image: img/news/advent.webp
 summary: Open a door every day from 1 to 24 December for XP, hunt 12 hidden units, collect tickets for the Infectia draw and unlock two advent banners. Plus a new News page.
 ---
 The Bloombot [advent calendar](advent.html) opens on **1 December**. Here's how it works.
