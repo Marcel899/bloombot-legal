@@ -3,13 +3,20 @@
   const $ = id => document.getElementById(id);
   const { el } = BB;
   const CATS = { "meta-units": "Meta units", "map-specific": "Map-specific", "general": "General" };
-  let list = [], cat = "all", sort = "new", me = null;
+  let list = [], cat = "all", sort = "top", me = null, map = "";
+  /* upvotes (st_votes / st_vote, sql/strategy-votes.sql) */
+  let votes = {}, myVotes = new Set();
+  /* Map tags come from the "Map:" line authors fill in when sharing. */
+  const mapOf = s => { const m = String(s.description || "").match(/\*\*Map:\*\*\s*`([^`]{1,40})`/i); return m ? m[1].replace(/\s+/g, " ").trim() : ""; };
+  const mapKey = n => n.toLowerCase();
+  let mapNames = new Map();     // key -> the spelling most authors use
   const norm = t => BB.plain(t || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
   /* ?cat=…&q=…&sort=… keeps filters when you share or reload the page */
   const qs = new URLSearchParams(location.search);
   if (qs.get("q")) $("sq").value = qs.get("q").slice(0, 80);
   if (["meta-units", "map-specific", "general", "mine"].includes(qs.get("cat"))) cat = qs.get("cat");
-  if (["old", "az", "long"].includes(qs.get("sort"))) sort = qs.get("sort");
+  if (["new", "old", "az", "long"].includes(qs.get("sort"))) sort = qs.get("sort");
+  if (qs.get("map")) map = qs.get("map").toLowerCase().slice(0, 40);
 
   /* Strategies made with the form (or the bot's template) have "## Heading" sections.
      Information/Performance become pills, units get their pictures, the rest stays text. */
@@ -95,9 +102,18 @@
     c.id = "s-" + s.id;
     const top = el("div", "strat-top");
     top.append(el("span", "stag c-" + s.category, CATS[s.category] || s.category));
+    const mp = mapOf(s);
+    if (mp) {
+      const t = el("button", "stag smap-tag", mapNames.get(mapKey(mp)) || mp);
+      t.type = "button";
+      t.title = "Show strategies for " + mp;
+      t.onclick = () => { map = mapKey(mp); $("smap").value = map; render(); scrollTo({ top: $("slist").offsetTop - 140, behavior: "smooth" }); };
+      top.append(t);
+    }
     if (s.created_at) top.append(el("span", "strat-date", BB.ago(s.created_at)));
     const words = BB.plain(s.description).split(/\s+/).length;
     if (words > 120) top.append(el("span", "strat-date", Math.ceil(words / 200) + " min read"));
+    top.append(voteBtn(s));
     const link = el("button", "strat-link", "Copy link");
     link.type = "button";
     link.onclick = () => BB.share(location.origin + location.pathname + "#s-" + s.id, BB.plain(s.title) + " · Bloombot", "Link to this strategy copied");
@@ -143,7 +159,70 @@
     return c;
   }
 
+  function voteBtn(s) {
+    const n = votes[s.id] || 0, on = myVotes.has(s.id), own = me && s.author_id === me;
+    const b = el("button", "svote" + (on ? " on" : ""));
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("aria-label", (on ? "Remove your upvote" : "Upvote") + " (" + n + ")");
+    b.title = own ? "Your own strategy" : on ? "You upvoted this" : "Upvote this strategy";
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 4 13h5v7h6v-7h5z" fill="currentColor"/></svg>';
+    b.append(el("span", null, String(n)));
+    if (own) b.disabled = true;
+    b.onclick = async () => {
+      if (!BB.session) { BB.login(); return; }
+      if (!me) { BB.requireDiscord(); return; }
+      const want = !myVotes.has(s.id);
+      /* show it straight away, put it back if it didn't save */
+      if (want) myVotes.add(s.id); else myVotes.delete(s.id);
+      votes[s.id] = Math.max(0, (votes[s.id] || 0) + (want ? 1 : -1));
+      b.replaceWith(voteBtn(s));
+      const { data, error } = await BB.sb.rpc("st_vote", { p_id: s.id, p_on: want });
+      if (error) {
+        if (want) myVotes.delete(s.id); else myVotes.add(s.id);
+        votes[s.id] = Math.max(0, (votes[s.id] || 0) + (want ? -1 : 1));
+        const m = error.message || "";
+        BB.toast(/st:profile/.test(m) ? "Create your Bloombot account to upvote." : /st:slow/.test(m) ? "Slow down a little." : /st:own/.test(m) ? "You can't upvote your own strategy." : "Couldn't save your upvote.", "bad");
+      } else votes[s.id] = data;
+      const cur = document.querySelector("#s-" + s.id + " .svote");
+      if (cur) cur.replaceWith(voteBtn(s));
+    };
+    return b;
+  }
+  async function loadVotes() {
+    try {
+      const { data, error } = await BB.sb.rpc("st_votes");
+      if (error || !data) return;
+      votes = data.counts || {};
+      myVotes = new Set((data.mine || []).map(Number));
+      if (loaded) render();
+    } catch (e) { /* votes not switched on yet */ }
+  }
+  /* map filter: every map that has strategies, most first */
+  function maps() {
+    const seen = new Map(), spell = new Map();
+    list.forEach(s => {
+      const m = mapOf(s); if (!m) return;
+      const k = mapKey(m), r = seen.get(k) || { name: m, n: 0 };
+      r.n++; seen.set(k, r);
+      const sp = spell.get(k) || new Map(); sp.set(m, (sp.get(m) || 0) + 1); spell.set(k, sp);
+    });
+    spell.forEach((sp, k) => { const caps = t => t !== t.toLowerCase();
+      const best = [...sp].sort((a, b) => b[1] - a[1] || caps(b[0]) - caps(a[0]) || a[0].localeCompare(b[0]))[0][0]; seen.get(k).name = best; });
+    mapNames = new Map([...seen].map(([k, r]) => [k, r.name]));
+    const sel = $("smap");
+    const keep = map;
+    sel.replaceChildren(el("option", null, "All maps"), ...[...seen].sort((a, b) => b[1].n - a[1].n || a[1].name.localeCompare(b[1].name)).map(([k, r]) => {
+      const o = el("option", null, r.name + " (" + r.n + ")"); o.value = k; return o;
+    }));
+    sel.firstChild.value = "";
+    sel.hidden = !seen.size;
+    sel.value = seen.has(keep) ? keep : "";
+    map = sel.value;
+  }
+
   const sorters = {
+    top: (a, b) => (votes[b.id] || 0) - (votes[a.id] || 0) || b.id - a.id,
     new: (a, b) => b.id - a.id,
     old: (a, b) => a.id - b.id,
     az: (a, b) => norm(a.title).localeCompare(norm(b.title)),
@@ -153,7 +232,7 @@
   function render() {
     const q = norm($("sq").value);
     const hit = s => !q || q.split(" ").every(w => norm(s.title + " " + s.description + " " + (s.author_name || "")).includes(w));
-    const found = list.filter(hit);
+    const found = list.filter(s => hit(s) && (!map || mapKey(mapOf(s)) === map));
     const shown = found.filter(s => inCat(s, cat)).sort(sorters[sort]);
     document.querySelectorAll(".chip[data-scat]").forEach(b => {
       b.classList.toggle("on", b.dataset.scat === cat);
@@ -167,7 +246,8 @@
     const p = new URLSearchParams();
     if (cat !== "all") p.set("cat", cat);
     if ($("sq").value.trim()) p.set("q", $("sq").value.trim());
-    if (sort !== "new") p.set("sort", sort);
+    if (sort !== "top") p.set("sort", sort);
+    if (map) p.set("map", map);
     const u = location.pathname + (p.toString() ? "?" + p : "") + location.hash;
     if (u !== location.pathname + location.search + location.hash) history.replaceState(null, "", u);
   }
@@ -178,6 +258,7 @@
     if (error) { $("snone").hidden = false; $("snonet").textContent = "Couldn't load strategies. Try again in a minute."; $("sclear").hidden = true; return; }
     list = data || [];
     loaded = true;
+    maps();
     render();
     focusHash();
   }
@@ -427,6 +508,7 @@
   document.querySelectorAll(".chip[data-scat]").forEach(b => b.onclick = () => { cat = b.dataset.scat; render(); });
   $("ssort").value = sort;
   $("ssort").addEventListener("change", () => { sort = $("ssort").value; render(); });
+  $("smap").addEventListener("change", () => { map = $("smap").value; render(); });
   $("sclear").onclick = () => { cat = "all"; $("sq").value = ""; render(); $("sq").focus(); };
   $("sq").oninput = render;
   $("sform").addEventListener("input", e => { if (!/^f-(uq|aq)/.test(e.target.id)) counters(); });
@@ -455,7 +537,7 @@
     const changed = id !== me;
     me = id;
     if (!me && cat === "mine") cat = "all";
-    if (!started) { started = true; load(); }
-    else if (changed) render();
+    if (!started) { started = true; load(); loadVotes(); }
+    else if (changed) { loadVotes(); render(); }
   });
 })();

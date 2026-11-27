@@ -779,7 +779,8 @@ strat_body = hero("bullseye", "Strategies", "Community strategies for Garden Tow
 <div class="panel board-bar">
 <input class="search" id="sq" type="search" placeholder="Search strategies…" aria-label="Search strategies">
 <div class="chips"><button class="chip on" type="button" data-scat="all">All<i></i></button><button class="chip" type="button" data-scat="meta-units">Meta units<i></i></button><button class="chip" type="button" data-scat="map-specific">Map-specific<i></i></button><button class="chip" type="button" data-scat="general">General<i></i></button><button class="chip" type="button" data-scat="mine" hidden>Mine<i></i></button></div>
-<select id="ssort" aria-label="Sort strategies"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
+<select id="smap" aria-label="Map" hidden><option value="">All maps</option></select>
+<select id="ssort" aria-label="Sort strategies"><option value="top">Most upvoted</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
 <span class="count-pill" id="scount"></span>
 </div>
 <div class="skel-grid sk-strats" id="sloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>

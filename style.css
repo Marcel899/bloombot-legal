@@ -4925,3 +4925,19 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 @media (max-width:860px){.wq-list{grid-template-columns:1fr}}
 [data-theme=light] .wq{background:#fffdf7;border-color:var(--line-2)}
 [data-theme=light] .wq-bar{background:#efe8d6;border-color:var(--line-2)}
+
+/* ── strategy upvotes and map tags ── */
+.svote{display:inline-flex;align-items:center;gap:5px;margin-left:auto;padding:4px 10px 4px 8px;border:2px solid var(--border);border-radius:999px;background:var(--card-2);color:var(--soft);font:900 .88rem "Nunito",sans-serif;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .12s}
+.svote svg{width:15px;height:15px}
+.svote:hover:not(:disabled){border-color:#33c46a;color:var(--text);transform:translateY(-1px)}
+.svote.on{background:rgba(51,196,106,.16);border-color:#33c46a;color:#5be08b}
+.svote:disabled{cursor:default;opacity:.6}
+.svote+.strat-link{margin-left:0}
+.smap-tag{border:0;cursor:pointer;background:rgba(20,174,234,.16);color:#7cc4ff;font:inherit;transition:background .15s}
+.smap-tag::before{content:"⌖ ";font-weight:900}
+.smap-tag:hover{background:rgba(20,174,234,.28)}
+#smap[hidden]{display:none}
+[data-theme=light] .svote{background:#fff;border-color:var(--line)}
+[data-theme=light] .svote.on{background:#e3f4da;border-color:#5fb43a;color:#24731a}
+[data-theme=light] .smap-tag{background:#e0f2fb;color:#0f6f99}
+.smap-tag{font-family:inherit;font-size:.72rem;font-weight:900;text-transform:none;letter-spacing:.02em;padding-top:3px;padding-bottom:3px;line-height:1.3}

@@ -23,7 +23,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="style.css?v=3493e5e1">
+<link rel="stylesheet" href="style.css?v=0abf4ff0">
 <script src="js/theme.js?v=9fa9b3c2"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=d143ab6d"></script>
@@ -112,7 +112,8 @@
 <div class="panel board-bar">
 <input class="search" id="sq" type="search" placeholder="Search strategies…" aria-label="Search strategies">
 <div class="chips"><button class="chip on" type="button" data-scat="all">All<i></i></button><button class="chip" type="button" data-scat="meta-units">Meta units<i></i></button><button class="chip" type="button" data-scat="map-specific">Map-specific<i></i></button><button class="chip" type="button" data-scat="general">General<i></i></button><button class="chip" type="button" data-scat="mine" hidden>Mine<i></i></button></div>
-<select id="ssort" aria-label="Sort strategies"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
+<select id="smap" aria-label="Map" hidden><option value="">All maps</option></select>
+<select id="ssort" aria-label="Sort strategies"><option value="top">Most upvoted</option><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A to Z</option><option value="long">Most detailed</option></select>
 <span class="count-pill" id="scount"></span>
 </div>
 <div class="skel-grid sk-strats" id="sloading" aria-busy="true" aria-label="Loading"><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div><div class="skel"><i></i><i></i><i></i></div></div>
@@ -120,7 +121,7 @@
 <div class="empty" id="snone" hidden><p id="snonet">No strategies match that.</p><button class="brick sm" type="button" id="sclear">Show all strategies</button></div>
 <section class="panel guide" aria-labelledby="guide-h"><h2 id="guide-h">About GTD strategies</h2><div class="guide-list"><div class="guide-q"><h3>What strategies are here?</h3><p>Garden Tower Defense loadouts, map guides and tips written by players, sorted into meta units, map-specific and general.</p></div><div class="guide-q"><h3>How do I share a strategy?</h3><p>Log in, press Share a strategy and fill in four short steps: basics, units, how to play, then share.</p></div></div></section>
 </main>
-<script defer src="js/strategies.js?v=fa090b25"></script>
+<script defer src="js/strategies.js?v=cbbb8c39"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">
