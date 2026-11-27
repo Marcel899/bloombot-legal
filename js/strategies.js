@@ -113,7 +113,6 @@
     if (s.created_at) top.append(el("span", "strat-date", BB.ago(s.created_at)));
     const words = BB.plain(s.description).split(/\s+/).length;
     if (words > 120) top.append(el("span", "strat-date", Math.ceil(words / 200) + " min read"));
-    top.append(voteBtn(s));
     const link = el("button", "strat-link", "Copy link");
     link.type = "button";
     link.onclick = () => BB.share(location.origin + location.pathname + "#s-" + s.id, BB.plain(s.title) + " · Bloombot", "Link to this strategy copied");
@@ -155,6 +154,7 @@
       a.append(av, el("span", null, s.author_name || "Bloombot player"));
       by.append(a);
     } else by.append(av, el("span", null, s.author_name || "Bloombot player"));
+    by.append(voteBtn(s));   // upvote sits at the end of the author line
     c.append(by);
     return c;
   }
