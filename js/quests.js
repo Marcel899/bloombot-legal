@@ -58,7 +58,7 @@
   }
   async function claim(q, b) {
     b.disabled = true;
-    const { data: r, error } = await BB.sb.rpc("claim_weekly_quest", { p_key: q.key });
+    const { error } = await BB.sb.rpc("claim_weekly_quest", { p_key: q.key });
     if (error) {
       b.disabled = false;
       const m = error.message || "";

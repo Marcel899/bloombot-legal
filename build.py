@@ -76,7 +76,7 @@ HEAD = """<!doctype html>
 <div class="progress" aria-hidden="true"></div>
 <header class="topbar">
 <div class="wrap bar">
-<a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo-sm.webp" alt="Bloombot home" width="126" height="20"></a>
 <nav class="links" id="links">{nav}</nav>
 <div class="right">
 <button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
@@ -93,7 +93,7 @@ FOOT = """<footer>
 <div class="wrap foot">
 <div class="foot-top">
 <div class="foot-brand">
-<a class="foot-mark" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo.png" alt="Bloombot home"></a>
+<a class="foot-mark" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo-sm.webp" alt="Bloombot home" width="126" height="20"></a>
 <p>The trading bot for Roblox Garden Tower Defense. Trade ads, live values, calculators and strategies, free in every server.</p>
 <div class="foot-cta"><a class="brick discord sm" href="{invite}">{dsvg}Add to Discord</a><a class="brick dark sm" href="{support}"><img src="img/envelope.png" alt="">Support</a></div>
 </div>
@@ -193,9 +193,11 @@ SPY = ""
 
 
 def hero(icon, h1, sub, art):
+    from PIL import Image as _Img
+    aw, ah = _Img.open(f"img/{art}.webp").size   # reserves the title's space while it loads
     return f"""<section class="hero">
 <div class="wrap hero-in">
-<h1 class="stud-title"><img class="hero-icon" src="img/{icon}.png" alt=""><img class="title-art" src="img/{art}.png" alt="{h1}"></h1>
+<h1 class="stud-title"><img class="hero-icon" src="img/{icon}.png" alt=""><img class="title-art" src="img/{art}.webp" alt="{h1}" width="{aw}" height="{ah}" decoding="async"></h1>
 <p class="sub">{sub}</p>
 </div>
 </section>
@@ -277,7 +279,7 @@ demo_panes = "".join(f'<div class="dpane" data-d="{k}" role="tabpanel"{"" if i =
 
 home = f"""<section class="hero big">
 <div class="wrap hero-in">
-<h1 class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.png" alt="Bloombot, the Garden Tower Defense trading bot"></h1>
+<h1 class="hero-mark"><img class="hero-flower" src="img/flower.png" alt=""><img class="hero-logo" src="img/logo.webp" alt="Bloombot, the Garden Tower Defense trading bot"></h1>
 <p class="sub">The free trading bot for Roblox Garden Tower Defense.<br class="br-wide"> Trade ads, live values and trade checks in every server.</p>
 <div class="ctas">
 <a class="brick discord big-cta" href="{INVITE}">{DISCORD_SVG}Add to Discord</a>
@@ -1014,7 +1016,7 @@ ADMIN_HTML = f"""<!doctype html>
 <div class="gate" id="gate"><div class="gbox"><img class="gflower" src="img/flower.png" alt=""><h1 id="gtitle">Bloombot Admin</h1><p id="gtext">Checking your login…</p><div class="gload" id="gloading"><i></i><i></i><i></i></div><button class="brick" id="glogin" type="button" hidden>Log in with Discord</button><a class="gback" href="./">Back to the website</a></div></div>
 <div class="app">
 <aside class="side" aria-label="Admin menu">
-<a class="brand" href="#overview"><img class="flower" src="img/flower.png" alt=""><img class="word" src="img/logo.png" alt="Bloombot"><span class="tag weld g-red">Admin</span></a>
+<a class="brand" href="#overview"><img class="flower" src="img/flower.png" alt=""><img class="word" src="img/logo.webp" alt="Bloombot"><span class="tag weld g-red">Admin</span></a>
 <nav class="snav" id="snav"></nav>
 <div class="side-foot"><a class="si back" href="./" title="Back to the website"><img src="img/flower.png" alt=""><span>Back to the website</span></a><div class="botcard"><img src="img/favicon.png" alt=""><div><b>Bloombot</b><small><span class="st" id="bstat"><i></i>Loading…</span></small></div></div></div>
 </aside>
