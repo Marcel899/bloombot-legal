@@ -1156,12 +1156,12 @@ def _advent():
 <div class="xm-cd" id="xmcd" role="timer" aria-live="off" hidden>
 <p class="xm-cd-h"><img src="img/wish_star.png" alt=""><span id="xmcd-h">Door 1 opens in</span><img src="img/wish_star.png" alt=""></p>
 <div class="xm-cd-row" id="xmcd-row">
-<div class="xm-cd-t" id="xmcd-dt"><b id="xmcd-d">0</b><span id="xmcd-dl">days</span></div><i class="xm-cd-c" id="xmcd-dc">:</i>
-<div class="xm-cd-t"><b id="xmcd-hh">00</b><span>hours</span></div><i class="xm-cd-c">:</i>
-<div class="xm-cd-t"><b id="xmcd-mm">00</b><span>mins</span></div><i class="xm-cd-c">:</i>
-<div class="xm-cd-t"><b id="xmcd-ss">00</b><span>secs</span></div>
+<div class="xm-cd-t weld" id="xmcd-dt"><b id="xmcd-d">0</b><span id="xmcd-dl">days</span></div><i class="xm-cd-c" id="xmcd-dc"></i>
+<div class="xm-cd-t weld"><b id="xmcd-hh">00</b><span>hours</span></div><i class="xm-cd-c"></i>
+<div class="xm-cd-t weld"><b id="xmcd-mm">00</b><span>mins</span></div><i class="xm-cd-c"></i>
+<div class="xm-cd-t weld"><b id="xmcd-ss">00</b><span>secs</span></div>
 </div>
-<p class="xm-cd-x" id="xmcd-x" hidden></p>
+<p class="xm-cd-x weld g-red" id="xmcd-x" hidden></p>
 </div>
 </div>
 </section>
