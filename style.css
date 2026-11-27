@@ -4941,3 +4941,12 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 [data-theme=light] .svote.on{background:#e3f4da;border-color:#5fb43a;color:#24731a}
 [data-theme=light] .smap-tag{background:#e0f2fb;color:#0f6f99}
 .smap-tag{font-family:inherit;font-size:.72rem;font-weight:900;text-transform:none;letter-spacing:.02em;padding-top:3px;padding-bottom:3px;line-height:1.3}
+
+/* advent: a tapped or keyboard-selected door swings open like a hovered one */
+.xm-cell{cursor:pointer;outline:none}
+.xm-cell.peek .xm-door{transform:rotateY(-68deg);filter:brightness(.93);box-shadow:inset 0 3px 0 rgba(255,255,255,.28),inset 0 -5px 0 rgba(0,0,0,.22),12px 0 24px -6px rgba(0,0,0,.6)}
+.xm-cell.peek .xm-door::after{background-position:0 0,-60% 0}
+.xm-cell.peek .xm-in i{animation:xmSpark 1.2s ease-in-out infinite}
+.xm-cell.peek .xm-in i:nth-child(2){animation-delay:.35s}.xm-cell.peek .xm-in i:nth-child(3){animation-delay:.7s}
+.xm-cell:focus-visible{box-shadow:inset 0 0 0 3px #0c0e12,0 0 0 3px #ffd24a,0 0 18px 4px rgba(255,210,74,.5)}
+@media (prefers-reduced-motion:reduce){.xm-cell.peek .xm-door{transform:translateY(-3px)}.xm-cell.peek .xm-in i{animation:none}}

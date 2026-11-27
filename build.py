@@ -1139,7 +1139,7 @@ def _advent():
     cells = []
     for i, d in enumerate(order):
         if d == 24:
-            cells.append('<li class="xm-cell big" data-day="24" aria-label="December 24"><span class="xm-in"><i></i><i></i><i></i><img src="img/units/christmas_tree.webp" alt=""></span>'
+            cells.append('<li class="xm-cell big" data-day="24" tabindex="0" role="button" aria-pressed="false" aria-label="December 24: peek inside"><span class="xm-in"><i></i><i></i><i></i><img src="img/units/christmas_tree.webp" alt=""></span>'
                          '<span class="xm-door c-gold p-ribbon snowy"><i class="xm-weld"></i><img class="xm-star" src="img/wish_star.png" alt=""><span class="xm-tag">24</span><em>Christmas Eve</em><i class="xm-knob"></i></span></li>')
             continue
         col, pat = looks[(d * 5) % len(looks)]
@@ -1148,7 +1148,7 @@ def _advent():
         wide = " w" + (" w2" if d in (13, 19) else "") if d in (6, 13, 19) else ""   # w2: normal width on tablets, so 4 columns fill evenly
         snowy = " snowy" if d % 3 == 0 else ""
         bow = '<i class="xm-bow"></i>' if pat == "ribbon" else ""
-        cells.append(f'<li class="xm-cell{wide}" data-day="{d}" aria-label="December {d}"><span class="xm-in"><i></i><i></i><i></i><img src="img/{peek}.{ext}" alt=""></span>'
+        cells.append(f'<li class="xm-cell{wide}" data-day="{d}" tabindex="0" role="button" aria-pressed="false" aria-label="December {d}: peek inside"><span class="xm-in"><i></i><i></i><i></i><img src="img/{peek}.{ext}" alt=""></span>'
                      f'<span class="xm-door c-{col} p-{pat}{snowy}"><i class="xm-weld"></i>{bow}<span class="xm-tag">{d}</span><i class="xm-knob"></i></span></li>')
     lights = "".join("<i></i>" for _ in range(32))
     flakes = "".join("<i></i>" for _ in range(36))

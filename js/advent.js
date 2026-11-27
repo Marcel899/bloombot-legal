@@ -64,6 +64,20 @@
     set("xmcd-ss", pad(s));
     box.setAttribute("aria-label", g.title + " " + (days ? days + (days === 1 ? " day, " : " days, ") : "") + h + " hours and " + mi + " minutes");
   }
+  /* Peek behind a door: hover on a computer, tap on a phone, Enter or Space with a
+     keyboard. Only one stays open at a time; it's just a look, nothing is claimed. */
+  const cells = [...document.querySelectorAll(".xm-cell")];
+  const peek = (cell, on) => {
+    cells.forEach(c => { if (c !== cell && c.classList.contains("peek")) { c.classList.remove("peek"); c.setAttribute("aria-pressed", "false"); } });
+    cell.classList.toggle("peek", on);
+    cell.setAttribute("aria-pressed", String(on));
+  };
+  cells.forEach(c => {
+    c.addEventListener("click", () => peek(c, !c.classList.contains("peek")));
+    c.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); peek(c, !c.classList.contains("peek")); } });
+  });
+  document.addEventListener("click", e => { if (!e.target.closest(".xm-cell")) cells.forEach(c => c.classList.contains("peek") && peek(c, false)); });
+
   tick();
   /* tick right on the second */
   setTimeout(() => { tick(); setInterval(tick, 1000); }, 1000 - (Date.now() % 1000));
