@@ -460,6 +460,35 @@
     g.before(tex);
     document.querySelectorAll(".ban-texs").forEach(x => { if (x !== tex) x.remove(); });
     paint();
+    /* Advent banners: shown once unlocked, or locked while the event is on */
+    let doors = 0;
+    try {
+      const { data, error } = await BB.sb.rpc("adv_status");
+      if (error || !data) return;
+      doors = (data.opened || []).length;
+    } catch (e) { return; }
+    const showLocked = Date.now() < Date.UTC(2027, 0, 1);
+    BB.EVENT_BANNERS.forEach(([k, name, need]) => {
+      const locked = doors < need;
+      if (locked && !showLocked && cur.color !== k) return;
+      const b = el("button", "ban-opt");
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.dataset.k = k;
+      const sw = el("span", "ban-sw pban");
+      sw.append(el("span", "ban-lv" + (locked ? " locked" : ""), (locked ? "\u{1F512} " : "") + need + " doors"));
+      b.append(sw, el("span", "ban-n", name));
+      if (locked) {
+        b.classList.add("locked");
+        b.setAttribute("aria-disabled", "true");
+        b.title = "Open " + need + " advent doors to unlock";
+        b.onclick = () => BB.toast("Open " + need + " doors on the advent calendar to unlock the " + name + " banner. You've opened " + doors + ".", "info",
+          { title: name + " is locked", action: { label: "Advent calendar", run: () => { location.href = "advent.html"; } } });
+      } else b.onclick = () => { if (pick.color !== k) { pick.color = k; paint(); commit(); } };
+      btns.push(b);
+      g.append(b);
+    });
+    paint();
   }
 
   let busy = false;

@@ -230,7 +230,7 @@
   const skel = (n) => `<div class="skel-wrap">${Array.from({ length: n || 6 }, () => '<i class="skel"></i>').join("")}</div>`;
   const avatar = (u) => `<img src="${esc(u && u.avatar ? u.avatar : "img/task_user.png")}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
   const verPill = (u) => (u.verified ? '<span class="pill green"><img src="img/verified_stud.png" alt="">Verified</span>' : u.roblox ? '<span class="pill gray">Linked</span>' : '<span class="pill gray">No Roblox</span>');
-  function statusPill(s) { return `<span class="pill ${{ Active: "green", Banned: "red", Live: "green", posted: "green", rejected: "red", pending: "yellow", done: "green", failed: "red", verified: "green", error: "red", join: "blue", leave: "gray", Done: "green", Ended: "gray", Won: "purple" }[s] || "gray"}">${esc(s)}</span>`; }
+  function statusPill(s) { return `<span class="pill ${{ Active: "green", Banned: "red", Live: "green", posted: "green", rejected: "red", pending: "yellow", done: "green", failed: "red", verified: "green", error: "red", join: "blue", leave: "gray", Done: "green", Ended: "gray", Won: "purple", Traded: "green" }[s] || "gray"}">${esc(s)}</span>`; }
   const robloxLink = (u) => (u.roblox ? (u.robloxUrl && /^https:\/\/www\.roblox\.com\//.test(u.robloxUrl) ? `<a href="${esc(u.robloxUrl)}" target="_blank" rel="noopener noreferrer">${esc(u.roblox)}</a>` : esc(u.roblox)) : '<span class="faint">–</span>');
   const userCell = (u) => `<div class="who">${avatar(u)}<div><b>${esc(u.name || u.id)}</b><small>${esc(u.id)}</small></div></div>`;
 
@@ -317,7 +317,7 @@
   // ---------- navigation ----------
   const NAV = [
     ["Dashboard", [["overview", "Overview", "gem"], ["analytics", "Analytics", "chart_up"], ["users", "Users", "task_user"]]],
-    ["Bot", [["ads", "Trade ads", "swap"], ["commands", "Commands", "lightning"], ["moderation", "Moderation", "shield"], ["servers", "Servers", "discord_stud_white"], ["values", "Values & demand", "dollar"], ["giveaways", "Giveaways", "gift"]]],
+    ["Bot", [["ads", "Trade ads", "swap"], ["commands", "Commands", "lightning"], ["moderation", "Moderation", "shield"], ["servers", "Servers", "discord_stud_white"], ["values", "Values & demand", "dollar"], ["giveaways", "Giveaways", "gift"], ["advent", "Advent prizes", "gift"]]],
     ["Site & system", [["website", "Website", "task_about"], ["logs", "Activity log", "task_addbot"], ["system", "System health", "lightning"], ["dms", "Message reports", "envelope"], ["reports", "Reports", "calculator"]]],
     ["Open on the website", [["x-values", "Value list", "dollar", "values.html"], ["x-trades", "Trade ads", "swap", "trades.html"], ["x-strat", "Strategies", "bullseye", "strategies.html"], ["x-dash", "Server dashboard", "gear", "dashboard.html"]]],
   ];
@@ -840,6 +840,50 @@
     } catch (e) { /* pictures just show as gone */ }
     return out;
   }
+  /* Advent calendar prizes (sql/advent.sql): who won what, drop times, mark as traded. */
+  R.advent = async (v) => {
+    v.innerHTML = `<div class="phead"><div><h1>Advent prizes</h1><p>The 12 hidden units and the Infectia draw. Drop times are secret on the website; only you see them here. Trade each unit to the winner's Roblox account, then mark it traded.</p></div><div class="acts"><a class="btn g-dark" href="advent.html" target="_blank" rel="noopener"><img src="img/gift.png" alt="">Open calendar</a><button class="btn g-dark" type="button" id="avref"><img src="img/clock.png" alt="">Refresh</button></div></div><div id="avk"></div><div id="avt" class="mt">${skel(6)}</div>`;
+    $("#avref").addEventListener("click", () => R.advent(v));
+    let d;
+    try { d = await rpc("adv_admin"); } catch (e) {
+      empty($("#avt"), "Couldn't load advent prizes", /function|schema/i.test(e.message) ? "Run sql/advent.sql in Supabase." : e.message);
+      return;
+    }
+    if (location.hash !== "#advent") return;
+    const prizes = d.prizes || [], units = prizes.filter((p) => p.kind === "first");
+    const days = d.days || [], opens = days.reduce((a, x) => a + x.n, 0), best = days.reduce((a, x) => (x.n > (a ? a.n : -1) ? x : a), null);
+    const toTrade = prizes.filter((p) => p.winner && !p.paid).length;
+    setCount("advent", toTrade, true);
+    renderKpis($("#avk"), [
+      kpi("Players", "task_user", full(d.players || 0), null, null, null, null, full(opens) + " doors opened"),
+      kpi("Units found", "gem", units.filter((p) => p.winner).length + " / " + units.length, null, null, null, null, units.filter((p) => p.paid).length + " traded"),
+      kpi("To trade", "gift", full(toTrade), null, null, null, null, toTrade ? "waiting for you" : "all done"),
+      kpi("Busiest day", "chart_up", best ? "Dec " + best.day : "-", null, null, null, null, best ? full(best.n) + " doors" : "nothing yet"),
+    ]);
+    const when = (t) => (t ? toDate(t).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
+    table($("#avt"), {
+      rows: () => prizes, sort: "day", dir: 1, per: 20, empty: "No prizes yet.",
+      cols: [
+        { key: "day", label: "Day", render: (p) => "Dec " + esc(p.day) },
+        { key: "unit", label: "Prize", render: (p) => `<b>${esc(p.unit)}</b>${p.kind === "draw" ? ' <span class="pill yellow">Draw</span>' : ""}` },
+        { key: "drop_at", label: "Drops", sort: (p) => toDate(p.drop_at), render: (p) => esc(when(p.drop_at)) },
+        { key: "winner_name", label: "Winner", render: (p) => (p.winner ? userCell({ id: p.winner, name: p.winner_name || p.winner }) + (p.roblox_name ? `<small class="muted">Roblox: ${esc(p.roblox_name)}</small>` : "") : '<span class="muted">Nobody yet</span>') },
+        { key: "won_at", label: "Won", sort: (p) => (p.won_at ? toDate(p.won_at) : 0), render: (p) => (p.won_at ? ago(toDate(p.won_at)) : ""), hide: true },
+        { key: "x", label: "", nosort: true, render: (p) => (!p.winner ? "" : `<div class="acts">${p.paid ? statusPill("Traded") : ""}<button class="mini-btn" data-pay="${esc(p.id)}" data-on="${p.paid ? 0 : 1}" type="button">${p.paid ? "Undo" : "Mark traded"}</button>${p.paid ? "" : `<button class="mini-btn danger" data-rr="${esc(p.id)}" type="button">${p.kind === "draw" ? "Redraw" : "Take back"}</button>`}</div>`) },
+      ],
+      after: (h) => {
+        $$("[data-pay]", h).forEach((b) => b.addEventListener("click", async () => {
+          try { await rpc("adv_admin_paid", { p_id: +b.dataset.pay, p_paid: b.dataset.on === "1" }); R.advent(v); } catch (e) { toast("Couldn't save: " + e.message, "warning"); }
+        }));
+        $$("[data-rr]", h).forEach((b) => b.addEventListener("click", async () => {
+          const p = prizes.find((x) => String(x.id) === b.dataset.rr);
+          const draw = p.kind === "draw";
+          if (!(await confirmBox({ title: (draw ? "Redraw the " : "Take back the ") + p.unit + "?", text: draw ? "Picks a new winner from everyone eligible, weighted by doors opened." : "It goes back into the hunt: the next eligible trader to open a door wins it.", ok: draw ? "Redraw" : "Take back", danger: true }))) return;
+          try { await rpc("adv_admin_reroll", { p_id: p.id }); toast(draw ? "New winner drawn" : "Back in the hunt", "gift"); R.advent(v); } catch (e) { toast("Couldn't do it: " + e.message, "warning"); }
+        }));
+      },
+    });
+  };
   R.dms = async (v) => {
     v.innerHTML = `<div class="phead"><div><h1>Message reports</h1><p>Website messages people reported. A reported picture stays saved as evidence.</p></div><div class="acts"><button class="btn g-dark" type="button" id="dmref"><img src="img/clock.png" alt="">Refresh</button></div></div><div id="dmk"></div><div class="mt" id="dmtabs"></div><div class="filters"><label class="srch"><span class="sr">Search message reports</span>${SRCH}<input class="inp" id="dmq" placeholder="Text, user or reason"></label></div><div id="dmt">${skel(6)}</div>`;
     $("#dmref").addEventListener("click", () => { S.dm = null; R.dms(v); });

@@ -1351,13 +1351,16 @@
     ["night", "Night"], ["rainbow", "Rainbow"],
     ["aurora", "Aurora", 5], ["lava", "Lava", 10], ["galaxy", "Galaxy", 20], ["royal", "Royal", 35], ["ancient", "Ancient", 50],
   ];
+  /* event banners: [colour, name, doors needed]. Unlocked on the advent page and
+     saved by adv_set_banner (sql/advent.sql), which checks the doors again. */
+  BB.EVENT_BANNERS = [["xmas", "Advent", 12], ["xmasgold", "Golden Advent", 24]];
   /* banner colour -> level it unlocks at (checked again by set_my_banner) */
   BB.bannerLevel = color => ((BB.BANNERS.find(b => b[0] === color) || [])[2] || 0);
   const AUTO = ["blue", "green", "purple", "orange", "ocean", "candy"];
   /* key = colour, optionally + "-weld" (default texture is studs) */
   BB.bannerParts = key => {
     const m = String(key || "auto").match(/^(.*?)(?:-(studs|weld))?$/);
-    return { color: BB.BANNERS.some(b => b[0] === m[1]) ? m[1] : "auto", tex: m[2] || "studs" };
+    return { color: BB.BANNERS.concat(BB.EVENT_BANNERS).some(b => b[0] === m[1]) ? m[1] : "auto", tex: m[2] || "studs" };
   };
   BB.bannerKey = (color, tex) => tex === "weld" ? color + "-weld" : color;
   BB.paintBanner = (node, key, id) => {
@@ -1379,7 +1382,8 @@
     } catch (e) { return "auto"; }
   };
   BB.setBanner = async key => {
-    const { error } = await BB.sb.rpc("set_my_banner", { b: key });
+    const ev = BB.EVENT_BANNERS.some(b => b[0] === BB.bannerParts(key).color);
+    const { error } = await BB.sb.rpc(ev ? "adv_set_banner" : "set_my_banner", { b: key });
     if (!error) bannerCache[BB.user(BB.session).id] = key;
     return error;
   };
