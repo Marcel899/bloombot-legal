@@ -5280,8 +5280,6 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 .xmc-behind img{width:40px;height:40px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4))}
 .xmc-door{position:absolute;inset:2px;display:grid;place-items:center;border-radius:11px;border:3px solid #0c0e12;background:var(--c);box-shadow:inset 0 3px 0 rgba(255,255,255,.28),inset 0 -4px 0 var(--k),0 3px 0 rgba(0,0,0,.3);transform-origin:0 50%;transition:transform .45s cubic-bezier(.2,.9,.3,1.1)}
 .xmc-door::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:7px;margin-left:-3.5px;background:#f5c83c;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
-/* snow on top of the door */
-.xmc-door::after{content:"";position:absolute;left:-4px;right:-4px;top:-8px;height:12px;border-radius:8px 8px 10px 10px;background:linear-gradient(180deg,#fff,#dfe8f5);box-shadow:0 2px 0 rgba(0,0,0,.18)}
 .xmc-knob{position:absolute;right:7px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:#f5c83c;box-shadow:0 0 0 1.5px #0c0e12}
 .xmc-door b{position:relative;min-width:26px;padding:0 5px;border-radius:7px;background:#fff;color:#c8202f;font:700 1.35rem/1.2 "Fredoka",sans-serif;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .xmc-in:hover .xmc-door,.xmc-in:focus-within .xmc-door{transform:rotateY(-58deg)}
