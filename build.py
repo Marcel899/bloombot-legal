@@ -464,11 +464,11 @@ home = f"""<section class="hero big">
 <a class="brick purple big-cta" href="trades.html"><img src="img/trading.png" alt="">Browse trade ads</a>
 </div>
 <div class="hstats" id="stats">
-<span hidden><img src="img/shield.png" alt=""><strong id="st-servers">–</strong> servers</span>
-<span hidden><img src="img/medal_gold.png" alt=""><strong id="st-users">–</strong> users</span>
-<span><i class="live" aria-hidden="true"></i><strong id="st-ads">–</strong> live trade ads</span>
-<span><img src="img/dollar.png" alt=""><strong id="st-values">–</strong> units tracked</span>
-<span><img src="img/bullseye.png" alt=""><strong id="st-strats">–</strong> strategies</span>
+<span hidden><img src="img/shield.png" alt=""><strong id="st-servers">–</strong><em>servers</em></span>
+<span hidden><img src="img/medal_gold.png" alt=""><strong id="st-users">–</strong><em>users</em></span>
+<span><i class="live" aria-hidden="true"></i><strong id="st-ads">–</strong><em>live trade ads</em></span>
+<span><img src="img/dollar.png" alt=""><strong id="st-values">–</strong><em>units tracked</em></span>
+<span><img src="img/bullseye.png" alt=""><strong id="st-strats">–</strong><em>strategies</em></span>
 </div>
 </div>
 </section>

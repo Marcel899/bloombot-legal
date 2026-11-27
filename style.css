@@ -5427,3 +5427,33 @@ body:has(dialog[open]) .xm-hero *,body:has(dialog[open]) .xm-hero *::before,body
 .fjump .chip{text-decoration:none;color:var(--text)}
 .fjump .chip:hover{border-color:var(--accent,#ffd24a)}
 #in-discord,#on-the-web,#commands{scroll-margin-top:90px}
+/* Home polish (2026-11-27): one stats bar, tighter hero, even panels, swipe rows on phones */
+.hero.big{padding-bottom:84px}
+.hstats{width:fit-content;max-width:100%;margin:22px auto 0;gap:0;padding:4px;border-radius:99px;background:rgba(10,12,16,.55);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hstats span{background:none;border:0;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;padding:6px 16px;border-radius:0}
+.hstats span:not([hidden])~span{border-left:1px solid rgba(255,255,255,.14)}
+.hstats em{font-style:normal}
+.hstats strong{margin-right:-2px}
+[data-theme=light] .hstats{background:rgba(255,255,255,.86);border-color:rgba(255,255,255,.95);box-shadow:0 8px 22px -12px rgba(10,30,60,.5)}
+[data-theme=light] .hstats span{background:none;box-shadow:none}
+[data-theme=light] .hstats span:not([hidden])~span{border-left-color:rgba(20,40,70,.12)}
+.home>.xmc:first-child{margin-top:-6px}
+.now-grid{align-items:stretch}
+.hnews .nw-band{align-self:stretch}
+.dtab{border-color:rgba(255,255,255,.05);background:rgba(255,255,255,.02)}
+[data-theme=light] .dtab{border-color:rgba(20,40,70,.08);background:rgba(255,255,255,.5)}
+@media (max-width:700px){
+  .hero.big{padding:112px 0 64px}
+  .hstats{display:flex;flex-wrap:wrap;width:auto;border-radius:16px;padding:6px 4px}
+  .hstats span{flex:1 0 30%;flex-wrap:wrap;justify-content:center;gap:2px 5px;padding:6px 4px;font-size:.78rem;text-align:center}
+  .hstats span:not([hidden])~span{border-left:0}
+  .hstats strong{font-size:1rem}
+  .hstats img{width:18px;height:18px}
+  .hstats em{flex-basis:100%;line-height:1.1}
+}
+@media (max-width:600px){
+  .hs-list,.hnews .nw-grid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:84%;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;gap:12px;margin:0 -16px;padding:2px 16px 8px;scroll-padding:0 16px}
+  .hs-list::-webkit-scrollbar,.hnews .nw-grid::-webkit-scrollbar{display:none}
+  .hs-list>*,.hnews .nw-grid>*{scroll-snap-align:start}
+  .hnews .nw-cs{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+}
