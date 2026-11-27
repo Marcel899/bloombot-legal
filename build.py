@@ -523,11 +523,11 @@ open("index.html", "w").write(page("Bloombot · Garden Tower Defense Trading Bot
 # ── Features & commands ──────────────────────────────────────────────────
 ALL_FEATURES = [
     # (icon, title, text, commands, (site link, label) or None)
-    ("trading", "Global trade ads", "Post one ad in your server's trade channel and it shows up in every server running Bloombot. Unit names turn into icons.", ["/trade ad", "/trade bump"], ("trades.html", "Trade ads")),
+    ("trading", "Global trade ads", "Post one ad in your server's trade channel and it shows up in every server running Bloombot. Unit names turn into icons, and you can post, bump and delete ads from the website too.", ["/trade ad", "/trade bump"], ("trades.html", "Trade ads")),
     ("dollar", "Live values", "Every unit and gamepass with its value, demand and a price chart, updated from the community value list.", ["/value"], ("values.html", "Value list")),
     ("chart_up", "Value hub", "What's going up, what's going down, our guess for the next 30 days and the best cheap units for your budget.", ["/value-hub"], None),
     ("calculator", "Trade checker", "Type what you give and what you get and see if it's a win, fair or a loss, with a picture you can share.", ["/value-calculator"], ("calculator.html", "Calculator")),
-    ("wish_star", "Wishlist", "Add the units you want. Bloombot DMs you the moment a new trade ad offers one.", ["/wishlist"], None),
+    ("wish_star", "Wishlist", "Add the units you want. Bloombot DMs you the moment a new trade ad offers one. Edit it here or on the website.", ["/wishlist"], None),
     ("bell", "Value alerts", "Follow a unit and get a DM when its price moves 20% or more.", ["/value"], None),
     ("lightning", "DPS ranking", "Every unit ranked by damage, refreshed each week, plus full unit and enemy stats.", ["/dps", "/search"], None),
     ("medal_gold", "Levels and ranks", "Earn XP for using Bloombot. Higher ranks keep their trade ads up longer and auto-bump them.", ["/level", "/ranks"], ("levels.html", "Perks")),
@@ -537,6 +537,21 @@ ALL_FEATURES = [
     ("shield", "Safe trading", "Ads are screened for scams, bad words and NSFW images, and anyone can report a user.", ["Report user"], ("terms.html", "Rules")),
 ]
 F_COLORS = ["green", "blue", "yellow", "purple", "red", "orange"]
+
+WEB_FEATURES = [
+    ("trading", "Trade ads on the web", "Browse every ad from every server, filter by unit, and post your own with unit pickers. Bump, auto-bump and delete your ads.", [], ("trades.html", "Trade ads")),
+    ("dollar", "Value list and unit pages", "Sort by value, demand or 30-day change, switch to list view, star units for your watchlist and open any unit for its price chart.", [], ("values.html", "Values")),
+    ("calculator", "Three calculators", "Check if a trade is fair, see your real odds per crate with luck and pity, and work out Seeds and Fertilizer per hour.", [], ("calculator.html", "Calculators")),
+    ("gem", "Collection tracker", "Add the units you own and see what they're worth together. Sort them, see the split by rarity, then copy or share your list.", [], ("collection.html", "My collection")),
+    ("bell", "Price alerts", "Pick a unit and a price. Get a Discord DM or an email when its value goes past it.", [], ("alerts.html", "Alerts")),
+    ("bullseye", "Strategies", "Community guides for every map. Upvote the best ones, sort by most upvoted and post your own.", [], ("strategies.html", "Strategies")),
+    ("gift", "Advent calendar", "One door a day from 1 to 24 December: XP, two profile banners, 12 hidden units and an Infectia draw.", [], ("advent.html", "Calendar")),
+    ("news", "News", "Bloombot updates and Garden Tower Defense news with codes and events. A red dot on the bell shows what's new.", [], ("news.html", "News")),
+    ("medal_gold", "Levels and weekly quests", "Your level, every rank perk, one-time XP tasks and new quests every week. XP is shared with the bot.", [], ("levels.html", "Levels")),
+    ("envelope", "Messages", "Talk to other traders in private. Get an email if a message sits unread.", [], None),
+    ("gear", "Server dashboard", "Server admins change Bloombot's channels, pings and features from the website, no commands needed.", [], ("dashboard.html", "Dashboard")),
+    ("login", "Profiles and login", "Log in with Discord or Google. Your profile shows your Roblox account, level banner, live ads and strategies.", [], None),
+]
 
 COMMANDS = [
     ("Getting started", "green", [
@@ -594,6 +609,7 @@ def _ftile(n, i, h, p, cmds, link):
 
 
 ftiles = "".join(_ftile(n, *f) for n, f in enumerate(ALL_FEATURES))
+wtiles = "".join(_ftile(n + 1, *f) for n, f in enumerate(WEB_FEATURES))
 groups = ""
 gchips = '<button class="chip on" type="button" data-cg="all">All<i>%d</i></button>' % sum(len(c) for _, _, c in COMMANDS)
 for name, color, cmds in COMMANDS:
@@ -603,8 +619,12 @@ for name, color, cmds in COMMANDS:
         for c, d in cmds)
     groups += f'<div class="cmd-group" data-cg="{gid}"><h3 class="weld g-{color}">{name}</h3><ul>{rows}</ul></div>'
     gchips += f'<button class="chip" type="button" data-cg="{gid}">{name}<i>{len(cmds)}</i></button>'
-features_body = hero("gem", "Features", "Everything Bloombot can do, and every command.", "t_features") + f"""<main class="wrap" id="main">
+features_body = hero("gem", "Features", "Everything Bloombot can do in Discord and on the website, and every command.", "t_features") + f"""<main class="wrap" id="main">
+<nav class="chips fjump" aria-label="Jump to"><a class="chip" href="#in-discord">In Discord</a><a class="chip" href="#on-the-web">On the website</a><a class="chip" href="#commands">Commands</a></nav>
+<div class="sec-head" id="in-discord"><h2>In Discord</h2><a href="{INVITE}">Add to Discord &rarr;</a></div>
 <section class="tiles ftiles">{ftiles}</section>
+<div class="sec-head" id="on-the-web"><h2>On the website</h2><a href="trades.html">Open trade ads &rarr;</a></div>
+<section class="tiles ftiles">{wtiles}</section>
 <section class="panel cmds" id="commands">
 <div class="cmds-head"><h2 class="sec weld g-yellow"><img src="img/bell.png" alt="">Commands</h2>
 <input class="search" id="cmdq" type="search" placeholder="Search commands…" aria-label="Search commands"></div>
@@ -620,7 +640,7 @@ features_body = hero("gem", "Features", "Everything Bloombot can do, and every c
 </section>
 </main>
 """
-open("features.html", "w").write(page("Bloombot Features and Commands · Garden Tower Defense Discord Bot", "Everything the Bloombot Discord bot can do for Garden Tower Defense traders, and every slash command.", features_body, "f", "features.html"))
+open("features.html", "w").write(page("Bloombot Features and Commands · Garden Tower Defense Discord Bot", "Everything Bloombot can do for Garden Tower Defense traders in Discord and on the website: trade ads, values, calculators, alerts, advent calendar and every slash command.", features_body, "f", "features.html"))
 
 # ── Trade ads (Discord login through Supabase) ───────────────────────────
 JSVER = {n: hashlib.md5(open(f"js/{n}.js", "rb").read()).hexdigest()[:8] for n in ("trades", "values", "calc", "strategies", "home", "profile", "alerts")}
@@ -1333,7 +1353,7 @@ def _advent():
         bow = '<i class="xm-bow"></i>' if pat == "ribbon" else ""
         cells.append(f'<li class="xm-cell{wide}" data-day="{d}" tabindex="0" role="button" aria-label="December {d}"><span class="xm-in"><i></i><i></i><i></i><img src="img/{peek}.{ext}" alt=""></span>'
                      f'<span class="xm-door c-{col} p-{pat}{snowy}"><i class="xm-weld"></i>{bow}<span class="xm-tag">{d}</span><i class="xm-knob"></i></span></li>')
-    lights = "".join("<i></i>" for _ in range(32))
+    lights = "".join("<b>" + "<i></i>" * 8 + "</b>" for _ in range(4))   # one twinkling group per colour
     flakes = "".join("<i></i>" for _ in range(36))
     stars = "".join("<i></i>" for _ in range(40))
     trees = "".join("<i></i>" for _ in range(9))

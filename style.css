@@ -5384,3 +5384,46 @@ body:has(.xm-hero) .topbar .bar{backdrop-filter:none;-webkit-backdrop-filter:non
 .col-tools .col-filter{flex:0 1 160px}
 .col-legend li{line-height:1.2}
 @media (prefers-reduced-motion:reduce){.xmc-door{transition:none}.xmc-in:hover .xmc-door,.xmc-in:focus-within .xmc-door{transform:none}.xmc-lights i{animation:none!important}}
+/* ── advent: lag pass 2 ──
+   Measured with 4x CPU slowdown: the door shine (a moving background) repainted the whole
+   door every frame on hover, and 32 lights + 13 stars were each their own GPU layer.
+   Now the shine is a sliding layer, lights twinkle in 4 colour groups and stars in 2 layers. */
+.xm-door::after{background:linear-gradient(140deg,rgba(255,255,255,.24) 0%,rgba(255,255,255,0) 34%);transition:none}
+.xm-weld{opacity:1;background:none}
+.xm-door{will-change:transform}   /* each door keeps its own layer, so the shine and the swing never re-draw the board */
+.xm-weld::before{content:"";position:absolute;inset:0;background:url(img/weld.png) 0 0/45px 45px repeat;opacity:.3}
+.c-snow .xm-weld::before{opacity:.16}
+@media (max-width:600px){.xm-weld::before{background-size:36px 36px}}
+.xm-weld::after{content:"";position:absolute;top:0;bottom:0;left:0;width:70%;background:linear-gradient(105deg,transparent 22%,rgba(255,255,255,.38) 50%,transparent 78%);transform:translateX(-101%);transition:transform .7s ease}
+.xm-cell:hover .xm-weld::after{transform:translateX(145%)}
+.xm-lights b{position:absolute;top:0;bottom:0;left:0;right:0;animation:xmTwinkle 2.4s ease-in-out infinite}
+.xm-lights b:nth-child(2){left:60px;animation-delay:-.6s}
+.xm-lights b:nth-child(3){left:120px;animation-delay:-1.2s}
+.xm-lights b:nth-child(4){left:180px;animation-delay:-1.8s}
+.xm-lights b i{animation:none}
+.xm-lights b:nth-child(1) i{--b:#ff4d5e;--g:rgba(255,77,94,.75)}
+.xm-lights b:nth-child(2) i{--b:#ffd24a;--g:rgba(255,210,74,.75)}
+.xm-lights b:nth-child(3) i{--b:#3ddc84;--g:rgba(61,220,132,.7)}
+.xm-lights b:nth-child(4) i{--b:#4fb3ff;--g:rgba(79,179,255,.75)}
+.xm-lights b i:nth-child(1){left:25px}.xm-lights b i:nth-child(2){left:265px}.xm-lights b i:nth-child(3){left:505px}.xm-lights b i:nth-child(4){left:745px}
+.xm-lights b i:nth-child(5){left:985px}.xm-lights b i:nth-child(6){left:1225px}.xm-lights b i:nth-child(7){left:1465px}.xm-lights b i:nth-child(8){left:1705px}
+.xm-sky i,.xm-sky i:not(:nth-child(3n)){animation:none;opacity:.75}
+.xm-sky::before,.xm-sky::after{content:"";position:absolute;inset:0;pointer-events:none;animation:xmStar2 3.4s ease-in-out infinite;
+  background:radial-gradient(circle at 18% 22%,#fff 1.4px,rgba(255,255,255,.35) 2.4px,transparent 4px),radial-gradient(circle at 62% 64%,#fff 1.4px,rgba(255,255,255,.35) 2.4px,transparent 4px) 0 0/460px 320px}
+.xm-sky::after{background-position:210px 120px;background-size:520px 360px;animation-duration:4.2s;animation-delay:-1.6s}
+@media (prefers-reduced-motion:reduce){.xm-lights b,.xm-sky::before,.xm-sky::after,.xm-weld::after{animation:none;transition:none}}
+/* home advent card: lights only fade (box-shadow made it repaint every frame) */
+@keyframes xmcTw{50%{opacity:.35}}
+/* "live" dot: the pulse ring is its own layer that scales, instead of a growing box-shadow */
+i.live{position:relative;box-shadow:none;animation:none}
+i.live::after{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(61,220,107,.6);animation:livep2 2s infinite}
+@keyframes livep2{0%{transform:scale(1);opacity:1}70%{transform:scale(2.55);opacity:0}100%{transform:scale(2.55);opacity:0}}
+@media (prefers-reduced-motion:reduce){i.live::after{animation:none;opacity:0}}
+/* while a door card or win card is open, the sky behind the backdrop stands still */
+body:has(dialog[open]) .xm-hero *,body:has(dialog[open]) .xm-hero *::before,body:has(dialog[open]) .xm-hero *::after,body:has(dialog[open]) .xm-cell::after{animation-play-state:paused!important}
+/* features page: jump chips over the two tile groups */
+.fjump{position:relative;margin:-60px 0 0}
+.fjump ~ .tiles{margin-top:0}
+.fjump .chip{text-decoration:none;color:var(--text)}
+.fjump .chip:hover{border-color:var(--accent,#ffd24a)}
+#in-discord,#on-the-web,#commands{scroll-margin-top:90px}
