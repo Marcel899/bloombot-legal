@@ -177,9 +177,14 @@ CKVER = hashlib.md5(open("js/consent.js", "rb").read()).hexdigest()[:8]
 TRVER = hashlib.md5(open("js/track.js", "rb").read()).hexdigest()[:8]
 
 
+def _news_attr():
+    posts = globals().get("POSTS")
+    return f' data-new="{posts[0]["date"].isoformat()}"' if posts else ""
+
+
 def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
     nav = "".join(
-        f'<a class="nl{" on g-" + color if key == cur else ""}" data-g="{color}" href="{href}"{' title="' + label + '"' if key == "n" else ""}><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
+        f'<a class="nl{" on g-" + color if key == cur else ""}" data-g="{color}" href="{href}"{' title="' + label + '"' + _news_attr() if key == "n" else ""}><img src="img/{icon}.png" alt=""><span>{label}</span></a>'
         for key, href, icon, label, color in NAV)
     kw = kw or PAGE_KW.get(path, "")
     return (HEAD.format(title=title, desc=desc, support=SUPPORT, ver=VER, base=BASE, path=path,
@@ -199,6 +204,7 @@ def page(title, desc, body, cur="", path="", index=True, ld="", kw=""):
 #   icon: gem              (any img/<icon>.png)
 #   color: purple          (green, blue, yellow, purple, red, orange)
 #   summary: One or two sentences for the cards and link previews.
+#   image: img/news/x.webp (optional cover picture for the post, cards and link previews)
 #   ---
 # Body is Markdown: ## headings, - lists, **bold**, *italic*, `code`, [links](url),
 # ![pictures](img/...), > quotes, -# small print, and :icon: for any img/<icon>.png.
@@ -293,6 +299,7 @@ def _load_posts():
             "slug": slug, "title": meta["title"], "date": date, "tag": meta.get("tag", "News"),
             "icon": meta.get("icon", "bell"), "color": meta.get("color", "green"),
             "summary": meta.get("summary", ""), "html": _md(body), "mins": max(1, round(words / 200)),
+            "image": meta.get("image", ""),
             "url": f"news/{slug}.html",
         })
     posts.sort(key=lambda p: (p["date"], p["slug"]), reverse=True)
@@ -308,11 +315,12 @@ def _nice_date(d):
 
 def news_card(p, big=False):
     e = _html.escape
-    return (f'<a class="tile nw-card{" big" if big else ""}" href="{p["url"]}">'
-            f'<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>'
-            f'<span class="nw-cb"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time>'
+    cover = (f'<img class="nw-cover" src="{e(p["image"])}" alt="" loading="lazy" decoding="async">' if p["image"] else "")
+    return (f'<a class="tile nw-card{" big" if big else ""}{" has-cover" if cover else ""}" href="{p["url"]}" data-tag="{e(p["tag"].lower())}">'
+            f'{cover}<span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>'
+            f'<span class="nw-cb"><span class="nw-when"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span></span>'
             f'<strong class="nw-ct">{e(p["title"])}</strong><span class="nw-cs">{e(p["summary"])}</span>'
-            f'<span class="more">Read &rarr;</span></span></a>')
+            f'<span class="more">Read{" the post" if big else ""} &rarr;</span></span></a>')
 
 
 SPY = ""
@@ -403,6 +411,28 @@ DEMOS = [
 demo_tabs = "".join(f'<button type="button" role="tab" class="dtab{" on" if i == 0 else ""}" data-d="{k}" aria-selected="{"true" if i == 0 else "false"}"><img src="{ic}" alt="">{t}</button>' for i, (k, t, ic, _) in enumerate(DEMOS))
 demo_panes = "".join(f'<div class="dpane" data-d="{k}" role="tabpanel"{"" if i == 0 else " hidden"}>{m}</div>' for i, (k, t, ic, m) in enumerate(DEMOS))
 
+# ── Advent calendar card (home). Self-contained: one section + js/xmas-card.js + the .xmc CSS block,
+#    so it can move into any home layout. It stays hidden outside November and December.
+def xmas_card():
+    v = hashlib.md5(open("js/xmas-card.js", "rb").read()).hexdigest()[:8]
+    dots = "".join(f'<i data-d="{d}"></i>' for d in range(1, 25))
+    return f"""<section class="xmc" id="xmc" hidden aria-labelledby="xmc-h">
+<a class="xmc-in" href="advent.html">
+<span class="xmc-art" aria-hidden="true"><img class="xmc-gift" src="img/gift.png" alt="" loading="lazy"><span class="xmc-door"><b id="xmc-n">1</b></span></span>
+<span class="xmc-t">
+<span class="xmc-kick"><img src="img/wish_star.png" alt="">Advent calendar 2026</span>
+<strong class="xmc-h" id="xmc-h">Door 1 opens in</strong>
+<span class="xmc-sub" id="xmc-sub">24 doors of XP, banners and 13 free units, including an Infectia.</span>
+<span class="xmc-dots" id="xmc-dots" hidden>{dots}</span>
+</span>
+<span class="xmc-cd" id="xmc-cd"><span id="xmc-dw"><b id="xmc-d">0</b><em id="xmc-dl">days</em></span><span><b id="xmc-hh">00</b><em>hrs</em></span><span><b id="xmc-mm">00</b><em>mins</em></span></span>
+<span class="brick red xmc-go"><img src="img/gift.png" alt=""><span id="xmc-go">See the calendar</span></span>
+</a>
+</section>
+<script defer src="js/xmas-card.js?v={v}"></script>
+"""
+
+
 home_news = ('<section class="hnews"><div class="sec-head"><h2>Latest news</h2><a href="news.html">All news &rarr;</a></div><div class="nw-grid">' + "".join(news_card(p) for p in POSTS[:3]) + "</div></section>\n") if POSTS else ""
 home = f"""<section class="hero big">
 <div class="wrap hero-in">
@@ -422,7 +452,7 @@ home = f"""<section class="hero big">
 </div>
 </section>
 <main class="wrap home" id="main">
-<section class="tiles six">{tiles}</section>
+{xmas_card()}<section class="tiles six">{tiles}</section>
 <section class="watch" id="watch" hidden>
 <div class="sec-head"><h2>Your wishlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
 <div class="panel wl" id="wl"></div>
@@ -1211,18 +1241,21 @@ collection_body = f"""<main class="wrap colp" id="main">
 <section class="panel col-msg" id="cmsg" hidden></section>
 <div class="col-wrap" id="cmain" hidden>
 <section class="panel col-head">
-<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">What you own and what it's worth today.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
+<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">What you own and what it's worth today.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a><span class="col-save" id="csave" role="status" aria-live="polite"></span></div>
 <div class="col-stats" id="cstats">
 <div class="col-stat big"><span>Total value</span><strong id="ctotal">0</strong></div>
 <div class="col-stat"><span>Last 30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
 <div class="col-stat"><span>Units</span><strong id="ccount">0</strong><small id="ckinds"></small></div>
 </div>
+<div class="col-split" id="csplit" hidden><div class="col-sbar" id="csbar" aria-hidden="true"></div><ul class="col-legend" id="clegend" aria-label="Value by rarity"></ul></div>
 <label class="ktog-line col-pub" id="cpub-row" hidden><span class="ktog"><input type="checkbox" id="cpub"><i></i></span><span><strong>Show on my profile</strong><span>Off: only you can see it.</span></span></label>
 </section>
 <section class="panel col-body">
 <div class="col-tools">
 <div class="picker col-add" id="cadd" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="cq" type="search" placeholder="Add a unit you own…" aria-label="Add a unit you own" autocomplete="off"><div class="sugs" id="csug" hidden></div></div>
 <input class="search col-filter" id="cfilter" type="search" placeholder="Filter…" aria-label="Filter your collection" hidden>
+<select class="col-sort" id="csort" aria-label="Sort" hidden><option value="worth">Highest value</option><option value="change">Biggest 30-day gain</option><option value="drop">Biggest 30-day drop</option><option value="qty">Most owned</option><option value="rarity">Rarity</option><option value="name">Name A–Z</option></select>
+<div class="col-acts" id="cacts" hidden><button class="brick dark sm" type="button" id="ccopy"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" d="M9 9h10v12H9zM5 15V3h10"/></svg>Copy list</button><button class="brick dark sm" type="button" id="cshare" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Share</button></div>
 </div>
 <p class="col-tip" id="ctip" hidden>Tick units to put them in a trade ad.</p>
 <div class="col-list" id="clist"></div>
@@ -1345,11 +1378,24 @@ open("advent.html", "w").write(page("Advent calendar · Bloombot", "The Bloombot
 # ── News pages ───────────────────────────────────────────────────────────
 def _news():
     e = _html.escape
+    NEWSVER = hashlib.md5(open("js/news.js", "rb").read()).hexdigest()[:8]
     rss = f'<link rel="alternate" type="application/rss+xml" title="Bloombot news" href="{BASE}news/feed.xml">\n'
     if POSTS:
         first, rest = POSTS[0], POSTS[1:]
+        tags = {}
+        for q in POSTS:
+            tags.setdefault(q["tag"], 0)
+            tags[q["tag"]] += 1
+        chips = ""
+        if len(tags) > 1:
+            chips = (f'<div class="chips nw-chips" role="group" aria-label="Filter posts"><button class="chip on" type="button" data-t="all" aria-pressed="true">All</button>'
+                     + "".join(f'<button class="chip" type="button" data-t="{e(t.lower())}" aria-pressed="false">{e(t)}<i>{n}</i></button>' for t, n in sorted(tags.items(), key=lambda x: (-x[1], x[0])))
+                     + "</div>")
+        n_rest = len(rest)
         lst = (f'<section class="nw-top">{news_card(first, True)}</section>\n'
-               + (f'<div class="sec-head"><h2>Earlier posts</h2><span class="nw-n">{len(POSTS)} posts</span></div><section class="nw-grid">{"".join(news_card(p) for p in rest)}</section>\n' if rest else ""))
+               + (f'<div class="sec-head nw-head2"><h2 id="nw-h">Earlier posts</h2><span class="nw-n" id="nw-n">{n_rest} {"post" if n_rest == 1 else "posts"}</span></div>{chips}'
+                  f'<section class="nw-grid" id="nw-grid" aria-labelledby="nw-h">{news_card(first).replace("<a ", "<a data-first hidden ", 1)}{"".join(news_card(p) for p in rest)}</section>'
+                  '<p class="panel nw-none" id="nw-none" hidden>No posts with that tag yet.</p>\n' if rest else ""))
     else:
         lst = '<section class="panel nw-empty"><img src="img/bell.png" alt=""><p>No news yet. Check back soon!</p></section>\n'
     body = hero("bell", "News", "Updates, new features and announcements from the Bloombot team.", "t_news") + f"""<main class="wrap nw" id="main">
@@ -1359,6 +1405,7 @@ def _news():
 <div class="hband-btns"><a class="brick discord" href="{SUPPORT}">{DISCORD_SVG}Join the server</a><a class="brick dark" href="news/feed.xml"><img src="img/bell.png" alt="">RSS feed</a></div>
 </section>
 </main>
+<script defer src="js/news.js?v={NEWSVER}"></script>
 """
     ld = '<script type="application/ld+json">' + _json.dumps({
         "@context": "https://schema.org", "@type": "Blog", "name": "Bloombot news", "url": BASE + "news.html",
@@ -1376,25 +1423,33 @@ def _news():
         pn = "".join(
             f'<a class="nw-pn {cls}" href="{q["url"]}"><span>{lab}</span><strong>{e(q["title"])}</strong></a>'
             for q, cls, lab in ((older, "prev", "&larr; Older"), (newer, "next", "Newer &rarr;")) if q)
+        heads = re.findall(r'<h2 id="([^"]+)">(.*?)</h2>', p["html"])
+        toc = ('<nav class="nw-toc" aria-label="In this post"><span>In this post</span>'
+               + "".join(f'<a href="{p["url"]}#{h}">{re.sub(r"<[^>]+>", "", t)}</a>' for h, t in heads) + "</nav>\n") if len(heads) >= 3 else ""
+        # a # link next to each heading, to share one section
+        body_html = re.sub(r'<(h[23]) id="([^"]+)">(.*?)</\1>', lambda m: f'<{m.group(1)} id="{m.group(2)}">{m.group(3)}<a class="nw-anchor" href="{p["url"]}#{m.group(2)}" aria-label="Link to this section">#</a></{m.group(1)}>', p["html"])
         body = f"""<main class="wrap nw nw-post" id="main">
 <nav class="u-crumbs" aria-label="Breadcrumb"><a href="news.html">News</a><span aria-hidden="true">›</span><span>{e(p["title"])}</span></nav>
 <article class="panel nw-art">
 <header class="nw-head">
 <span class="nw-band weld g-{p["color"]}"><img src="img/{p["icon"]}.png" alt=""><span class="nw-tag">{e(p["tag"])}</span></span>
 <h1>{e(p["title"])}</h1>
-<p class="nw-meta"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span><span aria-hidden="true">·</span><span>Bloombot team</span></p>
+<p class="nw-meta"><time datetime="{p["date"].isoformat()}">{_nice_date(p["date"])}</time><span aria-hidden="true">·</span><span>{p["mins"]} min read</span><span aria-hidden="true">·</span><span>Bloombot team</span>
+<button class="nw-share" type="button" id="nw-share" data-title="{e(p["title"])}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Share</button></p>
 </header>
-<div class="nw-body">
-{p["html"]}
+{f'<img class="nw-hero-pic" src="{e(p["image"])}" alt="" decoding="async">' if p["image"] else ""}{toc}<div class="nw-body">
+{body_html}
 </div>
+<div class="nw-end"><a class="brick dark sm" href="news.html"><img src="img/bell.png" alt="">All news</a><a class="brick discord sm" href="{SUPPORT}">{DISCORD_SVG}Talk about it on Discord</a></div>
 </article>
 {f'<nav class="nw-pns" aria-label="More posts">{pn}</nav>' if pn else ""}
 {f'<div class="sec-head"><h2>More news</h2><a href="news.html">All news &rarr;</a></div><section class="nw-grid two">{"".join(news_card(q) for q in others)}</section>' if others else ""}
 </main>
+<script defer src="js/news.js?v={NEWSVER}"></script>
 """
         ld = '<script type="application/ld+json">' + _json.dumps([
             {"@context": "https://schema.org", "@type": "BlogPosting", "headline": p["title"], "description": p["summary"],
-             "datePublished": p["date"].isoformat(), "url": BASE + p["url"], "image": BASE + "img/og-v2.jpg",
+             "datePublished": p["date"].isoformat(), "url": BASE + p["url"], "image": BASE + (p["image"] or "img/og-v2.jpg"),
              "author": {"@type": "Organization", "name": "Bloombot"}, "publisher": {"@type": "Organization", "name": "Bloombot", "logo": {"@type": "ImageObject", "url": BASE + "img/logo.png"}}},
             {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
                 {"@type": "ListItem", "position": 1, "name": "News", "item": BASE + "news.html"},
@@ -1403,7 +1458,10 @@ def _news():
         out = page(f'{e(p["title"])} · Bloombot news', e(p["summary"]), body, "n", p["url"], ld=rss + ld,
                    kw="Bloombot news, " + e(p["tag"]))
         out = (out.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="/">\n', 1)
+                  .replace("img/og-v2.jpg", p["image"] or "img/og-v2.jpg")
                   .replace('<meta property="og:type" content="website">', f'<meta property="og:type" content="article">\n<meta property="article:published_time" content="{p["date"].isoformat()}">', 1))
+        if p["image"]:   # a cover picture has its own size
+            out = re.sub(r'<meta property="og:image:(?:width|height)"[^>]*>\n', "", out)
         open(p["url"], "w").write(out)
         keep.add(p["url"])
     for f in _glob.glob("news/*.html"):   # a post that was renamed or removed

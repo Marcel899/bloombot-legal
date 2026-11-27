@@ -23,13 +23,13 @@
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="style.css?v=975c169b">
+<link rel="stylesheet" href="style.css?v=994d6ec2">
 <script src="js/theme.js?v=9fa9b3c2"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=d988d47c"></script>
-<script defer src="js/site.js?v=0e086b77"></script>
+<script defer src="js/site.js?v=a67201cc"></script>
 <script defer src="js/giveaway.js?v=2bd59658"></script>
-<script defer src="js/consent.js?v=650a8387"></script>
+<script defer src="js/consent.js?v=8ed0e46f"></script>
 <script defer src="js/track.js?v=0580d865"></script>
 <script type="application/ld+json">[{"@context": "https://schema.org", "@type": "WebSite", "name": "Bloombot", "url": "https://bloombot-gtd.vercel.app/", "description": "Garden Tower Defense trading bot: trade ads, live values, trade calculator and strategies."}, {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Bloombot", "applicationCategory": "GameApplication", "operatingSystem": "Discord", "url": "https://bloombot-gtd.vercel.app/", "image": "https://bloombot-gtd.vercel.app/img/logo.png", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Discord bot for Roblox Garden Tower Defense traders: global trade ads, live unit values, trade checks and wishlists."}]</script>
 </head>
@@ -39,7 +39,7 @@
 <header class="topbar">
 <div class="wrap bar">
 <a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo-sm.webp" alt="Bloombot home" width="126" height="20"></a>
-<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a><a class="nl" data-g="red" href="news.html" title="News"><img src="img/bell.png" alt=""><span>News</span></a></nav>
+<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a><a class="nl" data-g="red" href="news.html" title="News" data-new="2026-11-27"><img src="img/bell.png" alt=""><span>News</span></a></nav>
 <div class="right">
 <button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
 <button class="theme-btn" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
@@ -67,6 +67,20 @@
 </div>
 </section>
 <main class="wrap home" id="main">
+<section class="xmc" id="xmc" hidden aria-labelledby="xmc-h">
+<a class="xmc-in" href="advent.html">
+<span class="xmc-art" aria-hidden="true"><img class="xmc-gift" src="img/gift.png" alt="" loading="lazy"><span class="xmc-door"><b id="xmc-n">1</b></span></span>
+<span class="xmc-t">
+<span class="xmc-kick"><img src="img/wish_star.png" alt="">Advent calendar 2026</span>
+<strong class="xmc-h" id="xmc-h">Door 1 opens in</strong>
+<span class="xmc-sub" id="xmc-sub">24 doors of XP, banners and 13 free units, including an Infectia.</span>
+<span class="xmc-dots" id="xmc-dots" hidden><i data-d="1"></i><i data-d="2"></i><i data-d="3"></i><i data-d="4"></i><i data-d="5"></i><i data-d="6"></i><i data-d="7"></i><i data-d="8"></i><i data-d="9"></i><i data-d="10"></i><i data-d="11"></i><i data-d="12"></i><i data-d="13"></i><i data-d="14"></i><i data-d="15"></i><i data-d="16"></i><i data-d="17"></i><i data-d="18"></i><i data-d="19"></i><i data-d="20"></i><i data-d="21"></i><i data-d="22"></i><i data-d="23"></i><i data-d="24"></i></span>
+</span>
+<span class="xmc-cd" id="xmc-cd"><span id="xmc-dw"><b id="xmc-d">0</b><em id="xmc-dl">days</em></span><span><b id="xmc-hh">00</b><em>hrs</em></span><span><b id="xmc-mm">00</b><em>mins</em></span></span>
+<span class="brick red xmc-go"><img src="img/gift.png" alt=""><span id="xmc-go">See the calendar</span></span>
+</a>
+</section>
+<script defer src="js/xmas-card.js?v=c00b76ac"></script>
 <section class="tiles six"><a class="tile tlink" href="trades.html"><div class="weld g-green"><img src="img/trading.png" alt=""><h3>Global trade ads</h3></div><p>Post once and your ad reaches every server running Bloombot.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="values.html"><div class="weld g-blue"><img src="img/dollar.png" alt=""><h3>Live values</h3></div><p>Every unit's value, demand and 30-day trend, with price charts.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="calculator.html"><div class="weld g-yellow"><img src="img/calculator.png" alt=""><h3>Trade calculator</h3></div><p>See right away if a trade is a win, fair, or a loss.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="crates.html"><div class="weld g-orange"><img src="img/crate.png" alt=""><h3>Crate calculator</h3></div><p>Your real chance per crate, and how much to save first.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="strategies.html"><div class="weld g-purple"><img src="img/bullseye.png" alt=""><h3>Strategies</h3></div><p>Loadouts and map guides from the community. Share your own.</p><span class="more">Open &rarr;</span></a><a class="tile tlink" href="levels.html"><div class="weld g-red"><img src="img/medal_gold.png" alt=""><h3>Levels &amp; perks</h3></div><p>Earn XP for trading and helping out. Unlock ranks and banners.</p><span class="more">Open &rarr;</span></a></section>
 <section class="watch" id="watch" hidden>
 <div class="sec-head"><h2>Your wishlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
@@ -83,7 +97,7 @@
 <div class="sec-head"><h2>New strategies</h2><a href="strategies.html">All strategies &rarr;</a></div>
 <div class="hs-list" id="hs-list"></div>
 </section>
-<section class="hnews"><div class="sec-head"><h2>Latest news</h2><a href="news.html">All news &rarr;</a></div><div class="nw-grid"><a class="tile nw-card" href="news/unit-pages-collection-alerts.html"><span class="nw-band weld g-purple"><img src="img/gem.png" alt=""><span class="nw-tag">Update</span></span><span class="nw-cb"><time datetime="2026-11-27">27 November 2026</time><strong class="nw-ct">New: unit pages, your collection and price alerts</strong><span class="nw-cs">Every unit gets its own page, track what your units are worth, get a DM when a price moves, make real offers in chats, and upvote the best strategies.</span><span class="more">Read &rarr;</span></span></a><a class="tile nw-card" href="news/messages.html"><span class="nw-band weld g-blue"><img src="img/envelope.png" alt=""><span class="nw-tag">Feature</span></span><span class="nw-cb"><time datetime="2026-11-13">13 November 2026</time><strong class="nw-ct">Message other traders on the website</strong><span class="nw-cs">Private chats right on Bloombot, with pictures, emojis and a chat filter. Plus a farm calculator for Seeds and Fertilizer per hour.</span><span class="more">Read &rarr;</span></span></a><a class="tile nw-card" href="news/website-update-1.html"><span class="nw-band weld g-yellow"><img src="img/medal_gold.png" alt=""><span class="nw-tag">Update</span></span><span class="nw-cb"><time datetime="2026-11-07">7 November 2026</time><strong class="nw-ct">Website update: levels, crate calculator, profiles and more</strong><span class="nw-cs">Levels with one-time XP tasks, an in-game style crate calculator, profile popups, Google login, Roblox verify, a server dashboard and a light mode.</span><span class="more">Read &rarr;</span></span></a></div></section>
+<section class="hnews"><div class="sec-head"><h2>Latest news</h2><a href="news.html">All news &rarr;</a></div><div class="nw-grid"><a class="tile nw-card" href="news/unit-pages-collection-alerts.html" data-tag="update"><span class="nw-band weld g-purple"><img src="img/gem.png" alt=""><span class="nw-tag">Update</span></span><span class="nw-cb"><span class="nw-when"><time datetime="2026-11-27">27 November 2026</time><span aria-hidden="true">·</span><span>1 min read</span></span><strong class="nw-ct">New: unit pages, your collection and price alerts</strong><span class="nw-cs">Every unit gets its own page, track what your units are worth, get a DM when a price moves, make real offers in chats, and upvote the best strategies.</span><span class="more">Read &rarr;</span></span></a><a class="tile nw-card" href="news/messages.html" data-tag="feature"><span class="nw-band weld g-blue"><img src="img/envelope.png" alt=""><span class="nw-tag">Feature</span></span><span class="nw-cb"><span class="nw-when"><time datetime="2026-11-13">13 November 2026</time><span aria-hidden="true">·</span><span>1 min read</span></span><strong class="nw-ct">Message other traders on the website</strong><span class="nw-cs">Private chats right on Bloombot, with pictures, emojis and a chat filter. Plus a farm calculator for Seeds and Fertilizer per hour.</span><span class="more">Read &rarr;</span></span></a><a class="tile nw-card" href="news/website-update-1.html" data-tag="update"><span class="nw-band weld g-yellow"><img src="img/medal_gold.png" alt=""><span class="nw-tag">Update</span></span><span class="nw-cb"><span class="nw-when"><time datetime="2026-11-07">7 November 2026</time><span aria-hidden="true">·</span><span>2 min read</span></span><strong class="nw-ct">Website update: levels, crate calculator, profiles and more</strong><span class="nw-cs">Levels with one-time XP tasks, an in-game style crate calculator, profile popups, Google login, Roblox verify, a server dashboard and a light mode.</span><span class="more">Read &rarr;</span></span></a></div></section>
 <section class="demo">
 <div class="demo-text">
 <h2>Right inside your Discord</h2>

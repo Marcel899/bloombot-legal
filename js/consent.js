@@ -1,7 +1,7 @@
 /* Cookie notice: shown once on the first visit. The choice is kept in localStorage bb_consent
    ("all" or "essential"). Essential-only turns off optional storage (recent searches, remembered popups, anonymous visit count). */
 (() => {
-  const KEY = "bb_consent", OPTIONAL = [/^bb_qs_recent$/, /^bb_gw_min_/, /^bb_seen$/];
+  const KEY = "bb_consent", OPTIONAL = [/^bb_qs_recent$/, /^bb_gw_min_/, /^bb_seen$/, /^bb_news_seen$/];
   const get = () => { try { return localStorage.getItem(KEY); } catch (e) { return "essential"; } };
   window.BB_CONSENT = { get, optional: () => get() === "all", open };
   let box = null;

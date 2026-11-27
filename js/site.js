@@ -652,3 +652,34 @@
     setTimeout(() => { location.href = a.href; }, 300);
   });
 })();
+
+/* News: a dot on the News bell while there's a post you haven't opened, and "New" on fresh cards.
+   With optional storage allowed it remembers the newest post you've seen (bb_news_seen);
+   without it, the dot just shows for the first 5 days after a post. */
+(() => {
+  const DAY = 864e5, now = Date.now();
+  const age = iso => (now - new Date(iso + "T12:00:00Z").getTime()) / DAY;
+  const link = document.querySelector('.links .nl[href$="news.html"][data-new]');
+  const onNews = /\/news(\.html|\/)/.test(location.pathname);
+  const ok = () => window.BB_CONSENT && BB_CONSENT.optional();
+  if (link) {
+    const latest = link.dataset.new;
+    let seen = null;
+    try { seen = localStorage.getItem("bb_news_seen"); } catch (e) { /* blocked */ }
+    if (onNews) { if (ok()) try { localStorage.setItem("bb_news_seen", latest); } catch (e) { /* blocked */ } }
+    else if (age(latest) <= (ok() ? 30 : 5) && (!seen || seen < latest)) {
+      link.classList.add("fresh");
+      link.title = "News: there's a new post";
+      link.querySelector("span").textContent = "News";
+      const b = document.createElement("em");
+      b.className = "nl-new";
+      b.textContent = "New";
+      link.append(b);
+    }
+  }
+  for (const t of document.querySelectorAll(".nw-card time[datetime]")) {
+    if (age(t.getAttribute("datetime")) > 10) continue;
+    const band = t.closest(".nw-card").querySelector(".nw-band");
+    if (band && !band.querySelector(".nw-fresh")) { const b = document.createElement("em"); b.className = "nw-fresh"; b.textContent = "New"; band.append(b); }
+  }
+})();

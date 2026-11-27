@@ -23,13 +23,13 @@
 <meta name="color-scheme" content="dark">
 <meta name="darkreader-lock">
 <link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="style.css?v=975c169b">
+<link rel="stylesheet" href="style.css?v=994d6ec2">
 <script src="js/theme.js?v=9fa9b3c2"></script>
 <script defer src="js/supabase.js?v=2.45.4"></script>
 <script defer src="js/app.js?v=d988d47c"></script>
-<script defer src="js/site.js?v=0e086b77"></script>
+<script defer src="js/site.js?v=a67201cc"></script>
 <script defer src="js/giveaway.js?v=2bd59658"></script>
-<script defer src="js/consent.js?v=650a8387"></script>
+<script defer src="js/consent.js?v=8ed0e46f"></script>
 <script defer src="js/track.js?v=0580d865"></script>
 </head>
 <body>
@@ -38,7 +38,7 @@
 <header class="topbar">
 <div class="wrap bar">
 <a class="mini" href="./"><img class="flower" src="img/flower.png" alt=""><img src="img/logo-sm.webp" alt="Bloombot home" width="126" height="20"></a>
-<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a><a class="nl" data-g="red" href="news.html" title="News"><img src="img/bell.png" alt=""><span>News</span></a></nav>
+<nav class="links" id="links"><a class="nl" data-g="blue" href="values.html"><img src="img/dollar.png" alt=""><span>Values</span></a><a class="nl" data-g="green" href="calculator.html"><img src="img/calculator.png" alt=""><span>Calculator</span></a><a class="nl" data-g="purple" href="trades.html"><img src="img/trading.png" alt=""><span>Trade ads</span></a><a class="nl" data-g="orange" href="strategies.html"><img src="img/bullseye.png" alt=""><span>Strategies</span></a><a class="nl" data-g="yellow" href="features.html"><img src="img/gem.png" alt=""><span>Features</span></a><a class="nl" data-g="red" href="news.html" title="News" data-new="2026-11-27"><img src="img/bell.png" alt=""><span>News</span></a></nav>
 <div class="right">
 <button class="qs-btn" id="qs" type="button" aria-label="Search the site (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
 <button class="theme-btn" id="themebtn" type="button" aria-label="Switch to light mode" aria-pressed="false"><img class="i-sun" src="img/sun.png" alt=""><img class="i-moon" src="img/moon.png" alt=""></button>
@@ -59,18 +59,21 @@
 <section class="panel col-msg" id="cmsg" hidden></section>
 <div class="col-wrap" id="cmain" hidden>
 <section class="panel col-head">
-<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">What you own and what it's worth today.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a></div>
+<div class="col-ht"><span class="col-ico"><img src="img/gem.png" alt=""></span><div><h1 id="ch">My collection</h1><p class="hint" id="csub">What you own and what it's worth today.</p></div><a class="brick dark sm col-who" id="cwho" href="profile.html" hidden>Profile</a><span class="col-save" id="csave" role="status" aria-live="polite"></span></div>
 <div class="col-stats" id="cstats">
 <div class="col-stat big"><span>Total value</span><strong id="ctotal">0</strong></div>
 <div class="col-stat"><span>Last 30 days</span><strong><em class="chg flat" id="cchange">–</em><small id="cchange-v"></small></strong></div>
 <div class="col-stat"><span>Units</span><strong id="ccount">0</strong><small id="ckinds"></small></div>
 </div>
+<div class="col-split" id="csplit" hidden><div class="col-sbar" id="csbar" aria-hidden="true"></div><ul class="col-legend" id="clegend" aria-label="Value by rarity"></ul></div>
 <label class="ktog-line col-pub" id="cpub-row" hidden><span class="ktog"><input type="checkbox" id="cpub"><i></i></span><span><strong>Show on my profile</strong><span>Off: only you can see it.</span></span></label>
 </section>
 <section class="panel col-body">
 <div class="col-tools">
 <div class="picker col-add" id="cadd" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm5.4-2.1L21 21"/></svg><input class="search" id="cq" type="search" placeholder="Add a unit you own…" aria-label="Add a unit you own" autocomplete="off"><div class="sugs" id="csug" hidden></div></div>
 <input class="search col-filter" id="cfilter" type="search" placeholder="Filter…" aria-label="Filter your collection" hidden>
+<select class="col-sort" id="csort" aria-label="Sort" hidden><option value="worth">Highest value</option><option value="change">Biggest 30-day gain</option><option value="drop">Biggest 30-day drop</option><option value="qty">Most owned</option><option value="rarity">Rarity</option><option value="name">Name A–Z</option></select>
+<div class="col-acts" id="cacts" hidden><button class="brick dark sm" type="button" id="ccopy"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" d="M9 9h10v12H9zM5 15V3h10"/></svg>Copy list</button><button class="brick dark sm" type="button" id="cshare" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Share</button></div>
 </div>
 <p class="col-tip" id="ctip" hidden>Tick units to put them in a trade ad.</p>
 <div class="col-list" id="clist"></div>
@@ -80,7 +83,7 @@
 </div>
 <div class="col-bar" id="cbar" hidden><span id="cbar-n"></span><a class="brick purple sm" id="cbar-go" href="trades.html">Post a trade ad</a><a class="brick dark sm" id="cbar-calc" href="calculator.html">Check value</a><button class="col-barx" type="button" id="cbar-x" aria-label="Clear selection">&times;</button></div>
 </main>
-<script defer src="js/collection.js?v=a9583fa5"></script>
+<script defer src="js/collection.js?v=d913dfcc"></script>
 <footer>
 <div class="wrap foot">
 <div class="foot-top">

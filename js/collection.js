@@ -17,18 +17,42 @@
   const rpc = async (fn, args) => { const { data, error } = await BB.sb.rpc(fn, args || {}); if (error) throw error; return data; };
 
   let me = null, mine = false, values = [], byName = new Map(), rows = [], pub = false, started = false;
-  let order = [];               // row order: sorted by worth on load, then kept while you edit
+  let order = [];               // row order: sorted on load / sort change, then kept while you edit
+  let sortBy = "worth";
   const picked = new Set();
   const timers = new Map();
+  const rowEls = new Map();     // name -> { d, n, sum } so + and − update one row instead of redrawing all
+  const pastCache = new Map();
+  const RAR = ["secret", "leaderboard", "exclusive", "godly", "mythic", "legendary", "epic", "rare", "uncommon", "common", "lowrarityvaluable", "item"];
+  const RCOL = { secret: "#3b3f4a", leaderboard: "#dc3232", exclusive: "#e07a10", godly: "#f5c83c", mythic: "#a94fff", legendary: "#f0a020", epic: "#8a3ff0", rare: "#14aeea", uncommon: "#28a828", common: "#6b7280", lowrarityvaluable: "#1f9d8a", item: "#5b6b8a" };
+  const rkey = it => String((it && it.rarity) || "").toLowerCase().replace(/\W/g, "");
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 
   /* Value 30 days ago from the price history: the last point on or before then. */
   function past(it) {
+    if (pastCache.has(it.name)) return pastCache.get(it.name);
     const h = (it.history || []).filter(p => p[1] > 0);
-    if (!h.length) return it.est;
-    const cut = Date.now() - 30 * 864e5;
     let v = null;
-    for (const [d, x] of h) if (new Date(d).getTime() <= cut) v = x;
-    return v == null ? h[0][1] : v;
+    if (!h.length) v = it.est;
+    else {
+      const cut = Date.now() - 30 * 864e5;
+      for (const [d, x] of h) if (new Date(d).getTime() <= cut) v = x;
+      if (v == null) v = h[0][1];
+    }
+    pastCache.set(it.name, v);
+    return v;
+  }
+  /* the 30-day move the value list shows (change_30d skips stale catch-ups) */
+  const move = it => (it && it.change_30d != null ? it.change_30d : null);
+
+  /* "Saving…" / "Saved" next to the title */
+  let saveT = 0;
+  function saving(state) {
+    const s = $("csave");
+    clearTimeout(saveT);
+    s.className = "col-save " + state;
+    s.textContent = state === "busy" ? "Saving…" : state === "ok" ? "Saved" : state === "bad" ? "Not saved" : "";
+    if (state === "ok") saveT = setTimeout(() => { s.className = "col-save"; s.textContent = ""; }, 1800);
   }
 
   function summary() {
@@ -41,6 +65,7 @@
       then += (it.oc ? it.est : past(it)) * r.qty;
     }
     $("ctotal").textContent = BB.fmt(now);
+    split(now);
     const ch = then > 0 ? Math.round((now - then) / then * 1000) / 10 : null;
     const c = $("cchange");
     c.className = "chg " + (ch > 0 ? "up" : ch < 0 ? "down" : "flat");
@@ -50,12 +75,40 @@
     $("ckinds").textContent = kinds === 1 ? "1 unit type" : kinds.toLocaleString() + " different";
   }
 
+  /* value share by rarity: one bar, biggest first */
+  function split(total) {
+    const by = new Map();
+    for (const r of rows) {
+      const it = byName.get(r.name);
+      if (!it || !(it.est > 0)) continue;
+      const k = rkey(it) || "item";
+      by.set(k, (by.get(k) || 0) + it.est * r.qty);
+    }
+    const parts = [...by].sort((a, b) => b[1] - a[1]);
+    $("csplit").hidden = !(total > 0) || parts.length < 1;
+    if ($("csplit").hidden) return;
+    $("csbar").replaceChildren(...parts.map(([k, v]) => {
+      const i = el("i");
+      i.style.flexGrow = v;
+      i.style.background = RCOL[k] || "#5b6b8a";
+      return i;
+    }));
+    $("clegend").replaceChildren(...parts.slice(0, 6).map(([k, v]) => {
+      const li = el("li");
+      const dot = el("i");
+      dot.style.background = RCOL[k] || "#5b6b8a";
+      li.append(dot, el("span", null, cap(k === "lowrarityvaluable" ? "low rarity valuable" : k)), el("b", null, Math.max(1, Math.round(v / total * 100)) + "%"));
+      return li;
+    }));
+  }
+
   function save(name, qty) {
     clearTimeout(timers.get(name));
+    saving("busy");
     timers.set(name, setTimeout(async () => {
       timers.delete(name);
-      try { await rpc("col_set", { p_item: name, p_qty: qty }); }
-      catch (e) { BB.toast(errText(e), "bad", { title: "Not saved" }); await load(); }
+      try { await rpc("col_set", { p_item: name, p_qty: qty }); if (!timers.size) saving("ok"); }
+      catch (e) { saving("bad"); BB.toast(errText(e), "bad", { title: "Not saved" }); await load(); draw(); }
     }, 450));
   }
 
@@ -74,7 +127,14 @@
     }
     r.qty = qty;
     save(name, qty);
-    draw();
+    /* same row, new number: update it in place */
+    const ref = rowEls.get(name), it = byName.get(name);
+    if (ref && ref.d.isConnected) {
+      if (ref.n && document.activeElement !== ref.n) ref.n.value = qty;
+      ref.sum.textContent = it && it.est > 0 ? BB.fmt(it.est * qty) : "–";
+      summary();
+      bar();
+    } else draw();
   }
 
   function row(r) {
@@ -99,6 +159,8 @@
     const sub = el("span", "col-sub");
     if (it && it.rarity) sub.append(el("span", "rar r-" + it.rarity.toLowerCase().replace(/\W/g, ""), it.rarity));
     sub.append(el("span", null, it && it.est > 0 ? BB.fmt(it.est) + " each" : "No value listed"));
+    const mv = move(it);
+    if (mv) sub.append(el("span", "chg sm " + (mv > 0 ? "up" : "down"), (mv > 0 ? "+" : "") + mv + "%"));
     t.append(sub);
     a.append(t);
     d.append(a);
@@ -116,7 +178,9 @@
       q.append(minus, n, plus);
       d.append(q);
     } else d.append(el("span", "col-x", "×" + r.qty));
-    d.append(el("strong", "col-sum", it && it.est > 0 ? BB.fmt(it.est * r.qty) : "–"));
+    const sum = el("strong", "col-sum", it && it.est > 0 ? BB.fmt(it.est * r.qty) : "–");
+    d.append(sum);
+    rowEls.set(r.name, { d, sum, n: d.querySelector(".col-qn") });
     if (mine) {
       const x = el("button", "col-del");
       x.type = "button";
@@ -131,6 +195,17 @@
   }
 
   const worth = r => { const it = byName.get(r.name); return it && it.est > 0 ? it.est * r.qty : -1; };
+  const SORTS = {
+    worth: (a, b) => worth(b) - worth(a),
+    change: (a, b) => (move(byName.get(b.name)) ?? -1e9) - (move(byName.get(a.name)) ?? -1e9),
+    drop: (a, b) => (move(byName.get(a.name)) ?? 1e9) - (move(byName.get(b.name)) ?? 1e9),
+    qty: (a, b) => b.qty - a.qty,
+    rarity: (a, b) => { const x = RAR.indexOf(rkey(byName.get(a.name))), y = RAR.indexOf(rkey(byName.get(b.name))); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y) || worth(b) - worth(a); },
+    name: () => 0,
+  };
+  function resort() {
+    order = rows.slice().sort((a, b) => SORTS[sortBy](a, b) || a.name.localeCompare(b.name)).map(r => r.name);
+  }
   function draw() {
     const q = $("cfilter").value.trim().toLowerCase();
     const pos = n => { const i = order.indexOf(n); return i < 0 ? -1 : i; };   // new ones first
@@ -138,6 +213,7 @@
     /* Redrawing replaces the buttons, so put keyboard focus back on the same control. */
     const was = document.activeElement && document.activeElement.closest && document.activeElement.closest("#clist") ? document.activeElement.dataset.f : null;
     const wasRow = was ? [...$("clist").children].indexOf(document.activeElement.closest(".col-row")) : -1;
+    rowEls.clear();
     $("clist").replaceChildren(...list.map(row));
     if (was) {
       const back = $("clist").querySelector('[data-f="' + CSS.escape(was) + '"]');
@@ -154,6 +230,8 @@
     $("cstats").hidden = !rows.length;
     $("cnomatch").hidden = !rows.length || list.length > 0;
     $("cfilter").hidden = rows.length < 8;
+    $("csort").hidden = rows.length < 3;
+    $("cacts").hidden = !rows.length;
     summary();
     bar();
   }
@@ -219,7 +297,7 @@
     mine = !!res.mine;
     pub = !!res.public;
     rows = (res.items || []).map(x => ({ name: x.name, qty: x.qty }));
-    order = rows.slice().sort((a, b) => worth(b) - worth(a) || a.name.localeCompare(b.name)).map(r => r.name);
+    resort();
     return res;
   }
 
@@ -279,7 +357,26 @@
       back.href = "profile.html?id=" + encodeURIComponent(asked);
       back.dataset.name = name;
     }
-    $("cfilter").oninput = draw;
+    let ft = 0;
+    $("cfilter").oninput = () => { clearTimeout(ft); ft = setTimeout(draw, 120); };
+    $("csort").value = sortBy;
+    $("csort").onchange = () => {
+      sortBy = $("csort").value;
+      resort();
+      draw();
+    };
+    resort();
+    /* copy as text, ready to paste in Discord */
+    $("ccopy").onclick = () => {
+      const list = order.map(n => rows.find(r => r.name === n)).filter(Boolean);
+      const txt = list.map(r => r.name + (r.qty > 1 ? " x" + r.qty : "")).join(", ");
+      BB.copy((mine ? "My" : $("ch").textContent.replace(/'s collection$/, "'s")) + " GTD collection (" + $("ctotal").textContent + "): " + txt, "List copied");
+    };
+    const shareUrl = () => location.origin + location.pathname + "?id=" + encodeURIComponent(mine ? me : asked);
+    const showShare = () => { $("cshare").hidden = mine ? !$("cpub").checked : false; };
+    showShare();
+    if (mine) $("cpub").addEventListener("change", showShare);
+    $("cshare").onclick = () => BB.share(shareUrl(), $("ch").textContent + " · Bloombot");
     draw();
   }
 
