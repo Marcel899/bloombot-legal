@@ -92,14 +92,17 @@
     star.type = "button";
     const label = () => {
       const i = el("img"); i.src = "img/wish_star.png"; i.alt = "";
-      star.replaceChildren(i, BB.favs.has(it.name) ? "Watching" : "Watch");
+      star.replaceChildren(i, BB.favs.has(it.name) ? "On wishlist" : "Wishlist");
+      star.title = BB.favs.synced ? "Same list as /wishlist in Discord" : "Log in to keep it with your account and Discord";
       star.classList.toggle("on", BB.favs.has(it.name));
     };
     label();
+    document.addEventListener("bb:favs", label);
     star.onclick = () => {
       const on = BB.favs.toggle(it.name);
       label();
-      BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your watchlist" : "Removed from your watchlist" });
+      if (on === null) return;
+      BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your wishlist" : "Removed from your wishlist" });
     };
     acts.append(calc, ad, star);
     const slot = el("div", "u-alert-slot");

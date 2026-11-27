@@ -103,16 +103,18 @@
       $("mv-up").replaceChildren(...up.map(mover));
       $("mv-down").replaceChildren(...down.map(mover));
       if (up.length || down.length) { $("mv-box").hidden = false; $("now").hidden = false; }
-      const favs = BB.favs.all();
-      const watched = all.filter(i => favs.has(i.name)).sort((a, b) => b.est - a.est).slice(0, 12);
-      if (watched.length) {
+      const drawWish = () => {
+        const favs = BB.favs.all();
+        const watched = all.filter(i => favs.has(i.name)).sort((a, b) => b.est - a.est).slice(0, 12);
         $("wl").replaceChildren(...watched.map(it => {
           const a = mover(it);
           if (it.change_30d == null || it.change_30d === 0) a.querySelector(".chg").replaceWith(el("span", "chg flat", "steady"));
           return a;
         }));
-        $("watch").hidden = false;
-      }
+        $("watch").hidden = !watched.length;
+      };
+      drawWish();
+      document.addEventListener("bb:favs", drawWish);   // your account's wishlist arrives after login
     } catch (e) { /* values not synced yet */ }
     BB.sb.from("trade_ads").select("id,content,created_at,expires_at,discord_name,discord_avatar").order("created_at", { ascending: false }).limit(12).then(({ data }) => {
       const now = Date.now();

@@ -96,7 +96,12 @@
       };
       head.append(el("span", "tag", "Yours"), bump, del);
     }
-    c.append(head, adText(a.content));
+    const hit = a.discord_id === me ? [] : wanted(a);
+    if (hit.length) {
+      c.classList.add("match");
+      const m = el("span", "tc-match", "★ Has " + hit.slice(0, 2).join(", ") + (hit.length > 2 ? " +" + (hit.length - 2) : "") + " from your wishlist");
+      c.append(head, m, adText(a.content));
+    } else c.append(head, adText(a.content));
     const img = BB.safeUrl(a.image_url);
     if (img) {
       const i = el("img", "tc-img");
@@ -140,9 +145,25 @@
     return c;
   }
 
+  /* Units on your wishlist that an ad offers (its "have" side), cached per ad. */
+  const offersCache = new Map();
+  function wanted(a) {
+    const favs = BB.favs.all();
+    if (!favs.size || !BB.adSidesNow) return [];
+    let have = offersCache.get(a.id + "|" + a.content);
+    if (!have) {
+      const s = BB.adSidesNow(a.content);
+      if (!s) return [];
+      have = s.have.map(r => r.item.name);
+      offersCache.set(a.id + "|" + a.content, have);
+    }
+    return have.filter(n => favs.has(n));
+  }
   function render() {
     const v = $("adq").value.trim().toLowerCase(), mine = $("mine").checked, now = Date.now();
+    const wants = $("wants") && $("wants").checked;
     const list = ads.filter(a => (!a.expires_at || new Date(a.expires_at) > now) && (!mine || a.discord_id === me) &&
+      (!wants || wanted(a).length) &&
       (!v || (a.content + " " + (a.discord_name || "") + " " + (a.roblox_name || "")).toLowerCase().includes(v)));
     const sort = $("adsort").value;
     if (sort === "old") list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -520,6 +541,13 @@
   const reset = () => { shown = PAGE; render(); };
   $("adq").oninput = reset;
   $("mine").onchange = reset;
+  if ($("wants")) $("wants").onchange = () => {
+    if ($("wants").checked && !BB.favs.all().size) BB.toast("Add units to your wishlist on the values page or a unit's page first.", "info", { title: "Your wishlist is empty" });
+    reset();
+  };
+  /* matches need the value list (to read ads) and your wishlist */
+  if (BB.offerLoad) BB.offerLoad().then(() => { if (ads.length) render(); }).catch(() => {});
+  document.addEventListener("bb:favs", () => { if (ads.length) render(); });
   $("adsort").onchange = reset;
   $("more").onclick = () => { shown += PAGE; render(); };
   document.querySelectorAll("[data-q]").forEach(b => b.onclick = () => { $("adq").value = b.dataset.q; reset(); });

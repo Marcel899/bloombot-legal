@@ -295,7 +295,7 @@ home = f"""<section class="hero big">
 <main class="wrap home" id="main">
 <section class="tiles six">{tiles}</section>
 <section class="watch" id="watch" hidden>
-<div class="sec-head"><h2>Your watchlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
+<div class="sec-head"><h2>Your wishlist</h2><a href="values.html#watchlist">Edit &rarr;</a></div>
 <div class="panel wl" id="wl"></div>
 </section>
 <section class="now" id="now" hidden>
@@ -485,6 +485,7 @@ trades_body = hero("trading", "Trade ads", "Every live Bloombot trade ad, from e
 <input class="search" id="adq" type="search" placeholder="Search units or traders…" aria-label="Search trade ads">
 <select id="adsort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="ending">Ending soon</option></select>
 <label class="mine"><input type="checkbox" id="mine"> Only my ads</label>
+<label class="mine wants" id="wants-l" title="Ads offering a unit on your wishlist"><input type="checkbox" id="wants"> ★ Wishlist matches</label>
 <span class="count-pill" id="count"></span>
 </div>
 <div class="quick"><span>Quick search:</span><button class="chip" type="button" data-q="LF">LF</button><button class="chip" type="button" data-q="offers">Offers</button><button class="chip" type="button" data-q="gold">Gold</button><button class="chip" type="button" data-q="rainbow">Rainbow</button><button class="chip" type="button" data-q="">Clear</button></div>
@@ -503,7 +504,7 @@ open("trades.html", "w").write(page("Bloombot Trade Ads · Garden Tower Defense"
 values_body = hero("dollar", "Values", "Every Garden Tower Defense unit and gamepass, with demand and 30-day trends.", "t_values") + f"""<main class="wrap vals" id="main">
 <section class="panel filters">
 <input class="search" id="vq" type="search" placeholder="Search a unit…" aria-label="Search units">
-<div class="chips"><button class="chip on" type="button" data-cat="all">All</button><button class="chip" type="button" data-cat="units">Units</button><button class="chip" type="button" data-cat="gamepasses">Gamepasses</button><button class="chip star-chip" type="button" data-cat="fav">★ Watchlist</button></div>
+<div class="chips"><button class="chip on" type="button" data-cat="all">All</button><button class="chip" type="button" data-cat="units">Units</button><button class="chip" type="button" data-cat="gamepasses">Gamepasses</button><button class="chip star-chip" type="button" data-cat="fav">★ Wishlist</button></div>
 <select id="vrar" aria-label="Rarity" data-pills="1"><option value="">All rarities</option></select>
 <select id="vsort" aria-label="Sort"><option value="value">Highest value</option><option value="low">Lowest value</option><option value="demand">Most demand</option><option value="up">Rising most</option><option value="down">Falling most</option><option value="name">A to Z</option></select>
 <div class="chips vview" role="group" aria-label="Layout"><button class="chip on" type="button" data-view="grid" aria-label="Cards" title="Cards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg><span class="vv-t">Cards</span></button><button class="chip" type="button" data-view="list" aria-label="List" title="List"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4zM4 10.5h16v3H4zM4 16h16v3H4z"/></svg><span class="vv-t">List</span></button></div>

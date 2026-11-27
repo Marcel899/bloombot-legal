@@ -4884,3 +4884,26 @@ body:has(.pedit.dirty:not([hidden])) .toasts{bottom:96px}
 .tc-users .tc-msg .tc-msg-t span{display:none}
 .of-ca .brick{padding:6px 8px;white-space:nowrap;font-size:.92rem;min-width:0}
 @media (max-width:600px){.dm-m.offer{max-width:94%}.of-card{min-width:0}.of-ca .brick{font-size:.84rem;padding:6px 4px}}
+
+/* ── wishlist matches on trade ads ── */
+.tcard.match{border-color:#e0b23c;box-shadow:0 0 0 1px rgba(245,197,66,.35),0 10px 24px -18px rgba(0,0,0,.8)}
+.tc-match{align-self:flex-start;padding:3px 10px;border-radius:999px;background:rgba(245,197,66,.16);color:#ffd96a;font-size:.82rem;font-weight:900}
+.mine.wants{color:#ffd96a}
+[data-theme=light] .tcard.match{border-color:#e0b23c}
+[data-theme=light] .tc-match{background:#fff3cc;color:#7a5500}
+[data-theme=light] .mine.wants{color:#7a5500}
+
+/* "Looking for" on profiles */
+.pwant-slot:empty{display:none}
+.pwant{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;background:var(--card-2);border:1px solid var(--border)}
+.pwant-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pwant-h em{font-style:normal;color:var(--muted);font-size:.74rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.pwant-h a{font-weight:900;font-size:.86rem;text-decoration:none}
+.pwant-list{display:flex;flex-wrap:wrap;gap:6px}
+.pwant-list .hint{margin:0;font-size:.86rem}
+.pwant-c{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 5px;border-radius:999px;background:rgba(245,197,66,.12);border:1px solid rgba(245,197,66,.3);color:var(--text);font-size:.86rem;font-weight:800;text-decoration:none;transition:background .15s,transform .15s}
+.pwant-c:hover{background:rgba(245,197,66,.22);transform:translateY(-1px)}
+.pwant-c img{width:24px;height:24px;object-fit:contain}
+[data-theme=light] .pwant{background:#fff;border-color:var(--line)}
+[data-theme=light] .pwant-c{background:#fff8e0;border-color:#efd58a}
+.panel .pwant-c,[data-theme=light] .panel .pwant-c{color:var(--text)}

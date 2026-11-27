@@ -300,19 +300,58 @@
     return b;
   };
 
-  /* Watchlist: units you starred, kept in this browser only. */
-  const FKEY = "bb_watch";
+  /* Wishlist: the same list as /wishlist in Discord when you're logged in (wl_get / wl_set,
+     sql/wishlist.sql; the bot keeps both in step). Logged out it lives in this browser, and
+     those stars move into your account the first time you log in. Pages listen for "bb:favs". */
+  const FKEY = "bb_watch", WMAX = 20;
+  const local = {
+    get() { try { return new Set(JSON.parse(localStorage.getItem(FKEY) || "[]")); } catch (e) { return new Set(); } },
+    set(f) { try { localStorage.setItem(FKEY, JSON.stringify([...f].slice(-100))); } catch (e) { /* blocked */ } },
+  };
+  let wish = null;                // Set once the account's wishlist is loaded
+  const favsChanged = () => document.dispatchEvent(new CustomEvent("bb:favs"));
   BB.favs = {
-    all() { try { return new Set(JSON.parse(localStorage.getItem(FKEY) || "[]")); } catch (e) { return new Set(); } },
-    has(name) { return BB.favs.all().has(name); },
+    max: WMAX,
+    get synced() { return !!wish; },
+    all() { return new Set(wish || local.get()); },
+    has(name) { return (wish || local.get()).has(name); },
+    /* Returns the new state, or null when it couldn't change (wishlist full). */
     toggle(name) {
-      const f = BB.favs.all();
-      const on = !f.has(name);
-      if (on) f.add(name); else f.delete(name);
-      try { localStorage.setItem(FKEY, JSON.stringify([...f].slice(-100))); } catch (e) { /* blocked */ }
+      if (!wish) {
+        const f = local.get(), on = !f.has(name);
+        if (on) f.add(name); else f.delete(name);
+        local.set(f);
+        favsChanged();
+        return on;
+      }
+      const on = !wish.has(name);
+      if (on && wish.size >= WMAX) { BB.toast("Your wishlist is full (" + WMAX + " units). Take one off first.", "info", { title: "Wishlist full" }); return null; }
+      if (on) wish.add(name); else wish.delete(name);
+      favsChanged();
+      BB.sb.rpc("wl_set", { p_name: name, p_on: on }).then(({ error }) => {
+        if (!error) return;
+        if (on) wish.delete(name); else wish.add(name);
+        favsChanged();
+        BB.toast(/wl:full/.test(error.message) ? "Your wishlist is full." : /wl:profile/.test(error.message) ? "Create your Bloombot account first." : "Couldn't save your wishlist. Try again.", "bad");
+      });
       return on;
     },
   };
+  async function loadWishlist(s) {
+    const u = s && BB.user(s);
+    if (!u || !u.id) { if (wish) { wish = null; favsChanged(); } return; }
+    let data, error;
+    try { ({ data, error } = await BB.sb.rpc("wl_get")); } catch (e) { return; }
+    if (error || !data) return;               // not set up yet: keep the browser list
+    wish = new Set(data.items || []);
+    const moving = [...local.get()].filter(n => !wish.has(n)).slice(0, Math.max(0, WMAX - wish.size));
+    for (const n of moving) {
+      const r = await BB.sb.rpc("wl_set", { p_name: n, p_on: true });
+      if (!r.error) wish.add(n);
+    }
+    if (moving.length) local.set(new Set());
+    favsChanged();
+  }
 
   /* An item's picture: the bot's emoji, then the value list's picture, then the flower. */
   /* Address of a unit's own page: "Grim Gardener" -> "units/grim-gardener". scripts/build-dist.mjs uses the same rule. */
@@ -873,7 +912,7 @@
       dmLink,
       link("profile.html#edit", "gear", "Edit profile"),
       link("levels.html", "medal_gold", "Levels & perks"),
-      link("values.html#watchlist", "wish_star", "My watchlist"),
+      link("values.html#watchlist", "wish_star", "My wishlist"),
       link("collection.html", "gem", "My collection"),
       link("alerts.html", "bell", "Price alerts"),
       sep(),
@@ -930,6 +969,7 @@
     BB.ready = true;
     renderAcct();
     try { dmLiveStart(); } catch (e) { /* live updates are optional */ }
+    loadWishlist(s);
     listeners.forEach(fn => { try { fn(s); } catch (e) { console.error(e); } });
     if (s) checkAccount(s);
     if (BB.loginError && !document.getElementById("loginerr")) {

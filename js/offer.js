@@ -54,8 +54,10 @@
   }
   /* A trade ad's two sides: what the poster has (you'd get) and what they want (you'd give).
      "Trading X for Y", "X for offers", "Trading X LF Y NLF Z" (NLF is ignored). */
-  BB.adSides = async content => {
-    await load();
+  BB.adSides = async content => { await load(); return sidesOf(content); };
+  /* Same, without waiting: null until the value list is in (BB.offerLoad()). */
+  BB.adSidesNow = content => vals ? sidesOf(content) : null;
+  function sidesOf(content) {
     const t = String(content || "").replace(/\*\*|__/g, "");
     const lf = t.search(/\b(?:LF|looking for)\b/i);
     if (lf >= 0) {
@@ -66,7 +68,7 @@
     const m = t.match(/^(.*?)\s+for\s+(.*)$/is);
     if (m) return { have: units(m[1]), want: units(m[2]) };
     return { have: units(t), want: [] };
-  };
+  }
 
   const total = side => side.reduce((n, r) => n + (r.item.est > 0 ? r.item.est * r.qty : 0), 0);
   /* Verdict for whoever is reading: giving g, getting r. */

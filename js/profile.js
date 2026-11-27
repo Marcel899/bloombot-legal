@@ -88,6 +88,12 @@
       c.append(slot);
       collection(slot, did0, isMe);
     }
+    /* What they're looking for: their wishlist, same as /wishlist in Discord. */
+    if (p && did0) {
+      const ws = el("div", "pwant-slot");
+      c.append(ws);
+      wants(ws, did0, isMe);
+    }
     /* How to reach them: a Bloombot chat first, their accounts after. */
     if (p && !isMe && did0) c.append(BB.dmCard(did0, p.discord_name || fallbackName));
     const acc = el("div", "p-accs upop-accs");
@@ -171,6 +177,32 @@
       if (rows.length > 10) icons.append(el("span", "pcol-more", "+" + (rows.length - 10)));
       box.append(icons);
     }
+    slot.replaceChildren(box);
+  }
+
+  async function wants(slot, did, isMe) {
+    let res, vals;
+    try { [res, vals] = await Promise.all([BB.sb.rpc("wl_get", { p_user: isMe ? null : did }), BB.loadValues()]); } catch (e) { return; }
+    if (!res || res.error || !res.data) return;
+    const names = res.data.items || [];
+    if (!names.length && !isMe) return;
+    const by = new Map(vals.map(v => [v.name, v]));
+    const box = el("div", "pwant");
+    const h = el("div", "pwant-h");
+    h.append(el("em", null, isMe ? "Your wishlist · " + names.length + "/" + (res.data.max || 20) : "Looking for"));
+    if (isMe) { const ed = el("a", null, names.length ? "Edit →" : "Add units →"); ed.href = "values.html#watchlist"; h.append(ed); }
+    box.append(h);
+    const list = el("div", "pwant-list");
+    names.forEach(n => {
+      const it = by.get(n) || { name: n };
+      const a = el("a", "pwant-c");
+      a.href = BB.unitUrl(n);
+      a.title = n + (it.est > 0 ? " · " + BB.fmt(it.est) : "");
+      a.append(BB.itemImg(it, null), el("span", null, n));
+      list.append(a);
+    });
+    if (!names.length) list.append(el("span", "hint", "Star units on the values page and traders see what you're after."));
+    box.append(list);
     slot.replaceChildren(box);
   }
 

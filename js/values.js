@@ -41,7 +41,7 @@
     t.append(el("strong", null, it.name));
     if (it.rarity) t.append(el("span", "rar r-" + it.rarity.toLowerCase().replace(/\W/g, ""), cap(it.rarity)));
     top.append(t);
-    if (favs.has(it.name)) { const st = el("span", "vstar", "★"); st.title = "On your watchlist"; top.append(st); }
+    if (favs.has(it.name)) { const st = el("span", "vstar", "★"); st.title = "On your wishlist"; top.append(st); }
     const val = el("div", "vval");
     val.append(el("span", "vnum", it.est > 0 ? BB.fmt(it.est) : (it.value_text || "N/A")));
     if (it.oc) { const oc = el("span", "oc", "O/C"); oc.title = "Owner's choice: no fixed value"; val.append(oc); }
@@ -91,7 +91,7 @@
     more.innerHTML = `<span>Show ${Math.min(PAGE, list.length - shown)} more</span><em>${list.length - shown} left</em><i aria-hidden="true">▾</i>`;
     more.onclick = () => { shown += PAGE; render(); };
     $("vnone").hidden = list.length > 0;
-    $("vnone").textContent = cat === "fav" && !favs.size ? "Your watchlist is empty. Open a unit and press Watch to add it." : "No unit matches that.";
+    $("vnone").textContent = cat === "fav" && !favs.size ? "Your wishlist is empty. Open a unit and press Wishlist to add it." : "No unit matches that.";
     $("vcount").textContent = `${list.length} of ${items.length}`;
   }
 
@@ -133,7 +133,7 @@
     star.type = "button";
     const label = () => {
       const i = el("img"); i.src = "img/wish_star.png"; i.alt = "";
-      star.replaceChildren(i, favs.has(it.name) ? "Watching" : "Watch");
+      star.replaceChildren(i, favs.has(it.name) ? "On wishlist" : "Wishlist");
       star.classList.toggle("on", favs.has(it.name));
     };
     label();
@@ -141,7 +141,8 @@
       const on = BB.favs.toggle(it.name);
       favs = BB.favs.all();
       label();
-      BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your watchlist" : "Removed from your watchlist",
+      if (on === null) return;
+      BB.toast(it.name, on ? "ok" : "info", { title: on ? "Added to your wishlist" : "Removed from your wishlist",
         action: { label: "Undo", run: () => { BB.favs.toggle(it.name); favs = BB.favs.all(); label(); render(); } } });
       render();
     };
@@ -182,6 +183,8 @@
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("vmodal").hidden) close(); });
 
   document.querySelectorAll(".chip[data-cat]").forEach(b => b.onclick = () => setCat(b.dataset.cat));
+  /* the wishlist loaded from your account, or changed on another page part */
+  document.addEventListener("bb:favs", () => { favs = BB.favs.all(); if (items.length) render(); });
   $("vq").oninput = render;
   $("vrar").onchange = render;
   $("vsort").onchange = render;
