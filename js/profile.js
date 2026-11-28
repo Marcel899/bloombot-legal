@@ -264,7 +264,8 @@
     s.textContent = text || "";
   }
   const LINK = /^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/;
-  const FU_HINT = "Click to change it by verifying a different Roblox account.";
+  const FU_HINT = "Your exact Roblox name, not your display name. Verify it below to get the verified tag.";
+  const USER = /^[A-Za-z0-9_]{3,20}$/;
   const FL_HINT = "Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.";
   let orig = { u: "", l: "", d: "", a: true }, touched = {};
   const vals = () => ({ u: $("fu").value.trim(), l: $("fl").value.trim(), d: $("fd").value.trim(), a: $("fab").checked });
@@ -289,8 +290,9 @@
   function check() {
     const v = vals();
     let ok = true;
-    /* The username is read-only: it only changes by connecting a Roblox account (proof it's yours). */
-    if (!v.u) { if (!mine) ok = false; field("fu", "", "Connect your Roblox account below to create your Bloombot account."); }
+    if (!v.u) { ok = false; field("fu", touched.fu ? "bad" : "", touched.fu ? "Enter your Roblox username." : FU_HINT); }
+    else if (!USER.test(v.u)) { ok = false; field("fu", "bad", v.u.length < 3 ? "Usernames are at least 3 characters." : "Only letters, numbers and _ are allowed."); }
+    else if (mine && mine.roblox_verified && v.u !== mine.roblox_name) field("fu", "ok", "Saving a new name removes your verified tag until you verify it.");
     else field("fu", "ok", FU_HINT);
     if (!v.l) field("fl", "", FL_HINT);
     else if (!LINK.test(v.l)) { ok = false; field("fl", touched.fl ? "bad" : "", touched.fl ? "That isn't a share link. It looks like https://www.roblox.com/share?code=…&type=Server" : FL_HINT); }
@@ -329,7 +331,7 @@
     $("pedit-h").textContent = mine ? "Profile settings" : "Create your Bloombot account";
     $("pedit-sub").textContent = mine
       ? "Saved to your Bloombot account, the same as /home → Settings in Discord."
-      : "Connect your Roblox account below to post trade ads and share strategies.";
+      : "Add your Roblox username to post trade ads and share strategies. Verify it to get the verified tag.";
     $("psave").textContent = mine ? "Save changes" : "Create account";
     orig = { u: (mine && mine.roblox_name) || "", l: (priv && priv.server_link) || "", d: (mine && mine.description) || "", a: !(priv && priv.auto_bump === false) };
     $("fu").value = orig.u;
@@ -344,8 +346,8 @@
     if (mine) banners();
     const vf = !!(mine && mine.roblox_name && mine.roblox_verified);
     $("fv-row").classList.toggle("ok", vf);
-    $("fv-s").textContent = vf ? "Verified. Connect another account to switch." : mine && mine.roblox_name ? "Not verified yet. Connect it to get the verified tag." : "Log in with Roblox to link your account.";
-    $("fverify").textContent = vf ? "Change account" : "Connect";
+    $("fv-s").textContent = vf ? "Verified. Type a new name above or press Change account to switch." : mine && mine.roblox_name ? "Not verified yet. Verify it to get the verified tag." : "Verify it with Roblox login or a code in your About.";
+    $("fverify").textContent = vf ? "Change account" : "Verify";
     $("fverify").className = "brick sm " + (vf ? "dark" : "blue");   // already verified: a quiet button, not a call to action
     accounts();
     $("pdanger").hidden = !mine;
@@ -354,7 +356,7 @@
     status("", "");
     check();
     $("pedit").scrollIntoView({ block: "start", behavior: "smooth" });
-    setTimeout(() => (mine ? $("fl") : $("fverify")).focus({ preventScroll: true }), 250);
+    setTimeout(() => $("fu").focus({ preventScroll: true }), 250);
   }
   /* Connected accounts: Discord (always), Google (add/remove), Roblox (verify) */
   function accounts() {
@@ -498,9 +500,10 @@
     if (busy) return;
     touched = { fu: true, fl: true };
     $("fl").value = cleanLink($("fl").value);
-    if (!check()) { status("bad", mine ? "Fix the highlighted field first." : "Connect your Roblox account first."); (mine ? $("fl") : $("fverify")).focus(); return; }
-    const { l, d } = vals();
+    if (!check()) { status("bad", "Fix the highlighted field first."); (USER.test(vals().u) ? $("fl") : $("fu")).focus(); return; }
+    const { u, l, d } = vals();
     const row = {};
+    if (!mine || u !== mine.roblox_name) row.roblox_username = u;
     if (l !== ((priv && priv.server_link) || "")) row.server_link = l;
     if (d !== ((mine && mine.description) || "")) row.description = d;
     if (!$("fab-sec").hidden && vals().a !== orig.a) row.auto_bump = vals().a;
@@ -508,7 +511,7 @@
     busy = true;
     $("psave").disabled = true;
     $("psave").classList.add("busy");
-    status("wait", "Saving… this takes a few seconds.");
+    status("wait", "Saving… Bloombot checks your Roblox name, this takes a few seconds.");
     const tt = BB.toast("Sending your changes to Bloombot…", "wait", { title: "Saving your profile" });
     let data, error;
     try { ({ data, error } = await BB.sb.from("profile_updates").insert(row).select("id").single()); }
@@ -540,10 +543,7 @@
   }
   $("pedit").onsubmit = save;
   if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.querySelector(".pe-kbd").textContent = "⌘ + Enter to save";
-  $("fverify").onclick = () => BB.verifyRoblox({ name: (mine && mine.roblox_name) || "" });
-  /* The username box is read-only: clicking it opens the same Roblox verify dialog. */
-  $("fu").addEventListener("click", () => $("fverify").click());
-  $("fu").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("fverify").click(); } });
+  $("fverify").onclick = () => BB.verifyRoblox({ name: $("fu").value.trim() || (mine && mine.roblox_name) || "" });
   document.addEventListener("bb:roblox-verified", () => { if (me) { orig = vals(); closeEdit(); setTimeout(load, 600); } });
   $("pdel").onclick = async () => {
     $("pdel").disabled = true;

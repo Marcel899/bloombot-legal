@@ -5469,4 +5469,3 @@ body:has(dialog[open]) .xm-hero *,body:has(dialog[open]) .xm-hero *::before,body
 @media (prefers-reduced-motion:reduce){.rcb.wait .login-icon{animation:none}}
 .rv-oauth{align-self:stretch;justify-content:center}
 .rv-pick{display:flex;flex-direction:column;gap:8px;align-self:stretch}
-#fu[readonly]{cursor:pointer}
