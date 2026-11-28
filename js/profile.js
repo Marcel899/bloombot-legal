@@ -530,7 +530,7 @@
         done();
         status("ok", "Saved!");
         tt.update("Your changes are live on the site and in Discord.", "ok", { title: "Profile saved" });
-        setTimeout(() => { closeEdit(); load(); }, 900);
+        setTimeout(() => { closeEdit(); load(row.roblox_username); }, 900);
         return;
       }
       if (r && r.status === "rejected") { done(); status("bad", r.reason || "Bloombot couldn't save that."); tt.update(r.reason || "Bloombot couldn't save that.", "bad", { title: "Profile not saved" }); return; }
@@ -577,16 +577,22 @@
   });
   addEventListener("beforeunload", e => { if (!$("pedit").hidden && dirty()) { e.preventDefault(); e.returnValue = ""; } });
 
-  async function load() {
+  /* expect: a Roblox name that was just saved. If the profile row hasn't caught up yet,
+     show the new name anyway and look again, so it never flips back to the old one. */
+  async function load(expect, tries = 0) {
     const did = want || me;
     const isMe = did === me;
-    const [{ data: p }, privRes] = await Promise.all([
+    let [{ data: p }, privRes] = await Promise.all([
       BB.sb.from("profiles").select("*").eq("discord_id", did).maybeSingle(),
       isMe ? BB.sb.from("profile_private").select("server_link,auto_bump").eq("discord_id", did).maybeSingle()
         .then(r => r.error ? BB.sb.from("profile_private").select("server_link").eq("discord_id", did).maybeSingle() : r)
         : Promise.resolve({ data: null }),
     ]);
     $("ploading").hidden = true;
+    if (isMe && expect && p && p.roblox_name !== expect) {
+      p = Object.assign({}, p, { roblox_name: expect, roblox_verified: false });
+      if (tries < 6) setTimeout(() => load(expect, tries + 1), 2000);
+    }
     if (isMe) { mine = p; priv = privRes.data; }
     const fallback = isMe ? BB.user(BB.session).name : null;
     if (!p && !isMe) {
