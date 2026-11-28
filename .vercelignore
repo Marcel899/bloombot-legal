@@ -3,3 +3,5 @@ src/
 README.md
 .nojekyll
 *.md
+supabase/
+sql/

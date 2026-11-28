@@ -1084,10 +1084,10 @@
   let checked = null;
   async function checkAccount(s) {
     const id = BB.user(s).id;
-    if (!id) { if (!/profile\.html/.test(location.pathname)) connectDialog(false); return; }
+    if (!id) { if (!/profile\.html|roblox-callback/.test(location.pathname)) connectDialog(false); return; }
     if (checked === id) return;
     checked = id;
-    if (/profile\.html/.test(location.pathname)) return;
+    if (/profile\.html|roblox-callback/.test(location.pathname)) return;
     let skip = null;
     try { skip = localStorage.getItem("bb_acct_" + id); } catch (e) { /* storage blocked */ }
     if (skip) return;
@@ -1105,56 +1105,27 @@
   function welcome(id) {
     const el = BB.el;
     const back = el("div", "wm-back");
-    const box = el("form", "wm panel");
+    const box = el("div", "wm panel");
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-modal", "true");
     box.setAttribute("aria-labelledby", "wm-h");
     const logo = el("img", "wm-logo"); logo.src = "img/flower.png"; logo.alt = "";
     const h = el("h2", null, "Welcome to Bloombot!"); h.id = "wm-h";
-    const sub = el("p", "hint", "Create your Bloombot account to post trade ads, share strategies and get a profile. It's the same account you use in Discord.");
-    const lab = (text, input, opt) => { const l = el("label"); l.append(document.createTextNode(text)); if (opt) l.append(el("em", null, " optional")); l.append(input); return l; };
-    const u = el("input", "search wm-in"); u.maxLength = 20; u.autocomplete = "off"; u.placeholder = "Your Roblox username";
-    const k = el("input", "search wm-in"); k.maxLength = 300; k.autocomplete = "off"; k.placeholder = "https://www.roblox.com/share?code=...&type=Server";
-    const st = el("p", "post-status"); st.hidden = true;
-    const say = (kind, t) => { st.hidden = !t; st.className = "post-status " + kind; st.textContent = t; };
+    const sub = el("p", "hint", "Verify your Roblox account to create your Bloombot account: log in with Roblox, or put a code in your Roblox About. Then you can post trade ads, share strategies and get a profile. It's the same account you use in Discord.");
     const later = el("button", "brick dark sm", "Later"); later.type = "button";
-    const go = el("button", "brick green", "Create account"); go.type = "submit";
-    const acts = el("div", "post-actions"); acts.append(later, go);
-    const rv = el("button", "rv-other", "Or verify with your Roblox account instead"); rv.type = "button";
-    rv.onclick = () => { close(); BB.verifyRoblox({ name: u.value.trim() }); };
-    box.append(logo, h, sub, lab("Roblox username", u), lab("Private server link", k, true), acts, rv, st);
+    const go = el("button", "brick green", "Log in with Roblox"); go.type = "button";
+    const rv = el("button", "brick blue", "Use a code in my About"); rv.type = "button";
+    const acts = el("div", "post-actions"); acts.append(later, rv, go);
+    box.append(logo, h, sub, acts);
     back.append(box);
     document.body.append(back);
-    setTimeout(() => u.focus(), 50);
+    setTimeout(() => go.focus(), 50);
     const close = () => { back.remove(); document.removeEventListener("keydown", esc); };
     const esc = e => { if (e.key === "Escape") { remember(id, "later"); close(); } };
     document.addEventListener("keydown", esc);
     later.onclick = () => { remember(id, "later"); close(); };
-    let busy = false;
-    box.onsubmit = async e => {
-      e.preventDefault();
-      if (busy) return;
-      const name = u.value.trim(), link = k.value.trim();
-      if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) { say("bad", "Your Roblox username needs 3 to 20 letters, numbers or underscores."); u.focus(); return; }
-      if (link && !/^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/.test(link)) { say("bad", "That server link isn't right. Leave it empty or paste the Private Server Link from Roblox."); k.focus(); return; }
-      busy = true; go.disabled = true; say("wait", "Creating your account…");
-      const row = { roblox_username: name };
-      if (link) row.server_link = link;
-      let data, error;
-      try { ({ data, error } = await BB.sb.from("profile_updates").insert(row).select("id").single()); }
-      catch (err) { error = { message: (err && err.message) || "network error" }; }
-      if (error) { busy = false; go.disabled = false; say("bad", "Couldn't create it: " + error.message); return; }
-      const t0 = Date.now();
-      const poll = async () => {
-        let r = null;
-        try { ({ data: r } = await BB.sb.from("profile_updates").select("status,reason").eq("id", data.id).single()); } catch (err) { /* retry */ }
-        if (r && r.status === "posted") { remember(id, "has"); say("ok", "Your account is ready!"); BB.toast("Your account is ready.", "ok", { title: "Welcome to Bloombot!" }); setTimeout(close, 1200); return; }
-        if (r && r.status === "rejected") { busy = false; go.disabled = false; say("bad", r.reason || "Bloombot couldn't create it."); return; }
-        if (Date.now() - t0 > 45000) { remember(id, "has"); say("wait", "Bloombot will finish creating it as soon as it's online."); setTimeout(close, 2500); return; }
-        setTimeout(poll, 1500);
-      };
-      setTimeout(poll, 1000);
-    };
+    go.onclick = () => { go.disabled = true; BB.robloxConnect(); };
+    rv.onclick = () => { close(); BB.verifyRoblox({ code: true }); };
   }
 
   /* ── Verify Roblox: a code in your Roblox About text proves the account is yours ──
@@ -1198,7 +1169,10 @@
     box.setAttribute("aria-labelledby", "rv-h");
     const logo = el("img", "wm-logo"); logo.src = "img/shield.png"; logo.alt = "";
     const h = el("h2", null, "Verify your Roblox account"); h.id = "rv-h";
-    const sub = el("p", "hint", "Prove the account is yours with a code in your Roblox About. You get a verified tag, and it creates your Bloombot account if you don't have one yet.");
+    const sub = el("p", "hint", "Pick how to prove the account is yours. You get a verified tag, and it creates your Bloombot account if you don't have one yet. To switch accounts, verify the other one.");
+    const oa = el("button", "brick green rv-oauth", "Log in with Roblox"); oa.type = "button";
+    oa.onclick = () => { oa.disabled = true; BB.robloxConnect(); };
+    const alt = el("button", "brick blue rv-oauth", "Put a code in my Roblox About"); alt.type = "button";
     const lab = el("label", null, "Roblox username");
     const u = el("input", "search wm-in"); u.maxLength = 20; u.autocomplete = "off"; u.spellcheck = false;
     u.autocapitalize = "off"; u.placeholder = "CoolGardener123"; u.value = opts.name || "";
@@ -1209,10 +1183,18 @@
     const cancel = el("button", "brick dark sm", "Cancel"); cancel.type = "button";
     const go = el("button", "brick green", "Get my code"); go.type = "submit";
     const acts = el("div", "post-actions"); acts.append(cancel, go);
-    box.append(logo, h, sub, lab, step2, acts, st);
+    const pick = el("div", "rv-pick"); pick.append(oa, alt);
+    box.append(logo, h, sub, pick, lab, step2, acts, st);
     back.append(box);
     document.body.append(back);
-    setTimeout(() => u.focus(), 50);
+    const codeMode = () => {
+      pick.hidden = true; lab.hidden = false; go.hidden = false;
+      sub.textContent = "Prove the account is yours with a code in your Roblox About.";
+      setTimeout(() => u.focus(), 50);
+    };
+    alt.onclick = codeMode;
+    if (opts.code) codeMode();
+    else { lab.hidden = true; go.hidden = true; setTimeout(() => oa.focus(), 50); }
     let vid = null, code = "", busy = false, done = false;
     const close = () => { back.remove(); document.removeEventListener("keydown", esc); };
     const esc = e => { if (e.key === "Escape" && !busy) close(); };
@@ -1292,6 +1274,92 @@
       if (vid) check(); else start();
     };
   };
+
+  /* ── Connect Roblox (OAuth 2.0 + PKCE) ──────────────────────
+     Roblox sends the player back to roblox-callback.html with a one-time code.
+     The roblox-oauth edge function swaps it (with the client secret, which never
+     reaches the browser), reads the verified Roblox id + username and queues it
+     for the bot, which links it the same way as a verified About code. */
+  const RBX = { client: "5599238111365011302", redirect: "https://bloombot-gtd.vercel.app/roblox-callback.html", key: "bb_rbx_oauth" };
+  const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const rand = n => b64url(crypto.getRandomValues(new Uint8Array(n)));
+  BB.robloxConnect = async () => {
+    if (!BB.requireDiscord()) return;
+    const state = rand(24), verifier = rand(48);
+    const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+    const back = /roblox-callback/.test(location.pathname) ? "profile.html" : location.pathname.replace(/^\//, "") + location.search;
+    try { sessionStorage.setItem(RBX.key, JSON.stringify({ state, verifier, back, t: Date.now() })); }
+    catch (e) { BB.toast("Your browser blocked site storage. Allow it and try again.", "bad", { title: "Couldn't connect Roblox" }); return; }
+    const q = new URLSearchParams({
+      client_id: RBX.client, redirect_uri: RBX.redirect, scope: "openid profile", response_type: "code",
+      state, code_challenge: challenge, code_challenge_method: "S256",
+    });
+    location.href = "https://apis.roblox.com/oauth/v1/authorize?" + q;
+  };
+
+  /* roblox-callback.html: finish the connection. */
+  function robloxCallback() {
+    const box = document.getElementById("rcb");
+    if (!box) return;
+    const q = new URLSearchParams(location.search);
+    const code = q.get("code"), state = q.get("state"), err = q.get("error");
+    history.replaceState(null, "", location.pathname);   // the code is single-use; keep it out of history
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(RBX.key) || "null"); sessionStorage.removeItem(RBX.key); } catch (e) { /* storage blocked */ }
+    const $ = id => document.getElementById(id);
+    const back = (saved && /^[\w\-./?=&%]*$/.test(saved.back) && saved.back) || "profile.html";
+    $("rcb-back").href = back || "./";
+    const show = (kind, title, text, retry) => {
+      box.className = "panel rcb " + kind;
+      $("rcb-h").textContent = title;
+      $("rcb-t").textContent = text;
+      $("rcb-retry").hidden = !retry;
+      $("rcb-back").hidden = kind === "wait";
+    };
+    $("rcb-retry").onclick = () => { $("rcb-retry").disabled = true; BB.robloxConnect().finally(() => { $("rcb-retry").disabled = false; }); };
+    if (err) return show("bad", "Roblox wasn't connected", err === "access_denied" ? "You cancelled on Roblox. Nothing was changed." : "Roblox didn't finish the connection. Please try again.", true);
+    if (!code || !saved || !state || state !== saved.state || Date.now() - saved.t > 15 * 60 * 1000)
+      return show("bad", "That link ran out", "Start again from the Connect Roblox button.", true);
+    let started = false;
+    BB.onAuth(async sess => {
+      if (started) return;
+      if (!sess) return show("bad", "Log in first", "Log in to Bloombot, then connect Roblox again.", false);
+      if (!BB.user(sess).id) return show("bad", "Connect Discord first", "Your Bloombot account is your Discord account. Connect Discord, then connect Roblox.", false);
+      started = true;
+      show("wait", "Connecting Roblox…", "Checking your Roblox account with Roblox.");
+      let j = {};
+      try {
+        const { data: { session } } = await BB.sb.auth.getSession();
+        const r = await fetch(C.url + "/functions/v1/roblox-oauth", {
+          method: "POST",
+          headers: { apikey: C.key, Authorization: "Bearer " + session.access_token, "Content-Type": "application/json" },
+          body: JSON.stringify({ code, verifier: saved.verifier }),
+        });
+        j = await r.json().catch(() => ({}));
+        if (!r.ok && !j.error) j.error = r.status === 404 ? "Roblox login isn't switched on yet. Try again later." : "Something went wrong. Please try again.";
+      } catch (e) { j = { error: "Network error. Check your connection and try again." }; }
+      if (j.error || !j.id) return show("bad", "Roblox wasn't connected", j.error || "Something went wrong. Please try again.", true);
+      $("rcb-t").textContent = "Bloombot is linking " + (j.username || "your account") + "…";
+      const t0 = Date.now();
+      const poll = async () => {
+        let r = null;
+        try { ({ data: r } = await BB.sb.from("roblox_verifications").select("status,reason,roblox_username").eq("id", j.id).single()); } catch (e) { /* retry */ }
+        if (r && r.status === "verified") {
+          try { localStorage.setItem("bb_acct_" + BB.user(sess).id, "has"); } catch (e) { /* ignore */ }
+          show("ok", "Roblox connected!", (r.roblox_username || j.username) + " is now your verified Roblox account on Bloombot and in Discord.", false);
+          BB.toast("Your Roblox account is verified.", "ok", { title: "Roblox verified" });
+          document.dispatchEvent(new CustomEvent("bb:roblox-verified"));
+          return;
+        }
+        if (r && r.status === "failed") return show("bad", "Roblox wasn't connected", r.reason || "Bloombot couldn't link it.", true);
+        if (Date.now() - t0 > 60000) return show("wait", "Almost done", "Bloombot is busy or offline. It will link your account as soon as it's back.") || ($("rcb-back").hidden = false);
+        setTimeout(poll, 1500);
+      };
+      setTimeout(poll, 800);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", robloxCallback);
+  else robloxCallback();
 
   document.addEventListener("click", e => {
     if (e.target.closest("[data-login]")) { e.preventDefault(); BB.login(); return; }
@@ -1669,7 +1737,7 @@
     });
     const p = new URLSearchParams(location.hash.slice(1) + "&" + location.search.slice(1));
     /* Only our own wording: the link's text could say anything. */
-    const err = p.get("error_description") || "";
+    const err = /roblox-callback/.test(location.pathname) ? "" : p.get("error_description") || "";
     if (err) BB.loginError = /already|exists|linked/i.test(err) ? "That Discord account already has its own Bloombot login. Log in with Discord instead." : "Login didn't finish. Please try again.";
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

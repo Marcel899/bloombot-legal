@@ -501,7 +501,7 @@ home = f"""<section class="hero big">
 <section class="how">
 <div class="sec-head"><h2>How it works</h2><a href="features.html">All features &rarr;</a></div>
 <div class="steps">
-<div class="step"><img src="img/num_1.png" alt="1"><div><h3>Make your account</h3><p>Log in here with Discord or Google, or run <code>/link</code>, and add your Roblox username.</p></div></div>
+<div class="step"><img src="img/num_1.png" alt="1"><div><h3>Make your account</h3><p>Log in here with Discord or Google and connect your Roblox account, or run <code>/link</code> in Discord.</p></div></div>
 <div class="step"><img src="img/num_2.png" alt="2"><div><h3>Post a trade ad</h3><p>Post it on this site or in a Global Trade Ad Channel. It reaches every server running Bloombot.</p></div></div>
 <div class="step"><img src="img/num_3.png" alt="3"><div><h3>Get offers</h3><p>Traders DM you, and Bloombot DMs you when a unit on your wishlist is offered.</p></div></div>
 </div>
@@ -1041,7 +1041,7 @@ profile_body = f"""<main class="wrap prof" id="main">
 <div class="pe-head"><span class="pe-ico"><img src="img/gear.png" alt=""></span><div><h2 id="pedit-h">Profile settings</h2><p class="hint" id="pedit-sub">Changes are saved to your Bloombot account, the same as /home → Settings in Discord.</p></div><button class="pe-x" type="button" id="pclose" aria-label="Close settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg></button></div>
 <section class="pe-sec" aria-labelledby="ps-rbx"><h3 class="pe-st" id="ps-rbx">Roblox</h3>
 <div class="pfields">
-<div class="pe-field" id="fu-f"><label for="fu">Username</label><div class="pe-in"><span class="pe-pre" aria-hidden="true">@</span><input id="fu" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="CoolGardener123" aria-describedby="fu-m"><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fu-m">Your exact Roblox name, not your display name.</p></div>
+<div class="pe-field" id="fu-f"><label for="fu">Username</label><div class="pe-in"><span class="pe-pre" aria-hidden="true">@</span><input id="fu" maxlength="20" readonly autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Not connected yet" aria-describedby="fu-m"><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fu-m">To change it, connect a different Roblox account below.</p></div>
 <div class="pe-field" id="fl-f"><label for="fl">Private server link <em>optional</em></label><div class="pe-in"><input id="fl" maxlength="300" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://www.roblox.com/share?code=…&amp;type=Server" aria-describedby="fl-m"><button class="pe-paste" type="button" id="fpaste" hidden>Paste</button><span class="pe-ok" aria-hidden="true"></span></div><p class="pe-msg" id="fl-m">Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.</p></div>
 </div>
 </section>
@@ -1330,6 +1330,18 @@ alerts_body = f"""<main class="wrap colp" id="main">
 <script defer src="js/alerts.js?v={JSVER['alerts']}"></script>
 """
 open("alerts.html", "w").write(page("Price alerts · Bloombot", "Get a Discord DM or email when a Garden Tower Defense unit's value crosses your price.", alerts_body, "", "alerts.html", index=False))
+
+# ── Roblox OAuth callback (js/app.js robloxCallback does the work) ───────
+rcb_body = """<main class="wrap colp" id="main">
+<section class="panel rcb wait" id="rcb" aria-live="polite">
+<img class="login-icon" src="img/rbx_stud.png" alt="">
+<h1 id="rcb-h">Connecting Roblox…</h1>
+<p class="hint" id="rcb-t">One moment.</p>
+<div class="post-actions"><a class="brick dark sm" id="rcb-back" href="profile.html" hidden>Back</a><button class="brick green" type="button" id="rcb-retry" hidden>Try again</button></div>
+</section>
+</main>
+"""
+open("roblox-callback.html", "w").write(page("Connect Roblox · Bloombot", "Finish connecting your Roblox account to Bloombot.", rcb_body, "", "roblox-callback.html", index=False))
 
 # ── Advent calendar (design only: no doors open yet, nothing to claim) ───
 def _advent():
