@@ -264,7 +264,7 @@
     s.textContent = text || "";
   }
   const LINK = /^https:\/\/www\.roblox\.com\/share\?code=[A-Za-z0-9]+&type=Server$/;
-  const FU_HINT = "To change it, connect a different Roblox account below.";
+  const FU_HINT = "Click to change it by verifying a different Roblox account.";
   const FL_HINT = "Garden Tower Defense → ··· → Share → Copy Private Server Link. Only you can see it.";
   let orig = { u: "", l: "", d: "", a: true }, touched = {};
   const vals = () => ({ u: $("fu").value.trim(), l: $("fl").value.trim(), d: $("fd").value.trim(), a: $("fab").checked });
@@ -541,6 +541,9 @@
   $("pedit").onsubmit = save;
   if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.querySelector(".pe-kbd").textContent = "⌘ + Enter to save";
   $("fverify").onclick = () => BB.verifyRoblox({ name: (mine && mine.roblox_name) || "" });
+  /* The username box is read-only: clicking it opens the same Roblox verify dialog. */
+  $("fu").addEventListener("click", () => $("fverify").click());
+  $("fu").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("fverify").click(); } });
   document.addEventListener("bb:roblox-verified", () => { if (me) { orig = vals(); closeEdit(); setTimeout(load, 600); } });
   $("pdel").onclick = async () => {
     $("pdel").disabled = true;

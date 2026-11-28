@@ -1163,7 +1163,7 @@
     if (!BB.requireDiscord()) return;
     const el = BB.el, me = BB.user(BB.session).id;
     const back = el("div", "wm-back");
-    const box = el("form", "wm panel rv");
+    const box = el("form", "wm panel rvd");
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-modal", "true");
     box.setAttribute("aria-labelledby", "rv-h");
