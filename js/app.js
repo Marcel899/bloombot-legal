@@ -1307,7 +1307,7 @@
     let saved = null;
     try { saved = JSON.parse(sessionStorage.getItem(RBX.key) || "null"); sessionStorage.removeItem(RBX.key); } catch (e) { /* storage blocked */ }
     const $ = id => document.getElementById(id);
-    const back = (saved && /^[\w\-./?=&%]*$/.test(saved.back) && saved.back) || "profile.html";
+    const back = (saved && typeof saved.back === "string" && /^[\w\-.?=&%][\w\-./?=&%]*$/.test(saved.back) && saved.back) || "profile.html";   // same-site page only
     $("rcb-back").href = back || "./";
     const show = (kind, title, text, retry) => {
       box.className = "panel rcb " + kind;
