@@ -26,7 +26,6 @@
     const top = el("div", "p-top");
     const avs = el("div", "p-avs");
     avs.append(img(p && p.discord_avatar, "p-av"));
-    if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "p-rav"));
     const who = el("div", "p-who");
     who.append(el("h1", null, (p && p.discord_name) || fallbackName || "Bloombot player"));
     if (p && p.roblox_name && p.roblox_verified) who.firstChild.append(BB.verifiedBadge());
@@ -36,7 +35,8 @@
     if (p && p.roblox_name) tags.append(BB.robloxTag(p));
     if (isMe) tags.append(el("span", "p-tag you", "You"));
     who.append(tags);
-    top.append(avs, who);
+    const acts = el("div", "p-acts");
+    top.append(avs, who, acts);
     c.append(top);
     c.classList.toggle("rk-ring", !!(p && p.level >= 20));
     if (p && p.level) c.style.setProperty("--rk", BB.rankFor(p.level).color);
@@ -59,18 +59,12 @@
       c.append(bar);
       requestAnimationFrame(() => setTimeout(() => { fill.style.width = (100 * L.into / L.need).toFixed(1) + "%"; }, 60));
     }
-    const stats = el("div", "upop-stats pstats");
-    const stat = (v, l, g, ic, id) => {
-      const s = el("div", "weld " + g);
-      const i = el("img"); i.alt = ""; i.src = "img/" + ic + ".png";
-      const n = el("strong", null, String(v));
-      if (id) n.id = id;
-      const lb = el("span", null, l);
-      if (id) lb.id = id + "-l";
-      s.append(i, n, lb);
-      return s;
-    };
-    stats.append(stat(p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"), stat("…", "Trade ads", "g-blue", "swap", "pst-ads"), stat("…", "Strategies", "g-purple", "bullseye", "pst-strs"));
+    const stats = BB.statRow([
+      [p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"],
+      ["…", "Trade ads", "g-blue", "swap", "pst-ads"],
+      ["…", "Strategies", "g-purple", "bullseye", "pst-strs"],
+    ]);
+    stats.classList.add("pstats");
     c.append(stats);
     if (p && p.description) {
       const d = el("div", "upop-sec p-about");
@@ -97,30 +91,18 @@
     /* How to reach them: a Bloombot chat first, their accounts after. */
     if (p && !isMe && did0) c.append(BB.dmCard(did0, p.discord_name || fallbackName));
     const acc = el("div", "p-accs upop-accs");
-    const pill = (kind, label, name, href) => {
-      const a = el(href ? "a" : "span", "acc " + kind);
-      const icons = { discord: "discord_stud_white", roblox: "rbx_stud", google: "google_stud" };
-      if (icons[kind]) {
-        const aic = el("img", "acc-ic");
-        aic.alt = "";
-        aic.src = "img/" + icons[kind] + ".png";
-        a.append(aic);
-      }
-      if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener nofollow"; }
-      const t = el("span", "acc-t");
-      t.append(el("em", null, label), el("strong", null, name));
-      a.append(t);
-      return a;
-    };
+    const pill = BB.accPill;
     const did = p ? p.discord_id : want;
     if (did && !isMe) acc.append(pill("discord", "Discord", "Open profile", "https://discord.com/users/" + did));
-    acc.append(p && p.roblox_name ? pill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url)) : pill("roblox", "Roblox", "Not linked", null));
+    acc.append(p && p.roblox_name ? pill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url), p.roblox_avatar) : pill("roblox", "Roblox", "Not linked", null));
     if (isMe) {
       const has = priv && priv.server_link;
-      acc.append(pill("server", "Private server", has ? "Set" : "Not set", has ? BB.safeUrl(priv.server_link) : null));
+      const sv = pill("server", "Private server", has ? "Join server" : "Not set", has ? BB.safeUrl(priv.server_link) : null);
+      sv.title = "Only you can see this";
+      if (!has) sv.classList.add("off");
+      acc.append(sv);
     }
     c.append(acc);
-    const acts = el("div", "p-acts");
     if (isMe) {
       const e = el("button", "brick blue sm", "Edit profile");
       e.type = "button";
@@ -138,7 +120,7 @@
         acts.append(mb);
       }
     }
-    if (acts.childElementCount) c.append(acts);
+    if (!acts.childElementCount) acts.remove();
     c.append(BB.copyLinkBtn(location.origin + location.pathname.replace(/[^/]*$/, "profile.html") + "?id=" + did, "Bloombot profile"));
     c.hidden = false;
   }

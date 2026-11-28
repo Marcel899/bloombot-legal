@@ -1307,7 +1307,7 @@
     let saved = null;
     try { saved = JSON.parse(sessionStorage.getItem(RBX.key) || "null"); sessionStorage.removeItem(RBX.key); } catch (e) { /* storage blocked */ }
     const $ = id => document.getElementById(id);
-    const back = (saved && typeof saved.back === "string" && /^[\w\-.?=&%][\w\-./?=&%]*$/.test(saved.back) && saved.back) || "profile.html";   // same-site page only
+    const back = (saved && /^[\w\-./?=&%]*$/.test(saved.back) && saved.back) || "profile.html";
     $("rcb-back").href = back || "./";
     const show = (kind, title, text, retry) => {
       box.className = "panel rcb " + kind;
@@ -1513,6 +1513,46 @@
     return box;
   };
 
+  /* Stat tiles shared by the profile popup and the profile page: [value, label, colour, icon, id?] */
+  BB.statRow = list => {
+    const row = BB.el("div", "upop-stats");
+    list.forEach(([v, l, g, ic, id]) => {
+      const s = BB.el("div", "weld " + g);
+      const i = BB.el("img"); i.alt = ""; i.src = "img/" + ic + ".png";
+      const t = BB.el("span", "st-t");
+      const n = BB.el("strong", null, String(v));
+      const lb = BB.el("span", null, l);
+      if (id) { n.id = id; lb.id = id + "-l"; }
+      t.append(n, lb);
+      s.append(i, t);
+      row.append(s);
+    });
+    return row;
+  };
+  /* Account pill (Discord / Roblox / private server). pic: a Roblox avatar shown instead of the icon. */
+  BB.accPill = (kind, label, val, href, pic) => {
+    const a = BB.el(href ? "a" : "span", "acc " + kind);
+    const icons = { discord: "discord_stud_white", roblox: "rbx_stud", google: "google_stud" };
+    if (icons[kind]) {
+      const aic = BB.el("img", "acc-ic");
+      aic.alt = "";
+      aic.src = "img/" + icons[kind] + ".png";
+      const safe = pic && BB.safeUrl(pic);
+      if (safe) {
+        aic.className = "acc-ic acc-pic";
+        aic.src = safe;
+        aic.onerror = () => { aic.onerror = null; aic.className = "acc-ic"; aic.src = "img/" + icons[kind] + ".png"; };
+      }
+      a.append(aic);
+    }
+    if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener nofollow"; }
+    const t = BB.el("span", "acc-t");
+    t.append(BB.el("em", null, label), BB.el("strong", null, val));
+    a.append(t);
+    if (href) a.append(BB.el("span", "acc-go", "↗"));
+    return a;
+  };
+
   /* ── profile popup: opens a player's profile on top of the current page ── */
   let popOpen = null;
   BB.openProfile = async (id, hint = {}) => {
@@ -1534,6 +1574,7 @@
     x.setAttribute("aria-label", "Close profile");
     x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></svg>';
     const body = el("div", "upop-body");
+    const foot = el("div", "upop-foot");
     box.append(banner, x, body);
     back.append(box);
     document.body.append(back);
@@ -1569,13 +1610,14 @@
     x.onclick = () => close();
     setTimeout(() => x.focus({ preventScroll: true }), 30);
 
+    /* header: avatar on the banner edge, name beside it, tags underneath */
     const top = el("div", "upop-top");
     const avs = el("div", "upop-avs");
     avs.append(img(hint.avatar, "upop-av"));
-    top.append(avs);
     const name = el("h2", "upop-name", hint.name || "Loading…");
+    top.append(avs, name);
     const tags = el("div", "p-tags");
-    body.append(top, name, tags, el("div", "upop-sk"));
+    body.append(top, tags, el("div", "upop-sk"));
 
     if (!BB.session) {
       body.querySelector(".upop-sk").remove();
@@ -1605,7 +1647,6 @@
     name.textContent = nm;
     box.setAttribute("aria-label", nm + "'s profile");
     if (p && p.discord_avatar) avs.firstChild.src = BB.safeUrl(p.discord_avatar) || avs.firstChild.src;
-    if (p && p.roblox_avatar) avs.append(img(p.roblox_avatar, "upop-rav"));
     if (p && p.registered_at) tags.append(el("span", "p-tag", "Joined " + new Date(p.registered_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })));
     if (p && p.level) tags.append(BB.rankTag(p.level));
     if (p && p.roblox_name) tags.append(BB.robloxTag(p));
@@ -1614,49 +1655,24 @@
     if (p && p.roblox_name && p.roblox_verified) name.append(BB.verifiedBadge());
     if (p && p.level >= 20) box.classList.add("rk-ring");
     if (p && p.level) box.style.setProperty("--rk", BB.rankFor(p.level).color);
-    if (isMe) {
-      const cb = el("a", "upop-cb", "Change banner");
-      cb.href = "profile.html#edit";
-      cb.dataset.page = "";
-      box.append(cb);
-    }
 
     if (!p || (!p.roblox_name && !isMe)) body.append(el("p", "hint upop-note", "This player hasn't linked a Roblox account to Bloombot yet."));
+    body.append(BB.statRow([
+      [p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"],
+      [ads.length, ads.length === 1 ? "Trade ad" : "Trade ads", "g-blue", "swap"],
+      [strs.length, strs.length === 1 ? "Strategy" : "Strategies", "g-purple", "bullseye"],
+    ]));
     if (p && p.description) {
       const d = el("div", "upop-sec p-about");
       d.append(el("h3", "upop-h", "About me"), BB.md(p.description, { cls: "p-desc" }));
       body.append(d);
     }
-    const stats = el("div", "upop-stats");
-    const stat = (v, l, g, ic) => {
-      const s = el("div", "weld " + g);
-      const i = el("img"); i.alt = ""; i.src = "img/" + ic + ".png";
-      s.append(i, el("strong", null, String(v)), el("span", null, l));
-      return s;
-    };
-    stats.append(stat(p && p.level ? p.level : "–", "Level", "g-yellow", "medal_gold"), stat(ads.length, ads.length === 1 ? "Trade ad" : "Trade ads", "g-blue", "swap"), stat(strs.length, strs.length === 1 ? "Strategy" : "Strategies", "g-purple", "bullseye"));
-    body.append(stats);
 
     /* How to reach them: a Bloombot chat first, their accounts after. */
     if (!isMe && p) body.append(BB.dmCard(id, nm, { compact: true, onGo: () => close(true) }));
     const accs = el("div", "upop-accs");
-    const pill = (kind, label, val, href) => {
-      const a = el(href ? "a" : "span", "acc " + kind);
-      const icons = { discord: "discord_stud_white", roblox: "rbx_stud", google: "google_stud" };
-      if (icons[kind]) {
-        const aic = el("img", "acc-ic");
-        aic.alt = "";
-        aic.src = "img/" + icons[kind] + ".png";
-        a.append(aic);
-      }
-      if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener nofollow"; }
-      const t = el("span", "acc-t");
-      t.append(el("em", null, label), el("strong", null, val));
-      a.append(t);
-      return a;
-    };
-    if (!isMe) accs.append(pill("discord", "Discord", "Open profile", "https://discord.com/users/" + id));
-    accs.append(p && p.roblox_name ? pill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url)) : pill("roblox", "Roblox", "Not linked", null));
+    if (!isMe) accs.append(BB.accPill("discord", "Discord", "Open profile", "https://discord.com/users/" + id));
+    accs.append(p && p.roblox_name ? BB.accPill("roblox", "Roblox", p.roblox_name, BB.safeUrl(p.roblox_url), p.roblox_avatar) : BB.accPill("roblox", "Roblox", "Not linked", null));
     body.append(accs);
 
     if (ads.length) {
@@ -1688,17 +1704,18 @@
       body.append(s);
     }
 
-    const acts = el("div", "upop-acts");
-    if (isMe) {
-      const e = el("a", "brick blue sm", "Edit profile"); e.href = "profile.html#edit";
-      acts.append(e);
-    }
+    /* footer stays in view while the popup scrolls: this is the short version, the full page has everything */
     const link = location.origin + location.pathname.replace(/[^/]*$/, "profile.html") + "?id=" + encodeURIComponent(id);
-    const cp = el("button", "brick dark sm", "Copy link"); cp.type = "button";
-    cp.onclick = () => BB.share(link, "Bloombot profile");
-    const full = el("a", "brick dark sm", "Full profile"); full.href = "profile.html?id=" + encodeURIComponent(id); full.dataset.page = "";
-    acts.append(cp, full);
-    body.append(acts);
+    const cp = BB.copyLinkBtn(link, "Bloombot profile");
+    cp.classList.add("upop-cp");
+    foot.append(cp);
+    if (isMe) {
+      const e = el("a", "brick dark sm", "Edit"); e.href = "profile.html#edit";
+      foot.append(e);
+    }
+    const full = el("a", "brick green sm upop-full", "Open full profile"); full.href = "profile.html?id=" + encodeURIComponent(id); full.dataset.page = "";
+    foot.append(full);
+    box.append(foot);
   };
 
   /* Any link to a profile opens the popup instead (Ctrl/middle click still opens the page). */
